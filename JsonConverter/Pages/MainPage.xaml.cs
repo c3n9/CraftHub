@@ -7,6 +7,7 @@ using System.Data;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -35,12 +36,12 @@ namespace JsonConverter.Pages
 
         private void BImport_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new OpenFileDialog() { Filter = ".json | *.json"};
+            var dialog = new OpenFileDialog() { Filter = ".json | *.json" };
             if (dialog.ShowDialog().GetValueOrDefault())
             {
                 jsonString = File.ReadAllText(dialog.FileName);
                 var dataTable = DisplayDataInGrid(jsonString);
-                DGLessons.ItemsSource = dataTable.DefaultView;
+                DGJsonData.ItemsSource = dataTable.DefaultView;
                 TBJson.Text = jsonString.ToString();
             }
         }
@@ -75,7 +76,17 @@ namespace JsonConverter.Pages
 
         private void BExport_Click(object sender, RoutedEventArgs e)
         {
-            
+
+        }
+
+        private void BSelectModel_Click(object sender, RoutedEventArgs e)
+        {
+            var dialog = new OpenFileDialog() { Filter = ".cs | *.cs" };
+            if (dialog.ShowDialog().GetValueOrDefault())
+            {
+                
+
+            }
         }
     }
 }
