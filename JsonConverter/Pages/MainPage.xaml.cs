@@ -1,7 +1,9 @@
-﻿using Microsoft.Win32;
+﻿using Microsoft.CSharp;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
@@ -29,6 +31,7 @@ namespace JsonConverter.Pages
     public partial class MainPage : Page
     {
         string jsonString;
+        private dynamic generatedObject;
         public MainPage()
         {
             InitializeComponent();
@@ -41,6 +44,7 @@ namespace JsonConverter.Pages
             {
                 jsonString = File.ReadAllText(dialog.FileName);
                 var dataTable = DisplayDataInGrid(jsonString);
+                DGJsonData.ItemsSource = null;
                 DGJsonData.ItemsSource = dataTable.DefaultView;
                 TBJson.Text = jsonString.ToString();
             }
@@ -52,24 +56,29 @@ namespace JsonConverter.Pages
             var jsonArray = JArray.Parse(json);
             if (jsonArray.Count > 0)
             {
-                foreach (var property in jsonArray[0] as JObject)
+                var properties = generatedObject.GetType().GetProperties();
+                foreach (var property in properties)
+                    dataTable.Columns.Add(property.Name, property.PropertyType);
+                foreach (var jsonItem in jsonArray)
                 {
-                    dataTable.Columns.Add(property.Key, typeof(object));
-                }
-            }
-            foreach (var jsonItem in jsonArray)
-            {
-                var dataRow = dataTable.NewRow();
-                var jsonObject = jsonItem as JObject;
+                    var dataRow = dataTable.NewRow();
+                    var jsonObject = jsonItem as JObject;
 
-                foreach (var property in jsonObject.Properties())
-                {
-                    var columnName = property.Name;
-                    var columnValue = property.Value.ToObject<object>();
-                    dataRow[columnName] = columnValue;
+                    foreach (var property in jsonObject.Properties())
+                    {
+                        var columnName = property.Name;
+                        foreach (var propertyInDynamic in properties)
+                        {
+                            // Проверяем, существует ли свойство в списке properties
+                            if (propertyInDynamic.Name == property.Name)
+                            {
+                                var columnValue = property.Value.ToObject<object>();
+                                dataRow[columnName] = columnValue;
+                            }
+                        }
+                    }
+                    dataTable.Rows.Add(dataRow);
                 }
-
-                dataTable.Rows.Add(dataRow);
             }
             return dataTable;
         }
@@ -84,8 +93,41 @@ namespace JsonConverter.Pages
             var dialog = new OpenFileDialog() { Filter = ".cs | *.cs" };
             if (dialog.ShowDialog().GetValueOrDefault())
             {
-                
+                string code = System.IO.File.ReadAllText(dialog.FileName);
+                CompileAndLoadCode(code);
+            }
+        }
 
+        private void CompileAndLoadCode(string code)
+        {
+            CSharpCodeProvider provider = new CSharpCodeProvider();
+            CompilerParameters parameters = new CompilerParameters();
+
+            // Получаем сборки, доступные в текущем домене приложения
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic).Select(a => a.Location).ToArray();
+            parameters.ReferencedAssemblies.AddRange(assemblies);
+
+            // Компилируем код
+            CompilerResults results = provider.CompileAssemblyFromSource(parameters, code);
+
+            if (results.Errors.HasErrors)
+            {
+                foreach (CompilerError error in results.Errors)
+                {
+                    MessageBox.Show($"Error in line {error.Line}: {error.ErrorText}");
+                }
+            }
+            else
+            {
+                // Загружаем сборку
+                Assembly assembly = results.CompiledAssembly;
+
+                // Создаем экземпляры класса из сборки
+                foreach (Type type in assembly.GetTypes())
+                {
+                    dynamic instance = Activator.CreateInstance(type);
+                    generatedObject = instance;
+                }
             }
         }
     }
