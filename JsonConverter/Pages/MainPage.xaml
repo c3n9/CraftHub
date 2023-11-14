@@ -13,7 +13,12 @@
             <RowDefinition Height="auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Horizontal"
+                    Grid.ColumnSpan="2">
             <Button x:Name="BImport"
                     Content="Import"
                     Click="BImport_Click"/>
@@ -21,6 +26,12 @@
                     Content="Export"
                     Click="BExport_Click" />
         </StackPanel>
+        <TextBox x:Name="TBJson"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True"
+                 VerticalScrollBarVisibility="Auto" 
+                 Grid.Row="1"
+                 Grid.Column="1"/>
         <DataGrid x:Name="DGLessons"
                   Grid.Row="1"
                   IsReadOnly="True" />

@@ -1,8 +1,10 @@
-﻿using JsonConverter.Models;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Dynamic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -12,6 +14,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -24,6 +27,7 @@ namespace JsonConverter.Pages
     /// </summary>
     public partial class MainPage : Page
     {
+        string jsonString;
         public MainPage()
         {
             InitializeComponent();
@@ -31,27 +35,47 @@ namespace JsonConverter.Pages
 
         private void BImport_Click(object sender, RoutedEventArgs e)
         {
-            var dialog = new OpenFileDialog();
+            var dialog = new OpenFileDialog() { Filter = ".json | *.json"};
             if (dialog.ShowDialog().GetValueOrDefault())
             {
-                DataManager.jsonFile = File.ReadAllText(dialog.FileName);   
+                jsonString = File.ReadAllText(dialog.FileName);
+                var dataTable = DisplayDataInGrid(jsonString);
+                DGLessons.ItemsSource = dataTable.DefaultView;
+                TBJson.Text = jsonString.ToString();
             }
-            Refresh();
         }
 
-        private void Refresh()
+        private DataTable DisplayDataInGrid(string json)
         {
-            DGLessons.ItemsSource = DataManager.Lessons.ToList();
+            var dataTable = new DataTable();
+            var jsonArray = JArray.Parse(json);
+            if (jsonArray.Count > 0)
+            {
+                foreach (var property in jsonArray[0] as JObject)
+                {
+                    dataTable.Columns.Add(property.Key, typeof(object));
+                }
+            }
+            foreach (var jsonItem in jsonArray)
+            {
+                var dataRow = dataTable.NewRow();
+                var jsonObject = jsonItem as JObject;
+
+                foreach (var property in jsonObject.Properties())
+                {
+                    var columnName = property.Name;
+                    var columnValue = property.Value.ToObject<object>();
+                    dataRow[columnName] = columnValue;
+                }
+
+                dataTable.Rows.Add(dataRow);
+            }
+            return dataTable;
         }
 
         private void BExport_Click(object sender, RoutedEventArgs e)
         {
-            var jsonData = JsonConvert.SerializeObject(DataManager.Lessons);
-            var dialog = new SaveFileDialog() { Filter = ".json | *.json"};
-            if(dialog.ShowDialog().GetValueOrDefault())
-            {
-                File.WriteAllText(dialog.FileName, jsonData, Encoding.UTF8);
-            }
+            
         }
     }
 }

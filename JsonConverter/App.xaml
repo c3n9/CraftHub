@@ -10,9 +10,5 @@
             <Setter Property="Width"
                     Value="200" />
         </Style>
-        <Style TargetType="StackPanel">
-            <Setter Property="Margin"
-                    Value="10" />
-        </Style>
     </Application.Resources>
 </Application>
