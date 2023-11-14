@@ -11,14 +11,29 @@
             <RowDefinition Height="auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-        <Menu>
-            <MenuItem Header="File"/>
-            <MenuItem Header="Options"/>
-            <MenuItem />
-            <MenuItem />
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+        <Menu Grid.ColumnSpan="2">
+            <MenuItem Header="File">
+                <MenuItem Header="Import class"
+                          x:Name="MIImportClass"
+                          Click="MIImportClass_Click" />
+                <MenuItem Header="Import json file"
+                          x:Name="MIImportJsonFile"
+                          Click="MIImportJsonFile_Click" />
+            </MenuItem>
+            <MenuItem Header="Options" />
         </Menu>
-        <Frame x:Name="MainFrame" 
-               Grid.Row="1"
-               NavigationUIVisibility="Hidden"/>
+        <TextBox x:Name="TBJson"
+                 TextWrapping="Wrap"
+                 AcceptsReturn="True"
+                 VerticalScrollBarVisibility="Auto"
+                 Grid.Row="1"
+                 Grid.Column="1" />
+        <DataGrid x:Name="DGJsonData"
+                  Grid.Row="1"
+                  IsReadOnly="True" />
     </Grid>
 </Window>
