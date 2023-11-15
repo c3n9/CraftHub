@@ -8,13 +8,9 @@
         Title="MainWindow" MinHeight="450" MinWidth="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
         <Menu Grid.ColumnSpan="2">
             <MenuItem Header="File">
                 <MenuItem Header="Import class"
@@ -26,14 +22,8 @@
             </MenuItem>
             <MenuItem Header="Options" />
         </Menu>
-        <TextBox x:Name="TBJson"
-                 TextWrapping="Wrap"
-                 AcceptsReturn="True"
-                 VerticalScrollBarVisibility="Auto"
-                 Grid.Row="1"
-                 Grid.Column="1" />
         <DataGrid x:Name="DGJsonData"
                   Grid.Row="1"
-                  IsReadOnly="True" />
+                  ColumnWidth="auto"/>
     </Grid>
 </Window>
