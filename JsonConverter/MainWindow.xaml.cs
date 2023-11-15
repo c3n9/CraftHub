@@ -49,7 +49,6 @@ namespace JsonConverter
                 var dataTable = DisplayDataInGrid(jsonString);
                 DGJsonData.ItemsSource = null;
                 DGJsonData.ItemsSource = dataTable.DefaultView;
-                TBJson.Text = jsonString.ToString();
             }
         }
         private DataTable DisplayDataInGrid(string json)
