@@ -35,6 +35,7 @@
         </StackPanel>
         <DataGrid x:Name="DGProperties"
                   IsReadOnly="True" 
-                  Grid.Row="1"/>
+                  Grid.Row="1"
+                  ColumnWidth="*"/>
     </Grid>
 </Page>

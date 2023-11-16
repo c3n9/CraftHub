@@ -42,6 +42,7 @@ namespace JsonConverter
                 string code = System.IO.File.ReadAllText(dialog.FileName);
                 CompileAndLoadCode(code);
                 MainFrame.Navigate(new PropertiesPage());
+
             }
         }
 
@@ -57,6 +58,8 @@ namespace JsonConverter
         }
         private void CompileAndLoadCode(string code)
         {
+            GlobalSettings.dictionary = new Dictionary<string, dynamic>();
+            GlobalSettings.jsonString = null;
             CSharpCodeProvider provider = new CSharpCodeProvider();
             CompilerParameters parameters = new CompilerParameters();
             // Получаем сборки, доступные в текущем домене приложения
