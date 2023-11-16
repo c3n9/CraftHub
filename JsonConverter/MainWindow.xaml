@@ -11,10 +11,6 @@
             <RowDefinition Height="auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
         <Menu Grid.ColumnSpan="2">
             <MenuItem Header="File">
                 <MenuItem Header="Import class"
@@ -26,12 +22,9 @@
             </MenuItem>
             <MenuItem Header="Options" />
         </Menu>
-        <DataGrid x:Name="DGJsonData"
-                  Grid.Row="1"
-                  Grid.Column="1"
-                  ColumnWidth="auto"/>
-        <DataGrid x:Name="DGProperties"
-                  IsReadOnly="True" 
-                  Grid.Row="1"/>
+        <Frame x:Name="MainFrame" 
+               NavigationUIVisibility="Hidden"
+               Grid.Row="1"/>
+
     </Grid>
 </Window>

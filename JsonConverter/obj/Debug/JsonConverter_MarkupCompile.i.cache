@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\App.xaml
-1219584333
+3418340974
 
-6-502434485
+9-1353056002
 14-866996422
-MainWindow.xaml;
+MainWindow.xaml;Pages\JsonPage.xaml;Pages\PropertiesPage.xaml;
 
-False
+True
 

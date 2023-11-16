@@ -1,4 +1,6 @@
-﻿using Microsoft.CSharp;
+﻿using JsonConverter.Pages;
+using JsonConverter.Services;
+using Microsoft.CSharp;
 using Microsoft.Win32;
 using Newtonsoft.Json.Linq;
 using System;
@@ -24,11 +26,11 @@ namespace JsonConverter
 {
     public partial class MainWindow : Window
     {
-        string jsonString;
-        private dynamic generatedObject;
+        
         public MainWindow()
         {
             InitializeComponent();
+            
         }
         private void MIImportClass_Click(object sender, RoutedEventArgs e)
         {
@@ -37,19 +39,7 @@ namespace JsonConverter
             {
                 string code = System.IO.File.ReadAllText(dialog.FileName);
                 CompileAndLoadCode(code);
-                var dataTable = new DataTable();
-                var properties = generatedObject.GetType().GetProperties();
-                dataTable.Columns.Add("Property");
-                dataTable.Columns.Add("Type");
-
-                foreach (var propertyInDynamic in properties)
-                {
-                    var dataRow = dataTable.NewRow();
-                    dataRow["Property"] = propertyInDynamic.Name;
-                    dataRow["Type"] = propertyInDynamic.PropertyType;
-                    dataTable.Rows.Add(dataRow);
-                }
-                DGProperties.ItemsSource = dataTable.DefaultView;
+                MainFrame.Navigate(new PropertiesPage());
             }
         }
 
@@ -58,43 +48,10 @@ namespace JsonConverter
             var dialog = new OpenFileDialog() { Filter = ".json | *.json" };
             if (dialog.ShowDialog().GetValueOrDefault())
             {
-                jsonString = File.ReadAllText(dialog.FileName);
-                var dataTable = DisplayDataInGrid(jsonString);
-                DGJsonData.ItemsSource = null;
-                DGJsonData.ItemsSource = dataTable.DefaultView;
-            }
-        }
-        private DataTable DisplayDataInGrid(string json)
-        {
-            var dataTable = new DataTable();
-            var jsonArray = JArray.Parse(json);
-            if (jsonArray.Count > 0)
-            {
-                var properties = generatedObject.GetType().GetProperties();
-                foreach (var property in properties)
-                    dataTable.Columns.Add(property.Name, property.PropertyType);
-                foreach (var jsonItem in jsonArray)
-                {
-                    var dataRow = dataTable.NewRow();
-                    var jsonObject = jsonItem as JObject;
+                GlobalSettings.jsonString = File.ReadAllText(dialog.FileName);
+                MainFrame.Navigate(new JsonPage());
 
-                    foreach (var property in jsonObject.Properties())
-                    {
-                        var columnName = property.Name;
-                        foreach (var propertyInDynamic in properties)
-                        {
-                            // Проверяем, существует ли свойство в списке properties
-                            if (propertyInDynamic.Name == property.Name)
-                            {
-                                var columnValue = property.Value.ToObject<object>();
-                                dataRow[columnName] = columnValue;
-                            }
-                        }
-                    }
-                    dataTable.Rows.Add(dataRow);
-                }
             }
-            return dataTable;
         }
         private void CompileAndLoadCode(string code)
         {
@@ -120,7 +77,13 @@ namespace JsonConverter
                 foreach (Type type in assembly.GetTypes())
                 {
                     dynamic instance = Activator.CreateInstance(type);
-                    generatedObject = instance;
+                    GlobalSettings.generatedObject = instance;
+                    foreach (var propertyInDynamic in instance.GetType().GetProperties())
+                    {
+                        var n = propertyInDynamic.Name;
+                        var f = propertyInDynamic.PropertyType;
+                        GlobalSettings.dictionary.Add(propertyInDynamic.Name.ToString(), propertyInDynamic.PropertyType);
+                    }
                 }
             }
         }

@@ -59,3 +59,7 @@ C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\JsonC
 C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\JsonConverter.csproj.CopyComplete
 C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\JsonConverter.exe
 C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\JsonConverter.pdb
+C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\Pages\JsonPage.g.cs
+C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\Pages\PropertiesPage.g.cs
+C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\Pages\JsonPage.baml
+C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\Pages\PropertiesPage.baml
