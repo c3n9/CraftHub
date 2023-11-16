@@ -37,6 +37,19 @@ namespace JsonConverter
             {
                 string code = System.IO.File.ReadAllText(dialog.FileName);
                 CompileAndLoadCode(code);
+                var dataTable = new DataTable();
+                var properties = generatedObject.GetType().GetProperties();
+                dataTable.Columns.Add("Property");
+                dataTable.Columns.Add("Type");
+
+                foreach (var propertyInDynamic in properties)
+                {
+                    var dataRow = dataTable.NewRow();
+                    dataRow["Property"] = propertyInDynamic.Name;
+                    dataRow["Type"] = propertyInDynamic.PropertyType;
+                    dataTable.Rows.Add(dataRow);
+                }
+                DGProperties.ItemsSource = dataTable.DefaultView;
             }
         }
 
@@ -111,5 +124,6 @@ namespace JsonConverter
                 }
             }
         }
+
     }
 }
