@@ -65,6 +65,7 @@ namespace JsonConverter
             // Получаем сборки, доступные в текущем домене приложения
             var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic).Select(a => a.Location).ToArray();
             parameters.ReferencedAssemblies.AddRange(assemblies);
+            parameters.ReferencedAssemblies.Add("System.Runtime.dll");
             // Компилируем код
             CompilerResults results = provider.CompileAssemblyFromSource(parameters, code);
             if (results.Errors.HasErrors)
@@ -78,15 +79,12 @@ namespace JsonConverter
             {
                 // Загружаем сборку
                 Assembly assembly = results.CompiledAssembly;
-                // Создаем экземпляры класса из сборки
                 foreach (Type type in assembly.GetTypes())
                 {
                     dynamic instance = Activator.CreateInstance(type);
                     GlobalSettings.generatedObject = instance;
                     foreach (var propertyInDynamic in instance.GetType().GetProperties())
                     {
-                        var n = propertyInDynamic.Name;
-                        var f = propertyInDynamic.PropertyType;
                         GlobalSettings.dictionary.Add(propertyInDynamic.Name.ToString(), propertyInDynamic.PropertyType);
                     }
                 }
