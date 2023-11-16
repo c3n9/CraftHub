@@ -38,12 +38,15 @@ namespace JsonConverter.Pages
             var dataTable = new DataTable();
             dataTable.Columns.Add("Property");
             dataTable.Columns.Add("Type");
-            foreach (var elemet in GlobalSettings.dictionary)
+            if(GlobalSettings.dictionary != null)
             {
-                var dataRow = dataTable.NewRow();
-                dataRow["Property"] = elemet.Key;
-                dataRow["Type"] = elemet.Value;
-                dataTable.Rows.Add(dataRow);
+                foreach (var elemet in GlobalSettings.dictionary)
+                {
+                    var dataRow = dataTable.NewRow();
+                    dataRow["Property"] = elemet.Key;
+                    dataRow["Type"] = elemet.Value;
+                    dataTable.Rows.Add(dataRow);
+                }
             }
             DGProperties.ItemsSource = dataTable.DefaultView;
         }

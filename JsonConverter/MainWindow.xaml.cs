@@ -30,7 +30,9 @@ namespace JsonConverter
         public MainWindow()
         {
             InitializeComponent();
-            
+            MainFrame.Navigate(new PropertiesPage());
+
+
         }
         private void MIImportClass_Click(object sender, RoutedEventArgs e)
         {
