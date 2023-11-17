@@ -31,6 +31,7 @@
                           x:Name="MIAddInModalWindow"
                           Checked="MIAddInModalWindow_Checked"
                           Unchecked="MIAddInModalWindow_Unchecked"
+                          IsChecked="True"
                           Style="{StaticResource CheckBoxMenuItemStyle}" />
             </MenuItem>
             <MenuItem Header="Extension">

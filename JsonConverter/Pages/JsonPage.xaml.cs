@@ -1,4 +1,5 @@
-﻿using JsonConverter.Services;
+﻿using JsonConverter.AppWindows;
+using JsonConverter.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -70,12 +71,27 @@ namespace JsonConverter.Pages
         }
         private void BAdd_Click(object sender, RoutedEventArgs e)
         {
+            // Создаем новый DataRowView с пустой строкой данных
+            DataRowView newRowView = GlobalSettings.dataTable.DefaultView.AddNew();
 
+            // Новая добавленная строка находится в режиме редактирования, поэтому нужно отменить редактирование, чтобы сделать ее доступной
+            newRowView.CancelEdit();
+
+            // Показываем страницу AddNewElementPage для добавления новой строки
+            new AddNewElementPage(newRowView, isAdding: true).ShowDialog();
         }
 
         private void BEdit_Click(object sender, RoutedEventArgs e)
         {
-
+            if (DGJsonData.SelectedItem is DataRowView dataRow)
+            {
+                new AddNewElementPage(dataRow, false).ShowDialog();
+            }
+            else
+            {
+                MessageBox.Show("Select object");
+                return;
+            }
         }
     }
 }

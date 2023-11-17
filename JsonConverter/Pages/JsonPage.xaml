@@ -28,7 +28,9 @@
         <DataGrid x:Name="DGJsonData" 
                   ColumnWidth="*"
                   Grid.Row="1"
-                  RowEditEnding="DGJsonData_RowEditEnding"/>
+                  RowEditEnding="DGJsonData_RowEditEnding"
+                  IsReadOnly="True"
+                  CanUserAddRows="False"/>
         <Button x:Name="BBack"
                 Content="Back"
                 Click="BBack_Click" 

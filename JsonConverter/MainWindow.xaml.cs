@@ -66,6 +66,7 @@ namespace JsonConverter
         {
             GlobalSettings.dictionary = new Dictionary<string, dynamic>();
             GlobalSettings.jsonString = null;
+            // Используем провайдер компиляции C# кода
             CSharpCodeProvider provider = new CSharpCodeProvider();
             CompilerParameters parameters = new CompilerParameters();
             // Получаем сборки, доступные в текущем домене приложения
