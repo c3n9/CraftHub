@@ -34,6 +34,11 @@ namespace JsonConverter.Pages
         }
         private void BNext_Click(object sender, RoutedEventArgs e)
         {
+            if (GlobalSettings.dictionary.Count == 0)
+            {
+                MessageBox.Show("Upload a template or add properties");
+                return;
+            }
             NavigationService.Navigate(new JsonPage());
         }
 

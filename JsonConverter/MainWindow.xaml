@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JsonConverter"
         mc:Ignorable="d"
-        Title="MainWindow" MinHeight="450" MinWidth="800">
+        Title="MainWindow" MinHeight="450" MinWidth="900"
+        WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -18,10 +19,12 @@
                           Click="MIImportClass_Click" />
                 <MenuItem Header="Import json file"
                           x:Name="MIImportJsonFile"
-                          Click="MIImportJsonFile_Click" />
+                          Click="MIImportJsonFile_Click"
+                          IsEnabled="False"/>
                 <MenuItem Header="Export json file"
                           x:Name="MIExportJsonFile"
-                          Click="MIExportJsonFile_Click" />
+                          Click="MIExportJsonFile_Click"
+                          IsEnabled="False" />
             </MenuItem>
             <MenuItem Header="Options" />
         </Menu>

@@ -27,7 +27,7 @@ namespace JsonConverter
 {
     public partial class MainWindow : Window
     {
-        
+
         public MainWindow()
         {
             InitializeComponent();
@@ -43,17 +43,23 @@ namespace JsonConverter
                 string code = System.IO.File.ReadAllText(dialog.FileName);
                 CompileAndLoadCode(code);
                 GlobalSettings.RefreshProperties();
-
+                MIImportJsonFile.IsEnabled = true;
             }
         }
 
         private void MIImportJsonFile_Click(object sender, RoutedEventArgs e)
         {
+            if (GlobalSettings.dictionary.Count == 0)
+            {
+                MessageBox.Show("Upload a template or add properties");
+                return;
+            }
             var dialog = new OpenFileDialog() { Filter = ".json | *.json" };
             if (dialog.ShowDialog().GetValueOrDefault())
             {
                 GlobalSettings.jsonString = File.ReadAllText(dialog.FileName);
                 GlobalSettings.DisplayDataInGrid();
+                MIExportJsonFile.IsEnabled = true;
             }
         }
         private void CompileAndLoadCode(string code)
@@ -75,7 +81,7 @@ namespace JsonConverter
                 {
                     errorMessage += $"Error in line {error.Line}: {error.ErrorText}\n";
                 }
-                if(!string.IsNullOrWhiteSpace(errorMessage))
+                if (!string.IsNullOrWhiteSpace(errorMessage))
                 {
                     MessageBox.Show(errorMessage);
                     return;
