@@ -13,6 +13,7 @@ namespace JsonConverter.Services
     {
         public static string jsonString;
         public static dynamic generatedObject;
+        public static string nameTemplate;
         public static Dictionary<string, dynamic> dictionary = new Dictionary<string, dynamic>();
         public static JsonPage jsonPage;
         public static PropertiesPage propertiesPage;

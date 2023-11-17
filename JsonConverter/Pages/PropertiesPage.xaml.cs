@@ -17,6 +17,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Win32;
+using System.IO;
 
 namespace JsonConverter.Pages
 {
@@ -64,6 +66,12 @@ namespace JsonConverter.Pages
             GlobalSettings.mainWindow.MIImportClass.IsEnabled = true;
             GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = false;
             GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = false;
+                
+        }
+
+        private void BSaveTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
 }
