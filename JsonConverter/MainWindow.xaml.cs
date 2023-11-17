@@ -2,6 +2,7 @@
 using JsonConverter.Services;
 using Microsoft.CSharp;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.CodeDom.Compiler;
@@ -93,12 +94,13 @@ namespace JsonConverter
 
         private void MIExportJsonFile_Click(object sender, RoutedEventArgs e)
         {
-            if (!string.IsNullOrWhiteSpace(GlobalSettings.exportJsonString))
+            var exportJsonString = JsonConvert.SerializeObject(GlobalSettings.dataTable, Formatting.Indented);
+            if (!string.IsNullOrWhiteSpace(exportJsonString))
             {
                 var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
                 if (dialog.ShowDialog().GetValueOrDefault())
                 {
-                    File.WriteAllText(dialog.FileName, GlobalSettings.exportJsonString, Encoding.UTF8);
+                    File.WriteAllText(dialog.FileName, exportJsonString, Encoding.UTF8);
                     MessageBox.Show("Successful export");
                 }
             }

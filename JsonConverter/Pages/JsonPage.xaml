@@ -10,6 +10,8 @@
 
     <Grid>
         <DataGrid x:Name="DGJsonData" 
-                  CanUserAddRows="False"/>
+                  CanUserAddRows="False"
+                  ColumnWidth="*"
+                  RowEditEnding="DGJsonData_RowEditEnding"/>
     </Grid>
 </Page>
