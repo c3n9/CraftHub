@@ -28,6 +28,25 @@ namespace JsonConverter.Pages
         {
             InitializeComponent();
             GlobalSettings.jsonPage = this;
+            GlobalSettings.mainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
+        }
+
+        private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
+        {
+            if (e)
+            {
+                GlobalSettings.jsonPage.BAdd.Visibility = Visibility.Visible;
+                GlobalSettings.jsonPage.BEdit.Visibility = Visibility.Visible;
+                GlobalSettings.jsonPage.DGJsonData.CanUserAddRows = false;
+                GlobalSettings.jsonPage.DGJsonData.IsReadOnly = true;
+            }
+            else
+            {
+                GlobalSettings.jsonPage.BAdd.Visibility = Visibility.Collapsed;
+                GlobalSettings.jsonPage.BEdit.Visibility = Visibility.Collapsed;
+                GlobalSettings.jsonPage.DGJsonData.CanUserAddRows = true;
+                GlobalSettings.jsonPage.DGJsonData.IsReadOnly = false;
+            }
         }
 
         private void DGJsonData_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
@@ -48,6 +67,15 @@ namespace JsonConverter.Pages
             GlobalSettings.mainWindow.MIImportClass.IsEnabled = false;
             GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = true;
             GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = true;
+        }
+        private void BAdd_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BEdit_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

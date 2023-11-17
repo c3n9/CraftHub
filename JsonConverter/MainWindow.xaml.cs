@@ -27,7 +27,7 @@ namespace JsonConverter
 {
     public partial class MainWindow : Window
     {
-
+        public event EventHandler<bool> AddInModalWindowCheckedChanged;
         public MainWindow()
         {
             InitializeComponent();
@@ -125,6 +125,15 @@ namespace JsonConverter
         private void MIRobocadExtension_Click(object sender, RoutedEventArgs e)
         {
 
+        }
+        private void MIAddInModalWindow_Checked(object sender, RoutedEventArgs e)
+        {
+            AddInModalWindowCheckedChanged?.Invoke(this, MIAddInModalWindow.IsChecked);
+        }
+
+        private void MIAddInModalWindow_Unchecked(object sender, RoutedEventArgs e)
+        {
+            AddInModalWindowCheckedChanged?.Invoke(this, MIAddInModalWindow.IsChecked);
         }
     }
 }

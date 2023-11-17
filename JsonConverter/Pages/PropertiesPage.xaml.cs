@@ -66,7 +66,6 @@ namespace JsonConverter.Pages
             GlobalSettings.mainWindow.MIImportClass.IsEnabled = true;
             GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = false;
             GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = false;
-                
         }
 
         private void BSaveTemplate_Click(object sender, RoutedEventArgs e)

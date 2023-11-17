@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JsonConverter"
         mc:Ignorable="d"
-        Title="Json converter" MinHeight="450" MinWidth="900"
+        Title="Json converter"
+        MinHeight="450"
+        MinWidth="900"
         WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>
@@ -19,21 +21,27 @@
                           Click="MIImportClass_Click" />
                 <MenuItem Header="Import json file"
                           x:Name="MIImportJsonFile"
-                          Click="MIImportJsonFile_Click"/>
+                          Click="MIImportJsonFile_Click" />
                 <MenuItem Header="Export json file"
                           x:Name="MIExportJsonFile"
-                          Click="MIExportJsonFile_Click"/>
+                          Click="MIExportJsonFile_Click" />
             </MenuItem>
-            <MenuItem Header="Options" />
+            <MenuItem Header="Options">
+                <MenuItem Header="Add in modal window"
+                          x:Name="MIAddInModalWindow"
+                          Checked="MIAddInModalWindow_Checked"
+                          Unchecked="MIAddInModalWindow_Unchecked"
+                          Style="{StaticResource CheckBoxMenuItemStyle}" />
+            </MenuItem>
             <MenuItem Header="Extension">
                 <MenuItem Header="RobocadExtension"
                           x:Name="MIRobocadExtension"
-                          Click="MIRobocadExtension_Click"/>
+                          Click="MIRobocadExtension_Click" />
             </MenuItem>
         </Menu>
-        <Frame x:Name="MainFrame" 
+        <Frame x:Name="MainFrame"
                NavigationUIVisibility="Hidden"
-               Grid.Row="1"/>
+               Grid.Row="1" />
 
     </Grid>
 </Window>

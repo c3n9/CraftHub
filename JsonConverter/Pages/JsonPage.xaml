@@ -11,16 +11,28 @@
 
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
             <RowDefinition />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
+        <StackPanel Margin="10"
+                    HorizontalAlignment="Left"
+                    Orientation="Horizontal">
+            <Button x:Name="BAdd"
+                    Click="BAdd_Click"
+                    Content="Add" />
+            <Button x:Name="BEdit"
+                    Click="BEdit_Click"
+                    Content="Edit" />
+        </StackPanel>
         <DataGrid x:Name="DGJsonData" 
                   ColumnWidth="*"
+                  Grid.Row="1"
                   RowEditEnding="DGJsonData_RowEditEnding"/>
         <Button x:Name="BBack"
                 Content="Back"
                 Click="BBack_Click" 
-                Grid.Row="1"
+                Grid.Row="2"
                 Margin="10"
                 HorizontalAlignment="Left" />
     </Grid>

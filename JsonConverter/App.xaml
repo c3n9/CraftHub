@@ -10,5 +10,10 @@
             <Setter Property="Width"
                     Value="200" />
         </Style>
+        <Style x:Key="CheckBoxMenuItemStyle"
+               TargetType="MenuItem">
+            <Setter Property="IsCheckable"
+                    Value="True" />
+        </Style>
     </Application.Resources>
 </Application>
