@@ -19,6 +19,9 @@
                 <MenuItem Header="Import json file"
                           x:Name="MIImportJsonFile"
                           Click="MIImportJsonFile_Click" />
+                <MenuItem Header="Export json file"
+                          x:Name="MIExportJsonFile"
+                          Click="MIExportJsonFile_Click" />
             </MenuItem>
             <MenuItem Header="Options" />
         </Menu>

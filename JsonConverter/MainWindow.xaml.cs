@@ -91,5 +91,21 @@ namespace JsonConverter
             }
         }
 
+        private void MIExportJsonFile_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(GlobalSettings.exportJsonString))
+            {
+                var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
+                if (dialog.ShowDialog().GetValueOrDefault())
+                {
+                    File.WriteAllText(dialog.FileName, GlobalSettings.exportJsonString, Encoding.UTF8);
+                    MessageBox.Show("Successful export");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Import json first");
+            }
+        }
     }
 }

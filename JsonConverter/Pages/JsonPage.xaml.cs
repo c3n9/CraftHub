@@ -1,4 +1,5 @@
 ﻿using JsonConverter.Services;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
@@ -58,6 +59,7 @@ namespace JsonConverter.Pages
                     dataTable.Rows.Add(dataRow);
                 }
             }
+            GlobalSettings.exportJsonString = JsonConvert.SerializeObject(dataTable, Formatting.Indented);
             DGJsonData.ItemsSource = null;
             DGJsonData.ItemsSource = dataTable.DefaultView;
         }

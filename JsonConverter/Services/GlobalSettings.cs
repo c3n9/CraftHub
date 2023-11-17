@@ -10,6 +10,7 @@ namespace JsonConverter.Services
     {
         public static string jsonString;
         public static dynamic generatedObject;
+        public static string exportJsonString;
         public static Dictionary<string, dynamic> dictionary = new Dictionary<string, dynamic>();
     }
 }
