@@ -12,6 +12,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal"
                     Margin="10">
@@ -37,5 +38,11 @@
                   IsReadOnly="True" 
                   Grid.Row="1"
                   ColumnWidth="*"/>
+        <Button x:Name="BNext"
+                Click="BNext_Click"
+                Content="Next"
+                Grid.Row="2"
+                HorizontalAlignment="Right"
+                Margin="10" />
     </Grid>
 </Page>

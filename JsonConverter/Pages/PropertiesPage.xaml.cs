@@ -28,29 +28,10 @@ namespace JsonConverter.Pages
         public PropertiesPage()
         {
             InitializeComponent();
+            GlobalSettings.propertiesPage = this;
             Type[] basicTypes = { typeof(int), typeof(bool), typeof(string) };
             CBValues.ItemsSource = basicTypes;
-            RefreshProperties();
         }
-
-        private void RefreshProperties()
-        {
-            var dataTable = new DataTable();
-            dataTable.Columns.Add("Property");
-            dataTable.Columns.Add("Type");
-            if(GlobalSettings.dictionary != null)
-            {
-                foreach (var elemet in GlobalSettings.dictionary)
-                {
-                    var dataRow = dataTable.NewRow();
-                    dataRow["Property"] = elemet.Key;
-                    dataRow["Type"] = elemet.Value;
-                    dataTable.Rows.Add(dataRow);
-                }
-            }
-            DGProperties.ItemsSource = dataTable.DefaultView;
-        }
-
         private void BNext_Click(object sender, RoutedEventArgs e)
         {
             NavigationService.Navigate(new JsonPage());
@@ -60,7 +41,7 @@ namespace JsonConverter.Pages
         {
             var type = CBValues.SelectedItem as dynamic;
             GlobalSettings.dictionary.Add(TBPropertyName.Text, type);
-            RefreshProperties();
+            GlobalSettings.RefreshProperties();
         }
 
         private void BRemovePropery_Click(object sender, RoutedEventArgs e)
@@ -70,7 +51,7 @@ namespace JsonConverter.Pages
             var nameProperty = rowView[0];
             GlobalSettings.dictionary.Remove(nameProperty.ToString());
             var n = GlobalSettings.dictionary;
-            RefreshProperties();
+            GlobalSettings.RefreshProperties();
         }
     }
 }

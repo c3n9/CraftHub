@@ -42,7 +42,7 @@ namespace JsonConverter
             {
                 string code = System.IO.File.ReadAllText(dialog.FileName);
                 CompileAndLoadCode(code);
-                MainFrame.Navigate(new PropertiesPage());
+                GlobalSettings.RefreshProperties();
 
             }
         }
@@ -53,8 +53,7 @@ namespace JsonConverter
             if (dialog.ShowDialog().GetValueOrDefault())
             {
                 GlobalSettings.jsonString = File.ReadAllText(dialog.FileName);
-                MainFrame.Navigate(new JsonPage());
-
+                GlobalSettings.DisplayDataInGrid();
             }
         }
         private void CompileAndLoadCode(string code)
@@ -69,11 +68,17 @@ namespace JsonConverter
             parameters.ReferencedAssemblies.Add("System.Runtime.dll");
             // Компилируем код
             CompilerResults results = provider.CompileAssemblyFromSource(parameters, code);
+            string errorMessage = string.Empty;
             if (results.Errors.HasErrors)
             {
                 foreach (CompilerError error in results.Errors)
                 {
-                    MessageBox.Show($"Error in line {error.Line}: {error.ErrorText}");
+                    errorMessage += $"Error in line {error.Line}: {error.ErrorText}\n";
+                }
+                if(!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    MessageBox.Show(errorMessage);
+                    return;
                 }
             }
             else
@@ -107,6 +112,7 @@ namespace JsonConverter
             else
             {
                 MessageBox.Show("Import json first");
+                return;
             }
         }
     }
