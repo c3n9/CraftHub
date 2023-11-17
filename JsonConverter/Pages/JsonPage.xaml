@@ -6,7 +6,8 @@
       xmlns:local="clr-namespace:JsonConverter.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="JsonPage">
+      Title="JsonPage"
+      Loaded="Page_Loaded">
 
     <Grid>
         <Grid.RowDefinitions>
@@ -14,7 +15,6 @@
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <DataGrid x:Name="DGJsonData" 
-                  CanUserAddRows="False"
                   ColumnWidth="*"
                   RowEditEnding="DGJsonData_RowEditEnding"/>
         <Button x:Name="BBack"

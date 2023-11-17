@@ -42,5 +42,12 @@ namespace JsonConverter.Pages
         {
             NavigationService.GoBack();
         }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            GlobalSettings.mainWindow.MIImportClass.IsEnabled = false;
+            GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = true;
+            GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = true;
+        }
     }
 }

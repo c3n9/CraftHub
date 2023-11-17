@@ -31,6 +31,7 @@ namespace JsonConverter
         public MainWindow()
         {
             InitializeComponent();
+            GlobalSettings.mainWindow = this;
             MainFrame.Navigate(new PropertiesPage());
 
 
@@ -43,7 +44,6 @@ namespace JsonConverter
                 string code = System.IO.File.ReadAllText(dialog.FileName);
                 CompileAndLoadCode(code);
                 GlobalSettings.RefreshProperties();
-                MIImportJsonFile.IsEnabled = true;
             }
         }
 
@@ -59,7 +59,6 @@ namespace JsonConverter
             {
                 GlobalSettings.jsonString = File.ReadAllText(dialog.FileName);
                 GlobalSettings.DisplayDataInGrid();
-                MIExportJsonFile.IsEnabled = true;
             }
         }
         private void CompileAndLoadCode(string code)
@@ -120,6 +119,11 @@ namespace JsonConverter
                 MessageBox.Show("Import json first");
                 return;
             }
+        }
+
+        private void MIRobocadExtension_Click(object sender, RoutedEventArgs e)
+        {
+
         }
     }
 }

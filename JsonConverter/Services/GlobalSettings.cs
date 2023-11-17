@@ -16,6 +16,7 @@ namespace JsonConverter.Services
         public static Dictionary<string, dynamic> dictionary = new Dictionary<string, dynamic>();
         public static JsonPage jsonPage;
         public static PropertiesPage propertiesPage;
+        public static MainWindow mainWindow;
         public static DataTable dataTable;
         public static void RefreshProperties()
         {

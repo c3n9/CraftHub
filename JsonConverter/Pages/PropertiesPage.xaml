@@ -6,7 +6,8 @@
       xmlns:local="clr-namespace:JsonConverter.Pages"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
-      Title="PropertiesPage">
+      Title="PropertiesPage"
+      Loaded="Page_Loaded">
 
     <Grid>
         <Grid.RowDefinitions>

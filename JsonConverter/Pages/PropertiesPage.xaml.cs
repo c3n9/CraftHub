@@ -58,5 +58,12 @@ namespace JsonConverter.Pages
             var n = GlobalSettings.dictionary;
             GlobalSettings.RefreshProperties();
         }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            GlobalSettings.mainWindow.MIImportClass.IsEnabled = true;
+            GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = false;
+            GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = false;
+        }
     }
 }
