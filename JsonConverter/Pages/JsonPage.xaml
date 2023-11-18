@@ -30,6 +30,7 @@
                   Grid.Row="1"
                   RowEditEnding="DGJsonData_RowEditEnding"
                   IsReadOnly="True"
+                  LoadingRow="DGJsonData_LoadingRow"
                   CanUserAddRows="False"/>
         <Button x:Name="BBack"
                 Content="Back"

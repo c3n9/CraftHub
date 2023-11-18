@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -78,7 +79,7 @@ namespace JsonConverter.Pages
             newRowView.CancelEdit();
 
             // Показываем страницу AddNewElementPage для добавления новой строки
-            new AddNewElementPage(newRowView, isAdding: true).ShowDialog();
+            new AddNewElementPage(newRowView, true).ShowDialog();
         }
 
         private void BEdit_Click(object sender, RoutedEventArgs e)
@@ -86,6 +87,12 @@ namespace JsonConverter.Pages
             if (DGJsonData.SelectedItem is DataRowView dataRow)
             {
                 new AddNewElementPage(dataRow, false).ShowDialog();
+                // Получаем текущую выбранную строку из DataGrid
+                DataGridRow selectedRow = (DataGridRow)DGJsonData.ItemContainerGenerator.ContainerFromItem(dataRow);
+                if (selectedRow != null)
+                {
+                    selectedRow.Background = Brushes.Yellow;
+                }
             }
             else
             {
