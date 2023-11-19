@@ -33,6 +33,12 @@
                           Unchecked="MIAddInModalWindow_Unchecked"
                           IsChecked="True"
                           Style="{StaticResource CheckBoxMenuItemStyle}" />
+                <MenuItem Header="View json"
+                          x:Name="MIViewJson"
+                          Checked="MIViewJson_Checked"
+                          Unchecked="MIViewJson_Unchecked"
+                          IsChecked="False"
+                          Style="{StaticResource CheckBoxMenuItemStyle}" /> 
             </MenuItem>
             <MenuItem Header="Extension">
                 <MenuItem Header="RobocadExtension"

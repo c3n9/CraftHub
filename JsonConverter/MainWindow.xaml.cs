@@ -28,6 +28,7 @@ namespace JsonConverter
     public partial class MainWindow : Window
     {
         public event EventHandler<bool> AddInModalWindowCheckedChanged;
+        public event EventHandler<bool> ViewJsonCheckedChanged;
         public MainWindow()
         {
             InitializeComponent();
@@ -135,6 +136,16 @@ namespace JsonConverter
         private void MIAddInModalWindow_Unchecked(object sender, RoutedEventArgs e)
         {
             AddInModalWindowCheckedChanged?.Invoke(this, MIAddInModalWindow.IsChecked);
+        }
+
+        private void MIViewJson_Checked(object sender, RoutedEventArgs e)
+        {
+            ViewJsonCheckedChanged?.Invoke(this, MIViewJson.IsChecked);
+        }
+
+        private void MIViewJson_Unchecked(object sender, RoutedEventArgs e)
+        {
+            ViewJsonCheckedChanged?.Invoke(this, MIViewJson.IsChecked);
         }
     }
 }

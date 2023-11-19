@@ -31,6 +31,24 @@ namespace JsonConverter.Pages
             InitializeComponent();
             GlobalSettings.jsonPage = this;
             GlobalSettings.mainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
+
+        }
+
+        private void MainWindow_ViewJsonCheckedChanged(object sender, bool e)
+        {
+            if (e)
+            {
+                Grid.SetColumnSpan(DGJsonData, 1);
+                TBJson.Visibility = Visibility.Visible;
+                var g = DGJsonData.SelectedItem as DataRowView;
+                string json = JsonConvert.SerializeObject(g.Row.ItemArray, Formatting.Indented);
+                TBJson.Text = json;
+            }
+            else
+            {
+                Grid.SetColumnSpan(DGJsonData, 2);
+                TBJson.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
@@ -74,11 +92,9 @@ namespace JsonConverter.Pages
         {
             // Создаем новый DataRowView с пустой строкой данных
             DataRowView newRowView = GlobalSettings.dataTable.DefaultView.AddNew();
-
             // Новая добавленная строка находится в режиме редактирования, поэтому нужно отменить редактирование, чтобы сделать ее доступной
             newRowView.CancelEdit();
-
-            // Показываем страницу AddNewElementPage для добавления новой строки
+            // Показываем окно AddNewElementPage для добавления новой строки
             new AddNewElementPage(newRowView, true).ShowDialog();
         }
 
@@ -99,6 +115,11 @@ namespace JsonConverter.Pages
                 MessageBox.Show("Select object");
                 return;
             }
+        }
+
+        private void DGJsonData_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            GlobalSettings.mainWindow.ViewJsonCheckedChanged += MainWindow_ViewJsonCheckedChanged;
         }
     }
 }
