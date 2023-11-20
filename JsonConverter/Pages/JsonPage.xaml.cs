@@ -70,6 +70,7 @@ namespace JsonConverter.Pages
             GlobalSettings.mainWindow.MIImportClass.IsEnabled = false;
             GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = true;
             GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = true;
+
         }
         private void BAdd_Click(object sender, RoutedEventArgs e)
         {
