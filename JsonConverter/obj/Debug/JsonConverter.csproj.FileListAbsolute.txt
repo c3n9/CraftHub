@@ -68,3 +68,5 @@ D:\Projects\Robocad-Json-Converter\JsonConverter\obj\Debug\Pages\JsonPage.baml
 D:\Projects\Robocad-Json-Converter\JsonConverter\obj\Debug\Pages\PropertiesPage.baml
 C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\AppWindows\AddNewElementPage.g.cs
 C:\Users\quart\source\repos\Robocad-Json-Converter\JsonConverter\obj\Debug\AppWindows\AddNewElementPage.baml
+D:\Projects\Robocad-Json-Converter\JsonConverter\obj\Debug\AppWindows\AddNewElementPage.g.cs
+D:\Projects\Robocad-Json-Converter\JsonConverter\obj\Debug\AppWindows\AddNewElementPage.baml

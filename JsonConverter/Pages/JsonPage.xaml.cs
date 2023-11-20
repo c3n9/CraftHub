@@ -34,23 +34,6 @@ namespace JsonConverter.Pages
 
         }
 
-        private void MainWindow_ViewJsonCheckedChanged(object sender, bool e)
-        {
-            if (e)
-            {
-                Grid.SetColumnSpan(DGJsonData, 1);
-                TBJson.Visibility = Visibility.Visible;
-                var g = DGJsonData.SelectedItem as DataRowView;
-                string json = JsonConvert.SerializeObject(g.Row.ItemArray, Formatting.Indented);
-                TBJson.Text = json;
-            }
-            else
-            {
-                Grid.SetColumnSpan(DGJsonData, 2);
-                TBJson.Visibility = Visibility.Collapsed;
-            }
-        }
-
         private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
         {
             if (e)
@@ -102,13 +85,17 @@ namespace JsonConverter.Pages
         {
             if (DGJsonData.SelectedItem is DataRowView dataRow)
             {
-                new AddNewElementPage(dataRow, false).ShowDialog();
+                var dialogResult = new AddNewElementPage(dataRow, false).ShowDialog();
                 // Получаем текущую выбранную строку из DataGrid
-                DataGridRow selectedRow = (DataGridRow)DGJsonData.ItemContainerGenerator.ContainerFromItem(dataRow);
-                if (selectedRow != null)
+                if (dialogResult.Value)
                 {
-                    selectedRow.Background = Brushes.Yellow;
+                    DataGridRow selectedRow = (DataGridRow)DGJsonData.ItemContainerGenerator.ContainerFromItem(dataRow);
+                    if (selectedRow != null)
+                    {
+                        selectedRow.Background = Brushes.Yellow;
+                    }
                 }
+                
             }
             else
             {
@@ -119,7 +106,19 @@ namespace JsonConverter.Pages
 
         private void DGJsonData_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            GlobalSettings.mainWindow.ViewJsonCheckedChanged += MainWindow_ViewJsonCheckedChanged;
+            if (GlobalSettings.mainWindow.MIViewJson.IsChecked)
+            {
+                Grid.SetColumnSpan(DGJsonData, 1);
+                TBJson.Visibility = Visibility.Visible;
+                var g = DGJsonData.SelectedItem as DataRowView;
+                string json = JsonConvert.SerializeObject(g.Row.ItemArray, Formatting.Indented);
+                TBJson.Text = json;
+            }
+            else
+            {
+                Grid.SetColumnSpan(DGJsonData, 2);
+                TBJson.Visibility = Visibility.Collapsed;
+            }
         }
     }
 }

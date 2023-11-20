@@ -28,7 +28,6 @@ namespace JsonConverter
     public partial class MainWindow : Window
     {
         public event EventHandler<bool> AddInModalWindowCheckedChanged;
-        public event EventHandler<bool> ViewJsonCheckedChanged;
         public MainWindow()
         {
             InitializeComponent();
@@ -140,12 +139,24 @@ namespace JsonConverter
 
         private void MIViewJson_Checked(object sender, RoutedEventArgs e)
         {
-            ViewJsonCheckedChanged?.Invoke(this, MIViewJson.IsChecked);
+            if(GlobalSettings.jsonPage != null && GlobalSettings.jsonPage.DGJsonData != null && GlobalSettings.jsonPage.DGJsonData.SelectedItem != null)
+            {
+                Grid.SetColumnSpan(GlobalSettings.jsonPage.DGJsonData, 1);
+                GlobalSettings.jsonPage.TBJson.Visibility = Visibility.Visible;
+                var g = GlobalSettings.jsonPage.DGJsonData.SelectedItem as DataRowView;
+                string json = JsonConvert.SerializeObject(g.Row.ItemArray, Formatting.Indented);
+                GlobalSettings.jsonPage.TBJson.Text = json;
+            }
         }
 
         private void MIViewJson_Unchecked(object sender, RoutedEventArgs e)
         {
-            ViewJsonCheckedChanged?.Invoke(this, MIViewJson.IsChecked);
+            if (GlobalSettings.jsonPage != null && GlobalSettings.jsonPage.DGJsonData != null && GlobalSettings.jsonPage.DGJsonData.SelectedItem != null)
+            {
+                Grid.SetColumnSpan(GlobalSettings.jsonPage.DGJsonData, 2);
+                GlobalSettings.jsonPage.TBJson.Visibility = Visibility.Collapsed;
+            }
+            
         }
     }
 }

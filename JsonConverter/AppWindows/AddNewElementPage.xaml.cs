@@ -107,7 +107,7 @@ namespace JsonConverter.AppWindows
                     }
                 }
             }
-            Close(); 
+            DialogResult = true;
         }
     }
 }
