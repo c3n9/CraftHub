@@ -90,15 +90,6 @@ namespace JsonConverter.AppWindows
                         SPElements.Children.Add(checkBox);
                     }
                 }
-                //foreach (var elementName in listElementsName)
-                //{
-                //    TextBlock textBlock = new TextBlock();
-                //    textBlock.Text = elementName;
-
-                //    TextBox textBox = new TextBox();
-                //    SPElements.Children.Add(textBlock);
-                //    SPElements.Children.Add(textBox);
-                //}
             }
         }
 
@@ -108,13 +99,22 @@ namespace JsonConverter.AppWindows
             {
                 // Создание новой строки данных и добавление ее в DataTable
                 DataRow newRow = _selectedDataRowView.Row.Table.NewRow();
-
                 for (int i = 0; i < SPElements.Children.Count; i += 2)
                 {
-                    if (SPElements.Children[i] is TextBlock textBlock && SPElements.Children[i + 1] is TextBox textBox)
+                    var textBox = SPElements.Children[i + 1] as TextBox;
+                    var checkBox = SPElements.Children[i + 1] as CheckBox;
+                    if (SPElements.Children[i] is TextBlock textBlock && (textBox is TextBox || checkBox is CheckBox))
                     {
                         var columnName = textBlock.Text;
-                        var value = textBox.Text;
+                        string value = string.Empty;
+                        if (textBox != null)
+                        {
+                            value = textBox.Text;
+                        }
+                        else
+                        {
+                            value = checkBox.IsChecked.ToString();
+                        }
                         // Установка значения в новой строке данных
                         newRow[columnName] = value;
                     }
@@ -147,10 +147,20 @@ namespace JsonConverter.AppWindows
                 // Обновление DataRowView измененными данными
                 for (int i = 0; i < SPElements.Children.Count; i += 2)
                 {
-                    if (SPElements.Children[i] is TextBlock textBlock && SPElements.Children[i + 1] is TextBox textBox)
+                    var textBox = SPElements.Children[i + 1] as TextBox;
+                    var checkBox = SPElements.Children[i + 1] as CheckBox;
+                    if (SPElements.Children[i] is TextBlock textBlock && (textBox is TextBox || checkBox is CheckBox))
                     {
                         var columnName = textBlock.Text;
-                        var modifiedValue = textBox.Text;
+                        string modifiedValue = string.Empty;
+                        if (textBox != null)
+                        {
+                            modifiedValue = textBox.Text;
+                        }
+                        else
+                        {
+                            modifiedValue = checkBox.IsChecked.ToString();
+                        }
                         _selectedDataRowView[columnName] = modifiedValue;
                     }
                 }
