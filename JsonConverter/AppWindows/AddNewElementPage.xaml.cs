@@ -38,7 +38,11 @@ namespace JsonConverter.AppWindows
         private void GenerationEditForm()
         {
             var listElementsName = new List<string>(GlobalSettings.dictionary.Keys);
-
+            //List<Type> listElemntsValueType = new List<Type>();
+            //foreach (var value in GlobalSettings.dictionary.Values)
+            //{
+            //    listElemntsValueType.Add(value.GetType());
+            //}
             if (!_isAdding)
             {
                 // Если редактирование, отобразить существующие значения
@@ -50,12 +54,17 @@ namespace JsonConverter.AppWindows
                 {
                     TextBlock textBlock = new TextBlock();
                     textBlock.Text = listElementsName[i];
-
+                    SPElements.Children.Add(textBlock);
                     TextBox textBox = new TextBox();
                     textBox.Text = values[i];
-
-                    SPElements.Children.Add(textBlock);
                     SPElements.Children.Add(textBox);
+                    //else if (listElemntsValueType[i] == typeof(bool))
+                    //{
+                    //    CheckBox checkBox = new CheckBox();
+                    //    checkBox.IsChecked = Convert.ToBoolean(values[i]);
+                    //    SPElements.Children.Add(checkBox);
+                    //}
+
                 }
             }
             else
