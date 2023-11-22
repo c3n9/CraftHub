@@ -29,6 +29,9 @@
             <Button x:Name="BEdit"
                     Click="BEdit_Click"
                     Content="Edit" />
+            <Button x:Name="BRemove"
+                    Click="BRemove_Click"
+                    Content="Remove"/>
         </StackPanel>
         <DataGrid x:Name="DGJsonData" 
                   ColumnWidth="*"

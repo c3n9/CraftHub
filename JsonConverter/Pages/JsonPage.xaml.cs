@@ -121,5 +121,18 @@ namespace JsonConverter.Pages
                 TBJson.Visibility = Visibility.Collapsed;
             }
         }
+
+        private void BRemove_Click(object sender, RoutedEventArgs e)
+        {
+            if (DGJsonData.SelectedItem is DataRowView dataRow)
+            {
+                dataRow.Row.Delete();
+            }
+            else
+            {
+                MessageBox.Show("Select object");
+                return;
+            }
+        }
     }
 }
