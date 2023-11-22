@@ -1,4 +1,2 @@
 # Robocad-Json-Converter
-
-![logo](https://github.com/c3n9/Robocad-Json-Converter/raw/main/assets/108518693/37a46c12-146e-40f7-9e07-9e79214f550c.png)
-
+![logo](https://github.com/c3n9/Robocad-Json-Converter/assets/108518693/09cd5471-55d6-45d7-8234-13fa723c9d74)
