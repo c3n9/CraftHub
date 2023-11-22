@@ -80,6 +80,7 @@ namespace JsonConverter.Pages
             newRowView.CancelEdit();
             // Показываем окно AddNewElementPage для добавления новой строки
             new AddNewElementPage(newRowView, true).ShowDialog();
+            
         }
 
         private void BEdit_Click(object sender, RoutedEventArgs e)

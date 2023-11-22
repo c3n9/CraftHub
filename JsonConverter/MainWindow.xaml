@@ -8,7 +8,9 @@
         Title="Json converter"
         MinHeight="450"
         MinWidth="900"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        Icon="/Recourses/logo.png">
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />

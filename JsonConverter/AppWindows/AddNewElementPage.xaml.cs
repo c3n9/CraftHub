@@ -86,13 +86,32 @@ namespace JsonConverter.AppWindows
                     {
                         var columnName = textBlock.Text;
                         var value = textBox.Text;
-
                         // Установка значения в новой строке данных
                         newRow[columnName] = value;
                     }
                 }
+
                 // Добавление новой строки данных в DataTable
                 _selectedDataRowView.Row.Table.Rows.Add(newRow);
+
+                // Обработчик события LoadingRow для изменения стиля только что добавленной строки
+                EventHandler<DataGridRowEventArgs> loadingRowHandler = null;
+                loadingRowHandler = (gridSender, loadingRowEventArgs) =>
+                {
+                    DataRowView rowView = loadingRowEventArgs.Row.Item as DataRowView;
+
+                    // Проверка, является ли текущая строка только что добавленной
+                    if (rowView != null && rowView.Row == newRow)
+                    {
+                        loadingRowEventArgs.Row.Background = Brushes.Yellow; // Установка цвета фона в желтый
+
+                        // Удаление обработчика после первого вызова
+                        GlobalSettings.jsonPage.DGJsonData.LoadingRow -= loadingRowHandler;
+                    }
+                };
+
+                // Подписка на событие LoadingRow
+                GlobalSettings.jsonPage.DGJsonData.LoadingRow += loadingRowHandler;
             }
             else
             {
