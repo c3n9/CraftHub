@@ -1,5 +1,6 @@
 ﻿using JsonConverter.Services;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -38,11 +39,11 @@ namespace JsonConverter.AppWindows
         private void GenerationEditForm()
         {
             var listElementsName = new List<string>(GlobalSettings.dictionary.Keys);
-            //List<Type> listElemntsValueType = new List<Type>();
-            //foreach (var value in GlobalSettings.dictionary.Values)
-            //{
-            //    listElemntsValueType.Add(value.GetType());
-            //}
+            var listValueTypes = new List<string>();
+            foreach (var element in GlobalSettings.dictionary.Values)
+            {
+                listValueTypes.Add(element.Name);
+            }
             if (!_isAdding)
             {
                 // Если редактирование, отобразить существующие значения
@@ -55,30 +56,49 @@ namespace JsonConverter.AppWindows
                     TextBlock textBlock = new TextBlock();
                     textBlock.Text = listElementsName[i];
                     SPElements.Children.Add(textBlock);
-                    TextBox textBox = new TextBox();
-                    textBox.Text = values[i];
-                    SPElements.Children.Add(textBox);
-                    //else if (listElemntsValueType[i] == typeof(bool))
-                    //{
-                    //    CheckBox checkBox = new CheckBox();
-                    //    checkBox.IsChecked = Convert.ToBoolean(values[i]);
-                    //    SPElements.Children.Add(checkBox);
-                    //}
+                    if (listValueTypes[i] == typeof(string).Name || listValueTypes[i] == typeof(int).Name)
+                    {
+                        TextBox textBox = new TextBox();
+                        textBox.Text = values[i];
+                        SPElements.Children.Add(textBox);
+                    }
+                    else if (listValueTypes[i] == typeof(bool).Name)
+                    {
+                        CheckBox checkBox = new CheckBox();
+                        checkBox.IsChecked = Convert.ToBoolean(values[i]);
+                        SPElements.Children.Add(checkBox);
+                    }
 
                 }
             }
             else
             {
                 // Если добавление, создать пустые текстовые поля для ввода
-                foreach (var elementName in listElementsName)
+                for (int i = 0; i < listElementsName.Count; i++)
                 {
                     TextBlock textBlock = new TextBlock();
-                    textBlock.Text = elementName;
-
-                    TextBox textBox = new TextBox();
+                    textBlock.Text = listElementsName[i];
                     SPElements.Children.Add(textBlock);
-                    SPElements.Children.Add(textBox);
+                    if (listValueTypes[i] == typeof(string).Name || listValueTypes[i] == typeof(int).Name)
+                    {
+                        TextBox textBox = new TextBox();
+                        SPElements.Children.Add(textBox);
+                    }
+                    else if (listValueTypes[i] == typeof(bool).Name)
+                    {
+                        CheckBox checkBox = new CheckBox();
+                        SPElements.Children.Add(checkBox);
+                    }
                 }
+                //foreach (var elementName in listElementsName)
+                //{
+                //    TextBlock textBlock = new TextBlock();
+                //    textBlock.Text = elementName;
+
+                //    TextBox textBox = new TextBox();
+                //    SPElements.Children.Add(textBlock);
+                //    SPElements.Children.Add(textBox);
+                //}
             }
         }
 
