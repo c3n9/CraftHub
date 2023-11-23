@@ -41,7 +41,7 @@ namespace JsonConverter
             var dialog = new OpenFileDialog() { Filter = ".cs | *.cs" };
             if (dialog.ShowDialog().GetValueOrDefault())
             {
-                this.Title = $"Json convert — {System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}";
+                this.Title = $"CraftHub — {System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}";
                 string code = System.IO.File.ReadAllText(dialog.FileName);
                 CompileAndLoadCode(code);
                 GlobalSettings.RefreshProperties();

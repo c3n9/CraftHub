@@ -26,6 +26,7 @@ namespace JsonConverter.Pages
     /// </summary>
     public partial class JsonPage : Page
     {
+        private Dictionary<DataGridRow, SolidColorBrush> originalRowColors = new Dictionary<DataGridRow, SolidColorBrush>(); // Словарь для хранения оригинального цвета строк
         public JsonPage()
         {
             InitializeComponent();
@@ -96,7 +97,7 @@ namespace JsonConverter.Pages
                         selectedRow.Background = Brushes.Yellow;
                     }
                 }
-                
+
             }
             else
             {
@@ -133,6 +134,37 @@ namespace JsonConverter.Pages
                 MessageBox.Show("Select object");
                 return;
             }
+        }
+
+        private void DGJsonData_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            if (!originalRowColors.ContainsKey(e.Row))
+            {
+                originalRowColors[e.Row] = (e.Row.Background as SolidColorBrush);
+            }
+        }
+
+        private void DGJsonData_Sorting(object sender, DataGridSortingEventArgs e)
+        {
+            RestoreRowColorAfterSorting();
+        }
+        private void RestoreRowColorAfterSorting()
+        {
+            var c = originalRowColors;
+            // Установка оригинального цвета только для раскрашенных строк после сортировки
+            foreach (var rowColorPair in originalRowColors)
+            {
+                var row = rowColorPair.Key;
+                var originalColor = rowColorPair.Value;
+
+                if (originalColor != null && row.Background != originalColor)
+                {
+                    row.Background = originalColor;
+                }
+            }
+
+            originalRowColors.Clear(); // Очистить словарь оригинальных цветов строк
+
         }
     }
 }
