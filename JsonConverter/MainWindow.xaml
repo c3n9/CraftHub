@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JsonConverter"
         mc:Ignorable="d"
-        Title="Json converter"
+        Title="CraftHub"
         MinHeight="450"
         MinWidth="900"
         WindowStartupLocation="CenterScreen"
