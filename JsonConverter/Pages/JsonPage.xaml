@@ -38,7 +38,6 @@
                   Grid.ColumnSpan="2"
                   Grid.Row="1"
                   Sorting="DGJsonData_Sorting"
-                  LoadingRow="DGJsonData_LoadingRow"
                   RowEditEnding="DGJsonData_RowEditEnding"
                   IsReadOnly="True"
                   SelectionChanged="DGJsonData_SelectionChanged"

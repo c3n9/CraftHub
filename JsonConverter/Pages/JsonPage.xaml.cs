@@ -26,13 +26,12 @@ namespace JsonConverter.Pages
     /// </summary>
     public partial class JsonPage : Page
     {
-        private Dictionary<DataGridRow, SolidColorBrush> originalRowColors = new Dictionary<DataGridRow, SolidColorBrush>(); // Словарь для хранения оригинального цвета строк
+        private Dictionary<DataGridRow, SolidColorBrush> originalRowColors = new Dictionary<DataGridRow, SolidColorBrush>();
         public JsonPage()
         {
             InitializeComponent();
             GlobalSettings.jsonPage = this;
             GlobalSettings.mainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
-
         }
 
         private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
@@ -97,7 +96,6 @@ namespace JsonConverter.Pages
                         selectedRow.Background = Brushes.Yellow;
                     }
                 }
-
             }
             else
             {
@@ -135,36 +133,35 @@ namespace JsonConverter.Pages
                 return;
             }
         }
-
-        private void DGJsonData_LoadingRow(object sender, DataGridRowEventArgs e)
-        {
-            if (!originalRowColors.ContainsKey(e.Row))
-            {
-                originalRowColors[e.Row] = (e.Row.Background as SolidColorBrush);
-            }
-        }
-
         private void DGJsonData_Sorting(object sender, DataGridSortingEventArgs e)
         {
-            RestoreRowColorAfterSorting();
-        }
-        private void RestoreRowColorAfterSorting()
-        {
-            var c = originalRowColors;
-            // Установка оригинального цвета только для раскрашенных строк после сортировки
-            foreach (var rowColorPair in originalRowColors)
+            foreach (var row in DGJsonData.Items)
             {
-                var row = rowColorPair.Key;
-                var originalColor = rowColorPair.Value;
+                var dataGridRow = DGJsonData.ItemContainerGenerator.ContainerFromItem(row) as DataGridRow;
 
-                if (originalColor != null && row.Background != originalColor)
+                if (dataGridRow != null && !originalRowColors.ContainsKey(dataGridRow))
                 {
-                    row.Background = originalColor;
+                    SolidColorBrush originalColor = dataGridRow.Background as SolidColorBrush;
+
+                    if (originalColor != null)
+                    {
+                        originalRowColors[dataGridRow] = originalColor;
+                    }
                 }
             }
+            DGJsonData.Loaded += DGJsonData_Loaded;
+            
 
-            originalRowColors.Clear(); // Очистить словарь оригинальных цветов строк
+        }
 
+        private void DGJsonData_Loaded(object sender, RoutedEventArgs e)
+        {
+           
+        }
+
+        private void SetRowBackground(DataGrid dataGrid, DataGridRow dataGridRow, SolidColorBrush originalColor)
+        {
+            dataGridRow.Background = originalColor;
         }
     }
 }
