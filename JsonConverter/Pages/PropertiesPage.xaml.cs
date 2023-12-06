@@ -47,19 +47,37 @@ namespace JsonConverter.Pages
 
         private void BAddProperty_Click(object sender, RoutedEventArgs e)
         {
-            var type = CBValues.SelectedItem as dynamic;
-            GlobalSettings.dictionary.Add(TBPropertyName.Text, type);
-            GlobalSettings.RefreshProperties();
+            var type = CBValues.SelectedItem as Type;
+            if (!string.IsNullOrWhiteSpace(TBPropertyName.Text) && type != null)
+            {
+                GlobalSettings.dictionary.Add(TBPropertyName.Text, type);
+                GlobalSettings.RefreshProperties();
+                TBPropertyName.Text = string.Empty;
+                CBValues.SelectedItem = null;
+            }
+            else
+            {
+                MessageBox.Show("Enter the name of the object or select the type");
+                return;
+            }
         }
 
         private void BRemovePropery_Click(object sender, RoutedEventArgs e)
         {
             var property = DGProperties.SelectedItem as dynamic;
-            var rowView = property.Row.ItemArray;
-            var nameProperty = rowView[0];
-            GlobalSettings.dictionary.Remove(nameProperty.ToString());
-            var n = GlobalSettings.dictionary;
-            GlobalSettings.RefreshProperties();
+            if (property != null)
+            {
+                var rowView = property.Row.ItemArray;
+                var nameProperty = rowView[0];
+                GlobalSettings.dictionary.Remove(nameProperty.ToString());
+                var n = GlobalSettings.dictionary;
+                GlobalSettings.RefreshProperties();
+            }
+            else
+            {
+                MessageBox.Show("Select property to delete");
+                return;
+            }
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -71,7 +89,7 @@ namespace JsonConverter.Pages
 
         private void BSaveTemplate_Click(object sender, RoutedEventArgs e)
         {
-            
+
         }
     }
 }
