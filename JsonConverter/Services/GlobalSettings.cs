@@ -40,8 +40,22 @@ namespace JsonConverter.Services
         {
             GlobalSettings.dataTable = new DataTable();
             JArray jsonArray = new JArray();
+            var surchData = GlobalSettings.jsonPage.TBSurch.Text;
+            var propertyForSurch = GlobalSettings.jsonPage.CBProperty.SelectedItem as string;
             if (!string.IsNullOrWhiteSpace(GlobalSettings.jsonString))
                 jsonArray = JArray.Parse(GlobalSettings.jsonString);
+            if (!string.IsNullOrWhiteSpace(surchData) && propertyForSurch != null)
+            {
+                jsonArray = new JArray(jsonArray
+                    .Where(jsonItem =>
+                    {
+                        var jsonObject = jsonItem as JObject;
+                        // Проверяем, что объект и его свойство для сортировки существуют
+                        var propertyValue = jsonObject?[propertyForSurch]?.ToString();
+                        return jsonObject != null && propertyValue != null && propertyValue.IndexOf(surchData, StringComparison.OrdinalIgnoreCase) >= 0;
+                    })
+                );
+            }
             if (jsonArray.Count > 0)
             {
                 var properties = GlobalSettings.dictionary;

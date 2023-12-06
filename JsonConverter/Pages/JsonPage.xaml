@@ -12,6 +12,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
@@ -33,10 +34,28 @@
                     Click="BRemove_Click"
                     Content="Remove"/>
         </StackPanel>
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="1"
+                    VerticalAlignment="Center"
+                    Margin="10">
+            <TextBlock Text="Surch" 
+                       TextAlignment="Center"
+                       Margin="10,0"/>
+            <TextBox x:Name="TBSurch"
+                     TextAlignment="Center" 
+                     Width="200"
+                     TextChanged="TBSurch_TextChanged"/>
+            <TextBlock Text="Property"
+                       TextAlignment="Center"
+                       Margin="10,0" />
+            <ComboBox x:Name="CBProperty" 
+                      Width="200"
+                      SelectionChanged="CBProperty_SelectionChanged"/>
+        </StackPanel>
         <DataGrid x:Name="DGJsonData" 
                   ColumnWidth="*"
                   Grid.ColumnSpan="2"
-                  Grid.Row="1"
+                  Grid.Row="2"
                   Sorting="DGJsonData_Sorting"
                   RowEditEnding="DGJsonData_RowEditEnding"
                   IsReadOnly="True"
@@ -50,7 +69,7 @@
         <Button x:Name="BBack"
                 Content="Back"
                 Click="BBack_Click" 
-                Grid.Row="2"
+                Grid.Row="3"
                 Margin="10"
                 HorizontalAlignment="Left"
                 Grid.ColumnSpan="2"/>

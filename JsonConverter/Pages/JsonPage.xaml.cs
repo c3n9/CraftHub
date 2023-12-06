@@ -32,6 +32,7 @@ namespace JsonConverter.Pages
             InitializeComponent();
             GlobalSettings.jsonPage = this;
             GlobalSettings.mainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
+            CBProperty.ItemsSource = GlobalSettings.dictionary.Keys.ToList();
             GlobalSettings.DisplayDataInGrid();
         }
 
@@ -163,6 +164,16 @@ namespace JsonConverter.Pages
         private void SetRowBackground(DataGrid dataGrid, DataGridRow dataGridRow, SolidColorBrush originalColor)
         {
             dataGridRow.Background = originalColor;
+        }
+        
+        private void TBSurch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            GlobalSettings.DisplayDataInGrid();
+        }
+
+        private void CBProperty_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }
