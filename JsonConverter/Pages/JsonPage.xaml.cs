@@ -100,7 +100,7 @@ namespace JsonConverter.Pages
             }
             else
             {
-                MessageBox.Show("Select object");
+                MessageBox.Show("Select the object to continue", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
         }
@@ -130,7 +130,7 @@ namespace JsonConverter.Pages
             }
             else
             {
-                MessageBox.Show("Select object");
+                MessageBox.Show("Select the object to continue", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
         }
@@ -151,13 +151,13 @@ namespace JsonConverter.Pages
                 }
             }
             DGJsonData.Loaded += DGJsonData_Loaded;
-            
+
 
         }
 
         private void DGJsonData_Loaded(object sender, RoutedEventArgs e)
         {
-           
+
         }
 
         private void SetRowBackground(DataGrid dataGrid, DataGridRow dataGridRow, SolidColorBrush originalColor)

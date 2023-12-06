@@ -39,7 +39,7 @@ namespace JsonConverter.Pages
         {
             if (GlobalSettings.dictionary.Count == 0)
             {
-                MessageBox.Show("Upload a template or add properties");
+                MessageBox.Show("Upload a template or add properties", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
             NavigationService.Navigate(new JsonPage());
@@ -47,19 +47,22 @@ namespace JsonConverter.Pages
 
         private void BAddProperty_Click(object sender, RoutedEventArgs e)
         {
+            //Исправить ошибку с добавлением параметра с одинаковым названием
             var type = CBValues.SelectedItem as Type;
-            if (!string.IsNullOrWhiteSpace(TBPropertyName.Text) && type != null)
+            var error = string.Empty;
+            if (string.IsNullOrWhiteSpace(TBPropertyName.Text))
+                error += "Enter the name of the property\n";
+            if (type == null)
+                error += "Select the type\n";
+            if (!string.IsNullOrWhiteSpace(error))
             {
-                GlobalSettings.dictionary.Add(TBPropertyName.Text, type);
-                GlobalSettings.RefreshProperties();
-                TBPropertyName.Text = string.Empty;
-                CBValues.SelectedItem = null;
-            }
-            else
-            {
-                MessageBox.Show("Enter the name of the object or select the type");
+                MessageBox.Show(error, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            GlobalSettings.dictionary.Add(TBPropertyName.Text, type);
+            GlobalSettings.RefreshProperties();
+            TBPropertyName.Text = string.Empty;
+            CBValues.SelectedItem = null;
         }
 
         private void BRemovePropery_Click(object sender, RoutedEventArgs e)
@@ -75,7 +78,7 @@ namespace JsonConverter.Pages
             }
             else
             {
-                MessageBox.Show("Select property to delete");
+                MessageBox.Show("Select property to delete", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
         }
