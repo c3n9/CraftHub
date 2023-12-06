@@ -33,6 +33,7 @@ namespace JsonConverter.Pages
             GlobalSettings.propertiesPage = this;
             Type[] basicTypes = { typeof(int), typeof(bool), typeof(string) };
             CBValues.ItemsSource = basicTypes;
+            GlobalSettings.RefreshProperties();
         }
         private void BNext_Click(object sender, RoutedEventArgs e)
         {
@@ -48,7 +49,6 @@ namespace JsonConverter.Pages
         {
             var type = CBValues.SelectedItem as dynamic;
             GlobalSettings.dictionary.Add(TBPropertyName.Text, type);
-            GlobalSettings.RefreshProperties();
         }
 
         private void BRemovePropery_Click(object sender, RoutedEventArgs e)
