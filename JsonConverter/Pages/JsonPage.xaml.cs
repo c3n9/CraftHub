@@ -14,6 +14,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -110,11 +111,7 @@ namespace JsonConverter.Pages
         {
             if (GlobalSettings.mainWindow.MIViewJson.IsChecked)
             {
-                Grid.SetColumnSpan(DGJsonData, 1);
-                TBJson.Visibility = Visibility.Visible;
-                var g = DGJsonData.SelectedItem as DataRowView;
-                string json = JsonConvert.SerializeObject(g.Row.ItemArray, Formatting.Indented);
-                TBJson.Text = json;
+                GlobalSettings.ViewJsonFromTable();
             }
             else
             {
@@ -125,15 +122,31 @@ namespace JsonConverter.Pages
 
         private void BRemove_Click(object sender, RoutedEventArgs e)
         {
-            if (DGJsonData.SelectedItem is DataRowView dataRow)
+            if (DGJsonData.SelectedItems.Count == 1)
             {
-                dataRow.Row.Delete();
+                if (DGJsonData.SelectedItem is DataRowView dataRow)
+                    dataRow.Row.Delete();
+            }
+            else if (DGJsonData.SelectedItems.Count > 1)
+            {
+                var dataRows = DGJsonData.SelectedItems.Cast<DataRowView>().ToList();
+                if (dataRows != null)
+                {
+                    foreach (var dataRow in dataRows)
+                    {
+                        dataRow.Row.Delete();
+                    }
+                }
             }
             else
             {
                 MessageBox.Show("Select the object to continue", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+            TBJson.Text = string.Empty;
+            Grid.SetColumnSpan(DGJsonData, 2);
+            
+
         }
         private void DGJsonData_Sorting(object sender, DataGridSortingEventArgs e)
         {
@@ -165,7 +178,7 @@ namespace JsonConverter.Pages
         {
             dataGridRow.Background = originalColor;
         }
-        
+
         private void TBSurch_TextChanged(object sender, TextChangedEventArgs e)
         {
             GlobalSettings.DisplayDataInGrid();

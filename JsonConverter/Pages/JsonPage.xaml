@@ -59,11 +59,14 @@
                   Sorting="DGJsonData_Sorting"
                   RowEditEnding="DGJsonData_RowEditEnding"
                   IsReadOnly="True"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto"
                   SelectionChanged="DGJsonData_SelectionChanged"
                   CanUserAddRows="False"/>
-        <ScrollViewer Grid.Row="1"
+        <ScrollViewer Grid.Row="2"
                       Grid.Column="1">
             <TextBlock x:Name="TBJson"
+                       TextWrapping="Wrap"
                        Visibility="Collapsed"/>
         </ScrollViewer>
         <Button x:Name="BBack"

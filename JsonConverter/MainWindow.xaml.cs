@@ -141,11 +141,7 @@ namespace JsonConverter
         {
             if(GlobalSettings.jsonPage != null && GlobalSettings.jsonPage.DGJsonData != null && GlobalSettings.jsonPage.DGJsonData.SelectedItem != null)
             {
-                Grid.SetColumnSpan(GlobalSettings.jsonPage.DGJsonData, 1);
-                GlobalSettings.jsonPage.TBJson.Visibility = Visibility.Visible;
-                var g = GlobalSettings.jsonPage.DGJsonData.SelectedItem as DataRowView;
-                string json = JsonConvert.SerializeObject(g.Row.ItemArray, Formatting.Indented);
-                GlobalSettings.jsonPage.TBJson.Text = json;
+                GlobalSettings.ViewJsonFromTable();
             }
         }
 
