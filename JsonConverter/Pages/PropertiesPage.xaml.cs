@@ -49,6 +49,7 @@ namespace JsonConverter.Pages
         {
             var type = CBValues.SelectedItem as dynamic;
             GlobalSettings.dictionary.Add(TBPropertyName.Text, type);
+            GlobalSettings.RefreshProperties();
         }
 
         private void BRemovePropery_Click(object sender, RoutedEventArgs e)
