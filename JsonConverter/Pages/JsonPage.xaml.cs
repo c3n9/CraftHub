@@ -32,6 +32,7 @@ namespace JsonConverter.Pages
             InitializeComponent();
             GlobalSettings.jsonPage = this;
             GlobalSettings.mainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
+            GlobalSettings.DisplayDataInGrid();
         }
 
         private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)

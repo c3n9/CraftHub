@@ -5,16 +5,23 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JsonConverter.AppWindows"
         mc:Ignorable="d"
-        Title="AddNewElementPage" Height="450" Width="800"
+        Title="AddNewElementPage"
+        Height="450"
+        Width="800"
         WindowStartupLocation="CenterScreen">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="170*" />
+            <RowDefinition Height="47*" />
+        </Grid.RowDefinitions>
         <StackPanel HorizontalAlignment="Center"
-                    VerticalAlignment="Center">
+                    VerticalAlignment="Top"
+                    Margin="0,197,0,0">
             <StackPanel x:Name="SPElements" />
             <Button x:Name="BSave"
                     Content="Save"
-                    Click="BSave_Click" 
-                    Margin="0,10"/>
+                    Click="BSave_Click"
+                    Margin="0,10" />
         </StackPanel>
     </Grid>
 </Window>

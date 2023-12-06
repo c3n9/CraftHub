@@ -11,7 +11,7 @@ namespace JsonConverter.Services
 {
     public static class GlobalSettings
     {
-        public static string jsonString;
+        public static string jsonString = String.Empty;
         public static dynamic generatedObject;
         public static string nameTemplate;
         public static Dictionary<string, dynamic> dictionary = new Dictionary<string, dynamic>();
@@ -39,7 +39,9 @@ namespace JsonConverter.Services
         public static void DisplayDataInGrid()
         {
             GlobalSettings.dataTable = new DataTable();
-            var jsonArray = JArray.Parse(GlobalSettings.jsonString);
+            JArray jsonArray = new JArray();
+            if (!string.IsNullOrWhiteSpace(GlobalSettings.jsonString))
+                jsonArray = JArray.Parse(GlobalSettings.jsonString);
             if (jsonArray.Count > 0)
             {
                 var properties = GlobalSettings.dictionary;
@@ -65,6 +67,12 @@ namespace JsonConverter.Services
                     }
                     GlobalSettings.dataTable.Rows.Add(dataRow);
                 }
+            }
+            else
+            {
+                var properties = GlobalSettings.dictionary;
+                foreach (var property in properties)
+                    GlobalSettings.dataTable.Columns.Add(property.Key, property.Value);
             }
             jsonPage.DGJsonData.ItemsSource = GlobalSettings.dataTable.DefaultView;
         }
