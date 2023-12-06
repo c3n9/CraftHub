@@ -19,7 +19,6 @@
                         Content="Save"
                         Click="BSave_Click"
                         Margin="0,10" />
-
             </StackPanel>
         </ScrollViewer>
     </Grid>

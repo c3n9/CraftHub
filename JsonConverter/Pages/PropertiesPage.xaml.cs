@@ -47,9 +47,12 @@ namespace JsonConverter.Pages
 
         private void BAddProperty_Click(object sender, RoutedEventArgs e)
         {
-            //Исправить ошибку с добавлением параметра с одинаковым названием
-            var type = CBValues.SelectedItem as Type;
             var error = string.Empty;
+            var type = CBValues.SelectedItem as Type;
+            var propertyName = TBPropertyName.Text;
+            var propertyExist = GlobalSettings.dictionary.FirstOrDefault(x => x.Key == propertyName).Key;
+            if (propertyExist != null)
+                error += "Property with this parameter already exists\n";
             if (string.IsNullOrWhiteSpace(TBPropertyName.Text))
                 error += "Enter the name of the property\n";
             if (type == null)
@@ -59,7 +62,7 @@ namespace JsonConverter.Pages
                 MessageBox.Show(error, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            GlobalSettings.dictionary.Add(TBPropertyName.Text, type);
+            GlobalSettings.dictionary.Add(propertyName, type);
             GlobalSettings.RefreshProperties();
             TBPropertyName.Text = string.Empty;
             CBValues.SelectedItem = null;
