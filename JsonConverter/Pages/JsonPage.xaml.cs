@@ -65,7 +65,11 @@ namespace JsonConverter.Pages
 
         private void BBack_Click(object sender, RoutedEventArgs e)
         {
-            NavigationService.GoBack();
+            GlobalSettings.jsonString = string.Empty;
+            GlobalSettings.dataTable = null;
+            var continueBack = MessageBox.Show("The completed data will be deleted, continue?", "Warnings", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+            if (continueBack == MessageBoxResult.Yes)
+                NavigationService.GoBack();
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -83,6 +87,7 @@ namespace JsonConverter.Pages
             newRowView.CancelEdit();
             // Показываем окно AddNewElementPage для добавления новой строки
             new AddNewElementPage(newRowView, true).ShowDialog();
+            GlobalSettings.jsonString = JsonConvert.SerializeObject(GlobalSettings.dataTable, Formatting.Indented);
         }
 
         private void BEdit_Click(object sender, RoutedEventArgs e)
@@ -105,6 +110,8 @@ namespace JsonConverter.Pages
                 MessageBox.Show("Select the object to continue", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
+            GlobalSettings.jsonString = JsonConvert.SerializeObject(GlobalSettings.dataTable, Formatting.Indented);
+
         }
 
         private void DGJsonData_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -145,8 +152,7 @@ namespace JsonConverter.Pages
             }
             TBJson.Text = string.Empty;
             Grid.SetColumnSpan(DGJsonData, 2);
-            
-
+            GlobalSettings.jsonString = JsonConvert.SerializeObject(GlobalSettings.dataTable, Formatting.Indented);
         }
         private void DGJsonData_Sorting(object sender, DataGridSortingEventArgs e)
         {
@@ -186,7 +192,7 @@ namespace JsonConverter.Pages
 
         private void CBProperty_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
+            GlobalSettings.DisplayDataInGrid();
         }
     }
 }
