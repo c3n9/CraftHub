@@ -31,10 +31,20 @@ namespace JsonConverter.Pages
         public JsonPage()
         {
             InitializeComponent();
+            PreviewKeyDown += JsonPage_PreviewKeyDown;
             GlobalSettings.jsonPage = this;
             GlobalSettings.mainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
             CBProperty.ItemsSource = GlobalSettings.dictionary.Keys.ToList();
             GlobalSettings.DisplayDataInGrid();
+        }
+
+        private void JsonPage_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                ViewSurchOption();
+                e.Handled = true;
+            }
         }
 
         private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
@@ -67,8 +77,8 @@ namespace JsonConverter.Pages
         {
             GlobalSettings.jsonString = string.Empty;
             GlobalSettings.dataTable = null;
-            var continueBack = MessageBox.Show("The completed data will be deleted, continue?", "Warnings", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
-            if (continueBack == MessageBoxResult.Yes)
+            var continueBack = MessageBox.Show("The completed data will be deleted, continue?", "Warnings", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (continueBack == MessageBoxResult.OK)
                 NavigationService.GoBack();
         }
 
@@ -193,6 +203,25 @@ namespace JsonConverter.Pages
         private void CBProperty_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             GlobalSettings.DisplayDataInGrid();
+        }
+
+        private void BSurchOption_Click(object sender, RoutedEventArgs e)
+        {
+            ViewSurchOption();
+        }
+        private void ViewSurchOption()
+        {
+            var contentButton = BSurchOption.Content as string;
+            if (contentButton == "^")
+            {
+                SPSurchOption.Visibility = Visibility.Collapsed;
+                BSurchOption.Content = "˅";
+            }
+            else if (contentButton == "˅")
+            {
+                SPSurchOption.Visibility = Visibility.Visible;
+                BSurchOption.Content = "^";
+            }
         }
     }
 }

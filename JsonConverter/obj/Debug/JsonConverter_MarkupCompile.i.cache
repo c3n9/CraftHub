@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\
+D:\Projects\CraftHub\JsonConverter\obj\Debug\
 JsonConverter
 none
 false
 DEBUG;TRACE
-C:\Users\quart\source\repos\CraftHub\JsonConverter\App.xaml
+D:\Projects\CraftHub\JsonConverter\App.xaml
 4580880818
 
 10-1500880394
-18-41926087
+18488045275
 AppWindows\AddNewElementPage.xaml;MainWindow.xaml;Pages\JsonPage.xaml;Pages\PropertiesPage.xaml;
 
-False
+True
 
