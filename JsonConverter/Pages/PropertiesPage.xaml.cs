@@ -70,14 +70,30 @@ namespace JsonConverter.Pages
 
         private void BRemovePropery_Click(object sender, RoutedEventArgs e)
         {
-            var property = DGProperties.SelectedItem as dynamic;
-            if (property != null)
+            if (DGProperties.SelectedItems.Count == 1)
             {
-                var rowView = property.Row.ItemArray;
-                var nameProperty = rowView[0];
-                GlobalSettings.dictionary.Remove(nameProperty.ToString());
-                var n = GlobalSettings.dictionary;
-                GlobalSettings.RefreshProperties();
+                var property = DGProperties.SelectedItem as dynamic;
+                if (property != null)
+                {
+                    var rowView = property.Row.ItemArray;
+                    var nameProperty = rowView[0];
+                    GlobalSettings.dictionary.Remove(nameProperty.ToString());
+                    GlobalSettings.RefreshProperties();
+                }
+            }
+            else if (DGProperties.SelectedItems.Count > 1)
+            {
+                var properties = DGProperties.SelectedItems.Cast<dynamic>().ToList();
+                if(properties.Count != 0)
+                {
+                    foreach ( var property in properties)
+                    {
+                        var rowView = property.Row.ItemArray;
+                        var nameProperty = rowView[0];
+                        GlobalSettings.dictionary.Remove(nameProperty.ToString());
+                    }
+                    GlobalSettings.RefreshProperties();
+                }
             }
             else
             {
