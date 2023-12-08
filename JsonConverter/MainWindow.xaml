@@ -10,7 +10,6 @@
         MinWidth="900"
         WindowStartupLocation="CenterScreen"
         Icon="/Recourses/logo.png">
-
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -40,7 +39,7 @@
                           Checked="MIViewJson_Checked"
                           Unchecked="MIViewJson_Unchecked"
                           IsChecked="False"
-                          Style="{StaticResource CheckBoxMenuItemStyle}" /> 
+                          Style="{StaticResource CheckBoxMenuItemStyle}" />
             </MenuItem>
             <MenuItem Header="Extension">
                 <MenuItem Header="RobocadExtension"

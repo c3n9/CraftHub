@@ -5,9 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:JsonConverter.AppWindows"
         mc:Ignorable="d"
-        Title="AddNewElementPage"
+        Title="Add new element"
         MinHeight="450"
         MinWidth="800"
+        Icon="/Recourses/logo.png"
         WindowStartupLocation="CenterScreen">
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto"
