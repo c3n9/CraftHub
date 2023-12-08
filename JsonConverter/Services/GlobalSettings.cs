@@ -126,5 +126,19 @@ namespace JsonConverter.Services
             }
         }
 
+        internal static void ViewSurchOption()
+        {
+            var contentButton = jsonPage.BSurchOption.Content as string;
+            if (contentButton == "^")
+            {
+                jsonPage.SPSurchOption.Visibility = Visibility.Collapsed;
+                jsonPage.BSurchOption.Content = "˅";
+            }
+            else if (contentButton == "˅")
+            {
+                jsonPage.SPSurchOption.Visibility = Visibility.Visible;
+                jsonPage.BSurchOption.Content = "^";
+            }
+        }
     }
 }

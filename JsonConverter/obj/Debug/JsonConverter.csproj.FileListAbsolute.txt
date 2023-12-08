@@ -76,7 +76,6 @@ C:\Users\quart\source\repos\CraftHub\JsonConverter\bin\Debug\JsonConverter.pdb
 C:\Users\quart\source\repos\CraftHub\JsonConverter\bin\Debug\Newtonsoft.Json.dll
 C:\Users\quart\source\repos\CraftHub\JsonConverter\bin\Debug\Newtonsoft.Json.xml
 C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\JsonConverter.csproj.AssemblyReference.cache
-C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\JsonConverter.csproj.SuggestedBindingRedirects.cache
 C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\AppWindows\AddNewElementPage.g.cs
 C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\MainWindow.g.cs
 C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\Pages\JsonPage.g.cs

@@ -31,21 +31,21 @@ namespace JsonConverter.Pages
         public JsonPage()
         {
             InitializeComponent();
-            PreviewKeyDown += JsonPage_PreviewKeyDown;
+            //PreviewKeyDown += JsonPage_PreviewKeyDown;
             GlobalSettings.jsonPage = this;
             GlobalSettings.mainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
             CBProperty.ItemsSource = GlobalSettings.dictionary.Keys.ToList();
             GlobalSettings.DisplayDataInGrid();
         }
 
-        private void JsonPage_PreviewKeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
-            {
-                ViewSurchOption();
-                e.Handled = true;
-            }
-        }
+        //private void JsonPage_PreviewKeyDown(object sender, KeyEventArgs e)
+        //{
+        //    if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+        //    {
+        //        ViewSurchOption();
+        //        e.Handled = true;
+        //    }
+        //}
 
         private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
         {

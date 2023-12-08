@@ -31,11 +31,25 @@ namespace JsonConverter
         public MainWindow()
         {
             InitializeComponent();
+            PreviewKeyDown += MainWindow_PreviewKeyDown;
             GlobalSettings.mainWindow = this;
             MainFrame.Navigate(new PropertiesPage());
 
 
         }
+
+        private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
+            {
+                if(GlobalSettings.jsonPage != null)
+                {
+                    GlobalSettings.ViewSurchOption();
+                    e.Handled = true;
+                }
+            }
+        }
+
         private void MIImportClass_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog() { Filter = ".cs | *.cs" };
