@@ -4,12 +4,12 @@
 <h1 align="center">CraftHub</h1> 
 
 <p>
-        CraftHub provides an intuitive platform for uploading existing programming language classes or creating new ones
-        from scratch. With the ability to save and manage your custom classes, as well as effortlessly generate and export
-        JSON files.
-    </p>
+    CraftHub provides an intuitive platform for uploading existing programming language classes or creating new ones
+    from scratch. With the ability to save and manage your custom classes, as well as effortlessly generate and export
+    JSON files.
+</p>
 
-    <h2>Features</h2>
+<h2>Features</h2>
     <ol>
         <li>
             <strong>Class Upload and Creation</strong>
@@ -19,7 +19,6 @@
                 <li>Whether you want to explore existing classes or build your own, CraftHub has you covered.</li>
             </ul>
         </li>
-
         <li>
             <strong>Custom Class Management</strong>
             <ul>
@@ -27,7 +26,6 @@
                 <li>Once you've created or uploaded a class, you can save and organize it within the application.</li>
             </ul>
         </li>
-
         <li>
             <strong>JSON Generation and Export</strong>
             <ul>
@@ -37,25 +35,18 @@
             </ul>
         </li>
     </ol>
-
     <h2>Getting Started</h2>
-
     <h3>Installation</h3>
     <p>Clone the repository.</p>
-
     ```bash
     git clone https://github.com/your-username/CraftHub.git
     ```
-
     <h2>Explore and Create Classes</h2>
     <p>Navigate the user-friendly interface to explore existing classes or create your own.</p>
-
     <h2>Manage Your Classes</h2>
     <p>Save and manage your custom classes within CraftHub for easy access and organization.</p>
-
     <h2>Generate and Export JSON</h2>
     <p>Fill in the necessary information, generate JSON representations, and export them for your projects.</p>
-
     <h2>Contributions</h2>
     <p>CraftHub welcomes contributions from the open-source community. If you encounter issues or have ideas for improvements, feel free to submit a pull request or open an issue on our GitHub repository.</p>
 
