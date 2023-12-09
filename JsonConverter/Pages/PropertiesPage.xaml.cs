@@ -117,6 +117,11 @@ namespace JsonConverter.Pages
 
         private void BSaveTemplate_Click(object sender, RoutedEventArgs e)
         {
+            if(GlobalSettings.dictionary.Count == 0)
+            {
+                MessageBox.Show("Upload a template or add properties", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             var dialog = new SaveFileDialog() { Filter = ".cs | *.cs" };
             string exportClass = "using System;\r\nusing System.Collections.Generic;\r\nusing System.Linq;\r\nusing System.Text;\r\nusing System.Threading.Tasks;\r\n\r\nnamespace YourNamespace\r\n{\r\n    public class ";
             if (dialog.ShowDialog().GetValueOrDefault())
