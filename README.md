@@ -21,7 +21,7 @@ To get started with CraftHub, follow these simple steps:
 ## Installation
 Clone the repository.  
 ```bash
-git clone https://github.com/your-username/CraftHub.git
+git clone https://github.com/c3n9/CraftHub.git
 ```
 ## Explore and Create Classes
 Navigate the user-friendly interface to explore existing classes or create your own.
@@ -33,4 +33,5 @@ Fill in the necessary information, generate JSON representations, and export the
 CraftHub welcomes contributions from the open-source community. If you encounter issues or have ideas for improvements, feel free to submit a pull request or open an issue on our GitHub repository.
 ## License
 CraftHub is licensed under the MIT License. Feel free to use, modify, and distribute the application in accordance with the terms of the license.
+
 **Start your coding adventure with CraftHub today, and empower yourself with a seamless, personalized experience!**
