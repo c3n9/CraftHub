@@ -19,8 +19,10 @@ CraftHub provides an intuitive platform for uploading existing programming langu
 ## Getting 
 To get started with CraftHub, follow these simple steps:
 ## Installation
-Clone the repository.    
+Clone the repository.  
+```bash
     git clone https://github.com/your-username/CraftHub.git
+```
 ## Explore and Create Classes
 Navigate the user-friendly interface to explore existing classes or create your own.
 ## Manage Your Classes
