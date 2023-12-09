@@ -1,9 +1,9 @@
-# CraftHub
+<p align="center">
+    <img src="https://github.com/c3n9/CraftHub/assets/108518693/85f4bfcb-0d94-4979-81b8-2e2e6f80b954" alt="CraftHub logo" width="340" height="340">
+</p>
+<h1 align="center">CraftHub</h1> 
 CraftHub provides an intuitive platform for uploading existing programming language classes or creating new ones from scratch. With the ability to save and manage your custom classes, as well as effortlessly generate and export JSON files.
-##
-## ![logo](https://github.com/c3n9/Robocad-Json-Converter/assets/108518693/09cd5471-55d6-45d7-8234-13fa723c9d74)
 ## Features
-
 1. **Class Upload and Creation**
    - CraftHub allows you to upload pre-existing programming language classes or create new ones with ease.
    - The intuitive interface ensures a seamless experience, making it accessible for users of all skill levels.
