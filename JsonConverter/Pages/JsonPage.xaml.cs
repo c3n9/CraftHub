@@ -27,7 +27,7 @@ namespace JsonConverter.Pages
     /// </summary>
     public partial class JsonPage : Page
     {
-        private Dictionary<DataGridRow, SolidColorBrush> originalRowColors = new Dictionary<DataGridRow, SolidColorBrush>();
+        private Dictionary<DataGridRow, Brush> rowBackgrounds = new Dictionary<DataGridRow, Brush>();
         public JsonPage()
         {
             InitializeComponent();
@@ -59,6 +59,7 @@ namespace JsonConverter.Pages
         {
             // Получите измененную строку
             DataGridRow editedRow = e.Row;
+
             // Установите ее в выделенное состояние
             editedRow.Background = Brushes.Yellow;
         }
@@ -164,33 +165,7 @@ namespace JsonConverter.Pages
         }
         private void DGJsonData_Sorting(object sender, DataGridSortingEventArgs e)
         {
-            foreach (var row in DGJsonData.Items)
-            {
-                var dataGridRow = DGJsonData.ItemContainerGenerator.ContainerFromItem(row) as DataGridRow;
 
-                if (dataGridRow != null && !originalRowColors.ContainsKey(dataGridRow))
-                {
-                    SolidColorBrush originalColor = dataGridRow.Background as SolidColorBrush;
-
-                    if (originalColor != null)
-                    {
-                        originalRowColors[dataGridRow] = originalColor;
-                    }
-                }
-            }
-            DGJsonData.Loaded += DGJsonData_Loaded;
-
-
-        }
-
-        private void DGJsonData_Loaded(object sender, RoutedEventArgs e)
-        {
-
-        }
-
-        private void SetRowBackground(DataGrid dataGrid, DataGridRow dataGridRow, SolidColorBrush originalColor)
-        {
-            dataGridRow.Background = originalColor;
         }
 
         private void TBSurch_TextChanged(object sender, TextChangedEventArgs e)

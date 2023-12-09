@@ -58,7 +58,7 @@
                       Width="200"
                       SelectionChanged="CBProperty_SelectionChanged"/>
         </StackPanel>
-        <DataGrid x:Name="DGJsonData" 
+        <DataGrid x:Name="DGJsonData"
                   ColumnWidth="*"
                   Grid.ColumnSpan="2"
                   Grid.Row="2"
