@@ -54,9 +54,10 @@
             <TextBlock Text="Property"
                        TextAlignment="Center"
                        Margin="10,0" />
-            <ComboBox x:Name="CBProperty" 
+            <ComboBox x:Name="CBProperty"
                       Width="200"
-                      SelectionChanged="CBProperty_SelectionChanged"/>
+                      SelectionChanged="CBProperty_SelectionChanged" />
+
         </StackPanel>
         <DataGrid x:Name="DGJsonData"
                   ColumnWidth="*"

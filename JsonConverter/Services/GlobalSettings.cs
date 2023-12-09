@@ -22,6 +22,9 @@ namespace JsonConverter.Services
         public static PropertiesPage propertiesPage;
         public static MainWindow mainWindow;
         public static DataTable dataTable;
+        /// <summary>
+        /// Обновляет свойства в таблице на странице свойств.
+        /// </summary>
         public static void RefreshProperties()
         {
             var dataTable = new DataTable();
@@ -39,6 +42,9 @@ namespace JsonConverter.Services
             }
             propertiesPage.DGProperties.ItemsSource = dataTable.DefaultView;
         }
+        /// <summary>
+        /// Отображает данные в таблице на основе фильтрации по свойству и значению.
+        /// </summary>
         public static void DisplayDataInGrid()
         {
             GlobalSettings.dataTable = new DataTable();
@@ -93,6 +99,9 @@ namespace JsonConverter.Services
             }
             jsonPage.DGJsonData.ItemsSource = GlobalSettings.dataTable.DefaultView;
         }
+        /// <summary>
+        /// Просматривает выделенные строки в таблице данных JSON и отображает их в текстовом формате JSON.
+        /// </summary>
         public static void ViewJsonFromTable()
         {
             if (jsonPage.DGJsonData.SelectedItems.Count == 1)
@@ -125,7 +134,9 @@ namespace JsonConverter.Services
                 jsonPage.TBJson.Text = json;
             }
         }
-
+        /// <summary>
+        /// Отображает или скрывает опции поиска в зависимости от текущего состояния.
+        /// </summary>
         internal static void ViewSurchOption()
         {
             var contentButton = jsonPage.BSurchOption.Content as string;

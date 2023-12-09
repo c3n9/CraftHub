@@ -26,8 +26,6 @@ namespace JsonConverter.AppWindows
     {
         private DataRowView _selectedDataRowView;
         private bool _isAdding; // Флаг для определения добавления или редактирования
-
-        // Конструктор страницы
         public AddNewElementPage(DataRowView selectedItem, bool isAdding)
         {
             InitializeComponent();

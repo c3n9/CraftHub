@@ -27,7 +27,6 @@ namespace JsonConverter.Pages
     /// </summary>
     public partial class JsonPage : Page
     {
-        private Dictionary<DataGridRow, Brush> rowBackgrounds = new Dictionary<DataGridRow, Brush>();
         public JsonPage()
         {
             InitializeComponent();
@@ -36,7 +35,6 @@ namespace JsonConverter.Pages
             CBProperty.ItemsSource = GlobalSettings.dictionary.Keys.ToList();
             GlobalSettings.DisplayDataInGrid();
         }
-
         private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
         {
             if (e)
