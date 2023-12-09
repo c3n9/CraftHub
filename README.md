@@ -21,7 +21,7 @@ To get started with CraftHub, follow these simple steps:
 ## Installation
 Clone the repository.  
 ```bash
-    git clone https://github.com/your-username/CraftHub.git
+git clone https://github.com/your-username/CraftHub.git
 ```
 ## Explore and Create Classes
 Navigate the user-friendly interface to explore existing classes or create your own.
