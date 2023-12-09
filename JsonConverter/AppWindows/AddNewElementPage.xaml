@@ -8,7 +8,7 @@
         Title="Add new element"
         MinHeight="450"
         MinWidth="800"
-        Icon="/Recourses/logo.png"
+        Icon="/Recourses/logo.ico"
         WindowStartupLocation="CenterScreen">
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto"

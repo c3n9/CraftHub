@@ -9,7 +9,7 @@
         MinHeight="450"
         MinWidth="900"
         WindowStartupLocation="CenterScreen"
-        Icon="/Recourses/logo.png">
+        Icon="/Recourses/logo.ico">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
