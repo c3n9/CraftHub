@@ -42,6 +42,12 @@ namespace JsonConverter.Pages
                 MessageBox.Show("Upload a template or add properties", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            if(GlobalSettings.mainWindow.Title == "CraftHub")
+            {
+                var continueSave = MessageBox.Show("Do you want to save the class?", "Warnings", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                if (continueSave == MessageBoxResult.OK)
+                    return;
+            }
             NavigationService.Navigate(new JsonPage());
         }
 
@@ -84,9 +90,9 @@ namespace JsonConverter.Pages
             else if (DGProperties.SelectedItems.Count > 1)
             {
                 var properties = DGProperties.SelectedItems.Cast<dynamic>().ToList();
-                if(properties.Count != 0)
+                if (properties.Count != 0)
                 {
-                    foreach ( var property in properties)
+                    foreach (var property in properties)
                     {
                         var rowView = property.Row.ItemArray;
                         var nameProperty = rowView[0];
@@ -111,7 +117,19 @@ namespace JsonConverter.Pages
 
         private void BSaveTemplate_Click(object sender, RoutedEventArgs e)
         {
-
+            var dialog = new SaveFileDialog() { Filter = ".cs | *.cs" };
+            string exportClass = "using System;\r\nusing System.Collections.Generic;\r\nusing System.Linq;\r\nusing System.Text;\r\nusing System.Threading.Tasks;\r\n\r\nnamespace YourNamespace\r\n{\r\n    public class ";
+            if (dialog.ShowDialog().GetValueOrDefault())
+            {
+                exportClass += $"{System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}{{\r\n";
+                foreach(var element in GlobalSettings.dictionary)
+                {
+                    exportClass += $"public {element.Value.Name} {element.Key} {{ get; set; }}\r\n";
+                }
+                exportClass += "}\r\n}";
+                File.WriteAllText(dialog.FileName, exportClass);
+                GlobalSettings.mainWindow.Title = $"CraftHub — {System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}";
+            }
         }
     }
 }

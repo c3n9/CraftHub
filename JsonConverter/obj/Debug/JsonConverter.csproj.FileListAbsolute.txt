@@ -120,3 +120,5 @@ D:\Projects\CraftHub\JsonConverter\obj\Debug\JsonConverter.csproj.CoreCompileInp
 D:\Projects\CraftHub\JsonConverter\obj\Debug\JsonConverter.csproj.CopyComplete
 D:\Projects\CraftHub\JsonConverter\obj\Debug\JsonConverter.exe
 D:\Projects\CraftHub\JsonConverter\obj\Debug\JsonConverter.pdb
+C:\Users\quart\source\repos\CraftHub\JsonConverter\bin\Debug\System.Drawing.Common.dll
+C:\Users\quart\source\repos\CraftHub\JsonConverter\bin\Debug\System.Drawing.Common.xml
