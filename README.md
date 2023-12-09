@@ -33,4 +33,5 @@ Fill in the necessary information, generate JSON representations, and export the
 CraftHub welcomes contributions from the open-source community. If you encounter issues or have ideas for improvements, feel free to submit a pull request or open an issue on our GitHub repository.
 ## License
 CraftHub is licensed under the MIT License. Feel free to use, modify, and distribute the application in accordance with the terms of the license.
+
 **Start your coding adventure with CraftHub today, and empower yourself with a seamless, personalized experience!**
