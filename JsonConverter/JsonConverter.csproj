@@ -65,6 +65,7 @@
     <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -83,14 +84,21 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="AppWindows\AddNewElementPage.xaml.cs">
-      <DependentUpon>AddNewElementPage.xaml</DependentUpon>
+    <Compile Include="AppWindows\AddNewElementWindow.xaml.cs">
+      <DependentUpon>AddNewElementWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="AppWindows\RobocadExtensionWindow.xaml.cs">
+      <DependentUpon>RobocadExtensionWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\JsonPage.xaml.cs">
       <DependentUpon>JsonPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Services\GlobalSettings.cs" />
-    <Page Include="AppWindows\AddNewElementPage.xaml">
+    <Page Include="AppWindows\AddNewElementWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AppWindows\RobocadExtensionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

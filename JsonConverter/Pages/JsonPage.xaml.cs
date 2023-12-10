@@ -93,7 +93,7 @@ namespace JsonConverter.Pages
             // Новая добавленная строка находится в режиме редактирования, поэтому нужно отменить редактирование, чтобы сделать ее доступной
             newRowView.CancelEdit();
             // Показываем окно AddNewElementPage для добавления новой строки
-            new AddNewElementPage(newRowView, true).ShowDialog();
+            new AddNewElementWindow(newRowView, true).ShowDialog();
             GlobalSettings.jsonString = JsonConvert.SerializeObject(GlobalSettings.dataTable, Formatting.Indented);
         }
 
@@ -101,7 +101,7 @@ namespace JsonConverter.Pages
         {
             if (DGJsonData.SelectedItem is DataRowView dataRow)
             {
-                var dialogResult = new AddNewElementPage(dataRow, false).ShowDialog();
+                var dialogResult = new AddNewElementWindow(dataRow, false).ShowDialog();
                 // Получаем текущую выбранную строку из DataGrid
                 if (dialogResult.Value)
                 {

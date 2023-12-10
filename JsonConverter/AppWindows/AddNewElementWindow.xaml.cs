@@ -22,11 +22,11 @@ namespace JsonConverter.AppWindows
     /// <summary>
     /// Логика взаимодействия для AddNewElementPage.xaml
     /// </summary>
-    public partial class AddNewElementPage : Window
+    public partial class AddNewElementWindow : Window
     {
         private DataRowView _selectedDataRowView;
         private bool _isAdding; // Флаг для определения добавления или редактирования
-        public AddNewElementPage(DataRowView selectedItem, bool isAdding)
+        public AddNewElementWindow(DataRowView selectedItem, bool isAdding)
         {
             InitializeComponent();
             _selectedDataRowView = selectedItem;

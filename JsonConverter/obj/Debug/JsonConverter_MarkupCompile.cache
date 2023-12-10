@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\Users\quart\source\repos\CraftHub\JsonConverter\App.xaml
-4580880818
+5-1279388244
 
-9581208224
-191746423790
-AppWindows\AddNewElementPage.xaml;MainWindow.xaml;Pages\JsonPage.xaml;Pages\PropertiesPage.xaml;
+10136351366
+201044875117
+AppWindows\AddNewElementWindow.xaml;AppWindows\RobocadExtensionWindow.xaml;MainWindow.xaml;Pages\JsonPage.xaml;Pages\PropertiesPage.xaml;
 
 False
 

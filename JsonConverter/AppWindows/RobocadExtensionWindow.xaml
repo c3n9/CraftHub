@@ -1,0 +1,22 @@
+﻿<Window x:Class="JsonConverter.AppWindows.RobocadExtensionWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:JsonConverter.AppWindows"
+        mc:Ignorable="d"
+        Title="Robocad extension"
+        Icon="/Recourses/logo.ico"
+        MinHeight="250"
+        MinWidth="400"
+        WindowStartupLocation="CenterScreen">
+    <Grid>
+        <StackPanel VerticalAlignment="Center"
+                    HorizontalAlignment="Center">
+            <TextBlock Text="Generate folders" />
+            <Button x:Name="BGenerate"
+                    Click="BGenerate_Click"
+                    Content="Generate" />
+        </StackPanel>
+    </Grid>
+</Window>

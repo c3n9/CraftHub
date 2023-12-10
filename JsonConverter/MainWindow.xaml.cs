@@ -1,4 +1,5 @@
-﻿using JsonConverter.Pages;
+﻿using JsonConverter.AppWindows;
+using JsonConverter.Pages;
 using JsonConverter.Services;
 using Microsoft.CSharp;
 using Microsoft.Win32;
@@ -139,7 +140,7 @@ namespace JsonConverter
 
         private void MIRobocadExtension_Click(object sender, RoutedEventArgs e)
         {
-
+            new RobocadExtensionWindow().ShowDialog();
         }
         private void MIAddInModalWindow_Checked(object sender, RoutedEventArgs e)
         {
