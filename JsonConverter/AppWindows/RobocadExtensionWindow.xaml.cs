@@ -13,7 +13,6 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
-
 namespace JsonConverter.AppWindows
 {
     /// <summary>
@@ -27,19 +26,29 @@ namespace JsonConverter.AppWindows
         }
         private void BGenerate_Click(object sender, RoutedEventArgs e)
         {
-            var folderBrowserDialog = new FolderBrowserDialog();
-            if (folderBrowserDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
-            {
-                string selectedPath = folderBrowserDialog.SelectedPath;
-                for (int i = 1; i <= 3; i++)
-                {
-                    string folderName = $"{i} folder";
-                    string folderPath = System.IO.Path.Combine(selectedPath, folderName);
+            OpenFileDialog openFileDialog = new OpenFileDialog();
+            openFileDialog.Filter = "*.png, *.jpg;|*.png; *.jpg;";
 
-                    // Проверяем, существует ли папка, прежде чем создавать
-                    if (!Directory.Exists(folderPath))
+            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                string selectedImagePath = openFileDialog.FileName;
+                var folderBrowserDialog = new FolderBrowserDialog();
+                if (folderBrowserDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    string selectedPath = folderBrowserDialog.SelectedPath;
+                    for (int i = 1; i <= 3; i++)
                     {
-                        Directory.CreateDirectory(folderPath);
+                        string folderName = $"{i} folder";
+                        string folderPath = System.IO.Path.Combine(selectedPath, folderName);
+
+                        // Проверяем, существует ли папка, прежде чем создавать
+                        if (!Directory.Exists(folderPath))
+                        {
+                            Directory.CreateDirectory(folderPath);
+                            // Копирование изображения в созданную папку
+                            string destinationImagePath = System.IO.Path.Combine(folderPath, System.IO.Path.GetFileName(selectedImagePath));
+                            File.Copy(selectedImagePath, destinationImagePath);
+                        }
                     }
                 }
             }
