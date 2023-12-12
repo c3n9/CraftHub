@@ -29,7 +29,7 @@ Navigate the user-friendly interface to explore existing classes or create your 
 Save and manage your custom classes within CraftHub for easy access and organization.
 ## Generate and Export JSON
 Fill in the necessary information, generate JSON representations, and export them for your projects.
-##Extension
+## Extension
 Generation of sprites and folders for Unity.
 ## Contributions
 CraftHub welcomes contributions from the open-source community. If you encounter issues or have ideas for improvements, feel free to submit a pull request or open an issue on our GitHub repository.
