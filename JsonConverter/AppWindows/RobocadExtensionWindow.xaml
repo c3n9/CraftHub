@@ -11,9 +11,27 @@
         MinWidth="400"
         WindowStartupLocation="CenterScreen">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
         <StackPanel VerticalAlignment="Center"
                     HorizontalAlignment="Center">
-            <TextBlock Text="Generate folders" />
+            <TextBlock Text="Level" />
+            <ComboBox x:Name="CBLevel">
+                <TextBlock Text="B" />
+                <TextBlock Text="H" />
+            </ComboBox>
+            <TextBlock Text="Block number" />
+            <TextBox x:Name="TBBlockNumber" />
+            <TextBlock Text="Lesson count"
+                       x:Name="TBoxLessonCount"/>
+            <TextBox x:Name="TBLessonCount" />
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="Common" />
+                <CheckBox x:Name="IsCommon" 
+                          IsChecked="True"/>
+            </StackPanel>
             <Button x:Name="BGenerate"
                     Click="BGenerate_Click"
                     Content="Generate" />

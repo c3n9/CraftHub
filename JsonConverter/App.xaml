@@ -6,9 +6,15 @@
     <Application.Resources>
         <Style TargetType="Button">
             <Setter Property="Margin"
-                    Value="0,0,10,0" />
+                    Value="10,0,10,0" />
             <Setter Property="Width"
                     Value="200" />
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius"
+                            Value="5" />
+                </Style>
+            </Style.Resources>
         </Style>
         <Style x:Key="CheckBoxMenuItemStyle"
                TargetType="MenuItem">
