@@ -66,11 +66,15 @@ namespace JsonConverter.Pages
         {
             if(GlobalSettings.dataTable.Rows.Count != 0)
             {
-                GlobalSettings.jsonString = string.Empty;
-                GlobalSettings.dataTable = null;
                 var continueBack = MessageBox.Show("The completed data will be deleted, continue?", "Warnings", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (continueBack == MessageBoxResult.OK)
+                {
+                    GlobalSettings.jsonString = string.Empty;
+                    GlobalSettings.dataTable = null;
                     NavigationService.GoBack();
+                }
+                    
+                
             }
             else
             {

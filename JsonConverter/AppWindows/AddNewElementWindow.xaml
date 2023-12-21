@@ -8,16 +8,17 @@
         Title="Add new element"
         MinHeight="250"
         MinWidth="400"
-        SizeToContent="WidthAndHeight"
+        SizeToContent="Width"
         Icon="/Recourses/logo.ico"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        >
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel HorizontalAlignment="Center"
                         VerticalAlignment="Center">
-                <StackPanel x:Name="SPElements" 
-                            Width="200"/>
+                <StackPanel x:Name="SPElements"
+                            Width="200" />
                 <Button x:Name="BSave"
                         Content="Save"
                         Click="BSave_Click"
