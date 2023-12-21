@@ -9,6 +9,7 @@
         Icon="/Recourses/logo.ico"
         MinHeight="250"
         MinWidth="400"
+        SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.RowDefinitions>

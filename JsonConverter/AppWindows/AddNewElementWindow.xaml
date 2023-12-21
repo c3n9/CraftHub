@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:JsonConverter.AppWindows"
         mc:Ignorable="d"
         Title="Add new element"
-        MinHeight="450"
-        MinWidth="800"
+        MinHeight="250"
+        MinWidth="400"
+        SizeToContent="WidthAndHeight"
         Icon="/Recourses/logo.ico"
         WindowStartupLocation="CenterScreen">
     <Grid>
@@ -15,7 +16,8 @@
                       HorizontalScrollBarVisibility="Disabled">
             <StackPanel HorizontalAlignment="Center"
                         VerticalAlignment="Center">
-                <StackPanel x:Name="SPElements" />
+                <StackPanel x:Name="SPElements" 
+                            Width="200"/>
                 <Button x:Name="BSave"
                         Content="Save"
                         Click="BSave_Click"

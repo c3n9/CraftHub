@@ -46,7 +46,8 @@ namespace JsonConverter.Pages
             {
                 var continueSave = MessageBox.Show("Do you want to save the class?", "Warnings", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (continueSave == MessageBoxResult.OK)
-                    return;
+                    if (!SaveTemplate())
+                        return;
             }
             NavigationService.Navigate(new JsonPage());
         }
@@ -117,24 +118,32 @@ namespace JsonConverter.Pages
 
         private void BSaveTemplate_Click(object sender, RoutedEventArgs e)
         {
-            if(GlobalSettings.dictionary.Count == 0)
+            if (GlobalSettings.dictionary.Count == 0)
             {
                 MessageBox.Show("Upload a template or add properties", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+            SaveTemplate();
+        }
+        private bool SaveTemplate()
+        {
             var dialog = new SaveFileDialog() { Filter = ".cs | *.cs" };
             string exportClass = "using System;\r\nusing System.Collections.Generic;\r\nusing System.Linq;\r\nusing System.Text;\r\nusing System.Threading.Tasks;\r\n\r\nnamespace YourNamespace\r\n{\r\n    public class ";
             if (dialog.ShowDialog().GetValueOrDefault())
             {
                 exportClass += $"{System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}{{\r\n";
-                foreach(var element in GlobalSettings.dictionary)
+                foreach (var element in GlobalSettings.dictionary)
                 {
                     exportClass += $"public {element.Value.Name} {element.Key} {{ get; set; }}\r\n";
                 }
                 exportClass += "}\r\n}";
                 File.WriteAllText(dialog.FileName, exportClass);
                 GlobalSettings.mainWindow.Title = $"CraftHub — {System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}";
+                return true;
             }
+            else
+                return false;
         }
+
     }
 }

@@ -56,7 +56,7 @@ namespace JsonConverter.AppWindows
                     SPElements.Children.Add(textBlock);
                     if (listValueTypes[i] == typeof(string).Name || listValueTypes[i] == typeof(int).Name)
                     {
-                        TextBox textBox = new TextBox();
+                        TextBox textBox = new TextBox() { Width = 200, TextWrapping = TextWrapping.Wrap, Height = 50 };
                         textBox.Text = values[i];
                         SPElements.Children.Add(textBox);
                     }
@@ -79,7 +79,7 @@ namespace JsonConverter.AppWindows
                     SPElements.Children.Add(textBlock);
                     if (listValueTypes[i] == typeof(string).Name || listValueTypes[i] == typeof(int).Name)
                     {
-                        TextBox textBox = new TextBox();
+                        TextBox textBox = new TextBox() { Width = 200, TextWrapping = TextWrapping.Wrap, Height = 50 };
                         SPElements.Children.Add(textBox);
                     }
                     else if (listValueTypes[i] == typeof(bool).Name)
