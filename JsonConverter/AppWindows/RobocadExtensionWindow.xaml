@@ -24,10 +24,12 @@
                 <TextBlock Text="H" />
             </ComboBox>
             <TextBlock Text="Block number" />
-            <TextBox x:Name="TBBlockNumber" />
+            <TextBox x:Name="TBBlockNumber"
+                     PreviewTextInput="TBBlockNumber_PreviewTextInput" />
             <TextBlock Text="Lesson count"
                        x:Name="TBoxLessonCount"/>
-            <TextBox x:Name="TBLessonCount" />
+            <TextBox x:Name="TBLessonCount" 
+                     PreviewTextInput="TBLessonCount_PreviewTextInput"/>
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Common" />
                 <CheckBox x:Name="IsCommon" 

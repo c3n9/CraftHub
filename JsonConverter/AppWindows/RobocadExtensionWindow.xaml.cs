@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,6 +15,8 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
+using Application = System.Windows.Application;
+using MessageBox = System.Windows.MessageBox;
 
 namespace JsonConverter.AppWindows
 {
@@ -31,10 +34,25 @@ namespace JsonConverter.AppWindows
         }
         private void BGenerate_Click(object sender, RoutedEventArgs e)
         {
-            string level = ((TextBlock)CBLevel.SelectedItem).Text;
-            string blockNumber = TBBlockNumber.Text;
-            int lessonCount = int.Parse(TBLessonCount.Text);
+            string level = string.Empty;
+            string blockNumber = string.Empty;
+            int lessonCount = 0;
+            string error = string.Empty;
 
+            if (CBLevel.SelectedItem == null)
+                error += "Select level for lesson\n";
+            if (string.IsNullOrWhiteSpace(TBBlockNumber.Text))
+                error += "Enter block number for lesson\n";
+            if (string.IsNullOrWhiteSpace(TBLessonCount.Text))
+                error += "Enter the number of lessons\n";
+            if (!string.IsNullOrWhiteSpace(error))
+            {
+                MessageBox.Show(error, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            level = ((TextBlock)CBLevel.SelectedItem).Text;
+            blockNumber = TBBlockNumber.Text;
+            lessonCount = int.Parse(TBLessonCount.Text);
             var folderBrowserDialog = new FolderBrowserDialog();
             if (folderBrowserDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
@@ -55,7 +73,7 @@ namespace JsonConverter.AppWindows
                         }
                         else
                         {
-                            foreach(string folder in folders)
+                            foreach (string folder in folders)
                             {
                                 notCommonFolderPath = System.IO.Path.Combine(folderPath, folder.ToString());
                                 Directory.CreateDirectory(notCommonFolderPath);
@@ -81,7 +99,7 @@ namespace JsonConverter.AppWindows
                     File.Copy(file, destinationImagePath);
                     // Добавление метаинформации для Unity
                     string metaFilePath = System.IO.Path.Combine(notCommonFolderPath, $"Page{countPage}" + System.IO.Path.GetExtension(file) + ".meta");
-                    var resourceStream = System.Windows.Application.GetResourceStream(new Uri("Recourses/template.meta", UriKind.Relative));
+                    var resourceStream = Application.GetResourceStream(new Uri("Recourses/template.meta", UriKind.Relative));
                     using (var reader = new StreamReader(resourceStream.Stream))
                     {
                         string content = reader.ReadToEnd();
@@ -105,7 +123,7 @@ namespace JsonConverter.AppWindows
                     File.Copy(file, destinationImagePath);
                     // Добавление метаинформации для Unity
                     string metaFilePath = System.IO.Path.Combine(folderPath, $"Page{countPage}" + System.IO.Path.GetExtension(file) + ".meta");
-                    var resourceStream = System.Windows.Application.GetResourceStream(new Uri("Recourses/template.meta", UriKind.Relative));
+                    var resourceStream = Application.GetResourceStream(new Uri("Recourses/template.meta", UriKind.Relative));
                     using (var reader = new StreamReader(resourceStream.Stream))
                     {
                         string content = reader.ReadToEnd();
@@ -114,6 +132,32 @@ namespace JsonConverter.AppWindows
                     countPage++;
 
                 }
+            }
+        }
+
+        private void TBBlockNumber_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Паттерн для проверки наличия только чисел
+            string pattern = @"^\d+$";
+
+            // Проверка с использованием Regex.IsMatch
+            if (!Regex.IsMatch(e.Text, pattern))
+            {
+                // Если текущий ввод не соответствует паттерну, отменить ввод
+                e.Handled = true;
+            }
+        }
+
+        private void TBLessonCount_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            // Паттерн для проверки наличия только чисел
+            string pattern = @"^\d+$";
+
+            // Проверка с использованием Regex.IsMatch
+            if (!Regex.IsMatch(e.Text, pattern))
+            {
+                // Если текущий ввод не соответствует паттерну, отменить ввод
+                e.Handled = true;
             }
         }
     }
