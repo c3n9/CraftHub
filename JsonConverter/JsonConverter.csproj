@@ -150,6 +150,7 @@
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
+    <Resource Include="Recourses\template.meta" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

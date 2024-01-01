@@ -94,7 +94,6 @@ D:\Projects\CraftHub\JsonConverter\obj\Debug\JsonConverter.csproj.CopyComplete
 D:\Projects\CraftHub\JsonConverter\obj\Debug\JsonConverter.exe
 D:\Projects\CraftHub\JsonConverter\obj\Debug\JsonConverter.pdb
 C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\JsonConverter.csproj.AssemblyReference.cache
-C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\JsonConverter.csproj.SuggestedBindingRedirects.cache
 C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\AppWindows\AddNewElementWindow.g.cs
 C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\AppWindows\RobocadExtensionWindow.g.cs
 C:\Users\quart\source\repos\CraftHub\JsonConverter\obj\Debug\MainWindow.g.cs
