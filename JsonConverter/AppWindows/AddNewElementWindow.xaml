@@ -10,8 +10,7 @@
         MinWidth="400"
         SizeToContent="Width"
         Icon="/Recourses/logo.ico"
-        WindowStartupLocation="CenterScreen"
-        >
+        WindowStartupLocation="CenterScreen">
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">

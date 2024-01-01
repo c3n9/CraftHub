@@ -16,7 +16,7 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         <Menu Grid.ColumnSpan="2">
-            <MenuItem Header="File">
+            <MenuItem Header="_File">
                 <MenuItem Header="Upload template"
                           x:Name="MIImportClass"
                           Click="MIImportClass_Click" />
@@ -27,7 +27,7 @@
                           x:Name="MIExportJsonFile"
                           Click="MIExportJsonFile_Click" />
             </MenuItem>
-            <MenuItem Header="Options">
+            <MenuItem Header="_Options">
                 <MenuItem Header="Add in modal window"
                           x:Name="MIAddInModalWindow"
                           Checked="MIAddInModalWindow_Checked"
@@ -41,10 +41,10 @@
                           IsChecked="False"
                           Style="{StaticResource CheckBoxMenuItemStyle}" />
             </MenuItem>
-            <MenuItem Header="Extension">
-                <MenuItem Header="RobocadExtension"
-                          x:Name="MIRobocadExtension"
-                          Click="MIRobocadExtension_Click" />
+            <MenuItem Header="_Extension">
+                <MenuItem Header="Generation folders"
+                          x:Name="MIGenerationFolders"
+                          Click="MIGenerationFolders_Click" />
             </MenuItem>
         </Menu>
         <Frame x:Name="MainFrame"

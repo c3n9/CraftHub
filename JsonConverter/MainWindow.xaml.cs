@@ -137,11 +137,6 @@ namespace JsonConverter
                 return;
             }
         }
-
-        private void MIRobocadExtension_Click(object sender, RoutedEventArgs e)
-        {
-            new RobocadExtensionWindow().ShowDialog();
-        }
         private void MIAddInModalWindow_Checked(object sender, RoutedEventArgs e)
         {
             AddInModalWindowCheckedChanged?.Invoke(this, MIAddInModalWindow.IsChecked);
@@ -168,6 +163,11 @@ namespace JsonConverter
                 GlobalSettings.jsonPage.TBJson.Visibility = Visibility.Collapsed;
             }
             
+        }
+
+        private void MIGenerationFolders_Click(object sender, RoutedEventArgs e)
+        {
+            new GenerationFoldersWindow().ShowDialog();
         }
     }
 }

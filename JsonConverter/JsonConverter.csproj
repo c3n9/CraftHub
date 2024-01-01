@@ -88,8 +88,8 @@
     <Compile Include="AppWindows\AddNewElementWindow.xaml.cs">
       <DependentUpon>AddNewElementWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="AppWindows\RobocadExtensionWindow.xaml.cs">
-      <DependentUpon>RobocadExtensionWindow.xaml</DependentUpon>
+    <Compile Include="AppWindows\GenerationFoldersWindow.xaml.cs">
+      <DependentUpon>GenerationFoldersWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\JsonPage.xaml.cs">
       <DependentUpon>JsonPage.xaml</DependentUpon>
@@ -99,7 +99,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="AppWindows\RobocadExtensionWindow.xaml">
+    <Page Include="AppWindows\GenerationFoldersWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -169,6 +169,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Recourses\logo.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Recourses\folder.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

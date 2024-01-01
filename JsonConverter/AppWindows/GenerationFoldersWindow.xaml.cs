@@ -23,12 +23,12 @@ namespace JsonConverter.AppWindows
     /// <summary>
     /// Логика взаимодействия для RobocadExtensionWindow.xaml
     /// </summary>
-    public partial class RobocadExtensionWindow : Window
+    public partial class GenerationFoldersWindow : Window
     {
         string folderPath;
         string notCommonFolderPath;
         List<string> folders = new List<string>() { "Python", "Java", "LabView" };
-        public RobocadExtensionWindow()
+        public GenerationFoldersWindow()
         {
             InitializeComponent();
         }
@@ -60,7 +60,7 @@ namespace JsonConverter.AppWindows
 
                 for (int i = 1; i <= lessonCount; i++)
                 {
-                    string folderName = $"{level}{blockNumber}_{i}";
+                    string folderName = $"{level[0]}{blockNumber}_{i}";
                     folderPath = System.IO.Path.Combine(selectedPath, folderName);
 
                     // Проверяем, существует ли папка, прежде чем создавать
