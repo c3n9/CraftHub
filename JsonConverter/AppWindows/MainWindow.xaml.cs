@@ -24,7 +24,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace JsonConverter
+namespace JsonConverter.AppWindows
 {
     public partial class MainWindow : Window
     {
@@ -128,7 +128,7 @@ namespace JsonConverter
                 if (dialog.ShowDialog().GetValueOrDefault())
                 {
                     File.WriteAllText(dialog.FileName, exportJsonString, Encoding.UTF8);
-                    MessageBox.Show("Successful export");
+                    MessageBox.Show("Successful export", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             else

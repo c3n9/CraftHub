@@ -44,7 +44,7 @@ namespace JsonConverter.Pages
             }
             if(GlobalSettings.mainWindow.Title == "CraftHub")
             {
-                var continueSave = MessageBox.Show("Do you want to save the class?", "Warnings", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                var continueSave = MessageBox.Show("Do you want to save the class?", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (continueSave == MessageBoxResult.OK)
                     if (!SaveTemplate())
                         return;

@@ -25,8 +25,6 @@ namespace JsonConverter.AppWindows
     /// </summary>
     public partial class GenerationFoldersWindow : Window
     {
-        //string folderPath;
-        //string notCommonFolderPath;
         List<string> folders = new List<string>() { "Python", "Java", "LabView" };
         public GenerationFoldersWindow()
         {

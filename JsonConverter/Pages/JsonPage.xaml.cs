@@ -66,7 +66,7 @@ namespace JsonConverter.Pages
         {
             if(GlobalSettings.dataTable.Rows.Count != 0)
             {
-                var continueBack = MessageBox.Show("The completed data will be deleted, continue?", "Warnings", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+                var continueBack = MessageBox.Show("The completed data will be deleted, continue?", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (continueBack == MessageBoxResult.OK)
                 {
                     GlobalSettings.jsonString = string.Empty;
@@ -128,7 +128,7 @@ namespace JsonConverter.Pages
         {
             if (GlobalSettings.mainWindow.MIViewJson.IsChecked)
             {
-                GlobalSettings.ViewJsonFromTable();
+                Option.ViewJsonFromTable();
             }
             else
             {
@@ -181,7 +181,7 @@ namespace JsonConverter.Pages
 
         private void BSurchOption_Click(object sender, RoutedEventArgs e)
         {
-            GlobalSettings.ViewSurchOption();
+            Option.ViewSurchOption();
         }
     }
 }

@@ -93,75 +93,83 @@ namespace JsonConverter.AppWindows
 
         private void BSave_Click(object sender, RoutedEventArgs e)
         {
-            if (_isAdding)
+            try
             {
-                // Создание новой строки данных и добавление ее в DataTable
-                DataRow newRow = _selectedDataRowView.Row.Table.NewRow();
-                for (int i = 0; i < SPElements.Children.Count; i += 2)
+                if (_isAdding)
                 {
-                    var textBox = SPElements.Children[i + 1] as TextBox;
-                    var checkBox = SPElements.Children[i + 1] as CheckBox;
-                    if (SPElements.Children[i] is TextBlock textBlock && (textBox is TextBox || checkBox is CheckBox))
+                    // Создание новой строки данных и добавление ее в DataTable
+                    DataRow newRow = _selectedDataRowView.Row.Table.NewRow();
+                    for (int i = 0; i < SPElements.Children.Count; i += 2)
                     {
-                        var columnName = textBlock.Text;
-                        string value = string.Empty;
-                        if (textBox != null)
+                        var textBox = SPElements.Children[i + 1] as TextBox;
+                        var checkBox = SPElements.Children[i + 1] as CheckBox;
+                        if (SPElements.Children[i] is TextBlock textBlock && (textBox is TextBox || checkBox is CheckBox))
                         {
-                            value = textBox.Text;
+                            var columnName = textBlock.Text;
+                            string value = string.Empty;
+                            if (textBox != null)
+                            {
+                                value = textBox.Text;
+                            }
+                            else
+                            {
+                                value = checkBox.IsChecked.ToString();
+                            }
+                            // Установка значения в новой строке данных
+                            newRow[columnName] = value;
                         }
-                        else
+                    }
+
+                    // Добавление новой строки данных в DataTable
+                    _selectedDataRowView.Row.Table.Rows.Add(newRow);
+
+                    // Обработчик события LoadingRow для изменения стиля только что добавленной строки
+                    EventHandler<DataGridRowEventArgs> loadingRowHandler = null;
+                    loadingRowHandler = (gridSender, loadingRowEventArgs) =>
+                    {
+                        DataRowView rowView = loadingRowEventArgs.Row.Item as DataRowView;
+
+                        // Проверка, является ли текущая строка только что добавленной
+                        if (rowView != null && rowView.Row == newRow)
                         {
-                            value = checkBox.IsChecked.ToString();
+                            loadingRowEventArgs.Row.Background = Brushes.Yellow; // Установка цвета фона в желтый
+
+                            // Удаление обработчика после первого вызова
+                            GlobalSettings.jsonPage.DGJsonData.LoadingRow -= loadingRowHandler;
                         }
-                        // Установка значения в новой строке данных
-                        newRow[columnName] = value;
+                    };
+
+                    // Подписка на событие LoadingRow
+                    GlobalSettings.jsonPage.DGJsonData.LoadingRow += loadingRowHandler;
+                }
+                else
+                {
+                    // Обновление DataRowView измененными данными
+                    for (int i = 0; i < SPElements.Children.Count; i += 2)
+                    {
+                        var textBox = SPElements.Children[i + 1] as TextBox;
+                        var checkBox = SPElements.Children[i + 1] as CheckBox;
+                        if (SPElements.Children[i] is TextBlock textBlock && (textBox is TextBox || checkBox is CheckBox))
+                        {
+                            var columnName = textBlock.Text;
+                            string modifiedValue = string.Empty;
+                            if (textBox != null)
+                            {
+                                modifiedValue = textBox.Text;
+                            }
+                            else
+                            {
+                                modifiedValue = checkBox.IsChecked.ToString();
+                            }
+                            _selectedDataRowView[columnName] = modifiedValue;
+                        }
                     }
                 }
-
-                // Добавление новой строки данных в DataTable
-                _selectedDataRowView.Row.Table.Rows.Add(newRow);
-
-                // Обработчик события LoadingRow для изменения стиля только что добавленной строки
-                EventHandler<DataGridRowEventArgs> loadingRowHandler = null;
-                loadingRowHandler = (gridSender, loadingRowEventArgs) =>
-                {
-                    DataRowView rowView = loadingRowEventArgs.Row.Item as DataRowView;
-
-                    // Проверка, является ли текущая строка только что добавленной
-                    if (rowView != null && rowView.Row == newRow)
-                    {
-                        loadingRowEventArgs.Row.Background = Brushes.Yellow; // Установка цвета фона в желтый
-
-                        // Удаление обработчика после первого вызова
-                        GlobalSettings.jsonPage.DGJsonData.LoadingRow -= loadingRowHandler;
-                    }
-                };
-
-                // Подписка на событие LoadingRow
-                GlobalSettings.jsonPage.DGJsonData.LoadingRow += loadingRowHandler;
             }
-            else
+            catch (Exception ex)
             {
-                // Обновление DataRowView измененными данными
-                for (int i = 0; i < SPElements.Children.Count; i += 2)
-                {
-                    var textBox = SPElements.Children[i + 1] as TextBox;
-                    var checkBox = SPElements.Children[i + 1] as CheckBox;
-                    if (SPElements.Children[i] is TextBlock textBlock && (textBox is TextBox || checkBox is CheckBox))
-                    {
-                        var columnName = textBlock.Text;
-                        string modifiedValue = string.Empty;
-                        if (textBox != null)
-                        {
-                            modifiedValue = textBox.Text;
-                        }
-                        else
-                        {
-                            modifiedValue = checkBox.IsChecked.ToString();
-                        }
-                        _selectedDataRowView[columnName] = modifiedValue;
-                    }
-                }
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
             DialogResult = true;
         }
