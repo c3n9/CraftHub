@@ -45,7 +45,7 @@ namespace JsonConverter
             {
                 if(GlobalSettings.jsonPage != null)
                 {
-                    GlobalSettings.ViewSurchOption();
+                    Option.ViewSurchOption();
                     e.Handled = true;
                 }
             }
@@ -151,7 +151,7 @@ namespace JsonConverter
         {
             if(GlobalSettings.jsonPage != null && GlobalSettings.jsonPage.DGJsonData != null && GlobalSettings.jsonPage.DGJsonData.SelectedItem != null)
             {
-                GlobalSettings.ViewJsonFromTable();
+                Option.ViewJsonFromTable();
             }
         }
 

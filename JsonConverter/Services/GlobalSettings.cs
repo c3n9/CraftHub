@@ -99,57 +99,6 @@ namespace JsonConverter.Services
             }
             jsonPage.DGJsonData.ItemsSource = GlobalSettings.dataTable.DefaultView;
         }
-        /// <summary>
-        /// Просматривает выделенные строки в таблице данных JSON и отображает их в текстовом формате JSON.
-        /// </summary>
-        public static void ViewJsonFromTable()
-        {
-            if (jsonPage.DGJsonData.SelectedItems.Count == 1)
-            {
-                Grid.SetColumnSpan(jsonPage.DGJsonData, 1);
-                jsonPage.TBJson.Visibility = Visibility.Visible;
-                var selectedData = jsonPage.DGJsonData.SelectedItem as DataRowView;
-                if (selectedData != null)
-                {
-                    var selectedRow = selectedData.Row;
-                    var rowData = selectedRow.Table.Columns.Cast<DataColumn>().ToDictionary(col => col.ColumnName, col => selectedRow[col]);
-                    string json = JsonConvert.SerializeObject(rowData, Formatting.Indented);
-                    jsonPage.TBJson.Text = json;
-                }
-            }
-            else if (jsonPage.DGJsonData.SelectedItems.Count > 1)
-            {
-                var jsonList = new List<Dictionary<string, object>>();
-                Grid.SetColumnSpan(jsonPage.DGJsonData, 1);
-                foreach (var selectedData in jsonPage.DGJsonData.SelectedItems.Cast<DataRowView>())
-                {
-                    var selectedRow = selectedData.Row;
-                    var rowData = selectedRow.Table.Columns
-                        .Cast<DataColumn>()
-                        .ToDictionary(col => col.ColumnName, col => selectedRow[col]);
-
-                    jsonList.Add(rowData);
-                }
-                string json = JsonConvert.SerializeObject(jsonList, Formatting.Indented);
-                jsonPage.TBJson.Text = json;
-            }
-        }
-        /// <summary>
-        /// Отображает или скрывает опции поиска в зависимости от текущего состояния.
-        /// </summary>
-        internal static void ViewSurchOption()
-        {
-            var contentButton = jsonPage.BSurchOption.Content as string;
-            if (contentButton == "^")
-            {
-                jsonPage.SPSurchOption.Visibility = Visibility.Collapsed;
-                jsonPage.BSurchOption.Content = "˅";
-            }
-            else if (contentButton == "˅")
-            {
-                jsonPage.SPSurchOption.Visibility = Visibility.Visible;
-                jsonPage.BSurchOption.Content = "^";
-            }
-        }
+        
     }
 }

@@ -95,6 +95,7 @@
       <DependentUpon>JsonPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Services\GlobalSettings.cs" />
+    <Compile Include="Services\Option.cs" />
     <Page Include="AppWindows\AddNewElementWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
