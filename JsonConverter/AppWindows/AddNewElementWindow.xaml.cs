@@ -1,4 +1,4 @@
-﻿using JsonConverter.Services;
+﻿using CraftHub.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -17,7 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Xml.Linq;
 
-namespace JsonConverter.AppWindows
+namespace CraftHub.AppWindows
 {
     /// <summary>
     /// Логика взаимодействия для AddNewElementPage.xaml

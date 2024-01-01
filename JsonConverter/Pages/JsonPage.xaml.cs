@@ -1,5 +1,5 @@
-﻿using JsonConverter.AppWindows;
-using JsonConverter.Services;
+﻿using CraftHub.AppWindows;
+using CraftHub.Services;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -20,7 +20,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace JsonConverter.Pages
+namespace CraftHub.Pages
 {
     /// <summary>
     /// Логика взаимодействия для JsonPage.xaml

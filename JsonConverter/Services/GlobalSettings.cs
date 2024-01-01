@@ -1,4 +1,4 @@
-﻿using JsonConverter.Pages;
+﻿using CraftHub.Pages;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -9,9 +9,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows;
-using JsonConverter.AppWindows;
+using CraftHub.AppWindows;
 
-namespace JsonConverter.Services
+namespace CraftHub.Services
 {
     public static class GlobalSettings
     {

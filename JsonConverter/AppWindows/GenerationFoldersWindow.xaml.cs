@@ -18,7 +18,7 @@ using System.Windows.Shapes;
 using Application = System.Windows.Application;
 using MessageBox = System.Windows.MessageBox;
 
-namespace JsonConverter.AppWindows
+namespace CraftHub.AppWindows
 {
     /// <summary>
     /// Логика взаимодействия для RobocadExtensionWindow.xaml

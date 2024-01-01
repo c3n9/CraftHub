@@ -6,7 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace JsonConverter
+namespace CraftHub
 {
     /// <summary>
     /// Логика взаимодействия для App.xaml

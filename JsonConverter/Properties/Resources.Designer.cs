@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace JsonConverter.Properties
+namespace CraftHub.Properties
 {
 
 

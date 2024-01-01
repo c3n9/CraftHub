@@ -1,6 +1,6 @@
-﻿using JsonConverter.AppWindows;
-using JsonConverter.Pages;
-using JsonConverter.Services;
+﻿using CraftHub.AppWindows;
+using CraftHub.Pages;
+using CraftHub.Services;
 using Microsoft.CSharp;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -24,7 +24,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace JsonConverter.AppWindows
+namespace CraftHub.AppWindows
 {
     public partial class MainWindow : Window
     {

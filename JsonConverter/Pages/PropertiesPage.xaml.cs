@@ -1,4 +1,4 @@
-﻿using JsonConverter.Services;
+﻿using CraftHub.Services;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,7 +20,7 @@ using System.Windows.Shapes;
 using Microsoft.Win32;
 using System.IO;
 
-namespace JsonConverter.Pages
+namespace CraftHub.Pages
 {
     /// <summary>
     /// Логика взаимодействия для PropertiesPage.xaml

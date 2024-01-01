@@ -1,4 +1,4 @@
-﻿using JsonConverter.Pages;
+﻿using CraftHub.Pages;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows;
 
-namespace JsonConverter.Services
+namespace CraftHub.Services
 {
     public static class Option
     {
