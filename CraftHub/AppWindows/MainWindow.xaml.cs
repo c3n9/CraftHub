@@ -169,5 +169,10 @@ namespace CraftHub.AppWindows
         {
             new GenerationFoldersWindow().ShowDialog();
         }
+
+        private void MILessonConstuctor_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -164,11 +165,6 @@ namespace CraftHub.Pages
             Grid.SetColumnSpan(DGJsonData, 2);
             GlobalSettings.jsonString = JsonConvert.SerializeObject(GlobalSettings.dataTable, Formatting.Indented);
         }
-        private void DGJsonData_Sorting(object sender, DataGridSortingEventArgs e)
-        {
-
-        }
-
         private void TBSurch_TextChanged(object sender, TextChangedEventArgs e)
         {
             GlobalSettings.DisplayDataInGrid();
@@ -182,6 +178,24 @@ namespace CraftHub.Pages
         private void BSurchOption_Click(object sender, RoutedEventArgs e)
         {
             Option.ViewSurchOption();
+        }
+
+        private void DGJsonData_LoadingRow(object sender, DataGridRowEventArgs e)
+        {
+            
+        }
+
+        private void DGJsonData_Sorting(object sender, DataGridSortingEventArgs e)
+        {
+           
+        }
+
+        private void BCopyToClipboard_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(TBJson.Text))
+            {
+                Clipboard.SetText(TBJson.Text);
+            }
         }
     }
 }

@@ -173,5 +173,17 @@
   <ItemGroup>
     <Resource Include="Recourses\folder.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Recourses\jsonlogo.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Recourses\openfile.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Recourses\blocks.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Recourses\copy.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -31,7 +31,7 @@ namespace CraftHub.Pages
         {
             InitializeComponent();
             GlobalSettings.propertiesPage = this;
-            Type[] basicTypes = { typeof(int), typeof(bool), typeof(string) };
+            Type[] basicTypes = { typeof(int), typeof(bool), typeof(string), typeof(double), typeof(decimal) };
             CBValues.ItemsSource = basicTypes;
             GlobalSettings.RefreshProperties();
         }

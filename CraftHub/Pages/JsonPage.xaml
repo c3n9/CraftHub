@@ -11,14 +11,14 @@
       Loaded="Page_Loaded">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
             <RowDefinition />
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition/>
-            <ColumnDefinition Width="0.5*"/>
+            <ColumnDefinition />
+            <ColumnDefinition Width="0.5*" />
         </Grid.ColumnDefinitions>
         <StackPanel Margin="10"
                     HorizontalAlignment="Left"
@@ -32,11 +32,11 @@
                     Content="Edit" />
             <Button x:Name="BRemove"
                     Click="BRemove_Click"
-                    Content="Remove"/>
+                    Content="Remove" />
             <Button x:Name="BSurchOption"
                     Click="BSurchOption_Click"
-                    Content="˅" 
-                    Width="100"/>
+                    Content="˅"
+                    Width="50" />
         </StackPanel>
         <StackPanel Orientation="Horizontal"
                     Grid.Row="1"
@@ -44,14 +44,16 @@
                     Visibility="Collapsed"
                     VerticalAlignment="Center"
                     Margin="10">
-            <TextBlock Text="Surch" 
+            <TextBlock Text="Surch"
+                       VerticalAlignment="Center"
                        TextAlignment="Center"
-                       Margin="10,0"/>
+                       Margin="10,0" />
             <TextBox x:Name="TBSurch"
-                     TextAlignment="Center" 
                      Width="200"
-                     TextChanged="TBSurch_TextChanged"/>
+                     VerticalContentAlignment="Center"
+                     TextChanged="TBSurch_TextChanged" />
             <TextBlock Text="Property"
+                       VerticalAlignment="Center"
                        TextAlignment="Center"
                        Margin="10,0" />
             <ComboBox x:Name="CBProperty"
@@ -66,22 +68,75 @@
                   Sorting="DGJsonData_Sorting"
                   RowEditEnding="DGJsonData_RowEditEnding"
                   IsReadOnly="True"
+                  LoadingRow="DGJsonData_LoadingRow"
                   HorizontalScrollBarVisibility="Auto"
                   VerticalScrollBarVisibility="Auto"
                   SelectionChanged="DGJsonData_SelectionChanged"
-                  CanUserAddRows="False"/>
+                  CanUserAddRows="False" />
         <ScrollViewer Grid.Row="2"
                       Grid.Column="1">
-            <TextBlock x:Name="TBJson"
-                       TextWrapping="Wrap"
-                       Visibility="Collapsed"/>
+            <StackPanel>
+                <Button x:Name="BCopyToClipboard"
+                        Click="BCopyToClipboard_Click"
+                        BorderThickness="0"
+                        Width="auto"
+                        Background="#a8d8ff"
+                        Visibility="Collapsed">
+                    <Button.Style>
+                        <Style>
+                            
+                        </Style>
+                    </Button.Style>
+                    <Button.Content>
+                        <Grid>
+                            <TextBlock Text="json"
+                                       HorizontalAlignment="Left">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="FontFamily"
+                                                Value="Consolas" />
+                                        <Setter Property="FontSize"
+                                                Value="14" />
+                                        <Setter Property="Padding"
+                                                Value="5" />
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                            <Image Source="/Recourses/copy.png"
+                                   Width="20"
+                                   RenderOptions.BitmapScalingMode="Fant"
+                                   HorizontalAlignment="Right"
+                                   Margin="150,0,0,0"/>
+                        </Grid>
+                    </Button.Content>
+                </Button>
+                <TextBlock x:Name="TBJson"
+                           TextWrapping="Wrap"
+                           Visibility="Collapsed">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="FontFamily"
+                                    Value="Consolas" />
+                            <Setter Property="FontSize"
+                                    Value="14" />
+                            <Setter Property="Foreground"
+                                    Value="#FF2B91AF" />
+                            <Setter Property="Background"
+                                    Value="#FF1E1E1E" />
+                            <Setter Property="Padding"
+                                    Value="5" />
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </StackPanel>
+
         </ScrollViewer>
         <Button x:Name="BBack"
                 Content="Back"
-                Click="BBack_Click" 
+                Click="BBack_Click"
                 Grid.Row="3"
                 Margin="10"
                 HorizontalAlignment="Left"
-                Grid.ColumnSpan="2"/>
+                Grid.ColumnSpan="2" />
     </Grid>
 </Page>

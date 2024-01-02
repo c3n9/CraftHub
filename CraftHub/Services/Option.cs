@@ -22,6 +22,7 @@ namespace CraftHub.Services
             {
                 Grid.SetColumnSpan(GlobalSettings.jsonPage.DGJsonData, 1);
                 GlobalSettings.jsonPage.TBJson.Visibility = Visibility.Visible;
+                GlobalSettings.jsonPage.BCopyToClipboard.Visibility = Visibility.Visible;
                 var selectedData = GlobalSettings.jsonPage.DGJsonData.SelectedItem as DataRowView;
                 if (selectedData != null)
                 {

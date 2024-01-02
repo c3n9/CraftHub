@@ -9,6 +9,14 @@
                     Value="10,0,10,0" />
             <Setter Property="Width"
                     Value="200" />
+            <Setter Property="Background"
+                    Value="White" />
+            <Setter Property="BorderThickness"
+                    Value="1" />
+            <Setter Property="BorderBrush"
+                    Value="Black" />
+            <Setter Property="Cursor"
+                    Value="Hand" />
             <Style.Resources>
                 <Style TargetType="Border">
                     <Setter Property="CornerRadius"
@@ -20,6 +28,24 @@
                TargetType="MenuItem">
             <Setter Property="IsCheckable"
                     Value="True" />
+        </Style>
+        <Style TargetType="TextBox">
+            <Setter Property="FontSize"
+                    Value="14" />
+        </Style>
+        <Style TargetType="TextBlock">
+            <Setter Property="FontSize"
+                    Value="14" />
+        </Style>
+        <Style TargetType="Menu">
+            <Setter Property="FontSize"
+                    Value="14" />
+            <Setter Property="Background"
+                    Value="White" />
+        </Style>
+        <Style TargetType="DataGrid">
+            <Setter Property="FontSize"
+                    Value="14" />
         </Style>
     </Application.Resources>
 </Application>

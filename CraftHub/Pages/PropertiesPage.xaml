@@ -21,12 +21,13 @@
                        VerticalAlignment="Center"
                        Margin="10,0"/>
             <TextBox x:Name="TBPropertyName"
-                     Width="100" />
+                     Width="100" 
+                     VerticalContentAlignment="Center"/>
             <TextBlock Text="Type value"
                        VerticalAlignment="Center"
                        Margin="10,0"/>
             <ComboBox x:Name="CBValues" 
-                      Width="100"/>
+                      Width="150"/>
             <Button x:Name="BAddProperty"
                     Content="Add"
                     Click="BAddProperty_Click" 

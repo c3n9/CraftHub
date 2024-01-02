@@ -19,13 +19,24 @@
             <MenuItem Header="_File">
                 <MenuItem Header="Upload template"
                           x:Name="MIImportClass"
-                          Click="MIImportClass_Click" />
+                          Click="MIImportClass_Click"
+                          Icon=".cs"/>
                 <MenuItem Header="Import json file"
                           x:Name="MIImportJsonFile"
-                          Click="MIImportJsonFile_Click" />
+                          Click="MIImportJsonFile_Click">
+                    <MenuItem.Icon>
+                        <Image Source="/Recourses/jsonlogo.png"
+                               RenderOptions.BitmapScalingMode="Fant"/>
+                    </MenuItem.Icon>
+                </MenuItem>
                 <MenuItem Header="Export json file"
                           x:Name="MIExportJsonFile"
-                          Click="MIExportJsonFile_Click" />
+                          Click="MIExportJsonFile_Click">
+                    <MenuItem.Icon>
+                        <Image Source="/Recourses/jsonlogo.png" 
+                               RenderOptions.BitmapScalingMode="Fant"/>
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
             <MenuItem Header="_Options">
                 <MenuItem Header="Add in modal window"
@@ -44,12 +55,24 @@
             <MenuItem Header="_Extension">
                 <MenuItem Header="Generation folders"
                           x:Name="MIGenerationFolders"
-                          Click="MIGenerationFolders_Click" />
+                          Click="MIGenerationFolders_Click">
+                    <MenuItem.Icon>
+                        <Image Source="/Recourses/openfile.png"
+                               RenderOptions.BitmapScalingMode="Fant" />
+                    </MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Generation folders"
+                          x:Name="MILessonConstuctor"
+                          Click="MILessonConstuctor_Click">
+                    <MenuItem.Icon>
+                        <Image Source="/Recourses/blocks.png"
+                               RenderOptions.BitmapScalingMode="Fant" />
+                    </MenuItem.Icon>
+                </MenuItem>
             </MenuItem>
         </Menu>
         <Frame x:Name="MainFrame"
-               NavigationUIVisibility="Hidden"
-               Grid.Row="1" />
+               NavigationUIVisibility="Hidden"               Grid.Row="1" />
 
     </Grid>
 </Window>
