@@ -20,21 +20,21 @@
                 <MenuItem Header="Upload template"
                           x:Name="MIImportClass"
                           Click="MIImportClass_Click"
-                          Icon=".cs"/>
+                          Icon=".cs" />
                 <MenuItem Header="Import json file"
                           x:Name="MIImportJsonFile"
                           Click="MIImportJsonFile_Click">
                     <MenuItem.Icon>
                         <Image Source="/Recourses/jsonlogo.png"
-                               RenderOptions.BitmapScalingMode="Fant"/>
+                               RenderOptions.BitmapScalingMode="Fant" />
                     </MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="Export json file"
                           x:Name="MIExportJsonFile"
                           Click="MIExportJsonFile_Click">
                     <MenuItem.Icon>
-                        <Image Source="/Recourses/jsonlogo.png" 
-                               RenderOptions.BitmapScalingMode="Fant"/>
+                        <Image Source="/Recourses/jsonlogo.png"
+                               RenderOptions.BitmapScalingMode="Fant" />
                     </MenuItem.Icon>
                 </MenuItem>
             </MenuItem>
@@ -61,7 +61,7 @@
                                RenderOptions.BitmapScalingMode="Fant" />
                     </MenuItem.Icon>
                 </MenuItem>
-                <MenuItem Header="Generation folders"
+                <MenuItem Header="Lesson constructor"
                           x:Name="MILessonConstuctor"
                           Click="MILessonConstuctor_Click">
                     <MenuItem.Icon>
@@ -72,7 +72,7 @@
             </MenuItem>
         </Menu>
         <Frame x:Name="MainFrame"
-               NavigationUIVisibility="Hidden"               Grid.Row="1" />
-
+               NavigationUIVisibility="Hidden"
+               Grid.Row="1" />
     </Grid>
 </Window>

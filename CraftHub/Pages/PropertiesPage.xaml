@@ -31,7 +31,7 @@
             <Button x:Name="BAddProperty"
                     Content="Add"
                     Click="BAddProperty_Click" 
-                    Margin="10,0"/>
+                    Margin="10,0,0,0"/>
             <Button x:Name="BRemovePropery"
                     Click="BRemovePropery_Click"
                     Content="Remove" />

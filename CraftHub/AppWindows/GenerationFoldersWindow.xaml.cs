@@ -87,6 +87,7 @@ namespace CraftHub.AppWindows
         private void GenerateLesson(string folderPath, string folderName)
         {
             OpenFileDialog openFileDialog = new OpenFileDialog() { Multiselect = true, Filter = $"Uploading to {folderName}| *.png; *.jpg;" };
+
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 int countPage = 1;
@@ -107,7 +108,6 @@ namespace CraftHub.AppWindows
                 }
             }
         }
-
         private void TBBlockNumber_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             // Паттерн для проверки наличия только чисел
@@ -134,6 +134,7 @@ namespace CraftHub.AppWindows
             }
         }
     }
+
 }
 
 
