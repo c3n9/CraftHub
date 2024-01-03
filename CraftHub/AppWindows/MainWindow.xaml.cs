@@ -172,7 +172,7 @@ namespace CraftHub.AppWindows
 
         private void MILessonConstuctor_Click(object sender, RoutedEventArgs e)
         {
-
+            new LessonConstructorWindow().ShowDialog();
         }
     }
 }

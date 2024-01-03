@@ -56,3 +56,5 @@ C:\Users\quart\source\repos\CraftHub\CraftHub\obj\Debug\CraftHub.csproj.CoreComp
 C:\Users\quart\source\repos\CraftHub\CraftHub\obj\Debug\CraftHub.csproj.CopyComplete
 C:\Users\quart\source\repos\CraftHub\CraftHub\obj\Debug\CraftHub.exe
 C:\Users\quart\source\repos\CraftHub\CraftHub\obj\Debug\CraftHub.pdb
+C:\Users\quart\source\repos\CraftHub\CraftHub\obj\Debug\AppWindows\LessonConstructorWindow.g.cs
+C:\Users\quart\source\repos\CraftHub\CraftHub\obj\Debug\AppWindows\LessonConstructorWindow.baml

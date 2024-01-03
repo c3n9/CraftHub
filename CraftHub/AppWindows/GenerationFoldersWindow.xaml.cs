@@ -86,7 +86,7 @@ namespace CraftHub.AppWindows
         }
         private void GenerateLesson(string folderPath, string folderName)
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog() { Multiselect = true, Filter = $"Uploading to {folderName}| *.png; *.jpg;" };
+            OpenFileDialog openFileDialog = new OpenFileDialog() { Multiselect = true, Filter = $"Uploading to {folderName} | *.png; *.jpg; *.jpeg" };
 
             if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {

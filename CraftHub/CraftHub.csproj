@@ -91,6 +91,9 @@
     <Compile Include="AppWindows\GenerationFoldersWindow.xaml.cs">
       <DependentUpon>GenerationFoldersWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="AppWindows\LessonConstructorWindow.xaml.cs">
+      <DependentUpon>LessonConstructorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\JsonPage.xaml.cs">
       <DependentUpon>JsonPage.xaml</DependentUpon>
     </Compile>
@@ -101,6 +104,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="AppWindows\GenerationFoldersWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="AppWindows\LessonConstructorWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

@@ -81,33 +81,21 @@
                         BorderThickness="0"
                         Width="auto"
                         Background="#a8d8ff"
-                        Visibility="Collapsed">
-                    <Button.Style>
-                        <Style>
-                            
-                        </Style>
-                    </Button.Style>
+                        Visibility="Collapsed"
+                        Style="{Binding Null}">
                     <Button.Content>
-                        <Grid>
+                        <StackPanel Orientation="Horizontal">
                             <TextBlock Text="json"
-                                       HorizontalAlignment="Left">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="FontFamily"
-                                                Value="Consolas" />
-                                        <Setter Property="FontSize"
-                                                Value="14" />
-                                        <Setter Property="Padding"
-                                                Value="5" />
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                                       FontFamily="Consolas"
+                                       FontSize="14"
+                                       Padding="5"
+                                       HorizontalAlignment="Left" />
+
                             <Image Source="/Recourses/copy.png"
                                    Width="20"
                                    RenderOptions.BitmapScalingMode="Fant"
-                                   HorizontalAlignment="Right"
-                                   Margin="150,0,0,0"/>
-                        </Grid>
+                                   HorizontalAlignment="Right" />
+                        </StackPanel>
                     </Button.Content>
                 </Button>
                 <TextBlock x:Name="TBJson"
