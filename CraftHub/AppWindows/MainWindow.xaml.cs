@@ -161,8 +161,10 @@ namespace CraftHub.AppWindows
             {
                 Grid.SetColumnSpan(GlobalSettings.jsonPage.DGJsonData, 2);
                 GlobalSettings.jsonPage.TBJson.Visibility = Visibility.Collapsed;
+                GlobalSettings.jsonPage.BCopyToClipboard.Visibility = Visibility.Collapsed;
+
             }
-            
+
         }
 
         private void MIGenerationFolders_Click(object sender, RoutedEventArgs e)

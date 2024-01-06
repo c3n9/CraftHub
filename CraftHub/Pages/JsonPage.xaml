@@ -71,8 +71,7 @@
                   LoadingRow="DGJsonData_LoadingRow"
                   HorizontalScrollBarVisibility="Auto"
                   VerticalScrollBarVisibility="Auto"
-                  SelectionChanged="DGJsonData_SelectionChanged"
-                  CanUserAddRows="False" />
+                  SelectionChanged="DGJsonData_SelectionChanged" />
         <ScrollViewer Grid.Row="2"
                       Grid.Column="1">
             <StackPanel>

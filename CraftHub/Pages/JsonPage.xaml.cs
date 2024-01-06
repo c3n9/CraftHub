@@ -65,7 +65,7 @@ namespace CraftHub.Pages
 
         private void BBack_Click(object sender, RoutedEventArgs e)
         {
-            if(GlobalSettings.dataTable.Rows.Count != 0)
+            if (GlobalSettings.dataTable.Rows.Count != 0)
             {
                 var continueBack = MessageBox.Show("The completed data will be deleted, continue?", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
                 if (continueBack == MessageBoxResult.OK)
@@ -74,14 +74,14 @@ namespace CraftHub.Pages
                     GlobalSettings.dataTable = null;
                     NavigationService.GoBack();
                 }
-                    
-                
+
+
             }
             else
             {
                 NavigationService.GoBack();
             }
-                
+
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -127,14 +127,21 @@ namespace CraftHub.Pages
 
         private void DGJsonData_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (GlobalSettings.mainWindow.MIViewJson.IsChecked)
+            try
             {
-                Option.ViewJsonFromTable();
+                if (GlobalSettings.mainWindow.MIViewJson.IsChecked)
+                {
+                    Option.ViewJsonFromTable();
+                }
+                else
+                {
+                    Grid.SetColumnSpan(DGJsonData, 2);
+                    TBJson.Visibility = Visibility.Collapsed;
+                }
             }
-            else
+            catch
             {
-                Grid.SetColumnSpan(DGJsonData, 2);
-                TBJson.Visibility = Visibility.Collapsed;
+                return;
             }
         }
 
@@ -182,12 +189,12 @@ namespace CraftHub.Pages
 
         private void DGJsonData_LoadingRow(object sender, DataGridRowEventArgs e)
         {
-            
+
         }
 
         private void DGJsonData_Sorting(object sender, DataGridSortingEventArgs e)
         {
-           
+
         }
 
         private void BCopyToClipboard_Click(object sender, RoutedEventArgs e)

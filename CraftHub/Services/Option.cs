@@ -34,19 +34,26 @@ namespace CraftHub.Services
             }
             else if (GlobalSettings.jsonPage.DGJsonData.SelectedItems.Count > 1)
             {
-                var jsonList = new List<Dictionary<string, object>>();
-                Grid.SetColumnSpan(GlobalSettings.jsonPage.DGJsonData, 1);
-                foreach (var selectedData in GlobalSettings.jsonPage.DGJsonData.SelectedItems.Cast<DataRowView>())
+                try
                 {
-                    var selectedRow = selectedData.Row;
-                    var rowData = selectedRow.Table.Columns
-                        .Cast<DataColumn>()
-                        .ToDictionary(col => col.ColumnName, col => selectedRow[col]);
+                    var jsonList = new List<Dictionary<string, object>>();
+                    Grid.SetColumnSpan(GlobalSettings.jsonPage.DGJsonData, 1);
+                    foreach (var selectedData in GlobalSettings.jsonPage.DGJsonData.SelectedItems.Cast<DataRowView>())
+                    {
+                        var selectedRow = selectedData.Row;
+                        var rowData = selectedRow.Table.Columns
+                            .Cast<DataColumn>()
+                            .ToDictionary(col => col.ColumnName, col => selectedRow[col]);
 
-                    jsonList.Add(rowData);
+                        jsonList.Add(rowData);
+                    }
+                    string json = JsonConvert.SerializeObject(jsonList, Formatting.Indented);
+                    GlobalSettings.jsonPage.TBJson.Text = json;
                 }
-                string json = JsonConvert.SerializeObject(jsonList, Formatting.Indented);
-                GlobalSettings.jsonPage.TBJson.Text = json;
+                catch
+                {
+                    return;
+                }
             }
         }
         /// <summary>
