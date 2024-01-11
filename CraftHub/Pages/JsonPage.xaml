@@ -33,6 +33,9 @@
             <Button x:Name="BRemove"
                     Click="BRemove_Click"
                     Content="Remove" />
+            <Button x:Name="BExport"
+                    Click="BExport_Click"
+                    Content="Export" />
             <Button x:Name="BSurchOption"
                     Click="BSurchOption_Click"
                     Content="˅"

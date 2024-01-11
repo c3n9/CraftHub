@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="CraftHub"
         MinHeight="450"
-        MinWidth="950"
+        MinWidth="1050"
         WindowStartupLocation="CenterScreen"
         Icon="/Recourses/logo.ico">
     <Grid>

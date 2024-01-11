@@ -1,11 +1,13 @@
 ﻿using CraftHub.AppWindows;
 using CraftHub.Services;
+using Microsoft.Win32;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -202,6 +204,25 @@ namespace CraftHub.Pages
             if (!string.IsNullOrEmpty(TBJson.Text))
             {
                 Clipboard.SetText(TBJson.Text);
+            }
+        }
+
+        private void BExport_Click(object sender, RoutedEventArgs e)
+        {
+            var exportJsonString = JsonConvert.SerializeObject(GlobalSettings.dataTable, Formatting.Indented);
+            if (!string.IsNullOrWhiteSpace(exportJsonString))
+            {
+                var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
+                if (dialog.ShowDialog().GetValueOrDefault())
+                {
+                    File.WriteAllText(dialog.FileName, exportJsonString, Encoding.UTF8);
+                    MessageBox.Show("Successful export", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Import json first");
+                return;
             }
         }
     }
