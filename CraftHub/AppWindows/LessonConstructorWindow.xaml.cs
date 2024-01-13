@@ -74,8 +74,23 @@ namespace CraftHub.AppWindows
             var dialog = new OpenFileDialog() { Filter = ".png, .jpg, .jpeg | *.png; *.jpg; *.jpeg;" };
             if (dialog.ShowDialog().GetValueOrDefault())
             {
+                // Создаем контекстное меню
+                ContextMenu contextMenu = new ContextMenu();
+                // Создаем пункт меню "Удалить"
+                MenuItem deleteMenuItem = new MenuItem();
+                deleteMenuItem.Header = "Delete";
+                deleteMenuItem.Click += MIDelete_Click;
+                // Добавляем пункт меню в контекстное меню
+                contextMenu.Items.Add(deleteMenuItem);
+
                 var photoInBytes = File.ReadAllBytes(dialog.FileName);
-                Image image = new Image() { Source = MyTools.BytesToImage(photoInBytes), Width = 100, Height = 100 };
+                Image image = new Image() 
+                { 
+                    Source = MyTools.BytesToImage(photoInBytes), 
+                    Width = 100, 
+                    Height = 100, 
+                    ContextMenu = contextMenu 
+                };
                 image.MouseLeftButtonDown += IDragging_MouseLeftButtonDown;
                 image.MouseLeftButtonUp += IDragging_MouseLeftButtonUp;
                 image.MouseMove += IDragging_MouseMove;
@@ -85,11 +100,43 @@ namespace CraftHub.AppWindows
 
         private void BAddTextBox_Click(object sender, RoutedEventArgs e)
         {
-            var textBlock = new TextBlock() { Width = 200, Height = 30, Text= "TEST_TEST_TEST_TEST_TEST" };
+            // Создаем контекстное меню
+            ContextMenu contextMenu = new ContextMenu();
+            // Создаем пункт меню "Удалить"
+            MenuItem deleteMenuItem = new MenuItem();
+            deleteMenuItem.Header = "Delete";
+            deleteMenuItem.Click += MIDelete_Click;
+            // Добавляем пункт меню в контекстное меню
+            contextMenu.Items.Add(deleteMenuItem);
+
+            var textBlock = new TextBlock() 
+            { 
+                Width = 200, 
+                Height = 100, 
+                Text = $"{TBLabel.Text}", 
+                TextWrapping = TextWrapping.Wrap, 
+                ContextMenu = contextMenu
+            };
             textBlock.MouseLeftButtonDown += IDragging_MouseLeftButtonDown;
             textBlock.MouseLeftButtonUp += IDragging_MouseLeftButtonUp;
             textBlock.MouseMove += IDragging_MouseMove;
             CWorkingArea.Children.Add(textBlock);
+        }
+        private void MIDelete_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is MenuItem menuItem)
+            {
+                ContextMenu contextMenu = menuItem.Parent as ContextMenu;
+                if (contextMenu.PlacementTarget is Image image)
+                    CWorkingArea.Children.Remove(image);
+                if (contextMenu.PlacementTarget is TextBlock textBlock)
+                    CWorkingArea.Children.Remove(textBlock);
+            }
+        }
+
+        private void BClear_Click(object sender, RoutedEventArgs e)
+        {
+            CWorkingArea.Children.Clear();
         }
     }
 }
