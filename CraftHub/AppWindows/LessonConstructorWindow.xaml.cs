@@ -79,6 +79,9 @@ namespace CraftHub.AppWindows
                 // Создаем пункт меню "Удалить"
                 MenuItem deleteMenuItem = new MenuItem();
                 deleteMenuItem.Header = "Delete";
+                Image iconImage = new Image();
+                iconImage.Source = new BitmapImage(new Uri("/Recourses/delete.png", UriKind.Relative));
+                deleteMenuItem.Icon = iconImage;
                 deleteMenuItem.Click += MIDelete_Click;
                 // Добавляем пункт меню в контекстное меню
                 contextMenu.Items.Add(deleteMenuItem);
@@ -100,11 +103,19 @@ namespace CraftHub.AppWindows
 
         private void BAddTextBox_Click(object sender, RoutedEventArgs e)
         {
+            if (string.IsNullOrWhiteSpace(TBLabel.Text))
+            {
+                MessageBox.Show("Enter text", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             // Создаем контекстное меню
             ContextMenu contextMenu = new ContextMenu();
             // Создаем пункт меню "Удалить"
             MenuItem deleteMenuItem = new MenuItem();
             deleteMenuItem.Header = "Delete";
+            Image iconImage = new Image();
+            iconImage.Source = new BitmapImage(new Uri("/Recourses/delete.png", UriKind.Relative));
+            deleteMenuItem.Icon = iconImage;
             deleteMenuItem.Click += MIDelete_Click;
             // Добавляем пункт меню в контекстное меню
             contextMenu.Items.Add(deleteMenuItem);
