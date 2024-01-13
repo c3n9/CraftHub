@@ -7,7 +7,29 @@
         mc:Ignorable="d"
         Title="LessonConstructorWindow" Height="450" Width="800">
     <Grid>
-        <TextBlock Text="Soon...."
-                   FontSize="100" />
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal">
+            <Button x:Name="BAddImage"
+                    Content="Add image" 
+                    Click="BAddImage_Click"/>
+            <Button x:Name="BAddTextBox"
+                    Content="Add text box"
+                    Click="BAddTextBox_Click" />
+        </StackPanel>
+        <Canvas x:Name="CWorkingArea"
+                Grid.Row="1">
+            <Image x:Name="IDragging"
+                   Source="/Recourses/openfile.png"
+                   Width="100"
+                   Height="100"
+                   MouseLeftButtonDown="IDragging_MouseLeftButtonDown"
+                   MouseLeftButtonUp="IDragging_MouseLeftButtonUp"
+                   MouseMove="IDragging_MouseMove" />
+        </Canvas>
+        
+
     </Grid>
 </Window>
