@@ -85,11 +85,11 @@ namespace CraftHub.AppWindows
 
         private void BAddTextBox_Click(object sender, RoutedEventArgs e)
         {
-            var textBox = new TextBox() { Width = 150, Height = 30 };
-            textBox.MouseLeftButtonDown += IDragging_MouseLeftButtonDown;
-            textBox.MouseLeftButtonUp += IDragging_MouseLeftButtonUp;
-            textBox.MouseMove += IDragging_MouseMove;
-            CWorkingArea.Children.Add(textBox);
+            var textBlock = new TextBlock() { Width = 200, Height = 30, Text= "TEST_TEST_TEST_TEST_TEST" };
+            textBlock.MouseLeftButtonDown += IDragging_MouseLeftButtonDown;
+            textBlock.MouseLeftButtonUp += IDragging_MouseLeftButtonUp;
+            textBlock.MouseMove += IDragging_MouseMove;
+            CWorkingArea.Children.Add(textBlock);
         }
     }
 }
