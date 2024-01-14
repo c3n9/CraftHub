@@ -35,7 +35,7 @@ namespace CraftHub.AppWindows
         /// <summary>
         /// Обработчик события нажатия левой кнопки мыши для начала перетаскивания.
         /// </summary>
-        private void IDragging_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void Dragging_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             // Проверяем, была ли нажата клавиша Shift при нажатии левой кнопки мыши.
             if (Keyboard.IsKeyDown(Key.LeftShift) || Keyboard.IsKeyDown(Key.RightShift))
@@ -49,7 +49,7 @@ namespace CraftHub.AppWindows
         /// <summary>
         /// Обработчик события отпускания левой кнопки мыши для окончания перетаскивания.
         /// </summary>
-        private void IDragging_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void Dragging_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             // Завершаем перетаскивание при отпускании левой кнопки мыши.
             isDragging = false;
@@ -59,7 +59,7 @@ namespace CraftHub.AppWindows
         /// <summary>
         /// Обработчик события перемещения мыши для обновления положения элемента во время перетаскивания.
         /// </summary>
-        private void IDragging_MouseMove(object sender, MouseEventArgs e)
+        private void Dragging_MouseMove(object sender, MouseEventArgs e)
         {
             if (isDragging)
             {
@@ -72,31 +72,52 @@ namespace CraftHub.AppWindows
                 Canvas.SetTop((UIElement)sender, mouseY);
             }
         }
-        private void IResizing_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// Обработчик события нажатия правой кнопки мыши для изменения размера.
+        /// </summary>
+        private void Resizing_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
+            // Устанавливаем флаг, указывающий, что начат процесс изменения размера.
             isResizing = true;
+
+            // Запоминаем начальную позицию, где началось изменение размера.
             resizeStartPoint = e.GetPosition(sender as UIElement);
+
+            // Запоминаем оригинальную ширину и высоту UIElement.
             originalWidth = (sender as UIElement).RenderSize.Width;
             originalHeight = (sender as UIElement).RenderSize.Height;
+
+            // Захватываем мышь для отслеживания последующих движений мыши.
             (sender as UIElement).CaptureMouse();
         }
-
-        private void IResizing_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        /// <summary>
+        /// Обработчик события отпускания правой кнопки мыши после изменения размера.
+        /// </summary>
+        private void Resizing_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
         {
+            // Сбрасываем флаг изменения размера, так как изменение завершено.
             isResizing = false;
+
+            // Освобождаем захват мыши, чтобы прекратить отслеживание дальнейших движений мыши.
             (sender as UIElement).ReleaseMouseCapture();
         }
-
-        private void IResizing_MouseMove(object sender, MouseEventArgs e)
+        /// <summary>
+        /// Обработчик события перемещения мыши во время изменения размера.
+        /// </summary>
+        private void Resizing_MouseMove(object sender, MouseEventArgs e)
         {
+            // Проверяем, идет ли в данный момент процесс изменения размера.
             if (isResizing)
             {
+                // Вычисляем изменение позиции по X и Y относительно начальной точки.
                 double deltaX = e.GetPosition(CWorkingArea).X - resizeStartPoint.X;
                 double deltaY = e.GetPosition(CWorkingArea).Y - resizeStartPoint.Y;
 
+                // Вычисляем новую ширину и высоту на основе изменений.
                 double newWidth = Math.Max(0, originalWidth + deltaX);
                 double newHeight = Math.Max(0, originalHeight + deltaY);
 
+                // Обновляем ширину и минимальную высоту изменяемого FrameworkElement.
                 (sender as FrameworkElement).Width = newWidth;
                 (sender as FrameworkElement).MinHeight = newHeight;
             }
@@ -126,13 +147,13 @@ namespace CraftHub.AppWindows
                     Height = 100, 
                     ContextMenu = contextMenu 
                 };
-                image.MouseLeftButtonDown += IDragging_MouseLeftButtonDown;
-                image.MouseLeftButtonUp += IDragging_MouseLeftButtonUp;
-                image.MouseMove += IDragging_MouseMove;
+                image.MouseLeftButtonDown += Dragging_MouseLeftButtonDown;
+                image.MouseLeftButtonUp += Dragging_MouseLeftButtonUp;
+                image.MouseMove += Dragging_MouseMove;
 
-                image.MouseRightButtonDown += IResizing_MouseRightButtonDown;
-                image.MouseRightButtonUp += IResizing_MouseRightButtonUp;
-                image.MouseMove += IResizing_MouseMove;
+                image.MouseRightButtonDown += Resizing_MouseRightButtonDown;
+                image.MouseRightButtonUp += Resizing_MouseRightButtonUp;
+                image.MouseMove += Resizing_MouseMove;
 
                 CWorkingArea.Children.Add(image);
             }
@@ -165,13 +186,13 @@ namespace CraftHub.AppWindows
                 TextWrapping = TextWrapping.Wrap, 
                 ContextMenu = contextMenu
             };
-            textBlock.MouseLeftButtonDown += IDragging_MouseLeftButtonDown;
-            textBlock.MouseLeftButtonUp += IDragging_MouseLeftButtonUp;
-            textBlock.MouseMove += IDragging_MouseMove;
+            textBlock.MouseLeftButtonDown += Dragging_MouseLeftButtonDown;
+            textBlock.MouseLeftButtonUp += Dragging_MouseLeftButtonUp;
+            textBlock.MouseMove += Dragging_MouseMove;
 
-            textBlock.MouseRightButtonDown += IResizing_MouseRightButtonDown;
-            textBlock.MouseRightButtonUp += IResizing_MouseRightButtonUp;
-            textBlock.MouseMove += IResizing_MouseMove;
+            textBlock.MouseRightButtonDown += Resizing_MouseRightButtonDown;
+            textBlock.MouseRightButtonUp += Resizing_MouseRightButtonUp;
+            textBlock.MouseMove += Resizing_MouseMove;
 
             CWorkingArea.Children.Add(textBlock);
         }
