@@ -23,6 +23,10 @@ namespace CraftHub.AppWindows
     public partial class LessonConstructorWindow : Window
     {
         private bool isDragging = false;
+        private bool isResizing = false;
+        private Point resizeStartPoint;
+        private double originalWidth;
+        private double originalHeight;
         public LessonConstructorWindow()
         {
             InitializeComponent();
@@ -68,7 +72,35 @@ namespace CraftHub.AppWindows
                 Canvas.SetTop((UIElement)sender, mouseY);
             }
         }
+        private void IResizing_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            isResizing = true;
+            resizeStartPoint = e.GetPosition(sender as UIElement);
+            originalWidth = (sender as UIElement).RenderSize.Width;
+            originalHeight = (sender as UIElement).RenderSize.Height;
+            (sender as UIElement).CaptureMouse();
+        }
 
+        private void IResizing_MouseRightButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            isResizing = false;
+            (sender as UIElement).ReleaseMouseCapture();
+        }
+
+        private void IResizing_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isResizing)
+            {
+                double deltaX = e.GetPosition(CWorkingArea).X - resizeStartPoint.X;
+                double deltaY = e.GetPosition(CWorkingArea).Y - resizeStartPoint.Y;
+
+                double newWidth = Math.Max(0, originalWidth + deltaX);
+                double newHeight = Math.Max(0, originalHeight + deltaY);
+
+                (sender as FrameworkElement).Width = newWidth;
+                (sender as FrameworkElement).MinHeight = newHeight;
+            }
+        }
         private void BAddImage_Click(object sender, RoutedEventArgs e)
         {
             var dialog = new OpenFileDialog() { Filter = ".png, .jpg, .jpeg | *.png; *.jpg; *.jpeg;" };
@@ -97,6 +129,11 @@ namespace CraftHub.AppWindows
                 image.MouseLeftButtonDown += IDragging_MouseLeftButtonDown;
                 image.MouseLeftButtonUp += IDragging_MouseLeftButtonUp;
                 image.MouseMove += IDragging_MouseMove;
+
+                image.MouseRightButtonDown += IResizing_MouseRightButtonDown;
+                image.MouseRightButtonUp += IResizing_MouseRightButtonUp;
+                image.MouseMove += IResizing_MouseMove;
+
                 CWorkingArea.Children.Add(image);
             }
         }
@@ -131,6 +168,11 @@ namespace CraftHub.AppWindows
             textBlock.MouseLeftButtonDown += IDragging_MouseLeftButtonDown;
             textBlock.MouseLeftButtonUp += IDragging_MouseLeftButtonUp;
             textBlock.MouseMove += IDragging_MouseMove;
+
+            textBlock.MouseRightButtonDown += IResizing_MouseRightButtonDown;
+            textBlock.MouseRightButtonUp += IResizing_MouseRightButtonUp;
+            textBlock.MouseMove += IResizing_MouseMove;
+
             CWorkingArea.Children.Add(textBlock);
         }
         private void MIDelete_Click(object sender, RoutedEventArgs e)
