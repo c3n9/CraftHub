@@ -172,7 +172,6 @@ namespace CraftHub.AppWindows
             MenuItem deleteMenuItem = new MenuItem();
             deleteMenuItem.Header = "Delete";
             Image iconImage = new Image();
-            iconImage.Source = new BitmapImage(new Uri("/Recourses/delete.png", UriKind.Relative));
             deleteMenuItem.Icon = iconImage;
             deleteMenuItem.Click += MIDelete_Click;
             // Добавляем пункт меню в контекстное меню
@@ -184,8 +183,9 @@ namespace CraftHub.AppWindows
                 Height = 100, 
                 Text = $"{TBLabel.Text}", 
                 TextWrapping = TextWrapping.Wrap, 
-                ContextMenu = contextMenu
-            };
+                ContextMenu = contextMenu,
+                FontFamily = new FontFamily("pack://application:,,,/Fonts/#Montserrat-Regular")
+        };
             textBlock.MouseLeftButtonDown += Dragging_MouseLeftButtonDown;
             textBlock.MouseLeftButtonUp += Dragging_MouseLeftButtonUp;
             textBlock.MouseMove += Dragging_MouseMove;
@@ -286,14 +286,6 @@ namespace CraftHub.AppWindows
             Image,
             Text
         }
-
-        //private bool AreRectanglesIntersecting(double left1, double top1, double width1, double height1, double left2, double top2, double width2, double height2)
-        //{
-        //    return (left1 < left2 + width2 &&
-        //            left1 + width1 > left2 &&
-        //            top1 < top2 + height2 &&
-        //            top1 + height1 > top2);
-        //}
 
         private void BSave_Click(object sender, RoutedEventArgs e)
         {
