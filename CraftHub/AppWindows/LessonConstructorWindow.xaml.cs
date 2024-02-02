@@ -212,5 +212,113 @@ namespace CraftHub.AppWindows
         {
             CWorkingArea.Children.Clear();
         }
+
+        private void AutoArrangeText()
+        {
+            double canvasWidth = CWorkingArea.ActualWidth;
+
+            List<ElementInfo> elementsInfo = new List<ElementInfo>();
+
+            foreach (UIElement element in CWorkingArea.Children)
+            {
+                double elementLeft = Canvas.GetLeft(element);
+                double elementTop = Canvas.GetTop(element);
+
+                if (element is Image)
+                {
+                    double imageWidth = ((Image)element).ActualWidth;
+                    double imageHeight = ((Image)element).ActualHeight;
+
+                    elementsInfo.Add(new ElementInfo(element, ElementType.Image, elementLeft, elementTop, imageWidth, imageHeight));
+                }
+                else if (element is TextBlock)
+                {
+                    ((TextBlock)element).Measure(new Size(double.PositiveInfinity, double.PositiveInfinity));
+                    double textWidth = Math.Min(((TextBlock)element).DesiredSize.Width, canvasWidth);
+                    double textHeight = Math.Min(((TextBlock)element).DesiredSize.Height, canvasWidth);
+
+                    elementsInfo.Add(new ElementInfo(element, ElementType.Text, elementLeft, elementTop, textWidth, textHeight));
+                }
+            }
+
+            elementsInfo.Sort((a, b) => a.Top.CompareTo(b.Top));
+
+            double currentTop = 10;
+            double currentLeft = 10;
+
+            foreach (var elementInfo in elementsInfo)
+            {
+                if (currentLeft + elementInfo.Width > canvasWidth)
+                {
+                    currentLeft = 10;
+                    currentTop += elementInfo.Height + 10;
+                }
+
+                Canvas.SetLeft(elementInfo.Element, currentLeft);
+                Canvas.SetTop(elementInfo.Element, currentTop);
+
+                currentLeft += elementInfo.Width + 10;
+            }
+        }
+
+        private class ElementInfo
+        {
+            public UIElement Element { get; }
+            public ElementType Type { get; }
+            public double Left { get; }
+            public double Top { get; }
+            public double Width { get; }
+            public double Height { get; }
+
+            public ElementInfo(UIElement element, ElementType type, double left, double top, double width, double height)
+            {
+                Element = element;
+                Type = type;
+                Left = left;
+                Top = top;
+                Width = width;
+                Height = height;
+            }
+        }
+
+        private enum ElementType
+        {
+            Image,
+            Text
+        }
+
+        //private bool AreRectanglesIntersecting(double left1, double top1, double width1, double height1, double left2, double top2, double width2, double height2)
+        //{
+        //    return (left1 < left2 + width2 &&
+        //            left1 + width1 > left2 &&
+        //            top1 < top2 + height2 &&
+        //            top1 + height1 > top2);
+        //}
+
+        private void BSave_Click(object sender, RoutedEventArgs e)
+        {
+            AutoArrangeText();
+
+            double specifiedWidth = double.Parse(TBWidth.Text);
+            double specifiedHeight = double.Parse(TBHeight.Text);
+
+            CWorkingArea.Measure(new Size(specifiedWidth, specifiedHeight));
+            CWorkingArea.Arrange(new Rect(new Size(specifiedWidth, specifiedHeight)));
+
+            RenderTargetBitmap rtb = new RenderTargetBitmap((int)specifiedWidth, (int)specifiedHeight, 96, 96, PixelFormats.Default);
+            rtb.Render(CWorkingArea);
+
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.Filter = "PNG Files (*.png)|*.png";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                PngBitmapEncoder encoder = new PngBitmapEncoder();
+                encoder.Frames.Add(BitmapFrame.Create(rtb));
+                using (var fileStream = new FileStream(saveFileDialog.FileName, FileMode.Create))
+                {
+                    encoder.Save(fileStream);
+                }
+            }
+        }
     }
 }

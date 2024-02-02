@@ -12,25 +12,46 @@
             <ColumnDefinition Width="auto"/>
         </Grid.ColumnDefinitions>
         <Canvas x:Name="CWorkingArea" />
-        <StackPanel Grid.Column="1">
-            <Button x:Name="BClear"
-                    Content="Clear"
-                    Click="BClear_Click"
-                    Margin="0,10,0,0"/>
-            <Button x:Name="BAddImage"
-                    Content="Add image" 
-                    Click="BAddImage_Click"
-                    Margin="0,10"/>
-            <Button x:Name="BAddTextBox"
-                    Content="Add text box"
-                    Click="BAddTextBox_Click" />
-            <TextBox x:Name="TBLabel"
-                     Height="100" 
-                     Width="200"
-                     TextWrapping="Wrap"
-                     Margin="10"/>
-        </StackPanel>
-
+        <Border Grid.Column="1"
+                BorderThickness="1"
+                BorderBrush="Black"
+                CornerRadius="5"
+                Margin="10">
+            <StackPanel Grid.Column="1">
+                <TextBlock Text="Image size"
+                           Margin="10,10" />
+                <TextBlock Text="Height"
+                           Margin="10,0" />
+                <TextBox x:Name="TBHeight"
+                         Margin="10,0,0,10" />
+                <TextBlock Text="Width"
+                           Margin="10,0" />
+                <TextBox x:Name="TBWidth"
+                         Margin="10,0" />
+                <Button x:Name="BClear"
+                        Content="Clear"
+                        Click="BClear_Click"
+                        Margin="0,10,0,0" />
+                <Button x:Name="BAddImage"
+                        Content="Add image"
+                        Click="BAddImage_Click"
+                        Margin="0,10" />
+                <Button x:Name="BAddTextBox"
+                        Content="Add text box"
+                        Click="BAddTextBox_Click" />
+                <TextBlock Text="Text"
+                           Margin="10,0" />
+                <TextBox x:Name="TBLabel"
+                         Height="100"
+                         Width="200"
+                         TextWrapping="Wrap"
+                         Margin="10,0" />
+                <Button x:Name="BSave"
+                        Content="Save"
+                        Click="BSave_Click" 
+                        Margin="0,10"/>
+            </StackPanel>
+        </Border>
 
     </Grid>
 </Window>
