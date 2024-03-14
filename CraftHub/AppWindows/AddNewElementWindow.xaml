@@ -9,8 +9,11 @@
         MinHeight="250"
         MinWidth="400"
         SizeToContent="Width"
-        Icon="/Recourses/logo.ico"
-        WindowStartupLocation="CenterScreen">
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        Icon="/Recourses/logo.ico">
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto"
                       HorizontalScrollBarVisibility="Disabled">

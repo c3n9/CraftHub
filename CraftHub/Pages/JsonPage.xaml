@@ -8,6 +8,7 @@
       d:DesignHeight="450"
       d:DesignWidth="800"
       Title="JsonPage"
+      TextElement.Foreground="{DynamicResource MaterialDesignBody}"
       Loaded="Page_Loaded">
     <Grid>
         <Grid.RowDefinitions>
@@ -29,13 +30,15 @@
                     Content="Add" />
             <Button x:Name="BEdit"
                     Click="BEdit_Click"
-                    Content="Edit" />
+                    Content="Edit" 
+                    Margin="10,0"/>
             <Button x:Name="BRemove"
                     Click="BRemove_Click"
                     Content="Remove" />
             <Button x:Name="BExport"
                     Click="BExport_Click"
-                    Content="Export" />
+                    Content="Export"
+                    Margin="10,0" />
             <Button x:Name="BSurchOption"
                     Click="BSurchOption_Click"
                     Content="˅"
@@ -82,7 +85,6 @@
                         Click="BCopyToClipboard_Click"
                         BorderThickness="0"
                         Width="auto"
-                        Background="#a8d8ff"
                         Visibility="Collapsed"
                         Style="{Binding Null}">
                     <Button.Content>
@@ -92,7 +94,6 @@
                                        FontSize="14"
                                        Padding="5"
                                        HorizontalAlignment="Left" />
-
                             <Image Source="/Recourses/copy.png"
                                    Width="20"
                                    RenderOptions.BitmapScalingMode="Fant"

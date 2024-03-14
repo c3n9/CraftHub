@@ -60,9 +60,13 @@ namespace CraftHub.Pages
         {
             // Получите измененную строку
             DataGridRow editedRow = e.Row;
+            // Конвертируем HEX в Color
+            Color color = (Color)ColorConverter.ConvertFromString("#3f51b5");
 
+            // Создаем кисть на основе Color
+            Brush brush = new SolidColorBrush(color);
             // Установите ее в выделенное состояние
-            editedRow.Background = Brushes.Yellow;
+            editedRow.Background = brush;
         }
 
         private void BBack_Click(object sender, RoutedEventArgs e)
@@ -88,9 +92,9 @@ namespace CraftHub.Pages
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            GlobalSettings.mainWindow.MIImportClass.IsEnabled = false;
-            GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = true;
-            GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = true;
+            //GlobalSettings.mainWindow.MIImportClass.IsEnabled = false;
+            //GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = true;
+            //GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = true;
         }
         private void BAdd_Click(object sender, RoutedEventArgs e)
         {
@@ -114,7 +118,12 @@ namespace CraftHub.Pages
                     DataGridRow selectedRow = (DataGridRow)DGJsonData.ItemContainerGenerator.ContainerFromItem(dataRow);
                     if (selectedRow != null)
                     {
-                        selectedRow.Background = Brushes.Yellow;
+                        // Конвертируем HEX в Color
+                        Color color = (Color)ColorConverter.ConvertFromString("#3f51b5");
+
+                        // Создаем кисть на основе Color
+                        Brush brush = new SolidColorBrush(color);
+                        selectedRow.Background = brush;
                     }
                 }
             }

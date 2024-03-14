@@ -24,6 +24,8 @@ namespace CraftHub.AppWindows
     /// </summary>
     public partial class AddNewElementWindow : Window
     {
+        private bool isDragging = false;
+        private Point startPoint;
         private DataRowView _selectedDataRowView;
         private bool _isAdding; // Флаг для определения добавления или редактирования
         public AddNewElementWindow(DataRowView selectedItem, bool isAdding)
@@ -128,7 +130,12 @@ namespace CraftHub.AppWindows
                         // Проверка, является ли текущая строка только что добавленной
                         if (rowView != null && rowView.Row == newRow)
                         {
-                            loadingRowEventArgs.Row.Background = Brushes.Yellow; // Установка цвета фона в желтый
+                            // Конвертируем HEX в Color
+                            Color color = (Color)ColorConverter.ConvertFromString("#3f51b5");
+
+                            // Создаем кисть на основе Color
+                            Brush brush = new SolidColorBrush(color);
+                            loadingRowEventArgs.Row.Background = brush; 
 
                             // Удаление обработчика после первого вызова
                             GlobalSettings.jsonPage.DGJsonData.LoadingRow -= loadingRowHandler;
@@ -168,6 +175,59 @@ namespace CraftHub.AppWindows
                 return;
             }
             DialogResult = true;
+        }
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                isDragging = true;
+                startPoint = e.GetPosition(this);
+            }
+        }
+
+        private void TitleBar_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point endPoint = e.GetPosition(this);
+                double offsetX = endPoint.X - startPoint.X;
+                double offsetY = endPoint.Y - startPoint.Y;
+
+                Left += offsetX;
+                Top += offsetY;
+            }
+        }
+
+        private void TitleBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                isDragging = false;
+            }
+        }
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Минимизация окна
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Максимизация или восстановление окна
+            if (this.WindowState == WindowState.Maximized)
+            {
+                this.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                this.WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Закрытие окна
+            this.Close();
         }
     }
 }

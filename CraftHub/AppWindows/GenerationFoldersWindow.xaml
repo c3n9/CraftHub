@@ -9,35 +9,77 @@
         Icon="/Recourses/folder.ico"
         MinHeight="250"
         MinWidth="400"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        WindowStyle="None"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen">
-    <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition Height="auto"/>
-        </Grid.RowDefinitions>
-        <StackPanel VerticalAlignment="Center"
-                    HorizontalAlignment="Center">
-            <TextBlock Text="Level" />
-            <ComboBox x:Name="CBLevel">
-                <TextBlock Text="Basic" />
-                <TextBlock Text="Hight" />
-            </ComboBox>
-            <TextBlock Text="Block number" />
-            <TextBox x:Name="TBBlockNumber"
-                     PreviewTextInput="TBBlockNumber_PreviewTextInput" />
-            <TextBlock Text="Lesson count"
-                       x:Name="TBoxLessonCount"/>
-            <TextBox x:Name="TBLessonCount" 
-                     PreviewTextInput="TBLessonCount_PreviewTextInput"/>
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Common" />
-                <CheckBox x:Name="IsCommon" 
-                          IsChecked="True"/>
+    <DockPanel x:Name="RootWindow"
+               MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
+               MouseMove="TitleBar_MouseMove"
+               MouseLeftButtonUp="TitleBar_MouseLeftButtonUp">
+        <DockPanel x:Name="TitleBar"
+                   DockPanel.Dock="Top">
+            <Button x:Name="CloseButton"
+                    Content="X"
+                    Click="CloseButton_Click"
+                    DockPanel.Dock="Right"
+                    Width="50" />
+            <Button x:Name="MaxButton"
+                    Content="▢"
+                    Click="MaximizeButton_Click"
+                    Width="50"
+                    DockPanel.Dock="Right" />
+            <Button x:Name="MinButton"
+                    Content="➖"
+                    Width="50"
+                    Click="MinimizeButton_Click"
+                    DockPanel.Dock="Right" />
+            <StackPanel  HorizontalAlignment="Left"
+                         Orientation="Horizontal">
+                <Image Source="/Recourses/logo.ico"
+                       Height="20"
+                       Margin="10,0"
+                       RenderOptions.BitmapScalingMode="Fant" />
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="16">CraftHub</TextBlock>
+
             </StackPanel>
-            <Button x:Name="BGenerate"
-                    Click="BGenerate_Click"
-                    Content="Generate" />
-        </StackPanel>
-    </Grid>
+        </DockPanel>
+
+        <ContentControl>
+            <ContentControl.Content>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel VerticalAlignment="Center"
+                                HorizontalAlignment="Center">
+                        <TextBlock Text="Level" />
+                        <ComboBox x:Name="CBLevel">
+                            <TextBlock Text="Basic" />
+                            <TextBlock Text="Hight" />
+                        </ComboBox>
+                        <TextBlock Text="Block number" />
+                        <TextBox x:Name="TBBlockNumber"
+                                 PreviewTextInput="TBBlockNumber_PreviewTextInput" />
+                        <TextBlock Text="Lesson count"
+                                   x:Name="TBoxLessonCount" />
+                        <TextBox x:Name="TBLessonCount"
+                                 PreviewTextInput="TBLessonCount_PreviewTextInput" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Common" />
+                            <CheckBox x:Name="IsCommon"
+                                      IsChecked="True" />
+                        </StackPanel>
+                        <Button x:Name="BGenerate"
+                                Click="BGenerate_Click"
+                                Content="Generate" />
+                    </StackPanel>
+                </Grid>
+            </ContentControl.Content>
+        </ContentControl>
+    </DockPanel>
+    
 </Window>

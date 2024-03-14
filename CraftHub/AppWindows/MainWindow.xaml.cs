@@ -28,6 +28,8 @@ namespace CraftHub.AppWindows
 {
     public partial class MainWindow : Window
     {
+        private bool isDragging = false;
+        private Point startPoint;
         public event EventHandler<bool> AddInModalWindowCheckedChanged;
         public MainWindow()
         {
@@ -38,7 +40,7 @@ namespace CraftHub.AppWindows
 
 
         }
-
+       
         private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
@@ -175,6 +177,59 @@ namespace CraftHub.AppWindows
         private void MILessonConstuctor_Click(object sender, RoutedEventArgs e)
         {
             new LessonConstructorWindow().ShowDialog();
+        }
+        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                isDragging = true;
+                startPoint = e.GetPosition(this);
+            }
+        }
+
+        private void TitleBar_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging && e.LeftButton == MouseButtonState.Pressed)
+            {
+                Point endPoint = e.GetPosition(this);
+                double offsetX = endPoint.X - startPoint.X;
+                double offsetY = endPoint.Y - startPoint.Y;
+
+                Left += offsetX;
+                Top += offsetY;
+            }
+        }
+
+        private void TitleBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                isDragging = false;
+            }
+        }
+        private void MinimizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Минимизация окна
+            this.WindowState = WindowState.Minimized;
+        }
+
+        private void MaximizeButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Максимизация или восстановление окна
+            if (this.WindowState == WindowState.Maximized)
+            {
+                this.WindowState = WindowState.Normal;
+            }
+            else
+            {
+                this.WindowState = WindowState.Maximized;
+            }
+        }
+
+        private void CloseButton_Click(object sender, RoutedEventArgs e)
+        {
+            // Закрытие окна
+            this.Close();
         }
     }
 }
