@@ -16,22 +16,22 @@
    - CraftHub simplifies the process of working with JSON files.
    - Easily fill in the required data within the application, and CraftHub will generate the corresponding JSON representation.
    - With just a few clicks, you can export the JSON file, ready to be utilized in your projects.
-## ![logo](https://github.com/c3n9/CraftHub/assets/108518693/ad42f157-c393-4c90-8ddf-39c418052cbf) Getting 
+## Getting 
 To get started with CraftHub, follow these simple steps:
-## ![logo](https://github.com/c3n9/CraftHub/assets/108518693/ad42f157-c393-4c90-8ddf-39c418052cbf) Installation
+## Installation
 Clone the repository.  
 ```bash
 git clone https://github.com/c3n9/CraftHub.git
 ```
-## ![logo](https://github.com/c3n9/CraftHub/assets/108518693/ad42f157-c393-4c90-8ddf-39c418052cbf) Explore and Create Classes
+## Explore and Create Classes
 Navigate the user-friendly interface to explore existing classes or create your own.
-## ![logo](https://github.com/c3n9/CraftHub/assets/108518693/ad42f157-c393-4c90-8ddf-39c418052cbf) Manage Your Classes
+## Manage Your Classes
 Save and manage your custom classes within CraftHub for easy access and organization.
-## ![logo](https://github.com/c3n9/CraftHub/assets/108518693/ad42f157-c393-4c90-8ddf-39c418052cbf) Generate and Export JSON
+## Generate and Export JSON
 Fill in the necessary information, generate JSON representations, and export them for your projects.
-## ![logo](https://github.com/c3n9/CraftHub/assets/108518693/ad42f157-c393-4c90-8ddf-39c418052cbf) Contributions
+## Contributions
 CraftHub welcomes contributions from the open-source community. If you encounter issues or have ideas for improvements, feel free to submit a pull request or open an issue on our GitHub repository.
-## ![logo](https://github.com/c3n9/CraftHub/assets/108518693/ad42f157-c393-4c90-8ddf-39c418052cbf) License
+## License
 CraftHub is licensed under the MIT License. Feel free to use, modify, and distribute the application in accordance with the terms of the license.
 
 **Start your coding adventure with CraftHub today, and empower yourself with a seamless, personalized experience!**
