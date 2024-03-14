@@ -3,7 +3,7 @@
 </p>
 <h1 align="center">CraftHub</h1> 
 
-**CraftHub provides an intuitive platform for uploading existing programming language classes or creating new ones from scratch. With the ability to save and manage your custom classes, as well as effortlessly generate and export JSON files.**
+![logo](https://github.com/c3n9/CraftHub/assets/108518693/ad42f157-c393-4c90-8ddf-39c418052cbf) **CraftHub provides an intuitive platform for uploading existing programming language classes or creating new ones from scratch. With the ability to save and manage your custom classes, as well as effortlessly generate and export JSON files.**
 ## Features
 1. **Class Upload and Creation**
    - CraftHub allows you to upload pre-existing programming language classes or create new ones with ease.
