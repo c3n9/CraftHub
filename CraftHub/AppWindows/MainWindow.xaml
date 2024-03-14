@@ -57,6 +57,9 @@
 
                     <Menu Grid.Row="0">
                         <MenuItem Header="_File">
+                            <MenuItem Header="Upload template"
+                                      x:Name="MIImportClass"
+                                      Click="MIImportClass_Click"/>
                             <MenuItem Header="Import json file"
                                       x:Name="MIImportJsonFile"
                                       Click="MIImportJsonFile_Click">

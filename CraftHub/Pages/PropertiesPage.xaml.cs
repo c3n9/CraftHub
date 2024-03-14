@@ -111,9 +111,9 @@ namespace CraftHub.Pages
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            //GlobalSettings.mainWindow.MIImportClass.IsEnabled = true;
-            //GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = false;
-            //GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = false;
+            GlobalSettings.mainWindow.MIImportClass.IsEnabled = true;
+            GlobalSettings.mainWindow.MIImportJsonFile.IsEnabled = false;
+            GlobalSettings.mainWindow.MIExportJsonFile.IsEnabled = false;
         }
 
         private void BSaveTemplate_Click(object sender, RoutedEventArgs e)
