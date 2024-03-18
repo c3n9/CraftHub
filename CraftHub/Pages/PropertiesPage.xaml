@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:CraftHub.Pages"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800"
       Title="PropertiesPage"
@@ -20,15 +21,19 @@
                     Margin="10">
             <TextBlock Text="Property name" 
                        VerticalAlignment="Center"
-                       Margin="10,0"/>
+                       Margin="10,0"
+                       FontSize="16"/>
             <TextBox x:Name="TBPropertyName"
-                     Width="100" 
+                     Width="100"
+                     FontSize="20"
                      VerticalContentAlignment="Center"/>
             <TextBlock Text="Type value"
+                       FontSize="16"
                        VerticalAlignment="Center"
                        Margin="10,0"/>
             <ComboBox x:Name="CBValues" 
-                      Width="150"/>
+                      Width="150"
+                      FontSize="20"/>
             <Button x:Name="BAddProperty"
                     Content="Add"
                     Click="BAddProperty_Click" 
@@ -38,9 +43,9 @@
                     Content="Remove" />
         </StackPanel>
         <DataGrid x:Name="DGProperties"
-                  IsReadOnly="True" 
+                  IsReadOnly="True"
                   Grid.Row="1"
-                  ColumnWidth="*"/>
+                  ColumnWidth="*" />
         <StackPanel Orientation="Horizontal"
                     Grid.Row="2"
                     HorizontalAlignment="Right"
@@ -52,7 +57,9 @@
             <Button x:Name="BNext"
                     Click="BNext_Click"
                     Content="Next" />
+            
         </StackPanel>
         
+
     </Grid>
 </Page>

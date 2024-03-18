@@ -13,16 +13,21 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
+        MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
+        MouseMove="TitleBar_MouseMove"
+        MouseLeftButtonUp="TitleBar_MouseLeftButtonUp"
         Icon="/Recourses/logo.ico">
-    <DockPanel x:Name="RootWindow"
-               MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
-               MouseMove="TitleBar_MouseMove"
-               MouseLeftButtonUp="TitleBar_MouseLeftButtonUp">
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="10"
+                      CornerRadius="10"
+                      GlassFrameThickness="0"
+                      ResizeBorderThickness="5" />
+    </WindowChrome.WindowChrome>
+    <DockPanel x:Name="RootWindow" >
         <DockPanel x:Name="TitleBar"
                    DockPanel.Dock="Top">
-           
             <Button x:Name="CloseButton"
-                    Content="X"
+                    Content="✕"
                     Click="CloseButton_Click"
                     DockPanel.Dock="Right" 
                     Width="50"/>
@@ -32,7 +37,7 @@
                     Width="50"
                     DockPanel.Dock="Right" />
             <Button x:Name="MinButton"
-                    Content="➖"
+                    Content="＿"
                     Width="50"
                     Click="MinimizeButton_Click"
                     DockPanel.Dock="Right" />
@@ -67,13 +72,16 @@
                         <MenuItem Header="_File">
                             <MenuItem Header="Upload template"
                                       x:Name="MIImportClass"
+                                      Icon="{materialDesign:PackIcon Kind=Upload}"
                                       Click="MIImportClass_Click"/>
                             <MenuItem Header="Import json file"
+                                      Icon="{materialDesign:PackIcon Kind=CodeJson}"
                                       x:Name="MIImportJsonFile"
                                       Click="MIImportJsonFile_Click">
                             </MenuItem>
                             <MenuItem Header="Export json file"
                                       x:Name="MIExportJsonFile"
+                                      Icon="{materialDesign:PackIcon Kind=CloudJson}"
                                       Click="MIExportJsonFile_Click">
                             </MenuItem>
                         </MenuItem>
@@ -82,7 +90,7 @@
                                       x:Name="MIAddInModalWindow"
                                       Checked="MIAddInModalWindow_Checked"
                                       Unchecked="MIAddInModalWindow_Unchecked"
-                                      IsChecked="True" 
+                                      IsChecked="True"
                                       IsCheckable="True"/>
                             <MenuItem Header="View json"
                                       x:Name="MIViewJson"
@@ -94,10 +102,13 @@
                         <MenuItem Header="_Extension">
                             <MenuItem Header="Generation folders"
                                       x:Name="MIGenerationFolders"
+                                      Icon="{materialDesign:PackIcon Kind=Folder}"
                                       Click="MIGenerationFolders_Click">
                             </MenuItem>
                             <MenuItem Header="Lesson constructor"
                                       x:Name="MILessonConstuctor"
+                                      Icon="{materialDesign:PackIcon Kind=Idea}"
+                                      
                                       Click="MILessonConstuctor_Click">
                             </MenuItem>
                         </MenuItem>

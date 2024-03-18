@@ -11,16 +11,16 @@
         MinHeight="600"
         MinWidth="800"
         WindowStyle="None"
+        MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
+        MouseMove="TitleBar_MouseMove"
+        MouseLeftButtonUp="TitleBar_MouseLeftButtonUp"
         Title="LessonConstructorWindow" Height="450" Width="800">
 
-    <DockPanel x:Name="RootWindow"
-               MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
-               MouseMove="TitleBar_MouseMove"
-               MouseLeftButtonUp="TitleBar_MouseLeftButtonUp">
+    <DockPanel x:Name="RootWindow">
         <DockPanel x:Name="TitleBar"
                    DockPanel.Dock="Top">
             <Button x:Name="CloseButton"
-                    Content="X"
+                    Content="✕"
                     Click="CloseButton_Click"
                     DockPanel.Dock="Right"
                     Width="50" />
@@ -30,7 +30,7 @@
                     Width="50"
                     DockPanel.Dock="Right" />
             <Button x:Name="MinButton"
-                    Content="➖"
+                    Content="＿"
                     Width="50"
                     Click="MinimizeButton_Click"
                     DockPanel.Dock="Right" />
