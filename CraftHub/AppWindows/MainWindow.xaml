@@ -20,6 +20,7 @@
                MouseLeftButtonUp="TitleBar_MouseLeftButtonUp">
         <DockPanel x:Name="TitleBar"
                    DockPanel.Dock="Top">
+           
             <Button x:Name="CloseButton"
                     Content="X"
                     Click="CloseButton_Click"
@@ -35,6 +36,14 @@
                     Width="50"
                     Click="MinimizeButton_Click"
                     DockPanel.Dock="Right" />
+            <ToggleButton materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=WeatherSunny}"
+                          Content="{materialDesign:PackIcon Kind=MoonAndStars}"
+                          ToolTip="MaterialDesignActionLightToggleButton"
+                          Margin="10"
+                          Checked="ToggleButton_Checked"
+                          Unchecked="ToggleButton_Unchecked"
+                          Style="{StaticResource MaterialDesignActionToggleButton}"
+                          DockPanel.Dock="Right" />
             <StackPanel  HorizontalAlignment="Left"
                          Orientation="Horizontal">
                 <Image Source="/Recourses/logo.ico" 
@@ -93,14 +102,7 @@
                             </MenuItem>
                         </MenuItem>
                     </Menu>
-                    <ToggleButton materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=WeatherSunny}"
-                                  Content="{materialDesign:PackIcon Kind=MoonAndStars}"
-                                  ToolTip="MaterialDesignActionLightToggleButton"
-                                  Checked="ToggleButton_Checked"
-                                  Unchecked="ToggleButton_Unchecked"
-                                  Style="{StaticResource MaterialDesignActionToggleButton}"
-                                  HorizontalAlignment="Right"
-                                  Grid.Row="0" />
+                    
                     <Frame x:Name="MainFrame"
                            NavigationUIVisibility="Hidden"
                            Grid.Row="1" />

@@ -40,6 +40,14 @@ namespace CraftHub.AppWindows
             InitializeComponent();
             PreviewKeyDown += MainWindow_PreviewKeyDown;
             GlobalSettings.mainWindow = this;
+            if (Properties.Settings.Default.IsDarkTheme)
+            {
+                SetDarkTheme();
+            }
+            else
+            {
+                SetLightTheme();
+            }
             MainFrame.Navigate(new PropertiesPage());
         }
 
@@ -236,19 +244,37 @@ namespace CraftHub.AppWindows
 
         private void ToggleButton_Checked(object sender, RoutedEventArgs e)
         {
-            var paletteHelper = new PaletteHelper();
-            ITheme theme = paletteHelper.GetTheme();
-
-            // Установить сохранённые цвета
-            var newTheme = new Theme();
-            newTheme.SetBaseTheme(Theme.Light);
-            newTheme.PrimaryMid = new ColorPair(primaryColor);
-            newTheme.SecondaryMid = new ColorPair(secondaryColor);
-
-            paletteHelper.SetTheme(newTheme);
+            if (Properties.Settings.Default.IsDarkTheme)
+            {
+                Properties.Settings.Default.IsDarkTheme = false;
+                Properties.Settings.Default.Save();
+                SetLightTheme();
+            }
+            else
+            {
+                Properties.Settings.Default.IsDarkTheme = true;
+                Properties.Settings.Default.Save();
+                SetDarkTheme();
+            }
         }
 
         private void ToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (Properties.Settings.Default.IsDarkTheme)
+            {
+                Properties.Settings.Default.IsDarkTheme = false;
+                Properties.Settings.Default.Save();
+                SetLightTheme();
+            }
+            else
+            {
+                Properties.Settings.Default.IsDarkTheme = true;
+                Properties.Settings.Default.Save();
+                SetDarkTheme();
+            }
+
+        }
+        public void SetDarkTheme()
         {
             var paletteHelper = new PaletteHelper();
             ITheme theme = paletteHelper.GetTheme();
@@ -256,6 +282,19 @@ namespace CraftHub.AppWindows
             // Установить сохранённые цвета
             var newTheme = new Theme();
             newTheme.SetBaseTheme(Theme.Dark);
+            newTheme.PrimaryMid = new ColorPair(primaryColor);
+            newTheme.SecondaryMid = new ColorPair(secondaryColor);
+
+            paletteHelper.SetTheme(newTheme);
+        }
+        public void SetLightTheme()
+        {
+            var paletteHelper = new PaletteHelper();
+            ITheme theme = paletteHelper.GetTheme();
+
+            // Установить сохранённые цвета
+            var newTheme = new Theme();
+            newTheme.SetBaseTheme(Theme.Light);
             newTheme.PrimaryMid = new ColorPair(primaryColor);
             newTheme.SecondaryMid = new ColorPair(secondaryColor);
 
