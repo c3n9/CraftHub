@@ -36,6 +36,9 @@ CraftHub is licensed under the MIT License. Feel free to use, modify, and distri
 
 **Start your coding adventure with CraftHub today, and empower yourself with a seamless, personalized experience!**
 
-## ![logo](https://github.com/c3n9/CraftHub/assets/108518693/ad42f157-c393-4c90-8ddf-39c418052cbf) Screenshots
-![image](https://github.com/c3n9/CraftHub/assets/108518693/35e8f570-292e-4f81-8dce-84ba1ea9c5f9)
-![image](https://github.com/c3n9/CraftHub/assets/108518693/627c9d3f-34fc-4586-85c6-96a85f13fa9c)
+## Screenshots
+
+![image](https://github.com/c3n9/CraftHub/assets/108518693/7a95e84a-a7ef-4776-ad45-3a1789d38a5c)
+
+![image](https://github.com/c3n9/CraftHub/assets/108518693/441becca-7112-4823-a07f-961be8a74d64)
+
