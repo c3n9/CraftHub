@@ -1,6 +1,8 @@
 ﻿using CraftHub.AppWindows;
 using CraftHub.Pages;
 using CraftHub.Services;
+using MaterialDesignColors;
+using MaterialDesignThemes.Wpf;
 using Microsoft.CSharp;
 using Microsoft.Win32;
 using Newtonsoft.Json;
@@ -28,6 +30,8 @@ namespace CraftHub.AppWindows
 {
     public partial class MainWindow : Window
     {
+        private Color primaryColor = (Color)ColorConverter.ConvertFromString("#3f51b5");
+        private Color secondaryColor = (Color)ColorConverter.ConvertFromString("#3f51b5");
         private bool isDragging = false;
         private Point startPoint;
         public event EventHandler<bool> AddInModalWindowCheckedChanged;
@@ -37,15 +41,13 @@ namespace CraftHub.AppWindows
             PreviewKeyDown += MainWindow_PreviewKeyDown;
             GlobalSettings.mainWindow = this;
             MainFrame.Navigate(new PropertiesPage());
-
-
         }
-       
+
         private void MainWindow_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.F && Keyboard.Modifiers == ModifierKeys.Control)
             {
-                if(GlobalSettings.jsonPage != null)
+                if (GlobalSettings.jsonPage != null)
                 {
                     Option.ViewSurchOption();
                     e.Handled = true;
@@ -151,7 +153,7 @@ namespace CraftHub.AppWindows
 
         private void MIViewJson_Checked(object sender, RoutedEventArgs e)
         {
-            if(GlobalSettings.jsonPage != null && GlobalSettings.jsonPage.DGJsonData != null && GlobalSettings.jsonPage.DGJsonData.SelectedItem != null)
+            if (GlobalSettings.jsonPage != null && GlobalSettings.jsonPage.DGJsonData != null && GlobalSettings.jsonPage.DGJsonData.SelectedItem != null)
             {
                 Option.ViewJsonFromTable();
             }
@@ -230,6 +232,34 @@ namespace CraftHub.AppWindows
         {
             // Закрытие окна
             this.Close();
+        }
+
+        private void ToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            var paletteHelper = new PaletteHelper();
+            ITheme theme = paletteHelper.GetTheme();
+
+            // Установить сохранённые цвета
+            var newTheme = new Theme();
+            newTheme.SetBaseTheme(Theme.Light);
+            newTheme.PrimaryMid = new ColorPair(primaryColor);
+            newTheme.SecondaryMid = new ColorPair(secondaryColor);
+
+            paletteHelper.SetTheme(newTheme);
+        }
+
+        private void ToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var paletteHelper = new PaletteHelper();
+            ITheme theme = paletteHelper.GetTheme();
+
+            // Установить сохранённые цвета
+            var newTheme = new Theme();
+            newTheme.SetBaseTheme(Theme.Dark);
+            newTheme.PrimaryMid = new ColorPair(primaryColor);
+            newTheme.SecondaryMid = new ColorPair(secondaryColor);
+
+            paletteHelper.SetTheme(newTheme);
         }
     }
 }

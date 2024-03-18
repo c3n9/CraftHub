@@ -54,7 +54,6 @@
                         <RowDefinition Height="auto" />
                         <RowDefinition />
                     </Grid.RowDefinitions>
-
                     <Menu Grid.Row="0">
                         <MenuItem Header="_File">
                             <MenuItem Header="Upload template"
@@ -94,7 +93,14 @@
                             </MenuItem>
                         </MenuItem>
                     </Menu>
-
+                    <ToggleButton materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=WeatherSunny}"
+                                  Content="{materialDesign:PackIcon Kind=MoonAndStars}"
+                                  ToolTip="MaterialDesignActionLightToggleButton"
+                                  Checked="ToggleButton_Checked"
+                                  Unchecked="ToggleButton_Unchecked"
+                                  Style="{StaticResource MaterialDesignActionToggleButton}"
+                                  HorizontalAlignment="Right"
+                                  Grid.Row="0" />
                     <Frame x:Name="MainFrame"
                            NavigationUIVisibility="Hidden"
                            Grid.Row="1" />
