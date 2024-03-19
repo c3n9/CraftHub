@@ -18,97 +18,109 @@
         MouseLeftButtonUp="TitleBar_MouseLeftButtonUp"
         SizeToContent="WidthAndHeight"
         WindowStartupLocation="CenterScreen">
-    <DockPanel x:Name="RootWindow">
-        <DockPanel x:Name="TitleBar"
-                   DockPanel.Dock="Top">
-            <Button x:Name="CloseButton"
-                    Content="✕"
-                    Click="CloseButton_Click"
-                    DockPanel.Dock="Right"
-                    Width="50"/>
-            <Button x:Name="MaxButton"
-                    Content="▢"
-                    Click="MaximizeButton_Click"
-                    Width="50"
-                    DockPanel.Dock="Right" />
-            <Button x:Name="MinButton"
-                    Content="＿"
-                    Width="50"
-                    Click="MinimizeButton_Click"
-                    DockPanel.Dock="Right" />
-            <StackPanel  HorizontalAlignment="Left"
-                         Orientation="Horizontal">
-                <Image Source="/Recourses/logo.ico"
-                       Height="20"
-                       Margin="10,0"
-                       RenderOptions.BitmapScalingMode="Fant" />
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="16">CraftHub</TextBlock>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="30"
+                      CornerRadius="10"
+                      GlassFrameThickness="0"
+                      ResizeBorderThickness="5" />
+    </WindowChrome.WindowChrome>
+    <Border BorderBrush="#808080"
+            BorderThickness="2">
+        <DockPanel x:Name="RootWindow">
+            <DockPanel x:Name="TitleBar"
+                       DockPanel.Dock="Top">
+                <Button x:Name="CloseButton"
+                        Content="✕"
+                        Click="CloseButton_Click"
+                        DockPanel.Dock="Right"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        Width="50" />
+                <Button x:Name="MaxButton"
+                        Content="▢"
+                        Click="MaximizeButton_Click"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        Width="50"
+                        DockPanel.Dock="Right" />
+                <Button x:Name="MinButton"
+                        Content="＿"
+                        Width="50"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        Click="MinimizeButton_Click"
+                        DockPanel.Dock="Right" />
+                <StackPanel  HorizontalAlignment="Left"
+                             Orientation="Horizontal">
+                    <Image Source="/Recourses/logo.ico"
+                           Height="20"
+                           Margin="10,0"
+                           RenderOptions.BitmapScalingMode="Fant" />
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="16">CraftHub</TextBlock>
 
-            </StackPanel>
-        </DockPanel>
+                </StackPanel>
+            </DockPanel>
 
-        <ContentControl>
-            <ContentControl.Content>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition />
-                        <RowDefinition Height="auto" />
-                    </Grid.RowDefinitions>
-                    <StackPanel VerticalAlignment="Center"
-                                HorizontalAlignment="Center"
-                                Width="400">
-                        <TextBlock Text="Level"
-                                   FontSize="20" />
-                        <ComboBox x:Name="CBLevel">
-                            <TextBlock Text="Basic" 
-                                       FontSize="20"/>
-                            <TextBlock Text="Hight"
+            <ContentControl>
+                <ContentControl.Content>
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <StackPanel VerticalAlignment="Center"
+                                    HorizontalAlignment="Center"
+                                    Width="400">
+                            <TextBlock Text="Level"
                                        FontSize="20" />
-                        </ComboBox>
-                        <!--<TextBlock Text="Block number"
+                            <ComboBox x:Name="CBLevel">
+                                <TextBlock Text="Basic"
+                                           FontSize="20" />
+                                <TextBlock Text="Hight"
+                                           FontSize="20" />
+                            </ComboBox>
+                            <!--<TextBlock Text="Block number"
                                    FontSize="20" />-->
-                        <!--<TextBox x:Name="TBBlockNumber"
+                            <!--<TextBox x:Name="TBBlockNumber"
                                  FontSize="20"
                                  PreviewTextInput="TBBlockNumber_PreviewTextInput" />-->
-                        <TextBox VerticalAlignment="Top"
-                                 x:Name="TBBlockNumber"
-                                 materialDesign:HintAssist.Hint="Block number"
-                                 FontSize="20"
-                                 PreviewTextInput="TBBlockNumber_PreviewTextInput"
-                                 FontFamily="Moncerrat"
-                                 Style="{StaticResource MaterialDesignFilledTextBox}"
-                                 TextWrapping="Wrap" 
-                                 Margin="0,10"/>
-                        <!--<TextBlock Text="Lesson count"
+                            <TextBox VerticalAlignment="Top"
+                                     x:Name="TBBlockNumber"
+                                     materialDesign:HintAssist.Hint="Block number"
+                                     FontSize="20"
+                                     PreviewTextInput="TBBlockNumber_PreviewTextInput"
+                                     FontFamily="Moncerrat"
+                                     Style="{StaticResource MaterialDesignFilledTextBox}"
+                                     TextWrapping="Wrap"
+                                     Margin="0,10" />
+                            <!--<TextBlock Text="Lesson count"
                                    x:Name="TBoxLessonCount"
                                    FontSize="20" />
                         <TextBox x:Name="TBLessonCount"
                                  FontSize="20"
                                  PreviewTextInput="TBLessonCount_PreviewTextInput" />-->
-                        <TextBox VerticalAlignment="Top"
-                                 x:Name="TBLessonCount"
-                                 materialDesign:HintAssist.Hint="Block number"
-                                 FontSize="20"
-                                 PreviewTextInput="TBLessonCount_PreviewTextInput"
-                                 FontFamily="Moncerrat"
-                                 Style="{StaticResource MaterialDesignFilledTextBox}"
-                                 TextWrapping="Wrap" />
-                        <StackPanel Orientation="Horizontal"
-                                    Margin="0,10">
-                            <TextBlock Text="Common"
-                                       FontSize="20" />
-                            <CheckBox x:Name="IsCommon"
-                                      IsChecked="True"
-                                      Margin="10,5,0,0"/>
+                            <TextBox VerticalAlignment="Top"
+                                     x:Name="TBLessonCount"
+                                     materialDesign:HintAssist.Hint="Block number"
+                                     FontSize="20"
+                                     PreviewTextInput="TBLessonCount_PreviewTextInput"
+                                     FontFamily="Moncerrat"
+                                     Style="{StaticResource MaterialDesignFilledTextBox}"
+                                     TextWrapping="Wrap" />
+                            <StackPanel Orientation="Horizontal"
+                                        Margin="0,10">
+                                <TextBlock Text="Common"
+                                           FontSize="20" />
+                                <CheckBox x:Name="IsCommon"
+                                          IsChecked="True"
+                                          Margin="10,5,0,0" />
+                            </StackPanel>
+                            <Button x:Name="BGenerate"
+                                    Click="BGenerate_Click"
+                                    Content="Generate" />
                         </StackPanel>
-                        <Button x:Name="BGenerate"
-                                Click="BGenerate_Click"
-                                Content="Generate" />
-                    </StackPanel>
-                </Grid>
-            </ContentControl.Content>
-        </ContentControl>
-    </DockPanel>
-    
+                    </Grid>
+                </ContentControl.Content>
+            </ContentControl>
+        </DockPanel>
+    </Border>
+
 </Window>

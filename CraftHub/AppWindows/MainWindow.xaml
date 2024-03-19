@@ -13,12 +13,9 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
-        MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
-        MouseMove="TitleBar_MouseMove"
-        MouseLeftButtonUp="TitleBar_MouseLeftButtonUp"
         Icon="/Recourses/logo.ico">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="10"
+        <WindowChrome CaptionHeight="30"
                       CornerRadius="10"
                       GlassFrameThickness="0"
                       ResizeBorderThickness="5" />
@@ -29,24 +26,27 @@
             <Button x:Name="CloseButton"
                     Content="✕"
                     Click="CloseButton_Click"
-                    DockPanel.Dock="Right" 
+                    DockPanel.Dock="Right"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
                     Width="50"/>
             <Button x:Name="MaxButton"
                     Content="▢"
                     Click="MaximizeButton_Click"
                     Width="50"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
                     DockPanel.Dock="Right" />
             <Button x:Name="MinButton"
                     Content="＿"
                     Width="50"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
                     Click="MinimizeButton_Click"
                     DockPanel.Dock="Right" />
             <ToggleButton materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=WeatherSunny}"
                           Content="{materialDesign:PackIcon Kind=MoonAndStars}"
                           ToolTip="MaterialDesignActionLightToggleButton"
-                          Margin="10"
                           Checked="ToggleButton_Checked"
                           Unchecked="ToggleButton_Unchecked"
+                          WindowChrome.IsHitTestVisibleInChrome="True"
                           Style="{StaticResource MaterialDesignActionToggleButton}"
                           DockPanel.Dock="Right" />
             <StackPanel  HorizontalAlignment="Left"

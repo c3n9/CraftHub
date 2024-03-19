@@ -130,15 +130,31 @@ namespace CraftHub.AppWindows
                         // Проверка, является ли текущая строка только что добавленной
                         if (rowView != null && rowView.Row == newRow)
                         {
-                            // Конвертируем HEX в Color
-                            Color color = (Color)ColorConverter.ConvertFromString("#3f51b5");
+                            if (Properties.Settings.Default.IsDarkTheme)
+                            {
+                                // Конвертируем HEX в Color
+                                Color color = (Color)ColorConverter.ConvertFromString("#3f51b5");
 
-                            // Создаем кисть на основе Color
-                            Brush brush = new SolidColorBrush(color);
-                            loadingRowEventArgs.Row.Background = brush; 
+                                // Создаем кисть на основе Color
+                                Brush brush = new SolidColorBrush(color);
+                                loadingRowEventArgs.Row.Background = brush;
 
-                            // Удаление обработчика после первого вызова
-                            GlobalSettings.jsonPage.DGJsonData.LoadingRow -= loadingRowHandler;
+                                // Удаление обработчика после первого вызова
+                                GlobalSettings.jsonPage.DGJsonData.LoadingRow -= loadingRowHandler;
+                            }
+                            else
+                            {
+                                // Конвертируем HEX в Color
+                                Color color = (Color)ColorConverter.ConvertFromString("#03a9f4");
+
+                                // Создаем кисть на основе Color
+                                Brush brush = new SolidColorBrush(color);
+                                loadingRowEventArgs.Row.Background = brush;
+
+                                // Удаление обработчика после первого вызова
+                                GlobalSettings.jsonPage.DGJsonData.LoadingRow -= loadingRowHandler;
+                            }
+                           
                         }
                     };
 

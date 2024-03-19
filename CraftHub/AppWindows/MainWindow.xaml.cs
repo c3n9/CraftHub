@@ -30,8 +30,9 @@ namespace CraftHub.AppWindows
 {
     public partial class MainWindow : Window
     {
-        private Color primaryColor = (Color)ColorConverter.ConvertFromString("#3f51b5");
-        private Color secondaryColor = (Color)ColorConverter.ConvertFromString("#3f51b5");
+        private Color primaryColor;
+        private Color secondaryColor;
+
         private bool isDragging = false;
         private Point startPoint;
         public event EventHandler<bool> AddInModalWindowCheckedChanged;
@@ -188,35 +189,6 @@ namespace CraftHub.AppWindows
         {
             new LessonConstructorWindow().ShowDialog();
         }
-        private void TitleBar_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                isDragging = true;
-                startPoint = e.GetPosition(this);
-            }
-        }
-
-        private void TitleBar_MouseMove(object sender, MouseEventArgs e)
-        {
-            if (isDragging && e.LeftButton == MouseButtonState.Pressed)
-            {
-                Point endPoint = e.GetPosition(this);
-                double offsetX = endPoint.X - startPoint.X;
-                double offsetY = endPoint.Y - startPoint.Y;
-
-                Left += offsetX;
-                Top += offsetY;
-            }
-        }
-
-        private void TitleBar_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
-        {
-            if (e.ChangedButton == MouseButton.Left)
-            {
-                isDragging = false;
-            }
-        }
         private void MinimizeButton_Click(object sender, RoutedEventArgs e)
         {
             // Минимизация окна
@@ -282,8 +254,9 @@ namespace CraftHub.AppWindows
             // Установить сохранённые цвета
             var newTheme = new Theme();
             newTheme.SetBaseTheme(Theme.Dark);
-            newTheme.PrimaryMid = new ColorPair(primaryColor);
-            newTheme.SecondaryMid = new ColorPair(secondaryColor);
+
+            newTheme.PrimaryMid = new ColorPair((Color)ColorConverter.ConvertFromString("#3f51b5"));
+            newTheme.SecondaryMid = new ColorPair((Color)ColorConverter.ConvertFromString("#3f51b5"));
 
             paletteHelper.SetTheme(newTheme);
         }
@@ -292,11 +265,12 @@ namespace CraftHub.AppWindows
             var paletteHelper = new PaletteHelper();
             ITheme theme = paletteHelper.GetTheme();
 
+
             // Установить сохранённые цвета
             var newTheme = new Theme();
             newTheme.SetBaseTheme(Theme.Light);
-            newTheme.PrimaryMid = new ColorPair(primaryColor);
-            newTheme.SecondaryMid = new ColorPair(secondaryColor);
+            newTheme.PrimaryMid = new ColorPair((Color)ColorConverter.ConvertFromString("#03a9f4"));
+            newTheme.SecondaryMid = new ColorPair((Color)ColorConverter.ConvertFromString("#03a9f4"));
 
             paletteHelper.SetTheme(newTheme);
         }

@@ -118,12 +118,25 @@ namespace CraftHub.Pages
                     DataGridRow selectedRow = (DataGridRow)DGJsonData.ItemContainerGenerator.ContainerFromItem(dataRow);
                     if (selectedRow != null)
                     {
-                        // Конвертируем HEX в Color
-                        Color color = (Color)ColorConverter.ConvertFromString("#3f51b5");
+                        if (Properties.Settings.Default.IsDarkTheme)
+                        {
+                            // Конвертируем HEX в Color
+                            Color color = (Color)ColorConverter.ConvertFromString("#3f51b5");
 
-                        // Создаем кисть на основе Color
-                        Brush brush = new SolidColorBrush(color);
-                        selectedRow.Background = brush;
+                            // Создаем кисть на основе Color
+                            Brush brush = new SolidColorBrush(color);
+                            selectedRow.Background = brush;
+                        }
+                        else
+                        {
+                            // Конвертируем HEX в Color
+                            Color color = (Color)ColorConverter.ConvertFromString("#03a9f4");
+
+                            // Создаем кисть на основе Color
+                            Brush brush = new SolidColorBrush(color);
+                            selectedRow.Background = brush;
+                        }
+                        
                     }
                 }
             }

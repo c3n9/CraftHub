@@ -17,51 +17,63 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         Icon="/Recourses/logo.ico">
-    <DockPanel x:Name="RootWindow">
-        <DockPanel x:Name="TitleBar"
-                   DockPanel.Dock="Top">
-            <Button x:Name="CloseButton"
-                    Content="✕"
-                    Click="CloseButton_Click"
-                    DockPanel.Dock="Right"
-                    Width="50" />
-            <Button x:Name="MaxButton"
-                    Content="▢"
-                    Click="MaximizeButton_Click"
-                    Width="50"
-                    DockPanel.Dock="Right" />
-            <Button x:Name="MinButton"
-                    Content="＿"
-                    Width="50"
-                    Click="MinimizeButton_Click"
-                    DockPanel.Dock="Right" />
-            <StackPanel  HorizontalAlignment="Left"
-                         Orientation="Horizontal">
-                <Image Source="/Recourses/logo.ico"
-                       Height="20"
-                       Margin="10,0"
-                       RenderOptions.BitmapScalingMode="Fant" />
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="16">CraftHub</TextBlock>
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="30"
+                      CornerRadius="10"
+                      GlassFrameThickness="0"
+                      ResizeBorderThickness="5" />
+    </WindowChrome.WindowChrome>
+    <Border BorderBrush="#808080"
+            BorderThickness="2">
+        <DockPanel x:Name="RootWindow">
+            <DockPanel x:Name="TitleBar"
+                       DockPanel.Dock="Top">
+                <Button x:Name="CloseButton"
+                        Content="✕"
+                        Click="CloseButton_Click"
+                        DockPanel.Dock="Right"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        Width="50" />
+                <Button x:Name="MaxButton"
+                        Content="▢"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        Click="MaximizeButton_Click"
+                        Width="50"
+                        DockPanel.Dock="Right" />
+                <Button x:Name="MinButton"
+                        Content="＿"
+                        Width="50"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
+                        Click="MinimizeButton_Click"
+                        DockPanel.Dock="Right" />
+                <StackPanel  HorizontalAlignment="Left"
+                             Orientation="Horizontal">
+                    <Image Source="/Recourses/logo.ico"
+                           Height="20"
+                           Margin="10,0"
+                           RenderOptions.BitmapScalingMode="Fant" />
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="16">CraftHub</TextBlock>
 
-            </StackPanel>
+                </StackPanel>
+            </DockPanel>
+
+            <ContentControl>
+                <ContentControl.Content>
+                    <ScrollViewer VerticalScrollBarVisibility="Auto"
+                                  HorizontalScrollBarVisibility="Disabled">
+                        <StackPanel HorizontalAlignment="Center"
+                                    VerticalAlignment="Center">
+                            <StackPanel x:Name="SPElements"
+                                        Width="200" />
+                            <Button x:Name="BSave"
+                                    Content="Save"
+                                    Click="BSave_Click"
+                                    Margin="0,10" />
+                        </StackPanel>
+                    </ScrollViewer>
+                </ContentControl.Content>
+            </ContentControl>
         </DockPanel>
-
-        <ContentControl>
-            <ContentControl.Content>
-                <ScrollViewer VerticalScrollBarVisibility="Auto"
-                              HorizontalScrollBarVisibility="Disabled">
-                    <StackPanel HorizontalAlignment="Center"
-                                VerticalAlignment="Center">
-                        <StackPanel x:Name="SPElements"
-                                    Width="200" />
-                        <Button x:Name="BSave"
-                                Content="Save"
-                                Click="BSave_Click"
-                                Margin="0,10" />
-                    </StackPanel>
-                </ScrollViewer>
-            </ContentControl.Content>
-        </ContentControl>
-    </DockPanel>
+    </Border>
 </Window>
