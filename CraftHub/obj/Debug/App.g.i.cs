@@ -77,6 +77,8 @@ namespace CraftHub {
         [System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [System.CodeDom.Compiler.GeneratedCodeAttribute("PresentationBuildTasks", "4.0.0.0")]
         public static void Main() {
+            SplashScreen splashScreen = new SplashScreen("recourses/splashscreen.png");
+            splashScreen.Show(true);
             CraftHub.App app = new CraftHub.App();
             app.InitializeComponent();
             app.Run();
