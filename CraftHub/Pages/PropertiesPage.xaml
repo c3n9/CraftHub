@@ -38,18 +38,10 @@
                     Content="Add"
                     Click="BAddProperty_Click"
                     Margin="10,0,10,0">
-                <Button.ToolTip>
-                    <ToolTip Content="You can add a class property" 
-                             FontSize="16"/>
-                </Button.ToolTip>
             </Button>
             <Button x:Name="BRemovePropery"
                     Click="BRemovePropery_Click"
                     Content="Remove">
-                <Button.ToolTip>
-                    <ToolTip Content="You can remove a class property in table"
-                             FontSize="16" />
-                </Button.ToolTip>
             </Button>
         </StackPanel>
         <DataGrid x:Name="DGProperties"
@@ -62,14 +54,12 @@
                     Margin="10">
             <Button x:Name="BSaveTemplate"
                     Click="BSaveTemplate_Click"
-                    Content="Save template" 
-                    Margin="10,0"/>
+                    Content="Save template"
+                    Margin="10,0" />
             <Button x:Name="BNext"
                     Click="BNext_Click"
                     Content="Next" />
-            
-        </StackPanel>
-        
 
+        </StackPanel>
     </Grid>
 </Page>

@@ -38,11 +38,17 @@
             <Button x:Name="BExport"
                     Click="BExport_Click"
                     Content="Export"
-                    Margin="10,0" />
+                    Margin="10,0">
+            </Button>
             <Button x:Name="BSurchOption"
                     Click="BSurchOption_Click"
                     Content="˅"
-                    Width="50" />
+                    Width="50">
+                <Button.ToolTip>
+                    <ToolTip Content="You can surch in table"
+                             FontSize="14" />
+                </Button.ToolTip>
+            </Button>
         </StackPanel>
         <StackPanel Orientation="Horizontal"
                     Grid.Row="1"

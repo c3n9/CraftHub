@@ -4,16 +4,16 @@
 winexe
 C#
 .cs
-D:\Projects\CraftHub\CraftHub\obj\Debug\
+C:\Users\quart\source\repos\CraftHub\CraftHub\obj\Debug\
 CraftHub
 none
 false
 DEBUG;TRACE
-D:\Projects\CraftHub\CraftHub\App.xaml
+C:\Users\quart\source\repos\CraftHub\CraftHub\App.xaml
 62039887792
 
 13609310252
-24458630442
+249939352
 AppWindows\AddNewElementWindow.xaml;AppWindows\GenerationFoldersWindow.xaml;AppWindows\LessonConstructorWindow.xaml;AppWindows\MainWindow.xaml;Pages\JsonPage.xaml;Pages\PropertiesPage.xaml;
 recourses\splashscreen.png
 False
