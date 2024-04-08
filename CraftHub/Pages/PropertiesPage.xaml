@@ -36,11 +36,21 @@
                       FontSize="20"/>
             <Button x:Name="BAddProperty"
                     Content="Add"
-                    Click="BAddProperty_Click" 
-                    Margin="10,0,10,0"/>
+                    Click="BAddProperty_Click"
+                    Margin="10,0,10,0">
+                <Button.ToolTip>
+                    <ToolTip Content="You can add a class property" 
+                             FontSize="16"/>
+                </Button.ToolTip>
+            </Button>
             <Button x:Name="BRemovePropery"
                     Click="BRemovePropery_Click"
-                    Content="Remove" />
+                    Content="Remove">
+                <Button.ToolTip>
+                    <ToolTip Content="You can remove a class property in table"
+                             FontSize="16" />
+                </Button.ToolTip>
+            </Button>
         </StackPanel>
         <DataGrid x:Name="DGProperties"
                   IsReadOnly="True"
