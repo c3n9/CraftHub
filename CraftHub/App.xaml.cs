@@ -15,6 +15,7 @@ namespace CraftHub
     {
         public App()
         {
+            System.Threading.Thread.Sleep(2000);
             DispatcherUnhandledException += App_DispatcherUnhandledException;
         }
 
