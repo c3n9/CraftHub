@@ -17,6 +17,41 @@
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
         Icon="/Recourses/logo.ico">
+    <Window.Resources>
+        <Style x:Key="MaterialButtonStyle"
+               TargetType="Button">
+            <Setter Property="Foreground"
+                    Value="#708090" />
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="BorderBrush"
+                    Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#c5cbd1" />
+                                <Setter TargetName="border"
+                                        Property="BorderBrush"
+                                        Value="#c5cbd1" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"
                       CornerRadius="10"
@@ -27,14 +62,17 @@
             BorderThickness="2">
         <DockPanel x:Name="RootWindow">
             <DockPanel x:Name="TitleBar"
-                       DockPanel.Dock="Top">
+                       DockPanel.Dock="Top"
+                       Height="35">
                 <Button x:Name="CloseButton"
                         Content="✕"
+                        Style="{StaticResource MaterialButtonStyle}"
                         Click="CloseButton_Click"
                         DockPanel.Dock="Right"
                         WindowChrome.IsHitTestVisibleInChrome="True"
                         Width="50" />
                 <Button x:Name="MaxButton"
+                        Style="{StaticResource MaterialButtonStyle}"
                         Content="▢"
                         WindowChrome.IsHitTestVisibleInChrome="True"
                         Click="MaximizeButton_Click"
@@ -42,6 +80,7 @@
                         DockPanel.Dock="Right" />
                 <Button x:Name="MinButton"
                         Content="＿"
+                        Style="{StaticResource MaterialButtonStyle}"
                         Width="50"
                         WindowChrome.IsHitTestVisibleInChrome="True"
                         Click="MinimizeButton_Click"

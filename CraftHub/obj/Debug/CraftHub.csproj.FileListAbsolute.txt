@@ -105,3 +105,7 @@ D:\Projects\CraftHub\CraftHub\obj\Debug\CraftHub.csproj.CoreCompileInputs.cache
 D:\Projects\CraftHub\CraftHub\obj\Debug\CraftHub.csproj.CopyComplete
 D:\Projects\CraftHub\CraftHub\obj\Debug\CraftHub.exe
 D:\Projects\CraftHub\CraftHub\obj\Debug\CraftHub.pdb
+D:\Projects\CraftHub\CraftHub\bin\Debug\CraftHub.exe.manifest
+D:\Projects\CraftHub\CraftHub\bin\Debug\CraftHub.application
+D:\Projects\CraftHub\CraftHub\obj\Debug\CraftHub.exe.manifest
+D:\Projects\CraftHub\CraftHub\obj\Debug\CraftHub.application

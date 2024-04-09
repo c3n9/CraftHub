@@ -9,46 +9,79 @@
         Title="CraftHub"
         MinHeight="450"
         MinWidth="850"
+        WindowStyle="None"
+        SourceInitialized="Window_SourceInitialized"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         WindowStartupLocation="CenterScreen"
-        WindowStyle="None"
         Icon="/Recourses/logo.ico">
+    <Window.Resources>
+        <Style x:Key="MaterialButtonStyle"
+               TargetType="Button">
+            <Setter Property="Foreground"
+                    Value="#708090" />
+            <Setter Property="Background"
+                    Value="Transparent" />
+            <Setter Property="BorderBrush"
+                    Value="Transparent" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                              VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver"
+                                     Value="True">
+                                <Setter TargetName="border"
+                                        Property="Background"
+                                        Value="#c5cbd1" />
+                                <Setter TargetName="border"
+                                        Property="BorderBrush"
+                                        Value="#c5cbd1" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"
                       CornerRadius="10"
                       GlassFrameThickness="0"
-                      ResizeBorderThickness="5" />
+                      ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}" />
     </WindowChrome.WindowChrome>
-    <DockPanel x:Name="RootWindow" >
+    <DockPanel x:Name="RootWindow"
+               LastChildFill="True">
         <DockPanel x:Name="TitleBar"
-                   DockPanel.Dock="Top">
+                   DockPanel.Dock="Top"
+                   Height="35">
             <Button x:Name="CloseButton"
                     Content="✕"
                     Click="CloseButton_Click"
                     DockPanel.Dock="Right"
+                    Style="{StaticResource MaterialButtonStyle}"
                     WindowChrome.IsHitTestVisibleInChrome="True"
                     Width="50"/>
             <Button x:Name="MaxButton"
                     Content="▢"
                     Click="MaximizeButton_Click"
                     Width="50"
+                    Style="{StaticResource MaterialButtonStyle}"
                     WindowChrome.IsHitTestVisibleInChrome="True"
                     DockPanel.Dock="Right" />
             <Button x:Name="MinButton"
                     Content="＿"
                     Width="50"
+                    Style="{StaticResource MaterialButtonStyle}"
                     WindowChrome.IsHitTestVisibleInChrome="True"
                     Click="MinimizeButton_Click"
                     DockPanel.Dock="Right" />
-            <ToggleButton materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=WeatherSunny}"
-                          Content="{materialDesign:PackIcon Kind=MoonAndStars}"
-                          ToolTip="MaterialDesignActionLightToggleButton"
-                          Checked="ToggleButton_Checked"
-                          Unchecked="ToggleButton_Unchecked"
-                          WindowChrome.IsHitTestVisibleInChrome="True"
-                          Style="{StaticResource MaterialDesignActionToggleButton}"
-                          DockPanel.Dock="Right" />
             <StackPanel  HorizontalAlignment="Left"
                          Orientation="Horizontal">
                 <Image Source="/Recourses/logo.ico" 
@@ -66,7 +99,7 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
-                        <RowDefinition />
+                        <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
                     <Menu Grid.Row="0">
                         <MenuItem Header="_File">
@@ -92,6 +125,7 @@
                                       Unchecked="MIAddInModalWindow_Unchecked"
                                       IsChecked="True"
                                       IsCheckable="True"/>
+                            
                             <!--<MenuItem Header="View json"
                                       x:Name="MIViewJson"
                                       Checked="MIViewJson_Checked"
@@ -112,7 +146,15 @@
                             </MenuItem>-->
                         </MenuItem>
                     </Menu>
-                    
+                    <ToggleButton materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=MoonAndStars}"
+                                  Content="{materialDesign:PackIcon Kind=WeatherSunny}"
+                                  ToolTip="MaterialDesignActionLightToggleButton"
+                                  Checked="ToggleButton_Checked"
+                                  Unchecked="ToggleButton_Unchecked"
+                                  WindowChrome.IsHitTestVisibleInChrome="True"
+                                  Style="{StaticResource MaterialDesignActionToggleButton}"
+                                  HorizontalAlignment="Right"
+                                  Margin="10,0"/>
                     <Frame x:Name="MainFrame"
                            NavigationUIVisibility="Hidden"
                            Grid.Row="1" />
