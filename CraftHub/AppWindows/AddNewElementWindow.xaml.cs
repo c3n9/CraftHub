@@ -53,17 +53,33 @@ namespace CraftHub.AppWindows
 
                 for (int i = 0; i < values.Count; i++)
                 {
-                    TextBlock textBlock = new TextBlock();
+                    TextBlock textBlock = new TextBlock()
+                    { 
+                        FontSize = 16,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                    };
                     textBlock.Text = listElementsName[i];
                     SPElements.Children.Add(textBlock);
                     if (listValueTypes[i] == typeof(bool).Name)
                     {
-                        CheckBox checkBox = new CheckBox();
+                        CheckBox checkBox = new CheckBox()
+                        {
+                            Margin = new Thickness(0, 5, 0, 10)
+                        };
                         checkBox.IsChecked = Convert.ToBoolean(values[i]);
                         SPElements.Children.Add(checkBox);
                         continue;
                     }
-                    TextBox textBox = new TextBox() { Width = 200, TextWrapping = TextWrapping.Wrap, Height = 50 };
+                    TextBox textBox = new TextBox()
+                    {
+                        Width = 200,
+                        TextWrapping = TextWrapping.Wrap,
+                        Height = 100,
+                        Style = (Style)Application.Current.FindResource("MaterialDesignOutlinedTextBox"),
+                        Padding = new Thickness(5),
+                        FontSize = 16,
+                        Margin = new Thickness(0, 5, 0, 10)
+                    };
                     textBox.Text = values[i];
                     SPElements.Children.Add(textBox);
 
@@ -74,16 +90,32 @@ namespace CraftHub.AppWindows
                 // Если добавление, создать пустые текстовые поля для ввода
                 for (int i = 0; i < listElementsName.Count; i++)
                 {
-                    TextBlock textBlock = new TextBlock();
+                    TextBlock textBlock = new TextBlock()
+                    {
+                        FontSize = 16,
+                        HorizontalAlignment = HorizontalAlignment.Center,
+                    };
                     textBlock.Text = listElementsName[i];
                     SPElements.Children.Add(textBlock);
                     if (listValueTypes[i] == typeof(bool).Name)
                     {
-                        CheckBox checkBox = new CheckBox();
+                        CheckBox checkBox = new CheckBox()
+                        {
+                            Margin = new Thickness(0, 5, 0, 10)
+                        };
                         SPElements.Children.Add(checkBox);
                         continue;
                     }
-                    TextBox textBox = new TextBox() { Width = 200, TextWrapping = TextWrapping.Wrap, Height = 50 };
+                    TextBox textBox = new TextBox()
+                    {
+                        Width = 200,
+                        TextWrapping = TextWrapping.Wrap,
+                        Height = 100,
+                        Style = (Style)Application.Current.FindResource("MaterialDesignOutlinedTextBox"),
+                        Padding = new Thickness(5),
+                        FontSize = 16,
+                        Margin = new Thickness(0, 5, 0, 10)
+                    };
                     SPElements.Children.Add(textBox);
                 }
             }
@@ -154,7 +186,7 @@ namespace CraftHub.AppWindows
                                 // Удаление обработчика после первого вызова
                                 GlobalSettings.jsonPage.DGJsonData.LoadingRow -= loadingRowHandler;
                             }
-                           
+
                         }
                     };
 

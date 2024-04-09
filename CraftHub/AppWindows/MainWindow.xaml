@@ -92,12 +92,12 @@
                                       Unchecked="MIAddInModalWindow_Unchecked"
                                       IsChecked="True"
                                       IsCheckable="True"/>
-                            <MenuItem Header="View json"
+                            <!--<MenuItem Header="View json"
                                       x:Name="MIViewJson"
                                       Checked="MIViewJson_Checked"
                                       Unchecked="MIViewJson_Unchecked"
                                       IsChecked="False"
-                                      IsCheckable="True" />
+                                      IsCheckable="True" />-->
                         </MenuItem>
                         <MenuItem Header="_Extension">
                             <MenuItem Header="Generation folders"
@@ -105,12 +105,11 @@
                                       Icon="{materialDesign:PackIcon Kind=Folder}"
                                       Click="MIGenerationFolders_Click">
                             </MenuItem>
-                            <MenuItem Header="Lesson constructor"
+                            <!--<MenuItem Header="Lesson constructor"
                                       x:Name="MILessonConstuctor"
                                       Icon="{materialDesign:PackIcon Kind=Idea}"
-                                      
                                       Click="MILessonConstuctor_Click">
-                            </MenuItem>
+                            </MenuItem>-->
                         </MenuItem>
                     </Menu>
                     

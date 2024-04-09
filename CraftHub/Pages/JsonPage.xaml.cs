@@ -151,22 +151,22 @@ namespace CraftHub.Pages
 
         private void DGJsonData_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            try
-            {
-                if (GlobalSettings.mainWindow.MIViewJson.IsChecked)
-                {
-                    Option.ViewJsonFromTable();
-                }
-                else
-                {
-                    Grid.SetColumnSpan(DGJsonData, 2);
-                    TBJson.Visibility = Visibility.Collapsed;
-                }
-            }
-            catch
-            {
-                return;
-            }
+            //try
+            //{
+            //    if (GlobalSettings.mainWindow.MIViewJson.IsChecked)
+            //    {
+            //        Option.ViewJsonFromTable();
+            //    }
+            //    else
+            //    {
+            //        Grid.SetColumnSpan(DGJsonData, 2);
+            //        TBJson.Visibility = Visibility.Collapsed;
+            //    }
+            //}
+            //catch
+            //{
+            //    return;
+            //}
         }
 
         private void BRemove_Click(object sender, RoutedEventArgs e)

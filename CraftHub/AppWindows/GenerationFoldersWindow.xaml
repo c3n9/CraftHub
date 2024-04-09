@@ -16,7 +16,9 @@
         MouseLeftButtonDown="TitleBar_MouseLeftButtonDown"
         MouseMove="TitleBar_MouseMove"
         MouseLeftButtonUp="TitleBar_MouseLeftButtonUp"
-        SizeToContent="WidthAndHeight"
+        SizeToContent="Manual"
+        Height="350"
+        Width="500"
         WindowStartupLocation="CenterScreen">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="30"
@@ -71,39 +73,29 @@
                                     Width="400">
                             <TextBlock Text="Level"
                                        FontSize="20" />
-                            <ComboBox x:Name="CBLevel">
+                            <ComboBox x:Name="CBLevel"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
                                 <TextBlock Text="Basic"
                                            FontSize="20" />
                                 <TextBlock Text="Hight"
                                            FontSize="20" />
                             </ComboBox>
-                            <!--<TextBlock Text="Block number"
-                                   FontSize="20" />-->
-                            <!--<TextBox x:Name="TBBlockNumber"
-                                 FontSize="20"
-                                 PreviewTextInput="TBBlockNumber_PreviewTextInput" />-->
                             <TextBox VerticalAlignment="Top"
                                      x:Name="TBBlockNumber"
                                      materialDesign:HintAssist.Hint="Block number"
                                      FontSize="20"
                                      PreviewTextInput="TBBlockNumber_PreviewTextInput"
                                      FontFamily="Moncerrat"
-                                     Style="{StaticResource MaterialDesignFilledTextBox}"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      TextWrapping="Wrap"
                                      Margin="0,10" />
-                            <!--<TextBlock Text="Lesson count"
-                                   x:Name="TBoxLessonCount"
-                                   FontSize="20" />
-                        <TextBox x:Name="TBLessonCount"
-                                 FontSize="20"
-                                 PreviewTextInput="TBLessonCount_PreviewTextInput" />-->
                             <TextBox VerticalAlignment="Top"
                                      x:Name="TBLessonCount"
                                      materialDesign:HintAssist.Hint="Block number"
                                      FontSize="20"
                                      PreviewTextInput="TBLessonCount_PreviewTextInput"
                                      FontFamily="Moncerrat"
-                                     Style="{StaticResource MaterialDesignFilledTextBox}"
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      TextWrapping="Wrap" />
                             <StackPanel Orientation="Horizontal"
                                         Margin="0,10">
@@ -114,6 +106,7 @@
                                           Margin="10,5,0,0" />
                             </StackPanel>
                             <Button x:Name="BGenerate"
+                                    FontSize="20"
                                     Click="BGenerate_Click"
                                     Content="Generate" />
                         </StackPanel>

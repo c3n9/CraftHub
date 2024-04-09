@@ -23,7 +23,7 @@
                       ResizeBorderThickness="5" />
     </WindowChrome.WindowChrome>
     <Border BorderBrush="#808080"
-            BorderThickness="2">
+            BorderThickness="3">
         <DockPanel x:Name="RootWindow">
             <DockPanel x:Name="TitleBar"
                        DockPanel.Dock="Top">
