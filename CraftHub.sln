@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.6.33723.286
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CraftHub", "CraftHub\CraftHub.csproj", "{ADED0B69-D307-440B-83FD-8FD48D680145}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ADED0B69-D307-440B-83FD-8FD48D680145}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ADED0B69-D307-440B-83FD-8FD48D680145}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ADED0B69-D307-440B-83FD-8FD48D680145}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ADED0B69-D307-440B-83FD-8FD48D680145}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2B2F3D9B-0909-4258-AB64-6D0E402E2DC3}
+	EndGlobalSection
+EndGlobal
