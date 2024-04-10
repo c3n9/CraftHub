@@ -1,0 +1,64 @@
+﻿<Page x:Class="CraftHub.Views.PropertiesView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:viewModels="clr-namespace:CraftHub.ViewModels"
+      xmlns:local="clr-namespace:CraftHub.ViewModels"
+      mc:Ignorable="d"
+      d:DesignHeight="450"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+      d:DesignWidth="800"
+      Title="PropertiesView">
+
+    <Page.DataContext>
+        <viewModels:PropertiesViewModel />
+    </Page.DataContext>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+            <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal"
+                    Margin="10">
+            <TextBlock Text="Property name"
+                       VerticalAlignment="Center"
+                       Margin="10,0"
+                       FontSize="16" />
+            <TextBox x:Name="TBPropertyName"
+                     Width="100"
+                     FontSize="20"
+                     VerticalContentAlignment="Center" />
+            <TextBlock Text="Type value"
+                       FontSize="16"
+                       VerticalAlignment="Center"
+                       Margin="10,0" />
+            <ComboBox x:Name="CBValues"
+                      Width="150"
+                      FontSize="20" />
+            <Button x:Name="BAddProperty"
+                    Content="Add"
+                    Margin="10,0,10,0" />
+            <Button x:Name="BRemovePropery"
+                    Content="Remove" />
+        </StackPanel>
+        <DataGrid x:Name="DGProperties"
+                  IsReadOnly="True"
+                  Grid.Row="1"
+                  ColumnWidth="*" />
+        <StackPanel Orientation="Horizontal"
+                    Grid.Row="2"
+                    HorizontalAlignment="Right"
+                    Margin="10">
+            <Button x:Name="BSaveTemplate"
+                    Content="Save template"
+                    Margin="10,0" />
+            <Button x:Name="BNext"
+                    Content="Next"
+                    Command="{Binding NavigateToWorkingWithJsonViewCommand}"/>
+        </StackPanel>
+    </Grid>
+</Page>
