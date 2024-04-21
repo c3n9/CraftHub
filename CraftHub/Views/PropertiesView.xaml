@@ -4,7 +4,6 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:viewModels="clr-namespace:CraftHub.ViewModels"
-      xmlns:local="clr-namespace:CraftHub.ViewModels"
       mc:Ignorable="d"
       d:DesignHeight="450"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
@@ -15,7 +14,7 @@
     <Page.DataContext>
         <viewModels:PropertiesViewModel />
     </Page.DataContext>
-    
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
@@ -38,27 +37,41 @@
                        Margin="10,0" />
             <ComboBox x:Name="CBValues"
                       Width="150"
-                      FontSize="20" />
+                      FontSize="20"
+                      ItemsSource="{Binding AvailableTypes}"
+                      SelectedItem="{Binding SelectedType}" />
             <Button x:Name="BAddProperty"
                     Content="Add"
-                    Margin="10,0,10,0" />
+                    Margin="10,0,10,0"
+                    Command="{Binding AddPropertyCommand}"
+                    CommandParameter="{Binding ElementName=TBPropertyName, Path=Text, Mode=OneWay}" />
             <Button x:Name="BRemovePropery"
-                    Content="Remove" />
+                    Content="Remove"
+                    Command="{Binding RemovePropertyCommand}" />
         </StackPanel>
         <DataGrid x:Name="DGProperties"
                   IsReadOnly="True"
                   Grid.Row="1"
-                  ColumnWidth="*" />
+                  AutoGenerateColumns="False"
+                  ItemsSource="{Binding Properties}"
+                  ColumnWidth="*">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Name"
+                                    Binding="{Binding Name}" />
+                <DataGridTextColumn Header="Type"
+                                    Binding="{Binding Type}" />
+            </DataGrid.Columns>
+        </DataGrid>
         <StackPanel Orientation="Horizontal"
                     Grid.Row="2"
                     HorizontalAlignment="Right"
                     Margin="10">
             <Button x:Name="BSaveTemplate"
                     Content="Save template"
-                    Margin="10,0" />
+                    Command="{Binding SaveTemplateCommand}" />
             <Button x:Name="BNext"
                     Content="Next"
-                    Command="{Binding NavigateToWorkingWithJsonViewCommand}"/>
+                    Command="{Binding NavigateToWorkingWithJsonViewCommand}" />
         </StackPanel>
     </Grid>
 </Page>
