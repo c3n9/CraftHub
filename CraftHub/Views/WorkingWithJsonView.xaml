@@ -30,18 +30,19 @@
                     Orientation="Horizontal"
                     Grid.ColumnSpan="2">
             <Button x:Name="BAdd"
-                    Content="Add" />
+                    Content="Add"
+                    Command="{Binding AddCommand}"/>
             <Button x:Name="BEdit"
                     Content="Edit"
-                    Margin="10,0" />
+                    Margin="10,0"
+                    Command="{Binding EditCommand}"/>
             <Button x:Name="BRemove"
-                    Content="Remove" />
+                    Content="Remove" 
+                    Command="{Binding RemoveCommand}"/>
             <Button x:Name="BExport"
                     Content="Export"
-                    Margin="10,0" />
-            <Button x:Name="BSurchOption"
-                    Content="˅"
-                    Width="50" />
+                    Margin="10,0"
+                    Command="{Binding ExportCommand}" />
         </StackPanel>
         <StackPanel Orientation="Horizontal"
                     Grid.Row="1"
