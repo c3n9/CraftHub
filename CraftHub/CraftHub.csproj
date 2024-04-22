@@ -6,10 +6,17 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+    <ApplicationIcon>Resources\logo.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Fonts\Montserrat-VariableFont_wght.ttf" />
     <None Remove="Resources\splashScreen.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Fonts\Montserrat-VariableFont_wght.ttf" />
+    <Resource Include="Resources\logo.ico" />
   </ItemGroup>
 
   <ItemGroup>

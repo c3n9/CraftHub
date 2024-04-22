@@ -10,7 +10,8 @@ namespace CraftHub
     /// </summary>
     public partial class App : Application
     {
-        internal static MainWindowViewModel mainWindowViewModel;
+        internal static MainWindowViewModel MainWindowViewModel;
+        internal static PropertiesViewModel PropertiesViewModel;
     }
 
 }

@@ -12,6 +12,7 @@
                                              SecondaryColor="Indigo" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
+            <FontFamily x:Key="MontserratFont">Fonts/#Montserrat-VariableFont_wght</FontFamily>
             <Style x:Key="MaterialButtonStyle"
                    TargetType="Button">
                 <Setter Property="Foreground"

@@ -41,6 +41,8 @@ namespace CraftHub.ViewModels
 
         public PropertiesViewModel()
         {
+            App.PropertiesViewModel = this;
+
             Properties = new ObservableCollection<PropertyModel>();
 
             AvailableTypes = new ObservableCollection<Type>
@@ -62,7 +64,7 @@ namespace CraftHub.ViewModels
 
         private void OnNavigateToWorkingWithJsonViewCommand(object parameter)
         {
-            App.mainWindowViewModel.MainFrameSource = new WorkingWithJsonView();
+            App.MainWindowViewModel.MainFrameSource = new WorkingWithJsonView();
         }
         private void OnAddPropertyCommand(object parameter)
         {
