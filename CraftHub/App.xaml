@@ -16,7 +16,7 @@
             <Style x:Key="MaterialButtonStyle"
                    TargetType="Button">
                 <Setter Property="Foreground"
-                        Value="#708090" />
+                        Value="{DynamicResource MaterialDesignBody}" />
                 <Setter Property="Width"
                         Value="50" />
                 <Setter Property="WindowChrome.IsHitTestVisibleInChrome"
@@ -42,20 +42,21 @@
                                          Value="True">
                                     <Setter TargetName="border"
                                             Property="Background"
-                                            Value="#c5cbd1" />
+                                            Value="#808080" />
                                     <Setter TargetName="border"
                                             Property="BorderBrush"
-                                            Value="#c5cbd1" />
+                                            Value="#808080" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
             </Style>
+
             <Style x:Key="MaterialCloseButtonStyle"
                    TargetType="Button">
                 <Setter Property="Foreground"
-                        Value="#708090" />
+                        Value="{DynamicResource MaterialDesignBody}" />
                 <Setter Property="Width"
                         Value="50" />
                 <Setter Property="WindowChrome.IsHitTestVisibleInChrome"
@@ -81,16 +82,17 @@
                                          Value="True">
                                     <Setter TargetName="border"
                                             Property="Background"
-                                            Value="#ff6161" />
+                                            Value="#ff0000" />
                                     <Setter TargetName="border"
                                             Property="BorderBrush"
-                                            Value="#ff6161" />
+                                            Value="#ff0000" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
             </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

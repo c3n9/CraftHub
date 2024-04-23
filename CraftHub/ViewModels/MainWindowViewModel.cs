@@ -43,6 +43,7 @@ namespace CraftHub.ViewModels
 
             App.MainWindowViewModel = this;
             MainFrameSource = new PropertiesView();
+            
         }
         private void OnOpenGenerateLessonsindow(object paramenter)
         {

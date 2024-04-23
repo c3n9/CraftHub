@@ -12,16 +12,19 @@
   <ItemGroup>
     <None Remove="Fonts\Montserrat-VariableFont_wght.ttf" />
     <None Remove="Resources\splashScreen.png" />
+    <None Remove="Resources\template.meta" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="Fonts\Montserrat-VariableFont_wght.ttf" />
     <Resource Include="Resources\logo.ico" />
+    <Resource Include="Resources\template.meta" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="MaterialDesignColors" Version="2.0.4" />
     <PackageReference Include="MaterialDesignThemes" Version="4.3.0" />
+    <PackageReference Include="Microsoft-WindowsAPICodePack-Core" Version="1.1.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
 
