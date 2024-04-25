@@ -69,6 +69,7 @@
                     Margin="10">
             <Button x:Name="BSaveTemplate"
                     Content="Save template"
+                    Margin="10,0"
                     Command="{Binding SaveTemplateCommand}" />
             <Button x:Name="BNext"
                     Content="Next"

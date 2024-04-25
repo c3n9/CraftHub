@@ -11,12 +11,15 @@
         x:Name="MyMainWindow"
         MinHeight="450"
         MinWidth="850"
+        AllowsTransparency="False"
         WindowStyle="None"
         FontFamily="{DynamicResource MontserratFont}"
         SourceInitialized="Window_SourceInitialized"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         WindowStartupLocation="CenterScreen">
+
+  
     <Window.Resources>
         <!-- Styles -->
         <Style x:Key="MaterialDesignIconButton"
@@ -147,13 +150,6 @@
                             </MenuItem>
                         </MenuItem>
                     </Menu>
-                    <!--<ToggleButton materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=MoonAndStars}"
-                                  Content="{materialDesign:PackIcon Kind=WeatherSunny}"
-                                  ToolTip="MaterialDesignActionLightToggleButton"
-                                  WindowChrome.IsHitTestVisibleInChrome="True"
-                                  Style="{StaticResource MaterialDesignActionToggleButton}"
-                                  HorizontalAlignment="Right"
-                                  Margin="10,0" />-->
                     <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                            NavigationUIVisibility="Hidden"
                            Grid.Row="1" />

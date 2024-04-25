@@ -66,6 +66,7 @@
     </Window.DataContext>
     <Border BorderBrush="#808080"
             BorderThickness="2">
+        
         <DockPanel x:Name="RootWindow">
             <DockPanel x:Name="TitleBar"
                        DockPanel.Dock="Top"
