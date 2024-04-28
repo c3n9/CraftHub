@@ -126,6 +126,7 @@
                         <MenuItem Header="_File">
                             <MenuItem Header="Upload template"
                                       x:Name="MIImportClass"
+                                      Command="{Binding UploadTemplateCommand}"
                                       Icon="{materialDesign:PackIcon Kind=Upload}" />
                             <MenuItem Header="Import json file"
                                       Icon="{materialDesign:PackIcon Kind=CodeJson}"

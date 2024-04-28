@@ -1,20 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\quart\\source\\repos\\CraftHub\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{74FA69D5-10FD-478A-9132-8DD09BC9CBC3}|CraftHub\\CraftHub.csproj|c:\\users\\quart\\source\\repos\\crafthub\\crafthub\\viewmodels\\mainwindowviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{74FA69D5-10FD-478A-9132-8DD09BC9CBC3}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\viewmodels\\mainwindowviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{74FA69D5-10FD-478A-9132-8DD09BC9CBC3}|CraftHub\\CraftHub.csproj|c:\\users\\quart\\source\\repos\\crafthub\\crafthub\\views\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{74FA69D5-10FD-478A-9132-8DD09BC9CBC3}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\views\\mainwindow.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{74FA69D5-10FD-478A-9132-8DD09BC9CBC3}|CraftHub\\CraftHub.csproj|c:\\users\\quart\\source\\repos\\crafthub\\crafthub\\views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{74FA69D5-10FD-478A-9132-8DD09BC9CBC3}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -22,7 +9,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
@@ -31,44 +18,6 @@
             {
               "$type": "Bookmark",
               "Name": "ST:0:0:{1c64b9c2-e352-428e-a56d-0ace190b99a6}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "MainWindowViewModel.cs",
-              "DocumentMoniker": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\ViewModels\\MainWindowViewModel.cs",
-              "RelativeDocumentMoniker": "CraftHub\\ViewModels\\MainWindowViewModel.cs",
-              "ToolTip": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\ViewModels\\MainWindowViewModel.cs",
-              "RelativeToolTip": "CraftHub\\ViewModels\\MainWindowViewModel.cs",
-              "ViewState": "AQIAABYAAAAAAAAAAAAgwB4AAAA4AAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-04-23T21:14:55.895Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "MainWindow.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\Views\\MainWindow.xaml.cs",
-              "RelativeDocumentMoniker": "CraftHub\\Views\\MainWindow.xaml.cs",
-              "ToolTip": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\Views\\MainWindow.xaml.cs",
-              "RelativeToolTip": "CraftHub\\Views\\MainWindow.xaml.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-04-23T21:14:54.628Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\Views\\MainWindow.xaml",
-              "RelativeDocumentMoniker": "CraftHub\\Views\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\Views\\MainWindow.xaml",
-              "RelativeToolTip": "CraftHub\\Views\\MainWindow.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-04-23T21:02:52.021Z",
-              "EditorCaption": ""
             }
           ]
         }
