@@ -1,4 +1,5 @@
 ﻿using CraftHub.ViewModels;
+using CraftHub.Views;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -16,5 +17,6 @@ namespace CraftHub
     {
         internal static MainWindowViewModel MainWindowViewModel;
         internal static PropertiesViewModel PropertiesViewModel;
+        internal static AddNewElementWindow AddNewElementWindow;
     }
 }
