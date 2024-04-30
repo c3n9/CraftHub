@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Forms;
 using System.Windows.Input;
 
 namespace CraftHub.ViewModels
@@ -95,8 +94,7 @@ namespace CraftHub.ViewModels
             level = Level;
             blockNumber = BlockNumber;
             lessonCount = LessonCount;
-
-            var folderBrowserDialog = new FolderBrowserDialog();
+            var folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             if (folderBrowserDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
             {
                 string selectedPath = folderBrowserDialog.SelectedPath;
@@ -133,9 +131,9 @@ namespace CraftHub.ViewModels
         }
         private void GenerateLesson(string folderPath, string folderName)
         {
-            System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog() { Multiselect = true, Filter = $"Uploading to {folderName} | *.png; *.jpg; *.jpeg" };
+            OpenFileDialog openFileDialog = new OpenFileDialog() { Multiselect = true, Filter = $"Uploading to {folderName} | *.png; *.jpg; *.jpeg" };
 
-            if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            if (openFileDialog.ShowDialog().GetValueOrDefault())
             {
                 int countPage = 1;
                 foreach (var file in openFileDialog.FileNames)

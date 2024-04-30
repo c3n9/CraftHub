@@ -2,7 +2,6 @@
 using CraftHub.ViewModels.Base;
 using CraftHub.ViewModels.Commands;
 using CraftHub.Views;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis;
 using Microsoft.CSharp;
 using Microsoft.Win32;
@@ -68,59 +67,47 @@ namespace CraftHub.ViewModels
                 CompileAndLoadCode(code);
             }
         }
+
         private void CompileAndLoadCode(string code)
         {
-            try
+            App.PropertiesViewModel.Properties.Clear();
+            // Используем провайдер компиляции C# кода
+            CSharpCodeProvider provider = new CSharpCodeProvider();
+            CompilerParameters parameters = new CompilerParameters();
+            // Получаем сборки, доступные в текущем домене приложения
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic).Select(a => a.Location).ToArray();
+            parameters.ReferencedAssemblies.AddRange(assemblies);
+            parameters.ReferencedAssemblies.Add("System.Runtime.dll");
+            // Компилируем код
+            CompilerResults results = provider.CompileAssemblyFromSource(parameters, code);
+            string errorMessage = string.Empty;
+            if (results.Errors.HasErrors)
             {
-                Assembly assembly = Compile(code);
-                if (assembly == null)
+                foreach (CompilerError error in results.Errors)
                 {
+                    errorMessage += $"Error in line {error.Line}: {error.ErrorText}\n";
+                }
+                if (!string.IsNullOrWhiteSpace(errorMessage))
+                {
+                    MessageBox.Show(errorMessage);
                     return;
                 }
-
+            }
+            else
+            {
+                // Загружаем сборку
+                Assembly assembly = results.CompiledAssembly;
                 foreach (Type type in assembly.GetTypes())
                 {
                     dynamic instance = Activator.CreateInstance(type);
                     foreach (var propertyInDynamic in instance.GetType().GetProperties())
                     {
-                        App.PropertiesViewModel.Properties.Add(new PropertyModel()
-                        {
-                            Name = propertyInDynamic.Name.ToString(),
-                            Type = propertyInDynamic.PropertyType
-                        });
+                        App.PropertiesViewModel.Properties.Add(new PropertyModel { Name = propertyInDynamic.Name, Type = propertyInDynamic.PropertyType }); 
                     }
                 }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            
         }
-        private static Assembly Compile(string code)
-        {
-            var syntaxTree = SyntaxFactory.ParseSyntaxTree(code);
-            var references = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic).Select(a => MetadataReference.CreateFromFile(a.Location));
-            var compilation = CSharpCompilation.Create("AssemblyName",
-                Enumerable.Repeat(syntaxTree, 1),
-                references,
-                options: new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
-            using (var memoryStream = new MemoryStream())
-            {
-                var emitResult = compilation.Emit(memoryStream);
-
-                if (emitResult.Success)
-                {
-                    memoryStream.Seek(0, SeekOrigin.Begin);
-                    return Assembly.Load(memoryStream.ToArray());
-                }
-                else
-                {
-                    return null;
-                }
-            }
-        }
         private void OnMinimizeWindowCommand(object paramenter)
         {
             (paramenter as Window).WindowState = WindowState.Minimized;
