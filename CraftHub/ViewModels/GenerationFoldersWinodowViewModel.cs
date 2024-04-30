@@ -85,6 +85,10 @@ namespace CraftHub.ViewModels
                 error += "Enter block number for lesson\n";
             if (string.IsNullOrWhiteSpace(LessonCount.ToString()))
                 error += "Enter the number of lessons\n";
+            if (LessonCount <= 0)
+                error += "Enter the number of lessons greater than 0\n";
+            if (LessonCount <= 0)
+                error += "Enter the number of block greater than 0\n";
             if (!string.IsNullOrWhiteSpace(error))
             {
                 System.Windows.MessageBox.Show(error, "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);

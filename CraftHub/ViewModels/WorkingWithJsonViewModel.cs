@@ -57,6 +57,7 @@ namespace CraftHub.ViewModels
 
         private void OnAddCommand(object parameter)
         {
+            new AddNewElementWindow().ShowDialog();
         }
 
         private void OnEditCommand(object parameter)

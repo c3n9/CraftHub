@@ -103,7 +103,6 @@ namespace CraftHub.ViewModels
                 }
                 exportClass += "}\r\n}";
                 File.WriteAllText(dialog.FileName, exportClass);
-                //App.mainWindowViewModel.Title = $"CraftHub — {System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}";
                 return true;
             }
             else

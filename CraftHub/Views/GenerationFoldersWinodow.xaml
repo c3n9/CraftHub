@@ -17,7 +17,7 @@
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         WindowStyle="None"
         SizeToContent="Manual"
-        Height="380"
+        Height="420"
         Width="500"
         WindowStartupLocation="CenterScreen">
     <Window.Resources>
@@ -66,7 +66,7 @@
     </Window.DataContext>
     <Border BorderBrush="#808080"
             BorderThickness="2">
-        
+
         <DockPanel x:Name="RootWindow">
             <DockPanel x:Name="TitleBar"
                        DockPanel.Dock="Top"
@@ -105,7 +105,8 @@
                                       FontSize="20"
                                       materialDesign:HintAssist.Hint="Level"
                                       SelectedItem="{Binding Level}"
-                                      Style="{StaticResource MaterialDesignOutlinedComboBox}">
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Cursor="">
                                 <TextBlock Text="Basic"
                                            FontSize="20" />
                                 <TextBlock Text="Hight"
@@ -115,26 +116,27 @@
                                      x:Name="TBBlockNumber"
                                      materialDesign:HintAssist.Hint="Block number"
                                      FontSize="20"
-                                     FontFamily="Moncerrat"
                                      Text="{Binding BlockNumber}"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      TextWrapping="Wrap"
-                                     Margin="0,20" />
+                                     Margin="0,30" />
                             <TextBox VerticalAlignment="Top"
                                      x:Name="TBLessonCount"
                                      Text="{Binding LessonCount}"
                                      materialDesign:HintAssist.Hint="Lesson count"
-                                     FontFamily="Moncerrat"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                                      FontSize="20"
-                                     TextWrapping="Wrap" />
+                                     TextWrapping="Wrap"
+                                     Cursor="IBeam" />
                             <StackPanel Orientation="Horizontal"
-                                        Margin="0,10">
+                                        Margin="0,20,0,10">
                                 <TextBlock Text="Common"
-                                           FontSize="20" />
+                                           FontSize="20"
+                                           VerticalAlignment="Center" 
+                                           Margin="0,0,10,0"/>
                                 <CheckBox x:Name="IsCommon"
-                                          IsChecked="{Binding IsCommon}"
-                                          Margin="10,5,0,0" />
+                                          materialDesign:CheckBoxAssist.CheckBoxSize="30"
+                                          IsChecked="{Binding IsCommon}" />
                             </StackPanel>
                             <Button x:Name="BGenerate"
                                     FontSize="20"
