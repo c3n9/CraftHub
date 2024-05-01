@@ -16,6 +16,7 @@ namespace CraftHub
     public partial class App : Application
     {
         internal static MainWindowViewModel MainWindowViewModel;
+        internal static MainWindow MainWindow;
         internal static PropertiesViewModel PropertiesViewModel;
         internal static AddNewElementWindow AddNewElementWindow;
         internal static WorkingWithJsonViewModel WorkingWithJsonViewModel;

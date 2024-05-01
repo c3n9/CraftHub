@@ -10,7 +10,8 @@
       TextElement.Foreground="{DynamicResource MaterialDesignBody}"
       FontFamily="{DynamicResource MontserratFont}"
       d:DesignWidth="800"
-      Title="PropertiesView">
+      Title="PropertiesView"
+      Loaded="Page_Loaded">
 
     <Page.DataContext>
         <viewModels:PropertiesViewModel />

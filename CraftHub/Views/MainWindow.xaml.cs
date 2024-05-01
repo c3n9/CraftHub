@@ -22,6 +22,7 @@ namespace CraftHub.Views
         public MainWindow()
         {
             InitializeComponent();
+            App.MainWindow = this;
         }
         // all this cringe is to make the window not overlap Windows taskbar. I think it's Ok to do this
         // because this doesn't contradict to the MVVM pattern

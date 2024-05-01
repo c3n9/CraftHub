@@ -24,5 +24,12 @@ namespace CraftHub.Views
         {
             InitializeComponent();
         }
+
+        private void Page_Loaded(object sender, RoutedEventArgs e)
+        {
+            App.MainWindow.MIExportJsonFile.IsEnabled = true;
+            App.MainWindow.MIImportJsonFile.IsEnabled = true;
+            App.MainWindow.MIImportClass.IsEnabled = false;
+        }
     }
 }

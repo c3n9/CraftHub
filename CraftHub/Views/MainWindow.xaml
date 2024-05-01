@@ -129,11 +129,13 @@
                                       Command="{Binding UploadTemplateCommand}"
                                       Icon="{materialDesign:PackIcon Kind=Upload}" />
                             <MenuItem Header="Import json file"
+                                      Command="{Binding ImportJsonFileCommand}"
                                       Icon="{materialDesign:PackIcon Kind=CodeJson}"
                                       x:Name="MIImportJsonFile">
                             </MenuItem>
                             <MenuItem Header="Export json file"
                                       x:Name="MIExportJsonFile"
+                                      Command="{Binding ExportJsonFileCommand}"
                                       Icon="{materialDesign:PackIcon Kind=CloudJson}">
                             </MenuItem>
                         </MenuItem>

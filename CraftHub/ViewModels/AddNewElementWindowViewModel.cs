@@ -13,6 +13,7 @@ using Newtonsoft.Json;
 using System.Data;
 using System.Windows.Forms;
 using System.Windows.Media;
+using MaterialDesignThemes.Wpf;
 
 namespace CraftHub.ViewModels
 {

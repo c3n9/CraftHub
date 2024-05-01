@@ -42,8 +42,9 @@ namespace CraftHub.ViewModels
 
         public PropertiesViewModel()
         {
-            App.PropertiesViewModel = this;
 
+            App.PropertiesViewModel = this;
+            
             Properties = new ObservableCollection<PropertyModel>();
 
             AvailableTypes = new ObservableCollection<Type>
@@ -65,7 +66,7 @@ namespace CraftHub.ViewModels
 
         private void OnNavigateToWorkingWithJsonViewCommand(object parameter)
         {
-            if(Properties.Count == 0)
+            if (Properties.Count == 0)
             {
                 MessageBox.Show("Upload a template or add properties", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
@@ -78,11 +79,21 @@ namespace CraftHub.ViewModels
         }
         private void OnAddPropertyCommand(object parameter)
         {
+            var error = string.Empty;
             var propertyName = parameter as string;
-            if (!string.IsNullOrEmpty(propertyName))
+            var propertyExist = Properties.FirstOrDefault(x => x.Name == propertyName);
+            if (propertyExist != null)
+                error += "Property with this parameter already exists\n";
+            if (string.IsNullOrEmpty(propertyName))
+                error += "Enter the name of the property\n";
+            if (SelectedType == null)
+                error += "Select the type\n";
+            if (!string.IsNullOrWhiteSpace(error))
             {
-                Properties.Add(new PropertyModel() { Name = propertyName, Type = SelectedType });
+                MessageBox.Show(error, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
+            Properties.Add(new PropertyModel() { Name = propertyName, Type = SelectedType });
         }
 
         private void OnRemovePropertyCommand(object parameter)

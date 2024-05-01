@@ -5,9 +5,12 @@ using CraftHub.Views;
 using Microsoft.CodeAnalysis;
 using Microsoft.CSharp;
 using Microsoft.Win32;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -39,6 +42,8 @@ namespace CraftHub.ViewModels
         public ICommand MaximizeWindowCommand { get; set; }
         public ICommand OpenGenerateFoldersindow { get; set; }
         public ICommand UploadTemplateCommand { get; set; }
+        public ICommand ExportJsonFileCommand { get; set; }
+        public ICommand ImportJsonFileCommand { get; set; }
 
         private PropertiesViewModel propertiesViewModel;
 
@@ -49,6 +54,8 @@ namespace CraftHub.ViewModels
             CloseWindowCommand = new DelegateCommand(OnCloseWindowCommand);
             OpenGenerateFoldersindow = new DelegateCommand(OnOpenGenerateLessonsindow);
             UploadTemplateCommand = new DelegateCommand(UploadTemplate);
+            ImportJsonFileCommand = new DelegateCommand(OnImportJsonFileCommand);
+            ExportJsonFileCommand = new DelegateCommand(OnExportJsonFileCommand);
 
             App.MainWindowViewModel = this;
             MainFrameSource = new PropertiesView();
@@ -57,6 +64,53 @@ namespace CraftHub.ViewModels
         private void OnOpenGenerateLessonsindow(object paramenter)
         {
             new GenerationFoldersWinodow().ShowDialog();
+        }
+        private void OnExportJsonFileCommand(object paramenter)
+        {
+            var exportJsonString = JsonConvert.SerializeObject(App.WorkingWithJsonViewModel.DataTable, Formatting.Indented);
+            if (!string.IsNullOrWhiteSpace(exportJsonString))
+            {
+                var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
+                if (dialog.ShowDialog().GetValueOrDefault())
+                {
+                    File.WriteAllText(dialog.FileName, exportJsonString, Encoding.UTF8);
+                    MessageBox.Show("Successful export", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Import json first");
+                return;
+            }
+        }
+        private void OnImportJsonFileCommand(object paramenter)
+        {
+            var dialog = new OpenFileDialog() { Filter = ".json | *.json" };
+            if (dialog.ShowDialog().GetValueOrDefault())
+            {
+                App.jsonString = File.ReadAllText(dialog.FileName);
+                JArray jsonArray = new JArray();
+                if (!string.IsNullOrWhiteSpace(App.jsonString))
+                {
+                    jsonArray = JArray.Parse(App.jsonString);
+                    foreach (var jsonItem in jsonArray)
+                    {
+                        var dataRow = App.WorkingWithJsonViewModel.DataTable.NewRow();
+                        var jsonObject = jsonItem as JObject;
+
+                        foreach (var property in jsonObject.Properties())
+                        {
+                            var columnName = property.Name;
+                            if (App.WorkingWithJsonViewModel.DataTable.Columns.Contains(columnName))
+                            {
+                                var columnValue = property.Value.ToObject<object>();
+                                dataRow[columnName] = columnValue;
+                            }
+                        }
+                        App.WorkingWithJsonViewModel.DataTable.Rows.Add(dataRow);
+                    }
+                }
+            }
         }
         private void UploadTemplate(object paramenter)
         {
@@ -102,7 +156,7 @@ namespace CraftHub.ViewModels
                     dynamic instance = Activator.CreateInstance(type);
                     foreach (var propertyInDynamic in instance.GetType().GetProperties())
                     {
-                        App.PropertiesViewModel.Properties.Add(new PropertyModel { Name = propertyInDynamic.Name, Type = propertyInDynamic.PropertyType }); 
+                        App.PropertiesViewModel.Properties.Add(new PropertyModel { Name = propertyInDynamic.Name, Type = propertyInDynamic.PropertyType });
                     }
                 }
             }
