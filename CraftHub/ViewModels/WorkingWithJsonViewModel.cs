@@ -5,10 +5,12 @@ using CraftHub.Views;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
 using System.Dynamic;
 using System.IO;
+using System.Linq;
 using System.Windows.Input;
 
 namespace CraftHub.ViewModels
@@ -22,6 +24,7 @@ namespace CraftHub.ViewModels
         public ICommand ExportCommand { get; set; }
         public DataTable DataTable { get; set; }
         public DataRowView DataRowView { get; set; }
+        public List<DataRowView> DataRowViews { get; set; }
 
         public WorkingWithJsonViewModel()
         {
@@ -46,9 +49,39 @@ namespace CraftHub.ViewModels
         {
             DataTable = new DataTable();
             var properties = App.PropertiesViewModel.Properties;
-            foreach (var property in properties)
+           
+            JArray jsonArray = new JArray();
+            if (!string.IsNullOrWhiteSpace(App.jsonString))
+                jsonArray = JArray.Parse(App.jsonString);
+            if (jsonArray.Count > 0)
             {
-                DataTable.Columns.Add(property.Name, property.Type);
+                foreach (var property in properties)
+                    DataTable.Columns.Add(property.Name, property.Type);
+                foreach (var jsonItem in jsonArray)
+                {
+                    var dataRow = DataTable.NewRow();
+                    var jsonObject = jsonItem as JObject;
+
+                    foreach (var property in jsonObject.Properties())
+                    {
+                        var columnName = property.Name;
+                        foreach (var propertyInDynamic in properties)
+                        {
+                            // Проверяем, существует ли свойство в списке properties
+                            if (propertyInDynamic.Name == property.Name)
+                            {
+                                var columnValue = property.Value.ToObject<object>();
+                                dataRow[columnName] = columnValue;
+                            }
+                        }
+                    }
+                    DataTable.Rows.Add(dataRow);
+                }
+            }
+            else
+            {
+                foreach (var property in properties)
+                    DataTable.Columns.Add(property.Name, property.Type);
             }
         }
 
@@ -59,6 +92,9 @@ namespace CraftHub.ViewModels
 
         private void OnAddCommand(object parameter)
         {
+            DataRowView newRowView = DataTable.DefaultView.AddNew();
+            newRowView.CancelEdit();
+            App.DataRowView = newRowView;
             App.IsAdding = true;
             new AddNewElementWindow().ShowDialog();
         }
@@ -66,12 +102,14 @@ namespace CraftHub.ViewModels
         private void OnEditCommand(object parameter)
         {
             App.IsAdding = false;
+            App.DataRowView = DataRowView;
             new AddNewElementWindow().ShowDialog();
-
         }
 
         private void OnRemoveCammand(object parameter)
         {
+            if (DataRowView != null)
+                DataRowView.Delete();
 
         }
 

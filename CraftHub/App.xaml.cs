@@ -20,6 +20,7 @@ namespace CraftHub
         internal static AddNewElementWindow AddNewElementWindow;
         internal static WorkingWithJsonViewModel WorkingWithJsonViewModel;
         public static bool IsAdding = false;
+        public static string jsonString = String.Empty;
         public static DataRowView DataRowView { get; set; }
     }
 }

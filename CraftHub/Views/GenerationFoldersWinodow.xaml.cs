@@ -26,6 +26,14 @@ namespace CraftHub.Views
         {
             InitializeComponent();
         }
+        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            string pattern = @"^\d+$";
+            if (!Regex.IsMatch(e.Text, pattern))
+            {
+                e.Handled = true;
+            }
+        }
         // all this cringe is to make the window not overlap Windows taskbar. I think it's Ok to do this
         // because this doesn't contradict to the MVVM pattern
         #region WindowResizeFixes
@@ -135,13 +143,6 @@ namespace CraftHub.Views
         }
         #endregion
 
-        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        {
-            string pattern = @"^\d+$";
-            if (!Regex.IsMatch(e.Text, pattern))
-            {
-                e.Handled = true;
-            }
-        }
+        
     }
 }

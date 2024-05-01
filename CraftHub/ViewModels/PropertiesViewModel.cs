@@ -65,6 +65,15 @@ namespace CraftHub.ViewModels
 
         private void OnNavigateToWorkingWithJsonViewCommand(object parameter)
         {
+            if(Properties.Count == 0)
+            {
+                MessageBox.Show("Upload a template or add properties", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            var continueSave = MessageBox.Show("Do you want to save the class?", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
+            if (continueSave == MessageBoxResult.OK)
+                if (!SaveTemplate())
+                    return;
             App.MainWindowViewModel.MainFrameSource = new WorkingWithJsonView();
         }
         private void OnAddPropertyCommand(object parameter)

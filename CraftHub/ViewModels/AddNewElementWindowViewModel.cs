@@ -47,6 +47,8 @@ namespace CraftHub.ViewModels
             var listValueTypes = App.PropertiesViewModel.Properties.Select(x => x.Type).ToList();
             if (!App.IsAdding)
             {
+                UIElemetsCollection = new ObservableCollection<UIElement>();
+
                 var dataRow = App.DataRowView.Row;
                 var json = JsonConvert.SerializeObject(dataRow.ItemArray);
                 var values = JsonConvert.DeserializeObject<List<string>>(json);
@@ -130,7 +132,6 @@ namespace CraftHub.ViewModels
             {
                 if (App.IsAdding)
                 {
-                    // Создание новой строки данных и добавление ее в DataTable
                     DataRow newRow = App.DataRowView.Row.Table.NewRow();
                     for (int i = 0; i < UIElemetsCollection.Count; i += 2)
                     {
@@ -148,19 +149,13 @@ namespace CraftHub.ViewModels
                             {
                                 value = checkBox.IsChecked.ToString();
                             }
-                            // Установка значения в новой строке данных
                             newRow[columnName] = value;
                         }
                     }
-
-                    // Добавление новой строки данных в DataTable
-
-
-                    //App.WorkingWithJsonViewModel.DataTable.Row.Table.Rows.Add(newRow);
+                    App.DataRowView.Row.Table.Rows.Add(newRow);
                 }
                 else
                 {
-                    // Обновление DataRowView измененными данными
                     for (int i = 0; i < UIElemetsCollection.Count; i += 2)
                     {
                         var textBox = UIElemetsCollection[i + 1] as System.Windows.Controls.TextBox;
@@ -181,6 +176,7 @@ namespace CraftHub.ViewModels
                         }
                     }
                 }
+                App.AddNewElementWindow.Close();
             }
             catch (Exception ex)
             {
