@@ -115,6 +115,7 @@
                             <TextBox VerticalAlignment="Top"
                                      x:Name="TBBlockNumber"
                                      materialDesign:HintAssist.Hint="Block number"
+                                     PreviewTextInput="TextBox_PreviewTextInput"
                                      FontSize="20"
                                      Text="{Binding BlockNumber}"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
@@ -122,6 +123,7 @@
                                      Margin="0,30" />
                             <TextBox VerticalAlignment="Top"
                                      x:Name="TBLessonCount"
+                                     PreviewTextInput="TextBox_PreviewTextInput"
                                      Text="{Binding LessonCount}"
                                      materialDesign:HintAssist.Hint="Lesson count"
                                      Style="{StaticResource MaterialDesignOutlinedTextBox}"

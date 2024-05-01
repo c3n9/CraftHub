@@ -73,6 +73,7 @@
                   ItemsSource="{Binding DataTable}"
                   AutoGenerateColumns="True"
                   IsReadOnly="True"
+                  SelectedItem="{Binding DataRowView}"
                   HorizontalScrollBarVisibility="Auto"
                   VerticalScrollBarVisibility="Auto" />
         <ScrollViewer Grid.Row="2"

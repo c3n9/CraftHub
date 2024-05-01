@@ -21,9 +21,11 @@ namespace CraftHub.ViewModels
         public ICommand RemoveCommand { get; set; }
         public ICommand ExportCommand { get; set; }
         public DataTable DataTable { get; set; }
+        public DataRowView DataRowView { get; set; }
 
         public WorkingWithJsonViewModel()
         {
+            App.WorkingWithJsonViewModel = this;
             try
             {
                 DisplayDataInGrid();
@@ -57,11 +59,14 @@ namespace CraftHub.ViewModels
 
         private void OnAddCommand(object parameter)
         {
+            App.IsAdding = true;
             new AddNewElementWindow().ShowDialog();
         }
 
         private void OnEditCommand(object parameter)
         {
+            App.IsAdding = false;
+            new AddNewElementWindow().ShowDialog();
 
         }
 

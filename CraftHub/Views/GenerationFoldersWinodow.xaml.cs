@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -133,5 +134,14 @@ namespace CraftHub.Views
             }
         }
         #endregion
+
+        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            string pattern = @"^\d+$";
+            if (!Regex.IsMatch(e.Text, pattern))
+            {
+                e.Handled = true;
+            }
+        }
     }
 }
