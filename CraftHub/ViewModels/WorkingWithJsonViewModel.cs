@@ -36,11 +36,55 @@ namespace CraftHub.ViewModels
             }
         }
         public DataRowView DataRowView { get; set; }
-        public List<DataRowView> DataRowViews { get; set; }
-
+        private Visibility _buttonVisibility;
+        public Visibility ButtonVisibility
+        {
+            get { return _buttonVisibility; }
+            set
+            {
+                _buttonVisibility = value;
+                OnPropertyChanged(nameof(ButtonVisibility));
+            }
+        }
+        private bool _isEditTable;
+        public bool IsEditTable
+        {
+            get { return _isEditTable; }
+            set
+            {
+                _isEditTable = value;
+                OnPropertyChanged(nameof(IsEditTable));
+            }
+        }
+        private bool _canUserAddRows;
+        public bool CanUserAddRows
+        {
+            get { return _canUserAddRows; }
+            set
+            {
+                _canUserAddRows = value;
+                OnPropertyChanged(nameof(CanUserAddRows));
+            }
+        }
         public WorkingWithJsonViewModel()
         {
             App.WorkingWithJsonViewModel = this;
+
+            if (App.MainWindow.MIAddInModalWindow.IsChecked == true)
+            {
+                ButtonVisibility = Visibility.Visible;
+                CanUserAddRows = false;
+                IsEditTable = true;
+            }
+            else
+            {
+                ButtonVisibility = Visibility.Collapsed;
+                CanUserAddRows = true;
+                IsEditTable = false;
+            }
+
+            App.MainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
+
             try
             {
                 DisplayDataInGrid();
@@ -56,11 +100,27 @@ namespace CraftHub.ViewModels
             ExportCommand = new DelegateCommand(OnExportCommand);
         }
 
+        private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
+        {
+            if (e)
+            {
+                ButtonVisibility = Visibility.Visible;
+                CanUserAddRows = false;
+                IsEditTable = true;
+            }
+            else
+            {
+                ButtonVisibility = Visibility.Collapsed;
+                CanUserAddRows = true;
+                IsEditTable = false;
+            }
+        }
+
         public void DisplayDataInGrid()
         {
             DataTable = new DataTable();
             var properties = App.PropertiesViewModel.Properties;
-           
+
             JArray jsonArray = new JArray();
             if (!string.IsNullOrWhiteSpace(App.jsonString))
                 jsonArray = JArray.Parse(App.jsonString);

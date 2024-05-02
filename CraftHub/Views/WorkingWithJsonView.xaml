@@ -33,17 +33,21 @@
                     Grid.ColumnSpan="2">
             <Button x:Name="BAdd"
                     Content="Add"
+                    Visibility="{Binding ButtonVisibility}"
                     Command="{Binding AddCommand}"/>
             <Button x:Name="BEdit"
                     Content="Edit"
                     Margin="10,0"
+                    Visibility="{Binding ButtonVisibility}"
                     Command="{Binding EditCommand}"/>
             <Button x:Name="BRemove"
                     Content="Remove" 
+                    Visibility="{Binding ButtonVisibility}"
                     Command="{Binding RemoveCommand}"/>
             <Button x:Name="BExport"
                     Content="Export"
                     Margin="10,0"
+                    Visibility="{Binding ButtonVisibility}"
                     Command="{Binding ExportCommand}" />
         </StackPanel>
         <StackPanel Orientation="Horizontal"
@@ -73,7 +77,8 @@
                   Grid.Row="2"
                   ItemsSource="{Binding DataTable}"
                   AutoGenerateColumns="True"
-                  IsReadOnly="True"
+                  IsReadOnly="{Binding IsEditTable}"
+                  CanUserAddRows="{Binding CanUserAddRows}"
                   SelectedItem="{Binding DataRowView}"
                   HorizontalScrollBarVisibility="Auto"
                   VerticalScrollBarVisibility="Auto" />
