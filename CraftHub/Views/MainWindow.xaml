@@ -74,7 +74,6 @@
                       GlassFrameThickness="0"
                       ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}" />
     </WindowChrome.WindowChrome>
-
     <DockPanel x:Name="RootWindow"
                LastChildFill="True">
         <DockPanel x:Name="TitleBar"
