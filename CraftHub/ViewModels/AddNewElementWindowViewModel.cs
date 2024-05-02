@@ -44,8 +44,8 @@ namespace CraftHub.ViewModels
         }
         private void GenerationEditForm()
         {
-            var listElementsName = App.PropertiesViewModel.Properties.Select(x => x.Name).ToList();
-            var listValueTypes = App.PropertiesViewModel.Properties.Select(x => x.Type).ToList();
+            var listElementsName = App.WorkingAreaViewModel.Properties.Select(x => x.Name).ToList();
+            var listValueTypes = App.WorkingAreaViewModel.Properties.Select(x => x.Type).ToList();
             if (!App.IsAdding)
             {
                 UIElemetsCollection = new ObservableCollection<UIElement>();

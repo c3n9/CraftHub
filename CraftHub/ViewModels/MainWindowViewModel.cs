@@ -58,7 +58,7 @@ namespace CraftHub.ViewModels
             ExportJsonFileCommand = new DelegateCommand(OnExportJsonFileCommand);
 
             App.MainWindowViewModel = this;
-            MainFrameSource = new PropertiesView();
+            MainFrameSource = new WorkingAreaView();
 
         }
         private void OnOpenGenerateLessonsindow(object paramenter)
@@ -95,19 +95,19 @@ namespace CraftHub.ViewModels
                     jsonArray = JArray.Parse(App.jsonString);
                     foreach (var jsonItem in jsonArray)
                     {
-                        var dataRow = App.WorkingWithJsonViewModel.DataTable.NewRow();
+                        var dataRow = App.WorkingAreaViewModel.DataTable.NewRow();
                         var jsonObject = jsonItem as JObject;
 
                         foreach (var property in jsonObject.Properties())
                         {
                             var columnName = property.Name;
-                            if (App.WorkingWithJsonViewModel.DataTable.Columns.Contains(columnName))
+                            if (App.WorkingAreaViewModel.DataTable.Columns.Contains(columnName))
                             {
                                 var columnValue = property.Value.ToObject<object>();
                                 dataRow[columnName] = columnValue;
                             }
                         }
-                        App.WorkingWithJsonViewModel.DataTable.Rows.Add(dataRow);
+                        App.WorkingAreaViewModel.DataTable.Rows.Add(dataRow);
                     }
                 }
             }

@@ -20,6 +20,11 @@ namespace CraftHub
         internal static PropertiesViewModel PropertiesViewModel;
         internal static AddNewElementWindow AddNewElementWindow;
         internal static WorkingWithJsonViewModel WorkingWithJsonViewModel;
+
+
+        internal static WorkingAreaViewModel WorkingAreaViewModel;
+
+
         public static bool IsAdding = false;
         public static string jsonString = String.Empty;
         public static DataRowView DataRowView { get; set; }

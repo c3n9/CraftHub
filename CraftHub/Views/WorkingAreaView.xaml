@@ -1,0 +1,109 @@
+﻿<Page x:Class="CraftHub.Views.WorkingAreaView"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+      xmlns:viewModels="clr-namespace:CraftHub.ViewModels"
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:local="clr-namespace:CraftHub.Views"
+      xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+      TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+      FontFamily="{DynamicResource MontserratFont}"
+      mc:Ignorable="d"
+      d:DesignHeight="450"
+      d:DesignWidth="1000"
+      Title="WorkingAreaView">
+
+    <Page.DataContext>
+        <viewModels:WorkingAreaViewModel />
+    </Page.DataContext>
+    
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <ToolBarTray>
+            <ToolBar ClipToBounds="False"
+                     Style="{StaticResource MaterialDesignToolBar}">
+                <Button x:Name="BAdd"
+                        Visibility="{Binding ButtonVisibility}"
+                        Command="{Binding AddCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="TableLargeAdd" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Add new element" />
+                    </Button.ToolTip>
+                </Button>
+                <Button x:Name="BEdit"
+                        Margin="10,0"
+                        Visibility="{Binding ButtonVisibility}"
+                        Command="{Binding EditCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="Pencil" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Edit element" />
+                    </Button.ToolTip>
+                </Button>
+                <Button x:Name="BRemove"
+                        Visibility="{Binding ButtonVisibility}"
+                        Command="{Binding RemoveCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="Remove" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Remove element" />
+                    </Button.ToolTip>
+                </Button>
+                <Button x:Name="BExport"
+                        Margin="10,0"
+                        Visibility="{Binding ButtonVisibility}"
+                        Command="{Binding ExportCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="Export" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Export table to json" />
+                    </Button.ToolTip>
+                </Button>
+                <TextBlock Text="Property name"
+                           VerticalAlignment="Center"
+                           Margin="10,0"
+                           FontSize="16" />
+                <TextBox x:Name="TBPropertyName"
+                         Width="150"
+                         FontSize="20"
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         VerticalContentAlignment="Center" />
+                <TextBlock Text="Type value"
+                           FontSize="16"
+                           VerticalAlignment="Center"
+                           Margin="10,0" />
+                <ComboBox x:Name="CBValues"
+                          Width="150"
+                          FontSize="20"
+                          ItemsSource="{Binding AvailableTypes}"
+                          SelectedItem="{Binding SelectedType}" />
+                <Button x:Name="BAddProperty"
+                        Margin="10,0,10,0"
+                        Content="Add"
+                        Command="{Binding AddPropertyCommand}"
+                        CommandParameter="{Binding ElementName=TBPropertyName, Path=Text, Mode=OneWay}">
+                </Button>
+            </ToolBar>
+        </ToolBarTray>
+
+        <DataGrid ColumnWidth="*"
+                  Grid.Row="2"
+                  ItemsSource="{Binding DataTable}"
+                  AutoGenerateColumns="True"
+                  IsReadOnly="{Binding IsEditTable}"
+                  FontSize="18"
+                  CanUserAddRows="{Binding CanUserAddRows}"
+                  SelectedItem="{Binding DataRowView}"
+                  HorizontalScrollBarVisibility="Auto"
+                  VerticalScrollBarVisibility="Auto" />
+    </Grid>
+</Page>
