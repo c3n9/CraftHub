@@ -60,7 +60,7 @@ namespace CraftHub.ViewModels
                         FontSize = 16,
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
                     };
-                    textBlock.Text = listElementsName[i];
+                    textBlock.Text = $"{listElementsName[i]} ({listValueTypes[i]})";
                     UIElemetsCollection.Add(textBlock);
                     if (listValueTypes[i].ToString() == typeof(bool).FullName)
                     {
@@ -97,7 +97,7 @@ namespace CraftHub.ViewModels
                     {
                         FontSize = 16,
                         HorizontalAlignment = System.Windows.HorizontalAlignment.Center,
-                        Text = listElementsName[i]
+                        Text = $"{listElementsName[i]}({listValueTypes[i]})"
                     };
                     UIElemetsCollection.Add(textBlock);
                     var c = listValueTypes[i].ToString();

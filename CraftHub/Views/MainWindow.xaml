@@ -139,12 +139,7 @@
                             </MenuItem>
                         </MenuItem>
                         <MenuItem Header="_Options">
-                            <MenuItem Header="Add in modal window"
-                                      x:Name="MIAddInModalWindow"
-                                      IsChecked="True"
-                                      Checked="MIAddInModalWindow_Checked"
-                                      Unchecked="MIAddInModalWindow_Unchecked"
-                                      IsCheckable="True" />
+                            
                         </MenuItem>
                         <MenuItem Header="_Extension">
                             <MenuItem Header="Generation folders"

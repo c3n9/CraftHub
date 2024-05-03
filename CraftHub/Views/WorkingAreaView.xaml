@@ -37,7 +37,6 @@
                     </Button.ToolTip>
                 </Button>
                 <Button x:Name="BEdit"
-                        Margin="10,0"
                         Visibility="{Binding ButtonVisibility}"
                         Command="{Binding EditCommand}">
                     <Button.Content>
@@ -58,7 +57,6 @@
                     </Button.ToolTip>
                 </Button>
                 <Button x:Name="BExport"
-                        Margin="10,0"
                         Visibility="{Binding ButtonVisibility}"
                         Command="{Binding ExportCommand}">
                     <Button.Content>
@@ -68,6 +66,7 @@
                         <TextBlock Text="Export table to json" />
                     </Button.ToolTip>
                 </Button>
+                <Separator />
                 <TextBlock Text="Property name"
                            VerticalAlignment="Center"
                            Margin="10,0"

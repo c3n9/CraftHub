@@ -122,7 +122,7 @@
                                     VerticalAlignment="Center">
                             <Viewbox  Stretch="Uniform"
                                       Margin="20">
-                                <StackPanel Width="700">
+                                <StackPanel Width="700" >
                                     <ItemsControl ItemsSource="{Binding UIElemetsCollection}" />
                                     <Button x:Name="BSave"
                                              Content="Save"

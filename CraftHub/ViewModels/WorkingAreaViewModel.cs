@@ -72,32 +72,10 @@ namespace CraftHub.ViewModels
                 OnPropertyChanged(nameof(ButtonVisibility));
             }
         }
-        private bool _isEditTable;
-        public bool IsEditTable
-        {
-            get { return _isEditTable; }
-            set
-            {
-                _isEditTable = value;
-                OnPropertyChanged(nameof(IsEditTable));
-            }
-        }
-        private bool _canUserAddRows;
-        public bool CanUserAddRows
-        {
-            get { return _canUserAddRows; }
-            set
-            {
-                _canUserAddRows = value;
-                OnPropertyChanged(nameof(CanUserAddRows));
-            }
-        }
-
 
         public ObservableCollection<PropertyModel> Properties { get; set; }
         public ObservableCollection<Type> AvailableTypes { get; set; }
         public DataRowView DataRowView { get; set; }
-
         DataGrid dataGrid { get; set; }
         public WorkingAreaViewModel()
         {
@@ -115,9 +93,11 @@ namespace CraftHub.ViewModels
                 typeof(bool),
                 typeof(string),
                 typeof(double),
-                typeof(decimal)
+                typeof(decimal),
+                typeof(byte),
+                typeof(short),
+                typeof(char),
             };
-
 
             AddPropertyCommand = new DelegateCommand(OnAddPropertyCommand);
             AddCommand = new DelegateCommand(OnAddCommand);
@@ -129,38 +109,18 @@ namespace CraftHub.ViewModels
                 ColumnWidth = new DataGridLength(1, DataGridLengthUnitType.Star),
                 AutoGenerateColumns = true,
                 FontSize = 18,
-                CanUserAddRows = false,
-                IsReadOnly = true,
+                CanUserAddRows = true,
+                IsReadOnly = false,
                 HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
                 VerticalScrollBarVisibility = ScrollBarVisibility.Auto
             };
             dataGrid.SetBinding(DataGrid.SelectedItemProperty, new Binding("DataRowView"));
-            //dataGrid.SetBinding(DataGrid.CanUserAddRowsProperty, new Binding("CanUserAddRows"));
-            //dataGrid.SetBinding(DataGrid.IsReadOnlyProperty, new Binding("IsEditTable"));
             dataGrid.DataContext = this;
 
             UIElemetsCollection.Add(dataGrid);
 
-            //App.MainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
 
         }
-
-        private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
-        {
-            if (e)
-            {
-                ButtonVisibility = Visibility.Visible;
-                CanUserAddRows = false;
-                IsEditTable = true;
-            }
-            else
-            {
-                ButtonVisibility = Visibility.Collapsed;
-                CanUserAddRows = true;
-                IsEditTable = false;
-            }
-        }
-
         private void OnAddPropertyCommand(object parameter)
         {
             var error = string.Empty;
@@ -189,7 +149,7 @@ namespace CraftHub.ViewModels
             if (jsonArray.Count > 0)
             {
                 foreach (var property in Properties)
-                    DataTable.Columns.Add(property.Name, property.Type);
+                    DataTable.Columns.Add($"{property.Name} ({property.Type})", property.Type);
                 foreach (var jsonItem in jsonArray)
                 {
                     var dataRow = DataTable.NewRow();
@@ -213,7 +173,7 @@ namespace CraftHub.ViewModels
             else
             {
                 foreach (var property in Properties)
-                    DataTable.Columns.Add(property.Name, property.Type);
+                    DataTable.Columns.Add($"{property.Name} ({property.Type})", property.Type);
             }
             dataGrid.ItemsSource = DataTable.DefaultView;
         }
