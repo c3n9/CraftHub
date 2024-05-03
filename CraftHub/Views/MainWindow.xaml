@@ -138,9 +138,9 @@
                                       Icon="{materialDesign:PackIcon Kind=CloudJson}">
                             </MenuItem>
                         </MenuItem>
-                        <MenuItem Header="_Options">
+                        <!--<MenuItem Header="_Options">
                             
-                        </MenuItem>
+                        </MenuItem>-->
                         <MenuItem Header="_Extension">
                             <MenuItem Header="Generation folders"
                                       x:Name="MIGenerationFolders"

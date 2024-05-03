@@ -149,7 +149,7 @@ namespace CraftHub.ViewModels
             if (jsonArray.Count > 0)
             {
                 foreach (var property in Properties)
-                    DataTable.Columns.Add($"{property.Name} ({property.Type})", property.Type);
+                    DataTable.Columns.Add($"{property.Name} ({property.Type.Name})", property.Type);
                 foreach (var jsonItem in jsonArray)
                 {
                     var dataRow = DataTable.NewRow();
@@ -173,7 +173,7 @@ namespace CraftHub.ViewModels
             else
             {
                 foreach (var property in Properties)
-                    DataTable.Columns.Add($"{property.Name} ({property.Type})", property.Type);
+                    DataTable.Columns.Add($"{property.Name} ({property.Type.Name})", property.Type);
             }
             dataGrid.ItemsSource = DataTable.DefaultView;
         }

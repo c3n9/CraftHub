@@ -26,7 +26,7 @@
         <ToolBarTray>
             <ToolBar ClipToBounds="False"
                      Style="{StaticResource MaterialDesignToolBar}">
-                <Button x:Name="BAdd"
+                <!--<Button x:Name="BAdd"
                         Visibility="{Binding ButtonVisibility}"
                         Command="{Binding AddCommand}">
                     <Button.Content>
@@ -45,7 +45,7 @@
                     <Button.ToolTip>
                         <TextBlock Text="Edit element" />
                     </Button.ToolTip>
-                </Button>
+                </Button>-->
                 <Button x:Name="BRemove"
                         Visibility="{Binding ButtonVisibility}"
                         Command="{Binding RemoveCommand}">
@@ -87,9 +87,11 @@
                           SelectedItem="{Binding SelectedType}" />
                 <Button x:Name="BAddProperty"
                         Margin="10,0,10,0"
-                        Content="Add"
                         Command="{Binding AddPropertyCommand}"
                         CommandParameter="{Binding ElementName=TBPropertyName, Path=Text, Mode=OneWay}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="PlaylistAdd" />
+                    </Button.Content>
                 </Button>
             </ToolBar>
         </ToolBarTray>

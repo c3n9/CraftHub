@@ -25,5 +25,15 @@ namespace CraftHub
         public static bool IsAdding = false;
         public static string jsonString = String.Empty;
         public static DataRowView DataRowView { get; set; }
+        public App()
+        {
+            DispatcherUnhandledException += App_DispatcherUnhandledException;
+        }
+
+        private void App_DispatcherUnhandledException(object sender, System.Windows.Threading.DispatcherUnhandledExceptionEventArgs e)
+        {
+            e.Handled = true;
+            MessageBox.Show(e.Exception.Message);
+        }
     }
 }

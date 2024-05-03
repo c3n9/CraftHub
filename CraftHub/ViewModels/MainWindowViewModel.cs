@@ -65,21 +65,21 @@ namespace CraftHub.ViewModels
         }
         private void OnExportJsonFileCommand(object paramenter)
         {
-            //var exportJsonString = JsonConvert.SerializeObject(App.WorkingWithJsonViewModel.DataTable, Formatting.Indented);
-            //if (!string.IsNullOrWhiteSpace(exportJsonString))
-            //{
-            //    var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
-            //    if (dialog.ShowDialog().GetValueOrDefault())
-            //    {
-            //        File.WriteAllText(dialog.FileName, exportJsonString, Encoding.UTF8);
-            //        MessageBox.Show("Successful export", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-            //    }
-            //}
-            //else
-            //{
-            //    MessageBox.Show("Import json first");
-            //    return;
-            //}
+            var exportJsonString = JsonConvert.SerializeObject(App.WorkingAreaViewModel.DataTable, Formatting.Indented);
+            if (!string.IsNullOrWhiteSpace(exportJsonString))
+            {
+                var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
+                if (dialog.ShowDialog().GetValueOrDefault())
+                {
+                    File.WriteAllText(dialog.FileName, exportJsonString, Encoding.UTF8);
+                    MessageBox.Show("Successful export", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+            }
+            else
+            {
+                MessageBox.Show("Import json first");
+                return;
+            }
         }
         private void OnImportJsonFileCommand(object paramenter)
         {
@@ -122,7 +122,7 @@ namespace CraftHub.ViewModels
 
         private void CompileAndLoadCode(string code)
         {
-            //App.PropertiesViewModel.Properties.Clear();
+            App.WorkingAreaViewModel.Properties.Clear();
             // Используем провайдер компиляции C# кода
             CSharpCodeProvider provider = new CSharpCodeProvider();
             CompilerParameters parameters = new CompilerParameters();
@@ -154,7 +154,8 @@ namespace CraftHub.ViewModels
                     dynamic instance = Activator.CreateInstance(type);
                     foreach (var propertyInDynamic in instance.GetType().GetProperties())
                     {
-                        //Properties.Add(new PropertyModel { Name = propertyInDynamic.Name, Type = propertyInDynamic.PropertyType });
+                        App.WorkingAreaViewModel.Properties.Add(new PropertyModel { Name = propertyInDynamic.Name, Type = propertyInDynamic.PropertyType });
+                        App.WorkingAreaViewModel.DisplayDataInGrid();
                     }
                 }
             }
