@@ -15,6 +15,8 @@ using CraftHub.Models;
 using System.Collections.ObjectModel;
 using System.IO;
 using Microsoft.Win32;
+using System.Windows.Controls;
+using System.Windows.Data;
 
 namespace CraftHub.ViewModels
 {
@@ -26,6 +28,16 @@ namespace CraftHub.ViewModels
         public ICommand RemoveCommand { get; set; }
         public ICommand ExportCommand { get; set; }
 
+        private ObservableCollection<UIElement> _uIElemetsCollection;
+        public ObservableCollection<UIElement> UIElemetsCollection
+        {
+            get { return _uIElemetsCollection; }
+            set
+            {
+                _uIElemetsCollection = value;
+                OnPropertyChanged(nameof(UIElemetsCollection));
+            }
+        }
 
         private Type _selectedType;
         public Type SelectedType
@@ -86,9 +98,12 @@ namespace CraftHub.ViewModels
         public ObservableCollection<Type> AvailableTypes { get; set; }
         public DataRowView DataRowView { get; set; }
 
-
+        DataGrid dataGrid { get; set; }
         public WorkingAreaViewModel()
         {
+            DataTable = new DataTable();
+            UIElemetsCollection = new ObservableCollection<UIElement>();
+
             App.WorkingAreaViewModel = this;
 
             Properties = new ObservableCollection<PropertyModel>();
@@ -103,13 +118,31 @@ namespace CraftHub.ViewModels
                 typeof(decimal)
             };
 
-            //App.MainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
 
             AddPropertyCommand = new DelegateCommand(OnAddPropertyCommand);
             AddCommand = new DelegateCommand(OnAddCommand);
             EditCommand = new DelegateCommand(OnEditCommand);
             RemoveCommand = new DelegateCommand(OnRemoveCammand);
             ExportCommand = new DelegateCommand(OnExportCommand);
+            dataGrid = new DataGrid()
+            {
+                ColumnWidth = new DataGridLength(1, DataGridLengthUnitType.Star),
+                AutoGenerateColumns = true,
+                FontSize = 18,
+                CanUserAddRows = false,
+                IsReadOnly = true,
+                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+                VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+            };
+            dataGrid.SetBinding(DataGrid.SelectedItemProperty, new Binding("DataRowView"));
+            //dataGrid.SetBinding(DataGrid.CanUserAddRowsProperty, new Binding("CanUserAddRows"));
+            //dataGrid.SetBinding(DataGrid.IsReadOnlyProperty, new Binding("IsEditTable"));
+            dataGrid.DataContext = this;
+
+            UIElemetsCollection.Add(dataGrid);
+
+            //App.MainWindow.AddInModalWindowCheckedChanged += MainWindow_AddInModalWindowCheckedChanged;
+
         }
 
         private void MainWindow_AddInModalWindowCheckedChanged(object sender, bool e)
@@ -182,6 +215,7 @@ namespace CraftHub.ViewModels
                 foreach (var property in Properties)
                     DataTable.Columns.Add(property.Name, property.Type);
             }
+            dataGrid.ItemsSource = DataTable.DefaultView;
         }
 
         private void OnAddCommand(object parameter)
@@ -195,6 +229,11 @@ namespace CraftHub.ViewModels
 
         private void OnEditCommand(object parameter)
         {
+            if (DataRowView == null)
+            {
+                MessageBox.Show("Select row in table", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
             App.IsAdding = false;
             App.DataRowView = DataRowView;
             new AddNewElementWindow().ShowDialog();
@@ -206,7 +245,6 @@ namespace CraftHub.ViewModels
                 DataRowView.Delete();
 
         }
-
         private void OnExportCommand(object parameter)
         {
             var exportJsonString = JsonConvert.SerializeObject(DataTable, Formatting.Indented);

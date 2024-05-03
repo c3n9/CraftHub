@@ -94,16 +94,7 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
-
-        <DataGrid ColumnWidth="*"
-                  Grid.Row="2"
-                  ItemsSource="{Binding DataTable}"
-                  AutoGenerateColumns="True"
-                  IsReadOnly="{Binding IsEditTable}"
-                  FontSize="18"
-                  CanUserAddRows="{Binding CanUserAddRows}"
-                  SelectedItem="{Binding DataRowView}"
-                  HorizontalScrollBarVisibility="Auto"
-                  VerticalScrollBarVisibility="Auto" />
+        <ItemsControl ItemsSource="{Binding UIElemetsCollection}"
+                      Grid.Row="2" />
     </Grid>
 </Page>
