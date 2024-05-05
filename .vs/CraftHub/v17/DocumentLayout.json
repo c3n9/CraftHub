@@ -11,7 +11,7 @@
       "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\views\\workingareaview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\quart\\source\\repos\\crafthub\\crafthub\\viewmodels\\workingareaviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|C:\\Users\\quart\\source\\repos\\CraftHub\\crafthub\\viewmodels\\workingareaviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\viewmodels\\workingareaviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -46,8 +46,7 @@
               "RelativeToolTip": "CraftHub\\ViewModels\\WorkingAreaViewModel.cs",
               "ViewState": "AQIAAMAAAAAAAAAAAAAYwOMAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-05T09:27:57.061Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-05-05T09:27:57.061Z"
             },
             {
               "$type": "Document",
