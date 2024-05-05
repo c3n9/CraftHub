@@ -149,9 +149,18 @@
                             </MenuItem>
                         </MenuItem>
                     </Menu>
-                    <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                           NavigationUIVisibility="Hidden"
-                           Grid.Row="1" />
+                    <TabControl Grid.Row="1"
+                                TabStripPlacement="Bottom"
+                                BorderThickness="1"
+                                Background="{DynamicResource MaterialDesignPaper}">
+                        <TabItem Header="1 area">
+                            <TabItem.Content>
+                                <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                       NavigationUIVisibility="Hidden" />
+                            </TabItem.Content>
+                        </TabItem>
+                    </TabControl>
+                    
                 </Grid>
             </ContentControl.Content>
         </ContentControl>

@@ -20,8 +20,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
-            <RowDefinition />
+            <RowDefinition  />
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <ToolBarTray>
             <ToolBar ClipToBounds="False"
@@ -96,6 +96,6 @@
             </ToolBar>
         </ToolBarTray>
         <ItemsControl ItemsSource="{Binding UIElemetsCollection}"
-                      Grid.Row="2" />
+                      Grid.Row="1" />
     </Grid>
 </Page>

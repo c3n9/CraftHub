@@ -1,22 +1,18 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\C3N9\\source\\repos\\CraftHub\\",
+  "WorkspaceRootPath": "C:\\Users\\quart\\source\\repos\\CraftHub\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\c3n9\\source\\repos\\crafthub\\crafthub\\views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\quart\\source\\repos\\crafthub\\crafthub\\views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\views\\mainwindow.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\c3n9\\source\\repos\\crafthub\\crafthub\\views\\workingareaview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|C:\\Users\\quart\\source\\repos\\CraftHub\\crafthub\\views\\workingareaview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
       "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\views\\workingareaview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\c3n9\\source\\repos\\crafthub\\crafthub\\views\\workingareaview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\views\\workingareaview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\c3n9\\source\\repos\\crafthub\\crafthub\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\quart\\source\\repos\\crafthub\\crafthub\\viewmodels\\workingareaviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\viewmodels\\workingareaviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -32,47 +28,34 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "MainWindow.xaml",
-              "DocumentMoniker": "C:\\Users\\C3N9\\source\\repos\\CraftHub\\CraftHub\\Views\\MainWindow.xaml",
+              "DocumentMoniker": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\Views\\MainWindow.xaml",
               "RelativeDocumentMoniker": "CraftHub\\Views\\MainWindow.xaml",
-              "ToolTip": "C:\\Users\\C3N9\\source\\repos\\CraftHub\\CraftHub\\Views\\MainWindow.xaml",
+              "ToolTip": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\Views\\MainWindow.xaml",
               "RelativeToolTip": "CraftHub\\Views\\MainWindow.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-05-03T13:14:51.29Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "App.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\C3N9\\source\\repos\\CraftHub\\CraftHub\\App.xaml.cs",
-              "RelativeDocumentMoniker": "CraftHub\\App.xaml.cs",
-              "ToolTip": "C:\\Users\\C3N9\\source\\repos\\CraftHub\\CraftHub\\App.xaml.cs",
-              "RelativeToolTip": "CraftHub\\App.xaml.cs",
-              "ViewState": "AQIAABYAAAAAAAAAAAApwBIAAAAjAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-03T13:12:09.483Z",
+              "WhenOpened": "2024-05-05T10:51:32.48Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
-              "Title": "WorkingAreaView.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\C3N9\\source\\repos\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml.cs",
-              "RelativeDocumentMoniker": "CraftHub\\Views\\WorkingAreaView.xaml.cs",
-              "ToolTip": "C:\\Users\\C3N9\\source\\repos\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml.cs",
-              "RelativeToolTip": "CraftHub\\Views\\WorkingAreaView.xaml.cs",
-              "ViewState": "AQIAABIAAAAAAAAAAAAWwBUAAAAFAAAA",
+              "Title": "WorkingAreaViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\ViewModels\\WorkingAreaViewModel.cs",
+              "RelativeDocumentMoniker": "CraftHub\\ViewModels\\WorkingAreaViewModel.cs",
+              "ToolTip": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\ViewModels\\WorkingAreaViewModel.cs",
+              "RelativeToolTip": "CraftHub\\ViewModels\\WorkingAreaViewModel.cs",
+              "ViewState": "AQIAAMAAAAAAAAAAAAAYwOMAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-03T13:11:12.89Z",
+              "WhenOpened": "2024-05-05T09:27:57.061Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "WorkingAreaView.xaml",
-              "DocumentMoniker": "C:\\Users\\C3N9\\source\\repos\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml",
+              "DocumentMoniker": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml",
               "RelativeDocumentMoniker": "CraftHub\\Views\\WorkingAreaView.xaml",
-              "ToolTip": "C:\\Users\\C3N9\\source\\repos\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml",
+              "ToolTip": "C:\\Users\\quart\\source\\repos\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml",
               "RelativeToolTip": "CraftHub\\Views\\WorkingAreaView.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
               "WhenOpened": "2024-05-03T13:04:39.226Z",
