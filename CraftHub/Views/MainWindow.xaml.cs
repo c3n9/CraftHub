@@ -56,10 +56,55 @@ namespace CraftHub.Views
                         Header = "New Tab",
                         Content = newFrame
                     };
+
                     tabControl.Items.Insert(tabControl.Items.Count - 1, newTabItem);
                     tabControl.SelectedItem = newTabItem;
                 }
             }
+
+        }
+        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var menuItem = sender as MenuItem;
+            var contextMenu = menuItem?.Parent as ContextMenu;
+            var textBox = contextMenu?.PlacementTarget as System.Windows.Controls.TextBox;
+
+            if (textBox != null)
+            {
+                string previousText = textBox.Text;
+                textBox.IsReadOnly = false;
+
+                RoutedEventHandler lostFocusHandler = null;
+                lostFocusHandler = (s, args) =>
+                {
+                    if (textBox.Text == previousText)
+                    {
+                        textBox.IsReadOnly = true;
+                        textBox.LostFocus -= lostFocusHandler; 
+                        return;
+                    }
+
+                    var result = MessageBox.Show("Save new name?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        textBox.IsReadOnly = true;
+
+                        textBox.LostFocus -= lostFocusHandler;
+                    }
+                    else if (result == MessageBoxResult.No)
+                    {
+                        textBox.Text = previousText;
+                        textBox.IsReadOnly = true;
+
+                        textBox.LostFocus -= lostFocusHandler;
+                    }
+                };
+
+                textBox.LostFocus += lostFocusHandler;
+            }
+
+
 
         }
         // all this cringe is to make the window not overlap Windows taskbar. I think it's Ok to do this
@@ -170,8 +215,9 @@ namespace CraftHub.Views
             }
         }
 
+
+
         #endregion
 
-        
     }
 }

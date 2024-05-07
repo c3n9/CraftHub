@@ -165,9 +165,18 @@
                                         <Setter.Value>
                                             <DataTemplate>
                                                 <WrapPanel Orientation="Horizontal">
-                                                    <TextBlock Text="{Binding}"
-                                                               VerticalAlignment="Center"
-                                                               FontSize="20" />
+                                                    <TextBox Text="New Tab"
+                                                             IsReadOnly="True"
+                                                             FontSize="20"
+                                                             BorderThickness="0"
+                                                             Background="Transparent">
+                                                        <TextBox.ContextMenu>
+                                                            <ContextMenu>
+                                                                <MenuItem Header="Change topic name" 
+                                                                          Click="MenuItem_Click"/>
+                                                            </ContextMenu>
+                                                        </TextBox.ContextMenu>
+                                                    </TextBox>
                                                     <Button Style="{x:Null}"
                                                             Margin="5,0,0,0"
                                                             FontSize="20"
