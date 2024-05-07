@@ -151,12 +151,16 @@
                     </Menu>
                     <Grid Grid.Row="1">
                         <TabControl TabStripPlacement="Bottom"
-                                    BorderThickness="1"
+                                    BorderThickness="2"
                                     SelectionChanged="TCWorkAreas_SelectionChanged"
                                     x:Name="TCWorkAreas"
+                                    Foreground="White"
+                                    BorderBrush="{StaticResource MyPrimaryColor}"
                                     Background="{DynamicResource MaterialDesignPaper}">
-                            <TabControl.ItemContainerStyle>
+                            <TabControl.Resources>
                                 <Style TargetType="TabItem">
+                                    <Setter Property="Foreground"
+                                            Value="White" />
                                     <Setter Property="HeaderTemplate">
                                         <Setter.Value>
                                             <DataTemplate>
@@ -166,9 +170,11 @@
                                                                FontSize="20" />
                                                     <Button Style="{x:Null}"
                                                             Margin="5,0,0,0"
+                                                            FontSize="20"
                                                             Background="Transparent"
                                                             BorderBrush="Transparent"
-                                                            Click="CloseTab_Click">
+                                                            Click="CloseTab_Click"
+                                                            Foreground="White">
                                                         <Button.Content>
                                                             <materialDesign:PackIcon Kind="Close" />
                                                         </Button.Content>
@@ -177,22 +183,84 @@
                                             </DataTemplate>
                                         </Setter.Value>
                                     </Setter>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="TabItem">
+                                                <Border Name="Border"
+                                                        BorderThickness="2"
+                                                        CornerRadius="0,0,10,10"
+                                                        Margin="5,0"
+                                                        BorderBrush="{StaticResource MyPrimaryColor}"
+                                                        Background="{StaticResource MyPrimaryColor}">
+                                                    <ContentPresenter x:Name="ContentSite"
+                                                                      VerticalAlignment="Center"
+                                                                      HorizontalAlignment="Center"
+                                                                      ContentSource="Header"
+                                                                      Margin="10,2" />
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsSelected"
+                                                             Value="True">
+                                                        <Setter TargetName="Border"
+                                                                Property="Background"
+                                                                Value="{StaticResource MyPrimaryColor}" />
+                                                    </Trigger>
+                                                    <Trigger Property="IsSelected"
+                                                             Value="False">
+                                                        <Setter TargetName="Border"
+                                                                Property="Background"
+                                                                Value="{StaticResource MaterialDesignPaper}" />
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
                                 </Style>
-                            </TabControl.ItemContainerStyle>
-                            <TabItem Header="1 area" >
+                            </TabControl.Resources>
+
+                            <TabItem Header="1 area">
                                 <TabItem.Content>
                                     <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                            NavigationUIVisibility="Hidden" />
                                 </TabItem.Content>
                             </TabItem>
-                            <TabItem Header="+"
-                                     Style="{x:Null}">
+                            
+                            <TabItem FontSize="20"
+                                     Foreground="White">
+                                <TabItem.Header>
+                                    <materialDesign:PackIcon Kind="TrayPlus" />
+                                </TabItem.Header>
+                                <TabItem.Style>
+                                    <Style TargetType="TabItem">
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="TabItem">
+                                                    <Border Name="Border"
+                                                            BorderThickness="2"
+                                                            BorderBrush="{StaticResource MyPrimaryColor}"
+                                                            CornerRadius="20"
+                                                            Width="40"
+                                                            Height="40"
+                                                            Background="{StaticResource MyPrimaryColor}"
+                                                            Margin="5,0">
+                                                        <ContentPresenter x:Name="ContentSite"
+                                                                          VerticalAlignment="Center"
+                                                                          HorizontalAlignment="Center"
+                                                                          ContentSource="Header"
+                                                                          Margin="10,2" />
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </TabItem.Style>
                                 <TabItem.Content>
                                     <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                            NavigationUIVisibility="Hidden" />
                                 </TabItem.Content>
                             </TabItem>
                         </TabControl>
+
                     </Grid>
 
 

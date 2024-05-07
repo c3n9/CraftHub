@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MaterialDesignThemes.Wpf;
+using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -46,7 +47,7 @@ namespace CraftHub.Views
             if (tabControl != null)
             {
                 TabItem selectedTab = tabControl.SelectedItem as TabItem;
-                if (selectedTab != null && selectedTab.Header.ToString() == "+")
+                if (selectedTab != null && selectedTab.Header is PackIcon packIcon && packIcon.Kind == PackIconKind.TrayPlus)
                 {
                     var newFrame = new Frame();
                     newFrame.Content = new WorkingAreaView();

@@ -13,6 +13,11 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
             </ResourceDictionary.MergedDictionaries>
             <FontFamily x:Key="MontserratFont">Fonts/#Montserrat-VariableFont_wght</FontFamily>
+            <SolidColorBrush x:Key="MyPrimaryColor"
+                             Color="#3f51b5" />
+            <SolidColorBrush x:Key="MySecondaryColor"
+                             Color="#66f" />
+
             <Style x:Key="MaterialButtonStyle"
                    TargetType="Button">
                 <Setter Property="Foreground"
