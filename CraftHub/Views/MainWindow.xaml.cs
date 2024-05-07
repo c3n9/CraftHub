@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows;
@@ -133,5 +134,31 @@ namespace CraftHub.Views
         }
         #endregion
 
+        private void CloseTab_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is  Button button)) 
+                return;
+
+            string tabHeader = button.DataContext as string;
+            if (string.IsNullOrEmpty(tabHeader)) 
+                return;
+
+            TabItem tabItemToRemove = TCWorkAreas.Items.Cast<TabItem>().FirstOrDefault(item => item.Header as string == tabHeader);
+            if (tabItemToRemove != null)
+                TCWorkAreas.Items.Remove(tabItemToRemove);
+        }
+
+        private void BAdd_Click(object sender, RoutedEventArgs e)
+        {
+            var newFrame = new Frame();
+            newFrame.Content = new WorkingAreaView();
+            var newTabItem = new TabItem
+            {
+                Header = "New Tab",
+                Content = newFrame
+            };
+            TCWorkAreas.Items.Insert(TCWorkAreas.Items.Count - 1, newTabItem);
+            TCWorkAreas.SelectedItem = newTabItem;
+        }
     }
 }
