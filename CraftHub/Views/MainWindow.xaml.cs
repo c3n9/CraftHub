@@ -12,18 +12,54 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace CraftHub.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : System.Windows.Window
     {
         public MainWindow()
         {
             InitializeComponent();
             App.MainWindow = this;
+        }
+
+        private void CloseTab_Click(object sender, RoutedEventArgs e)
+        {
+            if (!(sender is System.Windows.Controls.Button button))
+                return;
+
+            string tabHeader = button.DataContext as string;
+            if (string.IsNullOrEmpty(tabHeader))
+                return;
+
+            TabItem tabItemToRemove = TCWorkAreas.Items.Cast<TabItem>().FirstOrDefault(item => item.Header as string == tabHeader);
+            if (tabItemToRemove != null)
+                TCWorkAreas.Items.Remove(tabItemToRemove);
+        }
+        private void TCWorkAreas_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            TabControl tabControl = sender as TabControl;
+            if (tabControl != null)
+            {
+                TabItem selectedTab = tabControl.SelectedItem as TabItem;
+                if (selectedTab != null && selectedTab.Header.ToString() == "+")
+                {
+                    var newFrame = new Frame();
+                    newFrame.Content = new WorkingAreaView();
+                    var newTabItem = new TabItem
+                    {
+                        Header = "New Tab",
+                        Content = newFrame
+                    };
+                    tabControl.Items.Insert(tabControl.Items.Count - 1, newTabItem);
+                    tabControl.SelectedItem = newTabItem;
+                }
+            }
+
         }
         // all this cringe is to make the window not overlap Windows taskbar. I think it's Ok to do this
         // because this doesn't contradict to the MVVM pattern
@@ -132,33 +168,9 @@ namespace CraftHub.Views
                 this.Bottom = bottom;
             }
         }
+
         #endregion
 
-        private void CloseTab_Click(object sender, RoutedEventArgs e)
-        {
-            if (!(sender is  Button button)) 
-                return;
-
-            string tabHeader = button.DataContext as string;
-            if (string.IsNullOrEmpty(tabHeader)) 
-                return;
-
-            TabItem tabItemToRemove = TCWorkAreas.Items.Cast<TabItem>().FirstOrDefault(item => item.Header as string == tabHeader);
-            if (tabItemToRemove != null)
-                TCWorkAreas.Items.Remove(tabItemToRemove);
-        }
-
-        private void BAdd_Click(object sender, RoutedEventArgs e)
-        {
-            var newFrame = new Frame();
-            newFrame.Content = new WorkingAreaView();
-            var newTabItem = new TabItem
-            {
-                Header = "New Tab",
-                Content = newFrame
-            };
-            TCWorkAreas.Items.Insert(TCWorkAreas.Items.Count - 1, newTabItem);
-            TCWorkAreas.SelectedItem = newTabItem;
-        }
+        
     }
 }
