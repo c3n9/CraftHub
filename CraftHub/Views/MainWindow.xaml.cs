@@ -77,27 +77,23 @@ namespace CraftHub.Views
                 RoutedEventHandler lostFocusHandler = null;
                 lostFocusHandler = (s, args) =>
                 {
+                    textBox.IsReadOnly = true;
+                    textBox.LostFocus -= lostFocusHandler;
+
                     if (textBox.Text == previousText)
-                    {
-                        textBox.IsReadOnly = true;
-                        textBox.LostFocus -= lostFocusHandler; 
                         return;
-                    }
 
                     var result = MessageBox.Show("Save new name?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        textBox.IsReadOnly = true;
-
-                        textBox.LostFocus -= lostFocusHandler;
+                        // Сохранить новое имя
+                        previousText = textBox.Text;
                     }
                     else if (result == MessageBoxResult.No)
                     {
+                        // Откатить изменения
                         textBox.Text = previousText;
-                        textBox.IsReadOnly = true;
-
-                        textBox.LostFocus -= lostFocusHandler;
                     }
                 };
 
@@ -219,5 +215,6 @@ namespace CraftHub.Views
 
         #endregion
 
+        
     }
 }

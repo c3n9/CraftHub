@@ -122,7 +122,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Menu Grid.Row="0">
-                        <MenuItem Header="_File">
+                        <!--<MenuItem Header="_File">
                             <MenuItem Header="Upload template"
                                       x:Name="MIImportClass"
                                       Command="{Binding UploadTemplateCommand}"
@@ -137,7 +137,7 @@
                                       Command="{Binding ExportJsonFileCommand}"
                                       Icon="{materialDesign:PackIcon Kind=CloudJson}">
                             </MenuItem>
-                        </MenuItem>
+                        </MenuItem>-->
                         <!--<MenuItem Header="_Options">
                             
                         </MenuItem>-->
