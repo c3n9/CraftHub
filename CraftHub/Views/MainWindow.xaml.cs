@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -33,40 +34,57 @@ namespace CraftHub.Views
             if (!(sender is System.Windows.Controls.Button button))
                 return;
 
-            string tabHeader = button.DataContext as string;
-            if (string.IsNullOrEmpty(tabHeader))
-                return;
-
-            TabItem tabItemToRemove = TCWorkAreas.Items.Cast<TabItem>().FirstOrDefault(item => item.Header as string == tabHeader);
+            TabItem tabItemToRemove = null;
+            if (button.DataContext is string tabHeader)
+            {
+                tabItemToRemove = TCWorkAreas.Items.Cast<TabItem>().FirstOrDefault(item => item.Header as string == tabHeader);
+            }
+            else
+            {
+                if (button.TemplatedParent is TabItem templatedTabItem && templatedTabItem.Tag is Guid tabUniqueId)
+                {
+                    tabItemToRemove = TCWorkAreas.Items.Cast<TabItem>().FirstOrDefault(item => item.Tag is Guid && (Guid)item.Tag == tabUniqueId);
+                }
+            }
             if (tabItemToRemove != null)
                 TCWorkAreas.Items.Remove(tabItemToRemove);
         }
         private void TCWorkAreas_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            TabControl tabControl = sender as TabControl;
+            System.Windows.Controls.TabControl tabControl = sender as System.Windows.Controls.TabControl;
             if (tabControl != null)
             {
                 TabItem selectedTab = tabControl.SelectedItem as TabItem;
                 if (selectedTab != null && selectedTab.Header is PackIcon packIcon && packIcon.Kind == PackIconKind.TrayPlus)
                 {
-                    var newFrame = new Frame();
-                    newFrame.Content = new WorkingAreaView();
-                    var newTabItem = new TabItem
-                    {
-                        Header = "New Tab",
-                        Content = newFrame
-                    };
-
-                    tabControl.Items.Insert(tabControl.Items.Count - 1, newTabItem);
-                    tabControl.SelectedItem = newTabItem;
+                    AddNewTabItem();
                 }
             }
+        }
+        private void AddNewTabItem()
+        {
+            TabItem selectedTab = TCWorkAreas.SelectedItem as TabItem;
+            if (selectedTab != null && selectedTab.Header is PackIcon packIcon && packIcon.Kind == PackIconKind.TrayPlus)
+            {
+                var newFrame = new Frame();
+                newFrame.Content = new WorkingAreaView();
+                var newTabItem = new TabItem
+                {
+                    Header = "New Tab",
+                    Content = newFrame
+                };
 
+                Guid uniqueId = Guid.NewGuid();
+                newTabItem.Tag = uniqueId;
+
+                TCWorkAreas.Items.Insert(TCWorkAreas.Items.Count - 1, newTabItem);
+                TCWorkAreas.SelectedItem = newTabItem;
+            }
         }
         private void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var menuItem = sender as MenuItem;
-            var contextMenu = menuItem?.Parent as ContextMenu;
+            var menuItem = sender as System.Windows.Controls.MenuItem;
+            var contextMenu = menuItem?.Parent as System.Windows.Controls.ContextMenu;
             var textBox = contextMenu?.PlacementTarget as System.Windows.Controls.TextBox;
 
             if (textBox != null)
@@ -83,16 +101,14 @@ namespace CraftHub.Views
                     if (textBox.Text == previousText)
                         return;
 
-                    var result = MessageBox.Show("Save new name?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+                    var result = System.Windows.MessageBox.Show("Save new name?", "Warning", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
                     if (result == MessageBoxResult.Yes)
                     {
-                        // Сохранить новое имя
                         previousText = textBox.Text;
                     }
                     else if (result == MessageBoxResult.No)
                     {
-                        // Откатить изменения
                         textBox.Text = previousText;
                     }
                 };

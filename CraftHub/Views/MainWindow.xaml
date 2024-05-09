@@ -227,7 +227,7 @@
                                 </Style>
                             </TabControl.Resources>
 
-                            <TabItem Header="1 area">
+                            <TabItem>
                                 <TabItem.Content>
                                     <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                            NavigationUIVisibility="Hidden" />
@@ -263,10 +263,6 @@
                                         </Setter>
                                     </Style>
                                 </TabItem.Style>
-                                <TabItem.Content>
-                                    <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                           NavigationUIVisibility="Hidden" />
-                                </TabItem.Content>
                             </TabItem>
                         </TabControl>
 
