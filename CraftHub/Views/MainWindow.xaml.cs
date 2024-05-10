@@ -23,6 +23,7 @@ namespace CraftHub.Views
     /// </summary>
     public partial class MainWindow : System.Windows.Window
     {
+        int count = 1;
         public MainWindow()
         {
             InitializeComponent();
@@ -68,12 +69,12 @@ namespace CraftHub.Views
             {
                 var newFrame = new Frame();
                 newFrame.Content = new WorkingAreaView();
+                count++;
                 var newTabItem = new TabItem
                 {
-                    Header = "New Tab",
+                    Header = "Tab " + TCWorkAreas.Items.Count,
                     Content = newFrame
                 };
-
                 Guid uniqueId = Guid.NewGuid();
                 newTabItem.Tag = uniqueId;
 

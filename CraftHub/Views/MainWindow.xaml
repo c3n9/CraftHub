@@ -74,6 +74,7 @@
                       GlassFrameThickness="0"
                       ResizeBorderThickness="{x:Static SystemParameters.WindowResizeBorderThickness}" />
     </WindowChrome.WindowChrome>
+    
     <DockPanel x:Name="RootWindow"
                LastChildFill="True">
         <DockPanel x:Name="TitleBar"
@@ -164,10 +165,11 @@
                                     <Setter Property="HeaderTemplate">
                                         <Setter.Value>
                                             <DataTemplate>
-                                                <WrapPanel Orientation="Horizontal">
-                                                    <TextBox Text="New Tab"
+                                                <WrapPanel Orientation="Horizontal"
+                                                           Margin="5">
+                                                    <TextBox Text="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}"
                                                              IsReadOnly="True"
-                                                             FontSize="20"
+                                                             FontSize="16"
                                                              BorderThickness="0"
                                                              Background="Transparent">
                                                         <TextBox.ContextMenu>
@@ -227,7 +229,7 @@
                                 </Style>
                             </TabControl.Resources>
 
-                            <TabItem>
+                            <TabItem Header="Tab 1">
                                 <TabItem.Content>
                                     <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                            NavigationUIVisibility="Hidden" />
