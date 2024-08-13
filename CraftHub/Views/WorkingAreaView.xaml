@@ -47,7 +47,6 @@
                     </Button.ToolTip>
                 </Button>-->
                 <Button x:Name="BRemove"
-                        Visibility="{Binding ButtonVisibility}"
                         Command="{Binding RemoveCommand}">
                     <Button.Content>
                         <materialDesign:PackIcon Kind="Remove" />
@@ -56,14 +55,31 @@
                         <TextBlock Text="Remove element" />
                     </Button.ToolTip>
                 </Button>
+                <Button x:Name="BImport"
+                        Command="{Binding ImportCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="Import" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Import table to json" />
+                    </Button.ToolTip>
+                </Button>
                 <Button x:Name="BExport"
-                        Visibility="{Binding ButtonVisibility}"
                         Command="{Binding ExportCommand}">
                     <Button.Content>
                         <materialDesign:PackIcon Kind="Export" />
                     </Button.Content>
                     <Button.ToolTip>
                         <TextBlock Text="Export table to json" />
+                    </Button.ToolTip>
+                </Button>
+                <Button x:Name="BLoadCode"
+                        Command="{Binding LoadCodeCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="FileCodeOutline" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Import table to json" />
                     </Button.ToolTip>
                 </Button>
                 <Separator />
@@ -95,7 +111,8 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
-        <ItemsControl ItemsSource="{Binding UIElemetsCollection}"
-                      Grid.Row="1" />
+        <ScrollViewer Grid.Row="1">
+            <ItemsControl ItemsSource="{Binding UIElemetsCollection}"/>
+        </ScrollViewer>
     </Grid>
 </Page>

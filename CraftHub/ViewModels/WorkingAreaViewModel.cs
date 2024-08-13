@@ -17,6 +17,9 @@ using System.IO;
 using Microsoft.Win32;
 using System.Windows.Controls;
 using System.Windows.Data;
+using Microsoft.CSharp;
+using System.CodeDom.Compiler;
+using System.Reflection;
 
 namespace CraftHub.ViewModels
 {
@@ -27,6 +30,8 @@ namespace CraftHub.ViewModels
         public ICommand EditCommand { get; set; }
         public ICommand RemoveCommand { get; set; }
         public ICommand ExportCommand { get; set; }
+        public ICommand ImportCommand { get; set; }
+        public ICommand LoadCodeCommand { get; set; }
 
         private ObservableCollection<UIElement> _uIElemetsCollection;
         public ObservableCollection<UIElement> UIElemetsCollection
@@ -62,16 +67,6 @@ namespace CraftHub.ViewModels
                 OnPropertyChanged(nameof(DataTable));
             }
         }
-        private Visibility _buttonVisibility;
-        public Visibility ButtonVisibility
-        {
-            get { return _buttonVisibility; }
-            set
-            {
-                _buttonVisibility = value;
-                OnPropertyChanged(nameof(ButtonVisibility));
-            }
-        }
 
         public ObservableCollection<PropertyModel> Properties { get; set; }
         public ObservableCollection<Type> AvailableTypes { get; set; }
@@ -104,6 +99,8 @@ namespace CraftHub.ViewModels
             EditCommand = new DelegateCommand(OnEditCommand);
             RemoveCommand = new DelegateCommand(OnRemoveCammand);
             ExportCommand = new DelegateCommand(OnExportCommand);
+            ImportCommand = new DelegateCommand(OnImportCommand);
+            LoadCodeCommand = new DelegateCommand(OnLoadCodeCommand);
             dataGrid = new DataGrid()
             {
                 ColumnWidth = new DataGridLength(1, DataGridLengthUnitType.Star),
@@ -121,8 +118,60 @@ namespace CraftHub.ViewModels
 
 
         }
-        private void OnAddPropertyCommand(object parameter)
+
+		private void CompileAndLoadCode(string code)
+		{
+			// Используем провайдер компиляции C# кода
+			CSharpCodeProvider provider = new CSharpCodeProvider();
+			CompilerParameters parameters = new CompilerParameters();
+			// Получаем сборки, доступные в текущем домене приложения
+			var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic).Select(a => a.Location).ToArray();
+			parameters.ReferencedAssemblies.AddRange(assemblies);
+			parameters.ReferencedAssemblies.Add("System.Runtime.dll");
+			// Компилируем код
+			CompilerResults results = provider.CompileAssemblyFromSource(parameters, code);
+			string errorMessage = string.Empty;
+			if (results.Errors.HasErrors)
+			{
+				foreach (CompilerError error in results.Errors)
+				{
+					errorMessage += $"Error in line {error.Line}: {error.ErrorText}\n";
+				}
+				if (!string.IsNullOrWhiteSpace(errorMessage))
+				{
+					MessageBox.Show(errorMessage);
+					return;
+				}
+			}
+			else
+			{
+				// Загружаем сборку
+				Assembly assembly = results.CompiledAssembly;
+				foreach (Type type in assembly.GetTypes())
+				{
+					dynamic instance = Activator.CreateInstance(type);
+					foreach (var propertyInDynamic in instance.GetType().GetProperties())
+					{
+						Properties.Add(new PropertyModel() { Name = propertyInDynamic.Name, Type = propertyInDynamic.PropertyType });
+					}
+				}
+			}
+		}
+
+		private void OnLoadCodeCommand(object parameter)
+		{
+			var dialog = new OpenFileDialog() { Filter = ".cs | *.cs" };
+			if (dialog.ShowDialog().GetValueOrDefault())
+			{
+				string code = System.IO.File.ReadAllText(dialog.FileName);
+				CompileAndLoadCode(code);
+				DisplayDataInGrid();
+			}
+		}
+
+		private void OnAddPropertyCommand(object parameter)
         {
+            App.jsonString = JsonConvert.SerializeObject(DataTable, Formatting.Indented);
             var error = string.Empty;
             var propertyName = parameter as string;
             var propertyExist = Properties.FirstOrDefault(x => x.Name == propertyName);
@@ -140,45 +189,98 @@ namespace CraftHub.ViewModels
             Properties.Add(new PropertyModel() { Name = propertyName, Type = SelectedType });
             DisplayDataInGrid();
         }
-        public void DisplayDataInGrid()
-        {
-            DataTable = new DataTable();
-            JArray jsonArray = new JArray();
-            if (!string.IsNullOrWhiteSpace(App.jsonString))
-                jsonArray = JArray.Parse(App.jsonString);
-            if (jsonArray.Count > 0)
-            {
-                foreach (var property in Properties)
-                    DataTable.Columns.Add($"{property.Name} ({property.Type.Name})", property.Type);
-                foreach (var jsonItem in jsonArray)
-                {
-                    var dataRow = DataTable.NewRow();
-                    var jsonObject = jsonItem as JObject;
+		public void DisplayDataInGrid()
+		{
+			// Создаем временную таблицу для хранения новых данных
+			DataTable tempTable = new DataTable();
 
-                    foreach (var property in jsonObject.Properties())
-                    {
-                        var columnName = property.Name;
-                        foreach (var propertyInDynamic in Properties)
-                        {
-                            if (propertyInDynamic.Name == property.Name)
-                            {
-                                var columnValue = property.Value.ToObject<object>();
-                                dataRow[columnName] = columnValue;
-                            }
-                        }
-                    }
-                    DataTable.Rows.Add(dataRow);
-                }
-            }
-            else
-            {
-                foreach (var property in Properties)
-                    DataTable.Columns.Add($"{property.Name} ({property.Type.Name})", property.Type);
-            }
-            dataGrid.ItemsSource = DataTable.DefaultView;
-        }
+			// Переносим существующие столбцы в новую таблицу
+			foreach (DataColumn column in DataTable.Columns)
+			{
+				tempTable.Columns.Add(column.ColumnName, column.DataType);
+			}
 
-        private void OnAddCommand(object parameter)
+			// Добавляем новые столбцы, если такие появились
+			foreach (var property in Properties)
+			{
+				if (!tempTable.Columns.Contains(property.Name))
+				{
+					tempTable.Columns.Add(property.Name, property.Type);
+
+					// Добавляем значение по умолчанию для новых столбцов
+					foreach (DataRow row in tempTable.Rows)
+					{
+						row[property.Name] = GetDefaultValue(property.Type);
+					}
+				}
+			}
+
+			// Переносим данные из старой таблицы в новую
+			foreach (DataRow row in DataTable.Rows)
+			{
+				var newRow = tempTable.NewRow();
+				foreach (DataColumn column in DataTable.Columns)
+				{
+					newRow[column.ColumnName] = row[column];
+				}
+				tempTable.Rows.Add(newRow);
+			}
+
+			// Обновляем DataTable на новую таблицу с сохраненными данными
+			DataTable = tempTable;
+
+			// Заполняем таблицу новыми данными из JSON, если они есть
+			JArray jsonArray = new JArray();
+			if (!string.IsNullOrWhiteSpace(App.jsonString))
+				jsonArray = JArray.Parse(App.jsonString);
+
+			if (jsonArray.Count > 0)
+			{
+				foreach (var jsonItem in jsonArray)
+				{
+					var dataRow = DataTable.NewRow();
+					var jsonObject = jsonItem as JObject;
+
+					foreach (var property in jsonObject.Properties())
+					{
+						var columnName = property.Name;
+						if (DataTable.Columns.Contains(columnName))
+						{
+							var columnValue = property.Value.ToObject<object>();
+							dataRow[columnName] = columnValue ?? GetDefaultValue(DataTable.Columns[columnName].DataType);
+						}
+					}
+					DataTable.Rows.Add(dataRow);
+				}
+			}
+
+			// Обновляем источник данных для DataGrid
+			dataGrid.ItemsSource = DataTable.DefaultView;
+		}
+
+		private object GetDefaultValue(Type type)
+		{
+			if (type == typeof(int))
+				return 0;
+			if (type == typeof(double))
+				return 0.0;
+			if (type == typeof(float))
+				return 0.0f;
+			if (type == typeof(decimal))
+				return 0m;
+			if (type == typeof(byte))
+				return (byte)0;
+			if (type == typeof(short))
+				return (short)0;
+			if (type == typeof(bool))
+				return false;
+			if (type == typeof(char))
+				return '\0';
+
+			return DBNull.Value;
+		}
+
+		private void OnAddCommand(object parameter)
         {
             DataRowView newRowView = DataTable.DefaultView.AddNew();
             newRowView.CancelEdit();
@@ -208,7 +310,7 @@ namespace CraftHub.ViewModels
         private void OnExportCommand(object parameter)
         {
             var exportJsonString = JsonConvert.SerializeObject(DataTable, Formatting.Indented);
-            if (!string.IsNullOrWhiteSpace(exportJsonString))
+            if (!string.IsNullOrWhiteSpace(exportJsonString) && exportJsonString != "[]")
             {
                 var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
                 if (dialog.ShowDialog().GetValueOrDefault())
@@ -223,5 +325,20 @@ namespace CraftHub.ViewModels
                 return;
             }
         }
-    }
+
+		private void OnImportCommand(object parameter)
+		{
+			if (Properties.Count == 0)
+			{
+				MessageBox.Show("Upload a template or add properties");
+				return;
+			}
+			var dialog = new OpenFileDialog() { Filter = ".json | *.json" };
+			if (dialog.ShowDialog().GetValueOrDefault())
+			{
+				App.jsonString = File.ReadAllText(dialog.FileName);
+				DisplayDataInGrid();
+			}
+		}
+	}
 }

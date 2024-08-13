@@ -90,11 +90,33 @@
             </Button>
             <Button x:Name="MaxButton"
                     Command="{Binding MaximizeWindowCommand}"
-                    CommandParameter="{Binding ElementName=MyMainWindow}"
-                    Style="{StaticResource MaterialButtonStyle}">
+                    CommandParameter="{Binding ElementName=MyMainWindow}">
                 <Button.Content>
                     <materialDesign:PackIcon Kind="WindowMaximize" />
                 </Button.Content>
+                <Button.Style>
+                    <Style TargetType="Button"
+                           BasedOn="{StaticResource MaterialButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsWindowMaximized}"
+                                         Value="True">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <materialDesign:PackIcon Kind="WindowRestore" />
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsWindowMaximized}"
+                                         Value="False">
+                                <Setter Property="Content">
+                                    <Setter.Value>
+                                        <materialDesign:PackIcon Kind="WindowMaximize" />
+                                    </Setter.Value>
+                                </Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
             </Button>
             <Button x:Name="MinButton"
                     Command="{Binding MinimizeWindowCommand}"

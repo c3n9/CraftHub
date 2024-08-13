@@ -37,6 +37,7 @@ namespace CraftHub.ViewModels
                 OnPropertyChanged();
             }
         }
+
         public ICommand MinimizeWindowCommand { get; set; }
         public ICommand CloseWindowCommand { get; set; }
         public ICommand MaximizeWindowCommand { get; set; }
