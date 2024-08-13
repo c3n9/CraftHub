@@ -35,6 +35,11 @@ namespace CraftHub.Views
             if (!(sender is System.Windows.Controls.Button button))
                 return;
 
+            if(TCWorkAreas.Items.Count <= 2)
+            {
+                return;
+            }
+
             TabItem tabItemToRemove = null;
             if (button.DataContext is string tabHeader)
             {

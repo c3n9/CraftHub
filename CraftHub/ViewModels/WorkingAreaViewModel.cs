@@ -23,101 +23,109 @@ using System.Reflection;
 
 namespace CraftHub.ViewModels
 {
-    internal class WorkingAreaViewModel : BaseViewModel
-    {
-        public ICommand AddPropertyCommand { get; private set; }
-        public ICommand AddCommand { get; set; }
-        public ICommand EditCommand { get; set; }
-        public ICommand RemoveCommand { get; set; }
-        public ICommand ExportCommand { get; set; }
-        public ICommand ImportCommand { get; set; }
-        public ICommand LoadCodeCommand { get; set; }
+	internal class WorkingAreaViewModel : BaseViewModel
+	{
+		public ICommand AddPropertyCommand { get; private set; }
+		public ICommand AddCommand { get; set; }
+		public ICommand EditCommand { get; set; }
+		public ICommand RemoveCommand { get; set; }
+		public ICommand ExportCommand { get; set; }
+		public ICommand ImportCommand { get; set; }
+		public ICommand LoadCodeCommand { get; set; }
+		public ICommand OpenGenerateFoldersWindowCommand { get; set; }
 
-        private ObservableCollection<UIElement> _uIElemetsCollection;
-        public ObservableCollection<UIElement> UIElemetsCollection
-        {
-            get { return _uIElemetsCollection; }
-            set
-            {
-                _uIElemetsCollection = value;
-                OnPropertyChanged(nameof(UIElemetsCollection));
-            }
-        }
+		private ObservableCollection<UIElement> _uIElemetsCollection;
+		public ObservableCollection<UIElement> UIElemetsCollection
+		{
+			get { return _uIElemetsCollection; }
+			set
+			{
+				_uIElemetsCollection = value;
+				OnPropertyChanged(nameof(UIElemetsCollection));
+			}
+		}
 
-        private Type _selectedType;
-        public Type SelectedType
-        {
-            get { return _selectedType; }
-            set
-            {
-                if (_selectedType != value)
-                {
-                    _selectedType = value;
-                    OnPropertyChanged(nameof(SelectedType));
-                }
-            }
-        }
-        private DataTable _dataTable;
-        public DataTable DataTable
-        {
-            get { return _dataTable; }
-            set
-            {
-                _dataTable = value;
-                OnPropertyChanged(nameof(DataTable));
-            }
-        }
+		private Type _selectedType;
+		public Type SelectedType
+		{
+			get { return _selectedType; }
+			set
+			{
+				if (_selectedType != value)
+				{
+					_selectedType = value;
+					OnPropertyChanged(nameof(SelectedType));
+				}
+			}
+		}
+		private DataTable _dataTable;
+		public DataTable DataTable
+		{
+			get { return _dataTable; }
+			set
+			{
+				_dataTable = value;
+				OnPropertyChanged(nameof(DataTable));
+			}
+		}
 
-        public ObservableCollection<PropertyModel> Properties { get; set; }
-        public ObservableCollection<Type> AvailableTypes { get; set; }
-        public DataRowView DataRowView { get; set; }
-        DataGrid dataGrid { get; set; }
-        public WorkingAreaViewModel()
-        {
-            DataTable = new DataTable();
-            UIElemetsCollection = new ObservableCollection<UIElement>();
+		public ObservableCollection<PropertyModel> Properties { get; set; }
+		public ObservableCollection<Type> AvailableTypes { get; set; }
+		public DataRowView DataRowView { get; set; }
+		DataGrid dataGrid { get; set; }
+		public WorkingAreaViewModel()
+		{
+			DataTable = new DataTable();
+			UIElemetsCollection = new ObservableCollection<UIElement>();
 
-            App.WorkingAreaViewModel = this;
+			App.WorkingAreaViewModel = this;
 
-            Properties = new ObservableCollection<PropertyModel>();
+			Properties = new ObservableCollection<PropertyModel>();
 
-            AvailableTypes = new ObservableCollection<Type>
-            {
-                typeof(int),
-                typeof(float),
-                typeof(bool),
-                typeof(string),
-                typeof(double),
-                typeof(decimal),
-                typeof(byte),
-                typeof(short),
-                typeof(char),
-            };
+			AvailableTypes = new ObservableCollection<Type>
+			{
+				typeof(int),
+				typeof(float),
+				typeof(bool),
+				typeof(string),
+				typeof(double),
+				typeof(decimal),
+				typeof(byte),
+				typeof(short),
+				typeof(char),
+			};
 
-            AddPropertyCommand = new DelegateCommand(OnAddPropertyCommand);
-            AddCommand = new DelegateCommand(OnAddCommand);
-            EditCommand = new DelegateCommand(OnEditCommand);
-            RemoveCommand = new DelegateCommand(OnRemoveCammand);
-            ExportCommand = new DelegateCommand(OnExportCommand);
-            ImportCommand = new DelegateCommand(OnImportCommand);
-            LoadCodeCommand = new DelegateCommand(OnLoadCodeCommand);
-            dataGrid = new DataGrid()
-            {
-                ColumnWidth = new DataGridLength(1, DataGridLengthUnitType.Star),
-                AutoGenerateColumns = true,
-                FontSize = 18,
-                CanUserAddRows = true,
-                IsReadOnly = false,
-                HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-                VerticalScrollBarVisibility = ScrollBarVisibility.Auto
-            };
-            dataGrid.SetBinding(DataGrid.SelectedItemProperty, new Binding("DataRowView"));
-            dataGrid.DataContext = this;
+			AddPropertyCommand = new DelegateCommand(OnAddPropertyCommand);
+			AddCommand = new DelegateCommand(OnAddCommand);
+			EditCommand = new DelegateCommand(OnEditCommand);
+			RemoveCommand = new DelegateCommand(OnRemoveCammand);
+			ExportCommand = new DelegateCommand(OnExportCommand);
+			ImportCommand = new DelegateCommand(OnImportCommand);
+			LoadCodeCommand = new DelegateCommand(OnLoadCodeCommand);
+			OpenGenerateFoldersWindowCommand = new DelegateCommand(OnOpenGenerateLessonsWindowCommand);
 
-            UIElemetsCollection.Add(dataGrid);
+			dataGrid = new DataGrid()
+			{
+				ColumnWidth = new DataGridLength(1, DataGridLengthUnitType.Star),
+				AutoGenerateColumns = true,
+				FontSize = 18,
+				CanUserAddRows = true,
+				IsReadOnly = false,
+				HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+				VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+			};
+			dataGrid.SetBinding(DataGrid.SelectedItemProperty, new Binding("DataRowView"));
+			dataGrid.DataContext = this;
+
+			UIElemetsCollection.Add(dataGrid);
 
 
-        }
+		}
+
+		private void OnOpenGenerateLessonsWindowCommand(object paramenter)
+		{
+			new GenerationFoldersWinodow().ShowDialog();
+		}
 
 		private void CompileAndLoadCode(string code)
 		{
@@ -163,6 +171,9 @@ namespace CraftHub.ViewModels
 			var dialog = new OpenFileDialog() { Filter = ".cs | *.cs" };
 			if (dialog.ShowDialog().GetValueOrDefault())
 			{
+				var selectedTabItem = App.MainWindow.TCWorkAreas.SelectedItem as TabItem;
+				selectedTabItem.Header = $"{System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}";
+
 				string code = System.IO.File.ReadAllText(dialog.FileName);
 				CompileAndLoadCode(code);
 				DisplayDataInGrid();
@@ -170,25 +181,25 @@ namespace CraftHub.ViewModels
 		}
 
 		private void OnAddPropertyCommand(object parameter)
-        {
-            App.jsonString = JsonConvert.SerializeObject(DataTable, Formatting.Indented);
-            var error = string.Empty;
-            var propertyName = parameter as string;
-            var propertyExist = Properties.FirstOrDefault(x => x.Name == propertyName);
-            if (propertyExist != null)
-                error += "Property with this parameter already exists\n";
-            if (string.IsNullOrEmpty(propertyName))
-                error += "Enter the name of the property\n";
-            if (SelectedType == null)
-                error += "Select the type\n";
-            if (!string.IsNullOrWhiteSpace(error))
-            {
-                MessageBox.Show(error, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
-            }
-            Properties.Add(new PropertyModel() { Name = propertyName, Type = SelectedType });
-            DisplayDataInGrid();
-        }
+		{
+			App.jsonString = JsonConvert.SerializeObject(DataTable, Formatting.Indented);
+			var error = string.Empty;
+			var propertyName = parameter as string;
+			var propertyExist = Properties.FirstOrDefault(x => x.Name == propertyName);
+			if (propertyExist != null)
+				error += "Property with this parameter already exists\n";
+			if (string.IsNullOrEmpty(propertyName))
+				error += "Enter the name of the property\n";
+			if (SelectedType == null)
+				error += "Select the type\n";
+			if (!string.IsNullOrWhiteSpace(error))
+			{
+				MessageBox.Show(error, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+				return;
+			}
+			Properties.Add(new PropertyModel() { Name = propertyName, Type = SelectedType });
+			DisplayDataInGrid();
+		}
 		public void DisplayDataInGrid()
 		{
 			// Создаем временную таблицу для хранения новых данных
@@ -256,8 +267,42 @@ namespace CraftHub.ViewModels
 
 			// Обновляем источник данных для DataGrid
 			dataGrid.ItemsSource = DataTable.DefaultView;
-		}
 
+			foreach (var column in dataGrid.Columns)
+			{
+				var property = Properties.FirstOrDefault(p => p.Name == column.Header.ToString());
+				if (property != null)
+				{
+					var headerTemplate = new StackPanel
+					{
+						Orientation = Orientation.Horizontal
+					};
+
+					var headerTextBlock = new TextBlock
+					{
+						Text = column.Header.ToString(),
+						Margin = new Thickness(0, 0, 5, 0)
+					};
+
+					var typeIndicator = new Button
+					{
+						Content = new MaterialDesignThemes.Wpf.PackIcon { Kind = MaterialDesignThemes.Wpf.PackIconKind.Help },
+						ToolTip = $"Type: {property.Type.Name}",
+						Margin = new Thickness(0, 0, 5, 0),
+						FontSize = 20,
+						Padding = new Thickness(5),
+						HorizontalContentAlignment = HorizontalAlignment.Center,
+						VerticalContentAlignment = VerticalAlignment.Center,
+						Style = (Style)Application.Current.Resources["ToolTipButtonStyle"] // Убедитесь, что у вас есть стиль для кнопки
+					};
+
+					headerTemplate.Children.Add(headerTextBlock);
+					headerTemplate.Children.Add(typeIndicator);
+
+					column.Header = headerTemplate;
+				}
+			}
+		}
 		private object GetDefaultValue(Type type)
 		{
 			if (type == typeof(int))
@@ -281,50 +326,42 @@ namespace CraftHub.ViewModels
 		}
 
 		private void OnAddCommand(object parameter)
-        {
-            DataRowView newRowView = DataTable.DefaultView.AddNew();
-            newRowView.CancelEdit();
-            App.DataRowView = newRowView;
-            App.IsAdding = true;
-            new AddNewElementWindow().ShowDialog();
-        }
+		{
+			DataRowView newRowView = DataTable.DefaultView.AddNew();
+			newRowView.CancelEdit();
+			App.DataRowView = newRowView;
+			App.IsAdding = true;
+			new AddNewElementWindow().ShowDialog();
+		}
 
-        private void OnEditCommand(object parameter)
-        {
-            if (DataRowView == null)
-            {
-                MessageBox.Show("Select row in table", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-            App.IsAdding = false;
-            App.DataRowView = DataRowView;
-            new AddNewElementWindow().ShowDialog();
-        }
+		private void OnEditCommand(object parameter)
+		{
+			if (DataRowView == null)
+			{
+				MessageBox.Show("Select row in table", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
+				return;
+			}
+			App.IsAdding = false;
+			App.DataRowView = DataRowView;
+			new AddNewElementWindow().ShowDialog();
+		}
 
-        private void OnRemoveCammand(object parameter)
-        {
-            if (DataRowView != null)
-                DataRowView.Delete();
+		private void OnRemoveCammand(object parameter)
+		{
+			if (DataRowView != null)
+				DataRowView.Delete();
 
-        }
-        private void OnExportCommand(object parameter)
-        {
-            var exportJsonString = JsonConvert.SerializeObject(DataTable, Formatting.Indented);
-            if (!string.IsNullOrWhiteSpace(exportJsonString) && exportJsonString != "[]")
-            {
-                var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
-                if (dialog.ShowDialog().GetValueOrDefault())
-                {
-                    File.WriteAllText(dialog.FileName, exportJsonString, Encoding.UTF8);
-                    MessageBox.Show("Successful export", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Import json first");
-                return;
-            }
-        }
+		}
+		private void OnExportCommand(object parameter)
+		{
+			var exportJsonString = JsonConvert.SerializeObject(DataTable, Formatting.Indented);
+			var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
+			if (dialog.ShowDialog().GetValueOrDefault())
+			{
+				File.WriteAllText(dialog.FileName, exportJsonString, Encoding.UTF8);
+				MessageBox.Show("Successful export", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+			}
+		}
 
 		private void OnImportCommand(object parameter)
 		{

@@ -9,8 +9,8 @@
         mc:Ignorable="d"
         Title="CraftHub"
         x:Name="MyMainWindow"
-        MinHeight="450"
-        MinWidth="850"
+        MinHeight="550"
+        MinWidth="1050"
         AllowsTransparency="False"
         WindowStyle="None"
         FontFamily="{DynamicResource MontserratFont}"
@@ -139,161 +139,122 @@
         </DockPanel>
         <ContentControl x:Name="MainContent">
             <ContentControl.Content>
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Menu Grid.Row="0">
-                        <!--<MenuItem Header="_File">
-                            <MenuItem Header="Upload template"
-                                      x:Name="MIImportClass"
-                                      Command="{Binding UploadTemplateCommand}"
-                                      Icon="{materialDesign:PackIcon Kind=Upload}" />
-                            <MenuItem Header="Import json file"
-                                      Command="{Binding ImportJsonFileCommand}"
-                                      Icon="{materialDesign:PackIcon Kind=CodeJson}"
-                                      x:Name="MIImportJsonFile">
-                            </MenuItem>
-                            <MenuItem Header="Export json file"
-                                      x:Name="MIExportJsonFile"
-                                      Command="{Binding ExportJsonFileCommand}"
-                                      Icon="{materialDesign:PackIcon Kind=CloudJson}">
-                            </MenuItem>
-                        </MenuItem>-->
-                        <!--<MenuItem Header="_Options">
-                            
-                        </MenuItem>-->
-                        <MenuItem Header="_Extension">
-                            <MenuItem Header="Generation folders"
-                                      x:Name="MIGenerationFolders"
-                                      Command="{Binding OpenGenerateFoldersindow}"
-                                      Icon="{materialDesign:PackIcon Kind=Folder}">
-                            </MenuItem>
-                        </MenuItem>
-                    </Menu>
-                    <Grid Grid.Row="1">
-                        <TabControl TabStripPlacement="Bottom"
-                                    BorderThickness="2"
-                                    SelectionChanged="TCWorkAreas_SelectionChanged"
-                                    x:Name="TCWorkAreas"
-                                    Foreground="White"
-                                    BorderBrush="{StaticResource MyPrimaryColor}"
-                                    Background="{DynamicResource MaterialDesignPaper}">
-                            <TabControl.Resources>
-                                <Style TargetType="TabItem">
-                                    <Setter Property="Foreground"
-                                            Value="White" />
-                                    <Setter Property="HeaderTemplate">
-                                        <Setter.Value>
-                                            <DataTemplate>
-                                                <WrapPanel Orientation="Horizontal"
-                                                           Margin="5">
-                                                    <TextBox Text="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}"
-                                                             IsReadOnly="True"
-                                                             FontSize="16"
-                                                             BorderThickness="0"
-                                                             Background="Transparent">
-                                                        <TextBox.ContextMenu>
-                                                            <ContextMenu>
-                                                                <MenuItem Header="Change topic name" 
-                                                                          Click="MenuItem_Click"/>
-                                                            </ContextMenu>
-                                                        </TextBox.ContextMenu>
-                                                    </TextBox>
-                                                    <Button Style="{x:Null}"
-                                                            Margin="5,0,0,0"
-                                                            FontSize="20"
-                                                            Background="Transparent"
-                                                            BorderBrush="Transparent"
-                                                            Click="CloseTab_Click"
-                                                            Foreground="White">
-                                                        <Button.Content>
-                                                            <materialDesign:PackIcon Kind="Close" />
-                                                        </Button.Content>
-                                                    </Button>
-                                                </WrapPanel>
-                                            </DataTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="TabItem">
-                                                <Border Name="Border"
-                                                        BorderThickness="2"
-                                                        CornerRadius="0,0,10,10"
-                                                        Margin="5,0"
-                                                        BorderBrush="{StaticResource MyPrimaryColor}"
-                                                        Background="{StaticResource MyPrimaryColor}">
-                                                    <ContentPresenter x:Name="ContentSite"
-                                                                      VerticalAlignment="Center"
-                                                                      HorizontalAlignment="Center"
-                                                                      ContentSource="Header"
-                                                                      Margin="10,2" />
-                                                </Border>
-                                                <ControlTemplate.Triggers>
-                                                    <Trigger Property="IsSelected"
-                                                             Value="True">
-                                                        <Setter TargetName="Border"
-                                                                Property="Background"
-                                                                Value="{StaticResource MyPrimaryColor}" />
-                                                    </Trigger>
-                                                    <Trigger Property="IsSelected"
-                                                             Value="False">
-                                                        <Setter TargetName="Border"
-                                                                Property="Background"
-                                                                Value="{StaticResource MaterialDesignPaper}" />
-                                                    </Trigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </TabControl.Resources>
+                <TabControl TabStripPlacement="Bottom"
+                            BorderThickness="2"
+                            SelectionChanged="TCWorkAreas_SelectionChanged"
+                            x:Name="TCWorkAreas"
+                            Foreground="White"
+                            BorderBrush="{StaticResource MyPrimaryColor}"
+                            Background="{DynamicResource MaterialDesignPaper}">
+                    <TabControl.Resources>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Foreground"
+                                    Value="White" />
+                            <Setter Property="HeaderTemplate">
+                                <Setter.Value>
+                                    <DataTemplate>
+                                        <WrapPanel Orientation="Horizontal"
+                                                   Margin="5">
+                                            <TextBox Text="{Binding Header, RelativeSource={RelativeSource AncestorType={x:Type TabItem}}}"
+                                                     IsReadOnly="True"
+                                                     FontSize="16"
+                                                     BorderThickness="0"
+                                                     Background="Transparent">
+                                                <TextBox.ContextMenu>
+                                                    <ContextMenu>
+                                                        <MenuItem Header="Change topic name"
+                                                                  Click="MenuItem_Click" />
+                                                    </ContextMenu>
+                                                </TextBox.ContextMenu>
+                                            </TextBox>
+                                            <Button Style="{x:Null}"
+                                                    Margin="5,0,0,0"
+                                                    FontSize="20"
+                                                    Background="Transparent"
+                                                    BorderBrush="Transparent"
+                                                    Click="CloseTab_Click"
+                                                    Foreground="White">
+                                                <Button.Content>
+                                                    <materialDesign:PackIcon Kind="Close" />
+                                                </Button.Content>
+                                            </Button>
+                                        </WrapPanel>
+                                    </DataTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TabItem">
+                                        <Border Name="Border"
+                                                BorderThickness="2"
+                                                CornerRadius="0,0,10,10"
+                                                Margin="5,0"
+                                                BorderBrush="{StaticResource MyPrimaryColor}"
+                                                Background="{StaticResource MyPrimaryColor}">
+                                            <ContentPresenter x:Name="ContentSite"
+                                                              VerticalAlignment="Center"
+                                                              HorizontalAlignment="Center"
+                                                              ContentSource="Header"
+                                                              Margin="10,2" />
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected"
+                                                     Value="True">
+                                                <Setter TargetName="Border"
+                                                        Property="Background"
+                                                        Value="{StaticResource MyPrimaryColor}" />
+                                            </Trigger>
+                                            <Trigger Property="IsSelected"
+                                                     Value="False">
+                                                <Setter TargetName="Border"
+                                                        Property="Background"
+                                                        Value="{StaticResource MaterialDesignPaper}" />
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TabControl.Resources>
 
-                            <TabItem Header="Tab 1">
-                                <TabItem.Content>
-                                    <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                           NavigationUIVisibility="Hidden" />
-                                </TabItem.Content>
-                            </TabItem>
-                            
-                            <TabItem FontSize="20"
-                                     Foreground="White">
-                                <TabItem.Header>
-                                    <materialDesign:PackIcon Kind="TrayPlus" />
-                                </TabItem.Header>
-                                <TabItem.Style>
-                                    <Style TargetType="TabItem">
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="TabItem">
-                                                    <Border Name="Border"
-                                                            BorderThickness="2"
-                                                            BorderBrush="{StaticResource MyPrimaryColor}"
-                                                            CornerRadius="20"
-                                                            Width="40"
-                                                            Height="40"
-                                                            Background="{StaticResource MyPrimaryColor}"
-                                                            Margin="5,0">
-                                                        <ContentPresenter x:Name="ContentSite"
-                                                                          VerticalAlignment="Center"
-                                                                          HorizontalAlignment="Center"
-                                                                          ContentSource="Header"
-                                                                          Margin="10,2" />
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </TabItem.Style>
-                            </TabItem>
-                        </TabControl>
+                    <TabItem Header="Tab 1">
+                        <TabItem.Content>
+                            <Frame Content="{Binding MainFrameSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                   NavigationUIVisibility="Hidden" />
+                        </TabItem.Content>
+                    </TabItem>
 
-                    </Grid>
-
-
-                </Grid>
+                    <TabItem FontSize="20"
+                             Foreground="White">
+                        <TabItem.Header>
+                            <materialDesign:PackIcon Kind="TrayPlus" />
+                        </TabItem.Header>
+                        <TabItem.Style>
+                            <Style TargetType="TabItem">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="TabItem">
+                                            <Border Name="Border"
+                                                    BorderThickness="2"
+                                                    BorderBrush="{StaticResource MyPrimaryColor}"
+                                                    CornerRadius="20"
+                                                    Width="40"
+                                                    Height="40"
+                                                    Background="{StaticResource MyPrimaryColor}"
+                                                    Margin="5,0">
+                                                <ContentPresenter x:Name="ContentSite"
+                                                                  VerticalAlignment="Center"
+                                                                  HorizontalAlignment="Center"
+                                                                  ContentSource="Header"
+                                                                  Margin="10,2" />
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                            </Style>
+                        </TabItem.Style>
+                    </TabItem>
+                </TabControl>
             </ContentControl.Content>
         </ContentControl>
     </DockPanel>

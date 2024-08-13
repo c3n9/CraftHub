@@ -79,7 +79,16 @@
                         <materialDesign:PackIcon Kind="FileCodeOutline" />
                     </Button.Content>
                     <Button.ToolTip>
-                        <TextBlock Text="Import table to json" />
+                        <TextBlock Text="Import properties" />
+                    </Button.ToolTip>
+                </Button>
+                <Button x:Name="BGenerationFolders"
+                        Command="{Binding OpenGenerateFoldersWindowCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="FolderPlusOutline" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Generation folders for lessons" />
                     </Button.ToolTip>
                 </Button>
                 <Separator />
@@ -108,6 +117,9 @@
                     <Button.Content>
                         <materialDesign:PackIcon Kind="PlaylistAdd" />
                     </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Added new column" />
+                    </Button.ToolTip>
                 </Button>
             </ToolBar>
         </ToolBarTray>

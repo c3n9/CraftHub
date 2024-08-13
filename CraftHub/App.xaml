@@ -17,7 +17,6 @@
                              Color="#3f51b5" />
             <SolidColorBrush x:Key="MySecondaryColor"
                              Color="#66f" />
-
             <Style x:Key="MaterialButtonStyle"
                    TargetType="Button">
                 <Setter Property="Foreground"
@@ -96,7 +95,64 @@
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+
             </Style>
+
+
+            <Style x:Key="ToolTipButtonStyle"
+                   TargetType="Button">
+                <Setter Property="Foreground"
+                        Value="{DynamicResource MaterialDesignBody}" />
+                <Setter Property="Width"
+                        Value="20" />
+                <Setter Property="Height"
+                        Value="20" />
+                <Setter Property="Background"
+                        Value="#cccccc" />
+                <Setter Property="BorderBrush"
+                        Value="Transparent" />
+                <Setter Property="Foreground"
+                        Value="Black" />
+                <Setter Property="BorderThickness"
+                        Value="1" />
+                <Setter Property="FontSize"
+                        Value="14" />
+                <Setter Property="HorizontalAlignment"
+                        Value="Center" />
+                <Setter Property="VerticalAlignment"
+                        Value="Center" />
+                <Setter Property="Padding"
+                        Value="0" />
+                <Setter Property="Margin"
+                        Value="0,2,0,0" />
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border"
+                                    Background="{TemplateBinding Background}"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="{TemplateBinding BorderThickness}"
+                                    CornerRadius="10">
+                                <!-- Делаем кнопку круглой -->
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                  VerticalAlignment="Center" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver"
+                                         Value="True">
+                                    <Setter TargetName="border"
+                                            Property="Background"
+                                            Value="{StaticResource MyPrimaryColor}" />
+                                    <Setter Property="Foreground"
+                                            Value="White" />
+                                    <!-- Голубой цвет при наведении -->
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

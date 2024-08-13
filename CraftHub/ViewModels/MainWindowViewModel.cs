@@ -41,126 +41,18 @@ namespace CraftHub.ViewModels
         public ICommand MinimizeWindowCommand { get; set; }
         public ICommand CloseWindowCommand { get; set; }
         public ICommand MaximizeWindowCommand { get; set; }
-        public ICommand OpenGenerateFoldersindow { get; set; }
-        public ICommand UploadTemplateCommand { get; set; }
-        public ICommand ExportJsonFileCommand { get; set; }
-        public ICommand ImportJsonFileCommand { get; set; }
 
         public MainWindowViewModel()
         {
             MinimizeWindowCommand = new DelegateCommand(OnMinimizeWindowCommand);
             MaximizeWindowCommand = new DelegateCommand(OnMaximizeWindowCommand);
             CloseWindowCommand = new DelegateCommand(OnCloseWindowCommand);
-            OpenGenerateFoldersindow = new DelegateCommand(OnOpenGenerateLessonsindow);
-            UploadTemplateCommand = new DelegateCommand(UploadTemplate);
-            ImportJsonFileCommand = new DelegateCommand(OnImportJsonFileCommand);
-            ExportJsonFileCommand = new DelegateCommand(OnExportJsonFileCommand);
 
             App.MainWindowViewModel = this;
             MainFrameSource = new WorkingAreaView();
 
         }
-        private void OnOpenGenerateLessonsindow(object paramenter)
-        {
-            new GenerationFoldersWinodow().ShowDialog();
-        }
-        private void OnExportJsonFileCommand(object paramenter)
-        {
-            var exportJsonString = JsonConvert.SerializeObject(App.WorkingAreaViewModel.DataTable, Formatting.Indented);
-            if (!string.IsNullOrWhiteSpace(exportJsonString))
-            {
-                var dialog = new SaveFileDialog() { Filter = ".json | *.json" };
-                if (dialog.ShowDialog().GetValueOrDefault())
-                {
-                    File.WriteAllText(dialog.FileName, exportJsonString, Encoding.UTF8);
-                    MessageBox.Show("Successful export", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
-                }
-            }
-            else
-            {
-                MessageBox.Show("Import json first");
-                return;
-            }
-        }
-        private void OnImportJsonFileCommand(object paramenter)
-        {
-            var dialog = new OpenFileDialog() { Filter = ".json | *.json" };
-            if (dialog.ShowDialog().GetValueOrDefault())
-            {
-                App.jsonString = File.ReadAllText(dialog.FileName);
-                JArray jsonArray = new JArray();
-                if (!string.IsNullOrWhiteSpace(App.jsonString))
-                {
-                    jsonArray = JArray.Parse(App.jsonString);
-                    foreach (var jsonItem in jsonArray)
-                    {
-                        var dataRow = App.WorkingAreaViewModel.DataTable.NewRow();
-                        var jsonObject = jsonItem as JObject;
-
-                        foreach (var property in jsonObject.Properties())
-                        {
-                            var columnName = property.Name;
-                            if (App.WorkingAreaViewModel.DataTable.Columns.Contains(columnName))
-                            {
-                                var columnValue = property.Value.ToObject<object>();
-                                dataRow[columnName] = columnValue;
-                            }
-                        }
-                        App.WorkingAreaViewModel.DataTable.Rows.Add(dataRow);
-                    }
-                }
-            }
-        }
-        private void UploadTemplate(object paramenter)
-        {
-            var dialog = new OpenFileDialog() { Filter = ".cs | *.cs" };
-            if (dialog.ShowDialog().GetValueOrDefault())
-            {
-                string code = System.IO.File.ReadAllText(dialog.FileName);
-                CompileAndLoadCode(code);
-            }
-        }
-
-        private void CompileAndLoadCode(string code)
-        {
-            App.WorkingAreaViewModel.Properties.Clear();
-            // Используем провайдер компиляции C# кода
-            CSharpCodeProvider provider = new CSharpCodeProvider();
-            CompilerParameters parameters = new CompilerParameters();
-            // Получаем сборки, доступные в текущем домене приложения
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.IsDynamic).Select(a => a.Location).ToArray();
-            parameters.ReferencedAssemblies.AddRange(assemblies);
-            parameters.ReferencedAssemblies.Add("System.Runtime.dll");
-            // Компилируем код
-            CompilerResults results = provider.CompileAssemblyFromSource(parameters, code);
-            string errorMessage = string.Empty;
-            if (results.Errors.HasErrors)
-            {
-                foreach (CompilerError error in results.Errors)
-                {
-                    errorMessage += $"Error in line {error.Line}: {error.ErrorText}\n";
-                }
-                if (!string.IsNullOrWhiteSpace(errorMessage))
-                {
-                    MessageBox.Show(errorMessage);
-                    return;
-                }
-            }
-            else
-            {
-                // Загружаем сборку
-                Assembly assembly = results.CompiledAssembly;
-                foreach (Type type in assembly.GetTypes())
-                {
-                    dynamic instance = Activator.CreateInstance(type);
-                    foreach (var propertyInDynamic in instance.GetType().GetProperties())
-                    {
-                        App.WorkingAreaViewModel.Properties.Add(new PropertyModel { Name = propertyInDynamic.Name, Type = propertyInDynamic.PropertyType });
-                        App.WorkingAreaViewModel.DisplayDataInGrid();
-                    }
-                }
-            }
-        }
+        
 
         private void OnMinimizeWindowCommand(object paramenter)
         {
