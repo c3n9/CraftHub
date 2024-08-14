@@ -111,8 +111,8 @@ namespace CraftHub.ViewModels
 				FontSize = 18,
 				CanUserAddRows = true,
 				IsReadOnly = false,
-				HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-				VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+				//HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
+				//VerticalScrollBarVisibility = ScrollBarVisibility.Auto
 			};
 			dataGrid.SetBinding(DataGrid.SelectedItemProperty, new Binding("DataRowView"));
 			dataGrid.DataContext = this;

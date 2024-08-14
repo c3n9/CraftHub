@@ -108,7 +108,7 @@
                 <Setter Property="Height"
                         Value="20" />
                 <Setter Property="Background"
-                        Value="#cccccc" />
+                        Value="#999999" />
                 <Setter Property="BorderBrush"
                         Value="Transparent" />
                 <Setter Property="Foreground"
@@ -133,7 +133,6 @@
                                     BorderBrush="{TemplateBinding BorderBrush}"
                                     BorderThickness="{TemplateBinding BorderThickness}"
                                     CornerRadius="10">
-                                <!-- Делаем кнопку круглой -->
                                 <ContentPresenter HorizontalAlignment="Center"
                                                   VerticalAlignment="Center" />
                             </Border>
@@ -145,12 +144,21 @@
                                             Value="{StaticResource MyPrimaryColor}" />
                                     <Setter Property="Foreground"
                                             Value="White" />
-                                    <!-- Голубой цвет при наведении -->
                                 </Trigger>
                             </ControlTemplate.Triggers>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
+            </Style>
+
+            <Style TargetType="DataGrid"
+                   BasedOn="{StaticResource MaterialDesignDataGrid}">
+                <Setter Property="GridLinesVisibility"
+                        Value="All" />
+                <Setter Property="HorizontalGridLinesBrush"
+                        Value="{DynamicResource MaterialDesignDivider}" />
+                <Setter Property="VerticalGridLinesBrush"
+                        Value="{DynamicResource MaterialDesignDivider}" />
             </Style>
 
         </ResourceDictionary>

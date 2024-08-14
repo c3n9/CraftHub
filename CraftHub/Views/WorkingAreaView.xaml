@@ -26,35 +26,6 @@
         <ToolBarTray>
             <ToolBar ClipToBounds="False"
                      Style="{StaticResource MaterialDesignToolBar}">
-                <!--<Button x:Name="BAdd"
-                        Visibility="{Binding ButtonVisibility}"
-                        Command="{Binding AddCommand}">
-                    <Button.Content>
-                        <materialDesign:PackIcon Kind="TableLargeAdd" />
-                    </Button.Content>
-                    <Button.ToolTip>
-                        <TextBlock Text="Add new element" />
-                    </Button.ToolTip>
-                </Button>
-                <Button x:Name="BEdit"
-                        Visibility="{Binding ButtonVisibility}"
-                        Command="{Binding EditCommand}">
-                    <Button.Content>
-                        <materialDesign:PackIcon Kind="Pencil" />
-                    </Button.Content>
-                    <Button.ToolTip>
-                        <TextBlock Text="Edit element" />
-                    </Button.ToolTip>
-                </Button>-->
-                <Button x:Name="BRemove"
-                        Command="{Binding RemoveCommand}">
-                    <Button.Content>
-                        <materialDesign:PackIcon Kind="Remove" />
-                    </Button.Content>
-                    <Button.ToolTip>
-                        <TextBlock Text="Remove element" />
-                    </Button.ToolTip>
-                </Button>
                 <Button x:Name="BImport"
                         Command="{Binding ImportCommand}">
                     <Button.Content>
@@ -89,6 +60,15 @@
                     </Button.Content>
                     <Button.ToolTip>
                         <TextBlock Text="Generation folders for lessons" />
+                    </Button.ToolTip>
+                </Button>
+                <Button x:Name="BRemove"
+                        Command="{Binding RemoveCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="Remove" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Remove element" />
                     </Button.ToolTip>
                 </Button>
                 <Separator />

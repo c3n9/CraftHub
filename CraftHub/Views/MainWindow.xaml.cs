@@ -69,7 +69,13 @@ namespace CraftHub.Views
         }
         private void AddNewTabItem()
         {
-            TabItem selectedTab = TCWorkAreas.SelectedItem as TabItem;
+			if (TCWorkAreas.Items.Count >= 16)
+			{
+                TCWorkAreas.SelectedIndex = 14;
+				System.Windows.MessageBox.Show("The maximum number of workspaces has been reached", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
+				return;
+			}
+			TabItem selectedTab = TCWorkAreas.SelectedItem as TabItem;
             if (selectedTab != null && selectedTab.Header is PackIcon packIcon && packIcon.Kind == PackIconKind.TrayPlus)
             {
                 var newFrame = new Frame();
