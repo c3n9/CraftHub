@@ -59,7 +59,7 @@
                         <materialDesign:PackIcon Kind="FileExportOutline" />
                     </Button.Content>
                     <Button.ToolTip>
-                        <TextBlock Text="Export properties in C# class" />
+                        <TextBlock Text="Export properties from C# class" />
                     </Button.ToolTip>
                 </Button>
                 <Button x:Name="BGenerationFolders"

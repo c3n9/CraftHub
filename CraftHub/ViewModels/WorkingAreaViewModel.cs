@@ -237,7 +237,7 @@ namespace CraftHub.ViewModels
 
 				foreach(var prop in properties)
 				{
-					propertiesString += $"\r\n        {prop.Type.ToString()} {prop.Name} {{ get; set; }}\r\n";
+					propertiesString += $"\r\n        public {prop.Type.ToString()} {prop.Name} {{ get; set; }}\r\n";
 				}
 				var code = "using System;\r\nusing System.Collections.Generic;\r\nusing System.Linq;\r\nusing System.Text;" +
 					"\r\nusing System.Threading.Tasks;\r\n\r\nnamespace YourNamespace\r\n{\r\n    " +
