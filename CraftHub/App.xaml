@@ -161,6 +161,12 @@
                         Value="{DynamicResource MaterialDesignDivider}" />
             </Style>
 
+            <Style TargetType="DataGridColumnHeader"
+                   BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                <Setter Property="HorizontalContentAlignment"
+                        Value="Center" />
+            </Style>
+
         </ResourceDictionary>
     </Application.Resources>
 </Application>

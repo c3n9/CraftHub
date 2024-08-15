@@ -53,6 +53,15 @@
                         <TextBlock Text="Import properties" />
                     </Button.ToolTip>
                 </Button>
+                <Button x:Name="BExportCode"
+                        Command="{Binding ExportCodeCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="FileExportOutline" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Export properties in C# class" />
+                    </Button.ToolTip>
+                </Button>
                 <Button x:Name="BGenerationFolders"
                         Command="{Binding OpenGenerateFoldersWindowCommand}">
                     <Button.Content>

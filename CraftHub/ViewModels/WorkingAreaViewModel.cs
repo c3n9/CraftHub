@@ -31,6 +31,7 @@ namespace CraftHub.ViewModels
 		public ICommand ImportCommand { get; set; }
 		public ICommand LoadCodeCommand { get; set; }
 		public ICommand OpenGenerateFoldersWindowCommand { get; set; }
+		public ICommand ExportCodeCommand { get; set; }
 
 		private ObservableCollection<UIElement> _uIElemetsCollection;
 		public ObservableCollection<UIElement> UIElemetsCollection
@@ -124,13 +125,24 @@ namespace CraftHub.ViewModels
 			ExportCommand = new DelegateCommand(OnExportCommand);
 			ImportCommand = new DelegateCommand(OnImportCommand);
 			LoadCodeCommand = new DelegateCommand(OnLoadCodeCommand);
+			ExportCodeCommand = new DelegateCommand(OnExportCodeCommand);
 			OpenGenerateFoldersWindowCommand = new DelegateCommand(OnOpenGenerateLessonsWindowCommand);
 		}
 
 		private void OnRemoveColumnCommand(DataGridColumn column)
 		{
+			var table = DataTable;
 			var typeName = column.SortMemberPath.ToString();
 			var columnName = column.Header.ToString();
+
+			for (int i = 0; i < table.Columns.Count; i++)
+			{
+				if(table.Columns[i].ColumnName == typeName)
+				{
+					DataTable.Columns.Remove(typeName);
+				}
+			} 
+
 			// Удаляем свойство из коллекции Properties
 			var property = Properties.FirstOrDefault(p => p.Name == typeName);
 			if (property != null)
@@ -145,11 +157,6 @@ namespace CraftHub.ViewModels
 				App.WorkingAreaView.DGJson.Columns.Remove(columnToRemove);
 			}
 
-			// Удаляем соответствующий столбец из DataTable
-			if (DataTable.Columns.Contains(columnName))
-			{
-				DataTable.Columns.Remove(columnName);
-			}
 		}
 
 		private void OnOpenGenerateLessonsWindowCommand(object paramenter)
@@ -207,6 +214,37 @@ namespace CraftHub.ViewModels
 				string code = System.IO.File.ReadAllText(dialog.FileName);
 				CompileAndLoadCode(code);
 				DisplayDataInGrid();
+			}
+		}
+
+		private void OnExportCodeCommand(object parameter)
+		{
+			var dialog = new SaveFileDialog() { Filter = ".cs | *.cs" };
+			if (dialog.ShowDialog().GetValueOrDefault())
+			{
+				var propertiesString = string.Empty;
+				var properties = new List<PropertyModel>();
+				
+				foreach(var prop in Properties)
+				{
+					Type typeForToolTip = prop.Type;
+					if (prop.Type.IsGenericType && prop.Type.GetGenericTypeDefinition() == typeof(Nullable<>))
+					{
+						typeForToolTip = Nullable.GetUnderlyingType(prop.Type); // Получаем базовый тип
+					}
+					properties.Add(new PropertyModel() { Name = prop.Name, Type = typeForToolTip });
+				}
+
+				foreach(var prop in properties)
+				{
+					propertiesString += $"\r\n        {prop.Type.ToString()} {prop.Name} {{ get; set; }}\r\n";
+				}
+				var code = "using System;\r\nusing System.Collections.Generic;\r\nusing System.Linq;\r\nusing System.Text;" +
+					"\r\nusing System.Threading.Tasks;\r\n\r\nnamespace YourNamespace\r\n{\r\n    " +
+					$"public partial class {Path.GetFileNameWithoutExtension(dialog.FileName)}\r\n    {{\r\n    {propertiesString}    \r\n    }}\r\n}}\r\n";
+				File.WriteAllText(dialog.FileName, code, Encoding.UTF8);
+				var selectedTabItem = App.MainWindow.TCWorkAreas.SelectedItem as TabItem;
+				selectedTabItem.Header = $"{System.IO.Path.GetFileNameWithoutExtension(dialog.FileName)}";
 			}
 		}
 

@@ -1,28 +1,7 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "C:\\Users\\manakov\\Documents\\CraftHub\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|C:\\Users\\manakov\\Documents\\CraftHub\\crafthub\\viewmodels\\workingareaviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\viewmodels\\workingareaviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\manakov\\documents\\crafthub\\crafthub\\views\\workingareaview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\views\\workingareaview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|C:\\Users\\manakov\\Documents\\CraftHub\\crafthub\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\app.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\manakov\\documents\\crafthub\\crafthub\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\app.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|c:\\users\\manakov\\documents\\crafthub\\crafthub\\views\\workingareaview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{9FE677D9-BA5B-4478-853B-68C2182F7F17}|CraftHub\\CraftHub.csproj|solutionrelative:crafthub\\views\\workingareaview.xaml.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
@@ -30,74 +9,11 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": -1,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{1fc202d4-d401-403c-9834-5b218574bb67}"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "WorkingAreaViewModel.cs",
-              "DocumentMoniker": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\ViewModels\\WorkingAreaViewModel.cs",
-              "RelativeDocumentMoniker": "CraftHub\\ViewModels\\WorkingAreaViewModel.cs",
-              "ToolTip": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\ViewModels\\WorkingAreaViewModel.cs",
-              "RelativeToolTip": "CraftHub\\ViewModels\\WorkingAreaViewModel.cs",
-              "ViewState": "AQIAAFwBAAAAAAAAAAAiwGkBAAAHAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-14T06:03:37.347Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "WorkingAreaView.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml.cs",
-              "RelativeDocumentMoniker": "CraftHub\\Views\\WorkingAreaView.xaml.cs",
-              "ToolTip": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml.cs",
-              "RelativeToolTip": "CraftHub\\Views\\WorkingAreaView.xaml.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABQAAAAkAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-15T04:21:45.578Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "App.xaml.cs",
-              "DocumentMoniker": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\App.xaml.cs",
-              "RelativeDocumentMoniker": "CraftHub\\App.xaml.cs",
-              "ToolTip": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\App.xaml.cs",
-              "RelativeToolTip": "CraftHub\\App.xaml.cs",
-              "ViewState": "AQIAABEAAAAAAAAAAAAAwBQAAAA3AAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-08-15T04:21:41.465Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "App.xaml",
-              "DocumentMoniker": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\App.xaml",
-              "RelativeDocumentMoniker": "CraftHub\\App.xaml",
-              "ToolTip": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\App.xaml",
-              "RelativeToolTip": "CraftHub\\App.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-08-14T06:05:01.545Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "WorkingAreaView.xaml",
-              "DocumentMoniker": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml",
-              "RelativeDocumentMoniker": "CraftHub\\Views\\WorkingAreaView.xaml",
-              "ToolTip": "C:\\Users\\manakov\\Documents\\CraftHub\\CraftHub\\Views\\WorkingAreaView.xaml",
-              "RelativeToolTip": "CraftHub\\Views\\WorkingAreaView.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2024-08-14T06:04:46.488Z",
-              "EditorCaption": ""
             }
           ]
         }
