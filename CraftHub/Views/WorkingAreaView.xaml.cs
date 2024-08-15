@@ -23,6 +23,9 @@ namespace CraftHub.Views
         public WorkingAreaView()
         {
             InitializeComponent();
-        }
+
+            App.WorkingAreaView = this;
+
+		}
     }
 }

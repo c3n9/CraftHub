@@ -79,6 +79,7 @@
                 <TextBox x:Name="TBPropertyName"
                          Width="150"
                          FontSize="20"
+                         Text="{Binding PropertyName}"
                          materialDesign:TextFieldAssist.HasClearButton="True"
                          VerticalContentAlignment="Center" />
                 <TextBlock Text="Type value"
@@ -92,8 +93,7 @@
                           SelectedItem="{Binding SelectedType}" />
                 <Button x:Name="BAddProperty"
                         Margin="10,0,10,0"
-                        Command="{Binding AddPropertyCommand}"
-                        CommandParameter="{Binding ElementName=TBPropertyName, Path=Text, Mode=OneWay}">
+                        Command="{Binding AddPropertyCommand}">
                     <Button.Content>
                         <materialDesign:PackIcon Kind="PlaylistAdd" />
                     </Button.Content>
@@ -103,8 +103,12 @@
                 </Button>
             </ToolBar>
         </ToolBarTray>
-        <ScrollViewer Grid.Row="1">
-            <ItemsControl ItemsSource="{Binding UIElemetsCollection}"/>
-        </ScrollViewer>
+        <DataGrid ItemsSource="{Binding DataViewTable, Mode=TwoWay}"
+                  x:Name="DGJson"
+                  FontSize="18"
+                  CanUserAddRows="True"
+                  Grid.Row="1"
+                  IsReadOnly="False"
+                  ColumnWidth="*" />
     </Grid>
 </Page>

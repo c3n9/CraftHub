@@ -71,7 +71,6 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Models\TabInfo.cs" />
-    <Compile Include="ViewModels\AddNewElementWindowViewModel.cs" />
     <Compile Include="ViewModels\Base\BaseViewModel.cs" />
     <Compile Include="ViewModels\Commands\DelegateCommand.cs" />
     <Compile Include="ViewModels\GenerationFoldersWinodowViewModel.cs" />
@@ -80,9 +79,6 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Views\AddNewElementWindow.xaml.cs">
-      <DependentUpon>AddNewElementWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\GenerationFoldersWinodow.xaml.cs">
       <DependentUpon>GenerationFoldersWinodow.xaml</DependentUpon>
@@ -125,10 +121,6 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Views\AddNewElementWindow.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="Views\GenerationFoldersWinodow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

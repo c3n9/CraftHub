@@ -26,8 +26,6 @@ namespace CraftHub.ViewModels
 	internal class WorkingAreaViewModel : BaseViewModel
 	{
 		public ICommand AddPropertyCommand { get; private set; }
-		public ICommand AddCommand { get; set; }
-		public ICommand EditCommand { get; set; }
 		public ICommand RemoveCommand { get; set; }
 		public ICommand ExportCommand { get; set; }
 		public ICommand ImportCommand { get; set; }
@@ -58,6 +56,22 @@ namespace CraftHub.ViewModels
 				}
 			}
 		}
+
+
+		private string _propertyName;
+		public string PropertyName
+		{
+			get { return _propertyName; }
+			set
+			{
+				if (_propertyName != value)
+				{
+					_propertyName = value;
+					OnPropertyChanged(nameof(PropertyName));
+				}
+			}
+		}
+
 		private DataTable _dataTable;
 		public DataTable DataTable
 		{
@@ -69,10 +83,20 @@ namespace CraftHub.ViewModels
 			}
 		}
 
+		private DataView _dataViewTable;
+		public DataView DataViewTable
+		{
+			get { return _dataViewTable; }
+			set
+			{
+				_dataViewTable = value;
+				OnPropertyChanged(nameof(DataViewTable));
+			}
+		}
+
 		public ObservableCollection<PropertyModel> Properties { get; set; }
 		public ObservableCollection<Type> AvailableTypes { get; set; }
 		public DataRowView DataRowView { get; set; }
-		DataGrid dataGrid { get; set; }
 		public WorkingAreaViewModel()
 		{
 			DataTable = new DataTable();
@@ -96,30 +120,36 @@ namespace CraftHub.ViewModels
 			};
 
 			AddPropertyCommand = new DelegateCommand(OnAddPropertyCommand);
-			AddCommand = new DelegateCommand(OnAddCommand);
-			EditCommand = new DelegateCommand(OnEditCommand);
 			RemoveCommand = new DelegateCommand(OnRemoveCammand);
 			ExportCommand = new DelegateCommand(OnExportCommand);
 			ImportCommand = new DelegateCommand(OnImportCommand);
 			LoadCodeCommand = new DelegateCommand(OnLoadCodeCommand);
 			OpenGenerateFoldersWindowCommand = new DelegateCommand(OnOpenGenerateLessonsWindowCommand);
+		}
 
-			dataGrid = new DataGrid()
+		private void OnRemoveColumnCommand(DataGridColumn column)
+		{
+			var typeName = column.SortMemberPath.ToString();
+			var columnName = column.Header.ToString();
+			// Удаляем свойство из коллекции Properties
+			var property = Properties.FirstOrDefault(p => p.Name == typeName);
+			if (property != null)
 			{
-				ColumnWidth = new DataGridLength(1, DataGridLengthUnitType.Star),
-				AutoGenerateColumns = true,
-				FontSize = 18,
-				CanUserAddRows = true,
-				IsReadOnly = false,
-				//HorizontalScrollBarVisibility = ScrollBarVisibility.Auto,
-				//VerticalScrollBarVisibility = ScrollBarVisibility.Auto
-			};
-			dataGrid.SetBinding(DataGrid.SelectedItemProperty, new Binding("DataRowView"));
-			dataGrid.DataContext = this;
+				Properties.Remove(property);
+			}
 
-			UIElemetsCollection.Add(dataGrid);
+			// Удаляем колонку из DataGrid
+			var columnToRemove = App.WorkingAreaView.DGJson.Columns.FirstOrDefault(c => c.Header.ToString() == columnName);
+			if (columnToRemove != null)
+			{
+				App.WorkingAreaView.DGJson.Columns.Remove(columnToRemove);
+			}
 
-
+			// Удаляем соответствующий столбец из DataTable
+			if (DataTable.Columns.Contains(columnName))
+			{
+				DataTable.Columns.Remove(columnName);
+			}
 		}
 
 		private void OnOpenGenerateLessonsWindowCommand(object paramenter)
@@ -184,7 +214,7 @@ namespace CraftHub.ViewModels
 		{
 			App.jsonString = JsonConvert.SerializeObject(DataTable, Formatting.Indented);
 			var error = string.Empty;
-			var propertyName = parameter as string;
+			var propertyName = PropertyName;
 			var propertyExist = Properties.FirstOrDefault(x => x.Name == propertyName);
 			if (propertyExist != null)
 				error += "Property with this parameter already exists\n";
@@ -197,7 +227,16 @@ namespace CraftHub.ViewModels
 				MessageBox.Show(error, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
 				return;
 			}
-			Properties.Add(new PropertyModel() { Name = propertyName, Type = SelectedType });
+			var selectedType = SelectedType;
+			if (selectedType.IsValueType)
+			{
+				selectedType = typeof(Nullable<>).MakeGenericType(SelectedType);
+			}
+
+			PropertyName = string.Empty;
+			SelectedType = null;
+
+			Properties.Add(new PropertyModel() { Name = propertyName, Type = selectedType });
 			DisplayDataInGrid();
 		}
 		public void DisplayDataInGrid()
@@ -216,29 +255,17 @@ namespace CraftHub.ViewModels
 			{
 				if (!tempTable.Columns.Contains(property.Name))
 				{
-					tempTable.Columns.Add(property.Name, property.Type);
+					Type columnType = property.Type;
 
-					// Добавляем значение по умолчанию для новых столбцов
-					foreach (DataRow row in tempTable.Rows)
+					// Проверяем, является ли тип Nullable<>
+					if (property.Type.IsGenericType && property.Type.GetGenericTypeDefinition() == typeof(Nullable<>))
 					{
-						row[property.Name] = GetDefaultValue(property.Type);
+						columnType = Nullable.GetUnderlyingType(property.Type); // Получаем базовый тип
 					}
+
+					tempTable.Columns.Add(property.Name, columnType);
 				}
 			}
-
-			// Переносим данные из старой таблицы в новую
-			foreach (DataRow row in DataTable.Rows)
-			{
-				var newRow = tempTable.NewRow();
-				foreach (DataColumn column in DataTable.Columns)
-				{
-					newRow[column.ColumnName] = row[column];
-				}
-				tempTable.Rows.Add(newRow);
-			}
-
-			// Обновляем DataTable на новую таблицу с сохраненными данными
-			DataTable = tempTable;
 
 			// Заполняем таблицу новыми данными из JSON, если они есть
 			JArray jsonArray = new JArray();
@@ -249,26 +276,42 @@ namespace CraftHub.ViewModels
 			{
 				foreach (var jsonItem in jsonArray)
 				{
-					var dataRow = DataTable.NewRow();
+					var dataRow = tempTable.NewRow();
 					var jsonObject = jsonItem as JObject;
 
 					foreach (var property in jsonObject.Properties())
 					{
 						var columnName = property.Name;
-						if (DataTable.Columns.Contains(columnName))
+						if (tempTable.Columns.Contains(columnName))
 						{
 							var columnValue = property.Value.ToObject<object>();
-							dataRow[columnName] = columnValue ?? GetDefaultValue(DataTable.Columns[columnName].DataType);
+							dataRow[columnName] = columnValue ?? DBNull.Value; // Ставим DBNull если значение null
 						}
 					}
-					DataTable.Rows.Add(dataRow);
+					tempTable.Rows.Add(dataRow);
+				}
+			}
+			else
+			{
+				// Переносим данные из старой таблицы в новую только если нет новых данных из JSON
+				foreach (DataRow row in DataTable.Rows)
+				{
+					var newRow = tempTable.NewRow();
+					foreach (DataColumn column in DataTable.Columns)
+					{
+						newRow[column.ColumnName] = row[column];
+					}
+					tempTable.Rows.Add(newRow);
 				}
 			}
 
-			// Обновляем источник данных для DataGrid
-			dataGrid.ItemsSource = DataTable.DefaultView;
+			// Обновляем DataTable на новую таблицу с сохраненными данными
+			DataTable = tempTable;
 
-			foreach (var column in dataGrid.Columns)
+			// Обновляем источник данных для DataGrid
+			DataViewTable = DataTable.DefaultView;
+
+			foreach (var column in App.WorkingAreaView.DGJson.Columns)
 			{
 				var property = Properties.FirstOrDefault(p => p.Name == column.Header.ToString());
 				if (property != null)
@@ -284,66 +327,43 @@ namespace CraftHub.ViewModels
 						Margin = new Thickness(0, 0, 5, 0)
 					};
 
+					// Проверяем, является ли тип Nullable<>
+					Type typeForToolTip = property.Type;
+					if (property.Type.IsGenericType && property.Type.GetGenericTypeDefinition() == typeof(Nullable<>))
+					{
+						typeForToolTip = Nullable.GetUnderlyingType(property.Type); // Получаем базовый тип
+					}
+
 					var typeIndicator = new Button
 					{
 						Content = new MaterialDesignThemes.Wpf.PackIcon { Kind = MaterialDesignThemes.Wpf.PackIconKind.Help },
-						ToolTip = $"Type: {property.Type.Name}",
+						ToolTip = $"Type: {typeForToolTip.Name}", // Отображаем базовый тип
 						Margin = new Thickness(0, 0, 5, 0),
 						FontSize = 20,
 						Padding = new Thickness(5),
 						HorizontalContentAlignment = HorizontalAlignment.Center,
 						VerticalContentAlignment = VerticalAlignment.Center,
-						Style = (Style)Application.Current.Resources["ToolTipButtonStyle"] // Убедитесь, что у вас есть стиль для кнопки
+						Style = (Style)Application.Current.Resources["ToolTipButtonStyle"]
 					};
 
 					headerTemplate.Children.Add(headerTextBlock);
 					headerTemplate.Children.Add(typeIndicator);
 
-					column.Header = headerTemplate;
+					// Создаем контекстное меню
+					var contextMenu = new ContextMenu();
+					var removeMenuItem = new MenuItem { Header = "Remove Column" };
+					removeMenuItem.Click += (s, e) => OnRemoveColumnCommand(column);
+					contextMenu.Items.Add(removeMenuItem);
+
+					var headerControl = new ContentControl
+					{
+						Content = headerTemplate,
+						ContextMenu = contextMenu
+					};
+
+					column.Header = headerControl;
 				}
 			}
-		}
-		private object GetDefaultValue(Type type)
-		{
-			if (type == typeof(int))
-				return 0;
-			if (type == typeof(double))
-				return 0.0;
-			if (type == typeof(float))
-				return 0.0f;
-			if (type == typeof(decimal))
-				return 0m;
-			if (type == typeof(byte))
-				return (byte)0;
-			if (type == typeof(short))
-				return (short)0;
-			if (type == typeof(bool))
-				return false;
-			if (type == typeof(char))
-				return '\0';
-
-			return DBNull.Value;
-		}
-
-		private void OnAddCommand(object parameter)
-		{
-			DataRowView newRowView = DataTable.DefaultView.AddNew();
-			newRowView.CancelEdit();
-			App.DataRowView = newRowView;
-			App.IsAdding = true;
-			new AddNewElementWindow().ShowDialog();
-		}
-
-		private void OnEditCommand(object parameter)
-		{
-			if (DataRowView == null)
-			{
-				MessageBox.Show("Select row in table", "Warning", MessageBoxButton.OK, MessageBoxImage.Warning);
-				return;
-			}
-			App.IsAdding = false;
-			App.DataRowView = DataRowView;
-			new AddNewElementWindow().ShowDialog();
 		}
 
 		private void OnRemoveCammand(object parameter)

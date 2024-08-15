@@ -17,9 +17,8 @@ namespace CraftHub
     {
         internal static MainWindowViewModel MainWindowViewModel;
         internal static MainWindow MainWindow;
-        internal static AddNewElementWindow AddNewElementWindow;
-
         internal static WorkingAreaViewModel WorkingAreaViewModel;
+        internal static WorkingAreaView WorkingAreaView;
 
 
         public static bool IsAdding = false;
