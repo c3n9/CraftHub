@@ -33,17 +33,6 @@ namespace CraftHub.ViewModels
 		public ICommand OpenGenerateFoldersWindowCommand { get; set; }
 		public ICommand ExportCodeCommand { get; set; }
 
-		private ObservableCollection<UIElement> _uIElemetsCollection;
-		public ObservableCollection<UIElement> UIElemetsCollection
-		{
-			get { return _uIElemetsCollection; }
-			set
-			{
-				_uIElemetsCollection = value;
-				OnPropertyChanged(nameof(UIElemetsCollection));
-			}
-		}
-
 		private Type _selectedType;
 		public Type SelectedType
 		{
@@ -101,7 +90,6 @@ namespace CraftHub.ViewModels
 		public WorkingAreaViewModel()
 		{
 			DataTable = new DataTable();
-			UIElemetsCollection = new ObservableCollection<UIElement>();
 
 			App.WorkingAreaViewModel = this;
 
