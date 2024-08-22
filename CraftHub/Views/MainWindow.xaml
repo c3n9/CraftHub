@@ -9,7 +9,7 @@
         mc:Ignorable="d"
         Title="CraftHub"
         x:Name="MyMainWindow"
-        MinHeight="550"
+        MinHeight="650"
         MinWidth="1050"
         AllowsTransparency="False"
         WindowStyle="None"

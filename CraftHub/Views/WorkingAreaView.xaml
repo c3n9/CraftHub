@@ -3,15 +3,20 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
       xmlns:viewModels="clr-namespace:CraftHub.ViewModels"
+      xmlns:converters="clr-namespace:CraftHub.Converters"
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:local="clr-namespace:CraftHub.Views"
       xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
       TextElement.Foreground="{DynamicResource MaterialDesignBody}"
       FontFamily="{DynamicResource MontserratFont}"
       mc:Ignorable="d"
-      d:DesignHeight="450"
+      d:DesignHeight="550"
       d:DesignWidth="1000"
       Title="WorkingAreaView">
+
+    <Page.Resources>
+        <converters:TypeToDescriptionConverter x:Key="TypeToDescriptionConverter" />
+    </Page.Resources>
 
     <Page.DataContext>
         <viewModels:WorkingAreaViewModel />
@@ -29,7 +34,9 @@
                 <Button x:Name="BImport"
                         Command="{Binding ImportCommand}">
                     <Button.Content>
-                        <materialDesign:PackIcon Kind="Import" />
+                        <materialDesign:PackIcon Kind="Import"
+                                                 Height="25"
+                                                 Width="25" />
                     </Button.Content>
                     <Button.ToolTip>
                         <TextBlock Text="Import table to json" />
@@ -38,7 +45,9 @@
                 <Button x:Name="BExport"
                         Command="{Binding ExportCommand}">
                     <Button.Content>
-                        <materialDesign:PackIcon Kind="Export" />
+                        <materialDesign:PackIcon Kind="Export"
+                                                 Height="25"
+                                                 Width="25" />
                     </Button.Content>
                     <Button.ToolTip>
                         <TextBlock Text="Export table to json" />
@@ -47,7 +56,9 @@
                 <Button x:Name="BLoadCode"
                         Command="{Binding LoadCodeCommand}">
                     <Button.Content>
-                        <materialDesign:PackIcon Kind="FileCodeOutline" />
+                        <materialDesign:PackIcon Kind="FileCodeOutline"
+                                                 Height="25"
+                                                 Width="25" />
                     </Button.Content>
                     <Button.ToolTip>
                         <TextBlock Text="Import properties" />
@@ -56,7 +67,9 @@
                 <Button x:Name="BExportCode"
                         Command="{Binding ExportCodeCommand}">
                     <Button.Content>
-                        <materialDesign:PackIcon Kind="FileExportOutline" />
+                        <materialDesign:PackIcon Kind="FileExportOutline"
+                                                 Height="25"
+                                                 Width="25" />
                     </Button.Content>
                     <Button.ToolTip>
                         <TextBlock Text="Export properties from C# class" />
@@ -65,7 +78,20 @@
                 <Button x:Name="BGenerationFolders"
                         Command="{Binding OpenGenerateFoldersWindowCommand}">
                     <Button.Content>
-                        <materialDesign:PackIcon Kind="FolderPlusOutline" />
+                        <materialDesign:PackIcon Kind="FolderPlusOutline"
+                                                 Height="25"
+                                                 Width="25" />
+                    </Button.Content>
+                    <Button.ToolTip>
+                        <TextBlock Text="Generation folders for lessons" />
+                    </Button.ToolTip>
+                </Button>
+                <Button x:Name="BArtificialIntelligence"
+                        Command="{Binding ArtificialIntelligenceOpenCommand}">
+                    <Button.Content>
+                        <materialDesign:PackIcon Kind="RobotHappyOutline"
+                                                 Height="25"
+                                                 Width="25" />
                     </Button.Content>
                     <Button.ToolTip>
                         <TextBlock Text="Generation folders for lessons" />
@@ -74,32 +100,61 @@
                 <Button x:Name="BRemove"
                         Command="{Binding RemoveCommand}">
                     <Button.Content>
-                        <materialDesign:PackIcon Kind="Remove" />
+                        <materialDesign:PackIcon Kind="Remove"
+                                                 Height="25"
+                                                 Width="25"/>
                     </Button.Content>
                     <Button.ToolTip>
                         <TextBlock Text="Remove element" />
                     </Button.ToolTip>
                 </Button>
                 <Separator />
-                <TextBlock Text="Property name"
-                           VerticalAlignment="Center"
-                           Margin="10,0"
-                           FontSize="16" />
                 <TextBox x:Name="TBPropertyName"
-                         Width="150"
+                         Width="240"
+                         Margin="5"
                          FontSize="20"
+                         Height="59"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         materialDesign:HintAssist.Hint="Property name"
                          Text="{Binding PropertyName}"
                          materialDesign:TextFieldAssist.HasClearButton="True"
                          VerticalContentAlignment="Center" />
-                <TextBlock Text="Type value"
-                           FontSize="16"
-                           VerticalAlignment="Center"
-                           Margin="10,0" />
                 <ComboBox x:Name="CBValues"
-                          Width="150"
+                          Width="240"
                           FontSize="20"
+                          IsEditable="True"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          materialDesign:HintAssist.Hint="Type value"
                           ItemsSource="{Binding AvailableTypes}"
-                          SelectedItem="{Binding SelectedType}" />
+                          SelectedItem="{Binding SelectedType}">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{Binding Name}"
+                                           VerticalAlignment="Center"
+                                           Grid.Column="0" />
+                                <Button Content="?"
+                                        Width="20"
+                                        Margin="10,0,0,0"
+                                        Style="{StaticResource ToolTipButtonStyle}"
+                                        Height="20"
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Right"
+                                        Grid.Column="1">
+                                    <Button.ToolTip>
+                                        <ToolTip>
+                                            <TextBlock Text="{Binding Converter={StaticResource TypeToDescriptionConverter}}" />
+                                        </ToolTip>
+                                    </Button.ToolTip>
+                                </Button>
+                            </Grid>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
                 <Button x:Name="BAddProperty"
                         Margin="10,0,10,0"
                         Command="{Binding AddPropertyCommand}">

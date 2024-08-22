@@ -32,6 +32,7 @@ namespace CraftHub.ViewModels
 		public ICommand LoadCodeCommand { get; set; }
 		public ICommand OpenGenerateFoldersWindowCommand { get; set; }
 		public ICommand ExportCodeCommand { get; set; }
+		public ICommand ArtificialIntelligenceOpenCommand { get; set; }
 
 		private Type _selectedType;
 		public Type SelectedType
