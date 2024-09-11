@@ -20,6 +20,7 @@ using System.Windows.Data;
 using Microsoft.CSharp;
 using System.CodeDom.Compiler;
 using System.Reflection;
+using MaterialDesignThemes.Wpf;
 
 namespace CraftHub.ViewModels
 {
@@ -116,6 +117,12 @@ namespace CraftHub.ViewModels
 			LoadCodeCommand = new DelegateCommand(OnLoadCodeCommand);
 			ExportCodeCommand = new DelegateCommand(OnExportCodeCommand);
 			OpenGenerateFoldersWindowCommand = new DelegateCommand(OnOpenGenerateLessonsWindowCommand);
+			ArtificialIntelligenceOpenCommand = new DelegateCommand(OnArtificialIntelligenceOpenCommand);
+		}
+
+		private void OnArtificialIntelligenceOpenCommand(object paramenter)
+		{
+			new ChatWithBotView().ShowDialog();	
 		}
 
 		private void OnRemoveColumnCommand(DataGridColumn column)

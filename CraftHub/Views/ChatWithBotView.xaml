@@ -10,7 +10,8 @@
         FontFamily="{DynamicResource MontserratFont}"
         Background="{DynamicResource MaterialDesignPaper}"
         mc:Ignorable="d"
-        Title="ChatWithBotView" MinHeight="750" MinWidth="800">
+        WindowStartupLocation="CenterScreen"
+        Title="ChatWithBotView" MinHeight="550" MinWidth="600">
     
     <Window.DataContext>
         <viewModels:WorkingAreaViewModel />
@@ -35,6 +36,9 @@
                      Height="200"
                      Style="{StaticResource MaterialDesignOutlinedTextBox}"
                      materialDesign:HintAssist.Hint="The principle according to which you need to fill in the table"/>
+            <Button x:Name="BSendRequest"
+                    Content="Send request"
+                    Margin="10,10"/>
             <TextBlock Text="Your response:" 
                        FontSize="16"
                        Margin="0,0,0,10"/>

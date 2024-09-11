@@ -23,5 +23,5 @@ namespace CraftHub.Views
 		{
 			InitializeComponent();
 		}
-	}
+    }
 }
