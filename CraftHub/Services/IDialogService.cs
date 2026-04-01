@@ -17,4 +17,7 @@ public interface IDialogService
 
     /// <summary>Copy text to clipboard.</summary>
     Task CopyToClipboardAsync(string text);
+
+    /// <summary>Open a visual nested editor for JSON.</summary>
+    Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService);
 }

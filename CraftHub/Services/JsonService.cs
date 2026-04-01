@@ -175,7 +175,11 @@ public class JsonService : IJsonService
             arrayNode.Add(rowNode);
         }
 
-        var options = new JsonSerializerOptions { WriteIndented = true };
+        var options = new JsonSerializerOptions 
+        { 
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        };
         return arrayNode.ToJsonString(options);
     }
 

@@ -67,6 +67,7 @@
                 <ComboBox ItemsSource="{Binding AvailableTypes}"
                           SelectedItem="{Binding SelectedArrayElementType}"
                           IsVisible="{Binding IsArrayTypeSelected}"
+                          Height="{Binding #TBPropertyName.Bounds.Height}"
                           Width="140" FontSize="14"
                           CornerRadius="6" />
 

@@ -272,4 +272,28 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         CloseRequested?.Invoke(this, EventArgs.Empty);
     }
+
+    public async Task EditJsonCellAsync(DynamicDataRow row, string propertyName, JsonFieldType type)
+    {
+        var currentValue = row[propertyName];
+        var newValue = await _dialogService.ShowJsonEditorDialogAsync($"Edit {propertyName}", currentValue, type, _jsonService);
+        if (newValue != null && newValue != currentValue)
+        {
+            var newRow = new DynamicDataRow();
+            foreach (var kvp in row.GetAllValues())
+            {
+                newRow.InitializeProperty(kvp.Key, kvp.Value);
+            }
+            newRow[propertyName] = newValue;
+            
+            // Force Avalonia DataGrid to refresh the row entirely by using a new instance
+            var idx = Rows.IndexOf(row);
+            if (idx >= 0) 
+            {
+                Rows[idx] = newRow;
+            }
+
+            StatusText = $"✓ Updated '{propertyName}'";
+        }
+    }
 }

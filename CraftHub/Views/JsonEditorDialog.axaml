@@ -1,0 +1,55 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftHub.ViewModels"
+        xmlns:models="using:CraftHub.Models"
+        xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+        x:Class="CraftHub.Views.JsonEditorDialog"
+        Title="Nested Object Editor"
+        Width="700" Height="500"
+        WindowStartupLocation="CenterOwner"
+        Background="#16162a"
+        x:DataType="vm:JsonEditorViewModel">
+    
+    <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="10">
+        
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
+            <TextBox Text="{Binding PropertyNameInput}" Watermark="New Field" Width="150" />
+            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Width="100" />
+            <Button Content="+ Prop" Command="{Binding AddPropertyCommand}" Classes="toolbar-btn" />
+            <Button Content="+ Row" Command="{Binding AddRowCommand}" Classes="toolbar-btn" IsVisible="{Binding !IsObjectMode}" />
+        </StackPanel>
+
+        <dg:DataGrid Grid.Row="1" x:Name="NestedDataGrid"
+                     ItemsSource="{Binding Rows}"
+                     AutoGenerateColumns="False" CanUserReorderColumns="True"
+                     CanUserResizeColumns="True" Background="#1a1a2e" RowBackground="#1a1a2e" />
+
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" Margin="0,8">
+            <ItemsControl ItemsSource="{Binding Properties}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="{x:Type models:JsonPropertyDefinition}">
+                        <Border Background="#2a2a42" CornerRadius="4" Padding="6,2">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock Text="{Binding Name}" Foreground="#8888cc" FontSize="12" />
+                                <Button Content="✕" Classes="close-tab" Command="{Binding $parent[Window].DataContext.RemovePropertyCommand}" CommandParameter="{Binding}" />
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
+            <TextBlock Text="{Binding StatusText}" Foreground="#6666aa" VerticalAlignment="Center" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                <Button Content="Cancel" Command="{Binding CancelCommand}" Width="80" HorizontalContentAlignment="Center" />
+                <Button Content="Save" Command="{Binding SubmitCommand}" Width="80" Classes="accent-btn" HorizontalContentAlignment="Center" />
+            </StackPanel>
+        </Grid>
+    </Grid>
+</Window>

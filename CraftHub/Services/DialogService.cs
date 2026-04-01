@@ -123,4 +123,16 @@ public class DialogService : IDialogService
             await window.Clipboard.SetTextAsync(text);
         }
     }
+
+    public async Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService)
+    {
+        var window = GetMainWindow();
+        if (window == null) return null;
+
+        var dialog = new JsonEditorDialog { Title = title };
+        var vm = new JsonEditorViewModel(initialJson, type, jsonService, this);
+        dialog.DataContext = vm;
+        
+        return await dialog.ShowDialog<string?>(window);
+    }
 }
