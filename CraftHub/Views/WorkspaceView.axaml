@@ -41,7 +41,7 @@
                 
                 <TextBlock Text="🔍" VerticalAlignment="Center" Margin="4,0,0,0" Foreground="#888899" />
                 <TextBox Text="{Binding SearchQuery}" Watermark="Search by value..." 
-                         Width="200" VerticalAlignment="Center" CornerRadius="6" FontSize="13" />
+                         Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13" />
             </StackPanel>
         </Border>
 
