@@ -1,0 +1,141 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftHub.ViewModels"
+             xmlns:models="using:CraftHub.Models"
+             xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+             x:Class="CraftHub.Views.WorkspaceView"
+             x:DataType="vm:WorkspaceViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+        <!-- Toolbar Row 1: Actions -->
+        <Border Grid.Row="0" Background="#1e1e32" Padding="8,6"
+                CornerRadius="8" Margin="8,8,8,0">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <Button Classes="toolbar-btn" Content="📥 Import JSON"
+                        Command="{Binding ImportJsonCommand}"
+                        ToolTip.Tip="Import data from JSON file" />
+                <Button Classes="toolbar-btn" Content="📤 Export JSON"
+                        Command="{Binding ExportJsonCommand}"
+                        ToolTip.Tip="Export data to JSON file" />
+
+                <Border Width="1" Background="#333350" Margin="6,4" />
+
+                <Button Classes="toolbar-btn" Content="📄 Import Class"
+                        Command="{Binding ImportClassCommand}"
+                        ToolTip.Tip="Import schema from C# class file" />
+                <Button Classes="toolbar-btn" Content="💾 Export Class"
+                        Command="{Binding ExportClassCommand}"
+                        ToolTip.Tip="Export schema as C# class file" />
+
+                <Border Width="1" Background="#333350" Margin="6,4" />
+
+                <Button Classes="toolbar-btn" Content="➕ Row"
+                        Command="{Binding AddRowCommand}"
+                        ToolTip.Tip="Add new data row" />
+                <Button Classes="toolbar-btn" Content="🗑 Row"
+                        Command="{Binding RemoveRowCommand}"
+                        ToolTip.Tip="Remove selected row" />
+            </StackPanel>
+        </Border>
+
+        <!-- Toolbar Row 2: Add Property -->
+        <Border Grid.Row="1" Background="#1e1e32" Padding="8,6"
+                CornerRadius="8" Margin="8,6,8,0">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <TextBlock Text="Add Property:" VerticalAlignment="Center"
+                           Foreground="#888899" FontSize="13" />
+
+                <TextBox Text="{Binding PropertyName}"
+                         Watermark="Property name"
+                         Width="200" FontSize="14"
+                         CornerRadius="6" />
+
+                <ComboBox ItemsSource="{Binding AvailableTypes}"
+                          SelectedItem="{Binding SelectedType}"
+                          Width="140" FontSize="14"
+                          CornerRadius="6" />
+
+                <ComboBox ItemsSource="{Binding AvailableTypes}"
+                          SelectedItem="{Binding SelectedArrayElementType}"
+                          IsVisible="{Binding IsArrayTypeSelected}"
+                          Width="140" FontSize="14"
+                          CornerRadius="6" />
+
+                <Button Classes="accent-btn" Content="+ Add"
+                        Command="{Binding AddPropertyCommand}" />
+            </StackPanel>
+        </Border>
+
+        <!-- DataGrid -->
+        <dg:DataGrid Grid.Row="2"
+                  x:Name="DataGrid"
+                  ItemsSource="{Binding Rows}"
+                  SelectedItem="{Binding SelectedRow}"
+                  AutoGenerateColumns="False"
+                  CanUserReorderColumns="True"
+                  CanUserResizeColumns="True"
+                  CanUserSortColumns="True"
+                  IsReadOnly="False"
+                  Margin="8,8,8,0"
+                  FontSize="14"
+                  Background="#1a1a2e"
+                  RowBackground="#1a1a2e">
+            <dg:DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Duplicate Row" 
+                              Command="{Binding DuplicateRowCommand}" 
+                              CommandParameter="{Binding SelectedRow}" />
+                    <MenuItem Header="Copy Row to JSON" 
+                              Command="{Binding CopyRowToJsonCommand}" 
+                              CommandParameter="{Binding SelectedRow}" />
+                </ContextMenu>
+            </dg:DataGrid.ContextMenu>
+        </dg:DataGrid>
+
+        <!-- Schema / Status bar -->
+        <Border Grid.Row="3" Background="#1a1a2e" Padding="8,6"
+                Margin="8,6,8,8" CornerRadius="8">
+            <Grid ColumnDefinitions="*,Auto">
+                <Grid ColumnDefinitions="Auto,*" Grid.Column="0">
+                    <TextBlock Grid.Column="0" Text="Schema:" FontSize="12" Foreground="#666680"
+                               VerticalAlignment="Center" Margin="0,0,6,0" />
+                    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" AllowAutoHide="False" Margin="0,0,8,0">
+                        <ItemsControl ItemsSource="{Binding Properties}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,0,6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="{x:Type models:JsonPropertyDefinition}">
+                                    <Border Background="#2a2a42" CornerRadius="4"
+                                            Padding="8,3" Cursor="Hand">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock FontSize="12" Foreground="#8888cc">
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0}: {1}">
+                                                        <Binding Path="Name" />
+                                                        <Binding Path="FieldType" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                            <Button Classes="close-tab" Content="✕"
+                                                    FontSize="10"
+                                                    Command="{Binding $parent[UserControl].DataContext.RemovePropertyCommand}"
+                                                    CommandParameter="{Binding}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Grid>
+
+                <TextBlock Grid.Column="1" Text="{Binding StatusText}"
+                           FontSize="12" Foreground="#6666aa"
+                           VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

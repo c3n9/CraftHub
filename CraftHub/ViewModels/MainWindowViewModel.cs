@@ -1,73 +1,63 @@
-﻿using CraftHub.Models;
-using CraftHub.ViewModels.Base;
-using CraftHub.ViewModels.Commands;
-using CraftHub.Views;
-using Microsoft.CodeAnalysis;
-using Microsoft.CSharp;
-using Microsoft.Win32;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
+using System.Collections.ObjectModel;
 using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace CraftHub.ViewModels
+namespace CraftHub.ViewModels;
+
+public partial class MainWindowViewModel : ViewModelBase
 {
-    internal class MainWindowViewModel : BaseViewModel
+    private readonly IServiceProvider _serviceProvider;
+
+    [ObservableProperty] private WorkspaceViewModel? _selectedWorkspace;
+    [ObservableProperty] private int _selectedWorkspaceIndex;
+
+    public ObservableCollection<WorkspaceViewModel> Workspaces { get; } = new();
+
+    public MainWindowViewModel(IServiceProvider serviceProvider)
     {
-        private Page mainFrameSource;
-        public Page MainFrameSource
+        _serviceProvider = serviceProvider;
+        AddWorkspace();
+    }
+
+    [RelayCommand]
+    private void AddWorkspace()
+    {
+        if (Workspaces.Count >= 15)
+            return;
+
+        var vm = _serviceProvider.GetRequiredService<WorkspaceViewModel>();
+        vm.Header = $"Tab {Workspaces.Count + 1}";
+        vm.CloseRequested += OnWorkspaceCloseRequested;
+        Workspaces.Add(vm);
+        SelectedWorkspace = vm;
+        SelectedWorkspaceIndex = Workspaces.Count - 1;
+    }
+
+    [RelayCommand]
+    private void SelectWorkspace(WorkspaceViewModel vm)
+    {
+        if (Workspaces.Contains(vm))
         {
-            get
+            SelectedWorkspace = vm;
+            SelectedWorkspaceIndex = Workspaces.IndexOf(vm);
+        }
+    }
+
+    private void OnWorkspaceCloseRequested(object? sender, EventArgs e)
+    {
+        if (sender is WorkspaceViewModel vm && Workspaces.Count > 1)
+        {
+            var idx = Workspaces.IndexOf(vm);
+            vm.CloseRequested -= OnWorkspaceCloseRequested;
+            Workspaces.Remove(vm);
+            if (SelectedWorkspace == vm)
             {
-                return mainFrameSource;
+                SelectedWorkspaceIndex = Math.Min(idx, Workspaces.Count - 1);
+                SelectedWorkspace = Workspaces[SelectedWorkspaceIndex];
             }
-            set
-            {
-                mainFrameSource = value;
-                OnPropertyChanged();
-            }
-        }
-
-        public ICommand MinimizeWindowCommand { get; set; }
-        public ICommand CloseWindowCommand { get; set; }
-        public ICommand MaximizeWindowCommand { get; set; }
-
-        public MainWindowViewModel()
-        {
-            MinimizeWindowCommand = new DelegateCommand(OnMinimizeWindowCommand);
-            MaximizeWindowCommand = new DelegateCommand(OnMaximizeWindowCommand);
-            CloseWindowCommand = new DelegateCommand(OnCloseWindowCommand);
-
-            App.MainWindowViewModel = this;
-            MainFrameSource = new WorkingAreaView();
-
-        }
-        
-
-        private void OnMinimizeWindowCommand(object paramenter)
-        {
-            (paramenter as Window).WindowState = WindowState.Minimized;
-        }
-        private void OnMaximizeWindowCommand(object paramenter)
-        {
-            if ((paramenter as Window).WindowState == WindowState.Maximized)
-                (paramenter as Window).WindowState = WindowState.Normal;
-            else
-                (paramenter as Window).WindowState = WindowState.Maximized;
-        }
-        private void OnCloseWindowCommand(object paramenter)
-        {
-            (paramenter as Window).Close();
         }
     }
 }
