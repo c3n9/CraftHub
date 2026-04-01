@@ -26,6 +26,7 @@ public class App : Application
         services.AddSingleton<IJsonService, JsonService>();
         services.AddSingleton<IClassParserService, ClassParserService>();
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<ThemeService>();
 
         // Register ViewModels
         services.AddSingleton<MainWindowViewModel>();

@@ -28,6 +28,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private string _statusText = "Ready";
     [ObservableProperty] private DynamicDataRow? _selectedRow;
     [ObservableProperty] private string _searchQuery = string.Empty;
+    [ObservableProperty] private bool _isActive;
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
@@ -107,11 +108,12 @@ public partial class WorkspaceViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void RemoveRow()
+    private void RemoveRow(DynamicDataRow? row)
     {
-        if (SelectedRow != null)
+        var targetRow = row ?? SelectedRow;
+        if (targetRow != null)
         {
-            Rows.Remove(SelectedRow);
+            Rows.Remove(targetRow);
             StatusText = $"✓ Row removed ({Rows.Count} remaining)";
         }
     }

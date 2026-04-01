@@ -7,27 +7,30 @@
         MinWidth="900" MinHeight="600"
         Width="1200" Height="750"
         WindowStartupLocation="CenterScreen"
-        Background="#12121e">
+        Background="{DynamicResource AppBackground}">
 
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Title bar area -->
-        <Border Grid.Row="0" Background="#1a1a2e" Padding="16,10">
+        <Border Grid.Row="0" Background="{DynamicResource ElevatedBackground}" Padding="16,10">
             <Grid ColumnDefinitions="Auto,*">
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                    <TextBlock Text="◆" FontSize="22" Foreground="#5c6bc0"
+                <StackPanel Orientation="Horizontal" Spacing="10" Grid.Column="0">
+                    <TextBlock Text="◆" FontSize="22" Foreground="{DynamicResource AccentPrimary}"
                                VerticalAlignment="Center" />
                     <TextBlock Text="CraftHub" FontSize="18" FontWeight="Bold"
-                               Foreground="White" VerticalAlignment="Center" />
+                               Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" />
                     <TextBlock Text="JSON Visual Editor" FontSize="12"
-                               Foreground="#666680" VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextMuted}" VerticalAlignment="Center"
                                Margin="8,2,0,0" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="10" Grid.Column="1" HorizontalAlignment="Right">
+                    <Button Content="🌗" Classes="toolbar-btn" Command="{Binding ToggleThemeCommand}" ToolTip.Tip="Toggle Theme" FontSize="16" />
                 </StackPanel>
             </Grid>
         </Border>
 
         <!-- Main content: current workspace -->
-        <Border Grid.Row="1" Background="#16162a" Margin="0">
+        <Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}" Margin="0">
             <ContentControl Content="{Binding SelectedWorkspace}">
                 <ContentControl.DataTemplates>
                     <DataTemplate DataType="{x:Type vm:WorkspaceViewModel}">
@@ -38,8 +41,8 @@
         </Border>
 
         <!-- Bottom tab bar -->
-        <Border Grid.Row="2" Background="#1a1a2e" Padding="8,6"
-                BorderBrush="#2a2a3e" BorderThickness="0,1,0,0">
+        <Border Grid.Row="2" Background="{DynamicResource ElevatedBackground}" Padding="8,6"
+                BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal" Spacing="0">
                 <ItemsControl ItemsSource="{Binding Workspaces}">
                     <ItemsControl.ItemsPanel>
@@ -51,6 +54,7 @@
                         <DataTemplate DataType="{x:Type vm:WorkspaceViewModel}">
                             <StackPanel Orientation="Horizontal">
                                 <Button Classes="tab-btn"
+                                        Classes.tab-active="{Binding IsActive}"
                                         Content="{Binding Header}"
                                         Command="{Binding $parent[Window].DataContext.SelectWorkspaceCommand}"
                                         CommandParameter="{Binding}" />

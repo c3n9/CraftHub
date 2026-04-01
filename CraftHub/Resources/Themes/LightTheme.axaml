@@ -1,0 +1,32 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Corporate Light Theme Colors -->
+    
+    <!-- Backgrounds -->
+    <SolidColorBrush x:Key="AppBackground" Color="#F3F4F6" />
+    <SolidColorBrush x:Key="SurfaceBackground" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="ElevatedBackground" Color="#E5E7EB" />
+
+    <!-- Text -->
+    <SolidColorBrush x:Key="TextPrimary" Color="#111827" />
+    <SolidColorBrush x:Key="TextSecondary" Color="#4B5563" />
+    <SolidColorBrush x:Key="TextMuted" Color="#9CA3AF" />
+    <SolidColorBrush x:Key="TextOnAccent" Color="#FFFFFF" />
+
+    <!-- Accents -->
+    <SolidColorBrush x:Key="AccentPrimary" Color="#4F46E5" /> <!-- Indigo -->
+    <SolidColorBrush x:Key="AccentHover" Color="#6366F1" />
+    <SolidColorBrush x:Key="AccentPressed" Color="#4338CA" />
+    
+    <!-- Semantic Colors -->
+    <SolidColorBrush x:Key="SuccessColor" Color="#10B981" />
+    <SolidColorBrush x:Key="WarningColor" Color="#F59E0B" />
+    <SolidColorBrush x:Key="DangerColor" Color="#EF4444" />
+    <SolidColorBrush x:Key="DangerHover" Color="#F87171" />
+
+    <!-- Borders -->
+    <SolidColorBrush x:Key="BorderColor" Color="#D1D5DB" />
+    <SolidColorBrush x:Key="BorderLight" Color="#E5E7EB" />
+
+</ResourceDictionary>

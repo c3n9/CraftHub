@@ -60,4 +60,17 @@ public partial class MainWindowViewModel : ViewModelBase
             }
         }
     }
+
+    partial void OnSelectedWorkspaceChanged(WorkspaceViewModel? oldValue, WorkspaceViewModel? newValue)
+    {
+        if (oldValue != null) oldValue.IsActive = false;
+        if (newValue != null) newValue.IsActive = true;
+    }
+
+    [RelayCommand]
+    private void ToggleTheme()
+    {
+        var ts = _serviceProvider.GetRequiredService<Services.ThemeService>();
+        ts.SwitchTheme(ts.CurrentTheme == Models.Enums.ThemeType.Dark ? Models.Enums.ThemeType.Light : Models.Enums.ThemeType.Dark);
+    }
 }
