@@ -49,11 +49,13 @@
                 <TextBox Text="{Binding PropertyName}"
                          Watermark="Property name"
                          Width="200" FontSize="14"
+                         x:Name="TBPropertyName"
                          CornerRadius="6" />
 
                 <ComboBox ItemsSource="{Binding AvailableTypes}"
                           SelectedItem="{Binding SelectedType}"
                           Width="140" FontSize="14"
+                          Height="{Binding #TBPropertyName.Bounds.Height}"
                           CornerRadius="6" />
 
                 <ComboBox ItemsSource="{Binding AvailableTypes}"
