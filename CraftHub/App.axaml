@@ -90,6 +90,8 @@
             <Setter Property="FontSize" Value="18" />
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
         </Style>
         <Style Selector="Button.tab-add:pointerover /template/ ContentPresenter#PART_ContentPresenter">
             <Setter Property="Background" Value="#5c6bc0" />
