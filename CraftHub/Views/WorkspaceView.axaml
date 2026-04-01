@@ -6,7 +6,7 @@
              x:Class="CraftHub.Views.WorkspaceView"
              x:DataType="vm:WorkspaceViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*,Auto">
+    <Grid RowDefinitions="Auto,Auto,Auto,*">
 
         <!-- Toolbar Row 1: Actions -->
         <Border Grid.Row="0" Background="#1e1e32" Padding="8,6"
@@ -36,6 +36,12 @@
                 <Button Classes="toolbar-btn" Content="🗑 Row"
                         Command="{Binding RemoveRowCommand}"
                         ToolTip.Tip="Remove selected row" />
+
+                <Border Width="1" Background="#333350" Margin="6,4" />
+                
+                <TextBlock Text="🔍" VerticalAlignment="Center" Margin="4,0,0,0" Foreground="#888899" />
+                <TextBox Text="{Binding SearchQuery}" Watermark="Search by value..." 
+                         Width="200" VerticalAlignment="Center" CornerRadius="6" FontSize="13" />
             </StackPanel>
         </Border>
 
@@ -70,7 +76,7 @@
         </Border>
 
         <!-- DataGrid -->
-        <dg:DataGrid Grid.Row="2"
+        <dg:DataGrid Grid.Row="3"
                   x:Name="DataGrid"
                   ItemsSource="{Binding Rows}"
                   SelectedItem="{Binding SelectedRow}"
@@ -96,7 +102,7 @@
         </dg:DataGrid>
 
         <!-- Schema / Status bar -->
-        <Border Grid.Row="3" Background="#1a1a2e" Padding="8,6"
+        <Border Grid.Row="2" Background="#1a1a2e" Padding="8,6"
                 Margin="8,6,8,8" CornerRadius="8">
             <Grid ColumnDefinitions="*,Auto">
                 <Grid ColumnDefinitions="Auto,*" Grid.Column="0">

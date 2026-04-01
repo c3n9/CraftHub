@@ -27,6 +27,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private bool _isArrayTypeSelected;
     [ObservableProperty] private string _statusText = "Ready";
     [ObservableProperty] private DynamicDataRow? _selectedRow;
+    [ObservableProperty] private string _searchQuery = string.Empty;
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
