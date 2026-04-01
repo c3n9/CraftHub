@@ -71,6 +71,7 @@ public partial class MainWindowViewModel : ViewModelBase
     private void ToggleTheme()
     {
         var ts = _serviceProvider.GetRequiredService<Services.ThemeService>();
+        var currentTheme = ts.CurrentTheme;
         ts.SwitchTheme(ts.CurrentTheme == Models.Enums.ThemeType.Dark ? Models.Enums.ThemeType.Light : Models.Enums.ThemeType.Dark);
     }
 }
