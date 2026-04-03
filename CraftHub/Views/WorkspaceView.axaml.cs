@@ -8,6 +8,7 @@ using Avalonia.Media;
 using CraftHub.Converters;
 using CraftHub.Models;
 using CraftHub.ViewModels;
+using CraftHub.Helpers;
 
 namespace CraftHub.Views;
 
@@ -89,10 +90,11 @@ public partial class WorkspaceView : UserControl
                         TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
                         TextWrapping = Avalonia.Media.TextWrapping.Wrap
                     };
-                    tb.Bind(TextBlock.TextProperty, new Binding($"[{prop.Name}]") 
+                    tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding($"[{prop.Name}]") 
                     { 
                         Converter = new JsonPreviewConverter() 
                     });
+                    tb.Bind(TextBlockHelper.HighlightTextProperty, new Binding("DataContext.SearchQuery") { RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) } });
                     
                     var editBtn = new Button
                     {
@@ -124,7 +126,8 @@ public partial class WorkspaceView : UserControl
                         VerticalAlignment = VerticalAlignment.Center,
                         Margin = new Avalonia.Thickness(12, 0)
                     };
-                    tb.Bind(TextBlock.TextProperty, new Binding($"[{prop.Name}]") { Mode = BindingMode.TwoWay });
+                    tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding($"[{prop.Name}]") { Mode = BindingMode.TwoWay });
+                    tb.Bind(TextBlockHelper.HighlightTextProperty, new Binding("DataContext.SearchQuery") { RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) } });
                     border.Child = tb;
                 }
                 
