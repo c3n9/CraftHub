@@ -166,21 +166,37 @@ public class JsonService : IJsonService
         var arrayNode = new JsonArray();
         foreach (var row in rows)
         {
-            var rowNode = new JsonObject();
-            foreach (var prop in properties)
-            {
-                var val = row[prop.Name];
-                SetNestedNode(rowNode, prop.Name, val, prop.FieldType);
-            }
-            arrayNode.Add(rowNode);
+            arrayNode.Add(ConvertRowToJsonNode(row, properties));
         }
 
-        var options = new JsonSerializerOptions 
-        { 
+        return SerializeNode(arrayNode);
+    }
+
+    public string SerializeSingleRowToJson(DynamicDataRow row, IReadOnlyList<JsonPropertyDefinition> properties)
+    {
+        var rowNode = ConvertRowToJsonNode(row, properties);
+        return SerializeNode(rowNode);
+    }
+
+    private JsonObject ConvertRowToJsonNode(DynamicDataRow row, IReadOnlyList<JsonPropertyDefinition> properties)
+    {
+        var rowNode = new JsonObject();
+        foreach (var prop in properties)
+        {
+            var val = row[prop.Name];
+            SetNestedNode(rowNode, prop.Name, val, prop.FieldType);
+        }
+        return rowNode;
+    }
+
+    private string SerializeNode(JsonNode node)
+    {
+        var options = new JsonSerializerOptions
+        {
             WriteIndented = true,
             Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         };
-        return arrayNode.ToJsonString(options);
+        return node.ToJsonString(options);
     }
 
     private static void SetNestedNode(JsonObject root, string path, string val, JsonFieldType type)

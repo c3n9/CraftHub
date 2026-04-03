@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
@@ -108,40 +109,79 @@ public partial class WorkspaceViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void RemoveRow(DynamicDataRow? row)
+    private void RemoveRows(object? parameter)
     {
-        var targetRow = row ?? SelectedRow;
-        if (targetRow != null)
+        if (parameter is not IList items || items.Count == 0)
         {
-            Rows.Remove(targetRow);
-            StatusText = $"✓ Row removed ({Rows.Count} remaining)";
+            if (SelectedRow != null)
+                Rows.Remove(SelectedRow);
+            return;
         }
+
+        var toRemove = items.Cast<DynamicDataRow>().ToList();
+        foreach (var row in toRemove)
+            Rows.Remove(row);
+
+        StatusText = $"✓ {toRemove.Count} row(s) removed";
     }
 
     [RelayCommand]
-    private void DuplicateRow(DynamicDataRow? row)
+    private void DuplicateRows(object? parameter)
     {
-        if (row == null) return;
+        if (parameter is not IList items || items.Count == 0)
+        {
+            if (SelectedRow != null)
+                DuplicateSingleRow(SelectedRow);
+            return;
+        }
+
+        var toDuplicate = items.Cast<DynamicDataRow>().ToList();
+        foreach (var row in toDuplicate)
+        {
+            DuplicateSingleRow(row);
+        }
+
+        StatusText = $"✓ {toDuplicate.Count} row(s) duplicated to bottom";
+    }
+
+    private void DuplicateSingleRow(DynamicDataRow row)
+    {
         var newRow = new DynamicDataRow();
         foreach (var prop in Properties)
         {
             newRow.InitializeProperty(prop.Name, row[prop.Name]);
         }
-        
-        var index = Rows.IndexOf(row);
-        if (index >= 0) Rows.Insert(index + 1, newRow);
-        else Rows.Add(newRow);
-        
-        StatusText = $"✓ Row duplicated";
+        Rows.Add(newRow);
     }
 
     [RelayCommand]
-    private async Task CopyRowToJsonAsync(DynamicDataRow? row)
+    private async Task CopyRowsToJsonAsync(object? parameter)
     {
-        if (row == null) return;
-        var json = _jsonService.SerializeToJson(new[] { row }, Properties);
+        IList? items = parameter as IList;
+        List<DynamicDataRow> selectedRows;
+
+        if (items == null || items.Count == 0)
+        {
+            if (SelectedRow == null) return;
+            selectedRows = new List<DynamicDataRow> { SelectedRow };
+        }
+        else
+        {
+            selectedRows = items.Cast<DynamicDataRow>().ToList();
+        }
+
+        string json;
+        if (selectedRows.Count == 1)
+        {
+            json = _jsonService.SerializeSingleRowToJson(selectedRows[0], Properties);
+        }
+        else
+        {
+            json = _jsonService.SerializeToJson(selectedRows, Properties);
+        }
+
         await _dialogService.CopyToClipboardAsync(json);
-        StatusText = $"✓ Row copied to clipboard as JSON";
+        StatusText = $"✓ {selectedRows.Count} row(s) copied to clipboard as JSON";
     }
 
     [RelayCommand]

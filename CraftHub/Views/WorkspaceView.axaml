@@ -34,8 +34,9 @@
                         Command="{Binding AddRowCommand}"
                         ToolTip.Tip="Add new data row" />
                 <Button Classes="toolbar-btn" Content="🗑 Row"
-                        Command="{Binding RemoveRowCommand}"
-                        ToolTip.Tip="Remove selected row" />
+                        Command="{Binding RemoveRowsCommand}"
+                        CommandParameter="{Binding #DataGrid.SelectedItems}"
+                        ToolTip.Tip="Remove selected rows" />
 
                 <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
                 
@@ -85,6 +86,7 @@
                   CanUserReorderColumns="True"
                   CanUserResizeColumns="True"
                   CanUserSortColumns="True"
+                  SelectionMode="Extended"
                   IsReadOnly="False"
                   Margin="8,8,8,0"
                   FontSize="14"
@@ -92,16 +94,16 @@
                   RowBackground="{DynamicResource ElevatedBackground}">
             <dg:DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Duplicate Row" 
-                              Command="{Binding DuplicateRowCommand}" 
-                              CommandParameter="{Binding SelectedRow}" />
-                    <MenuItem Header="Copy Row to JSON" 
-                              Command="{Binding CopyRowToJsonCommand}" 
-                              CommandParameter="{Binding SelectedRow}" />
+                    <MenuItem Header="Duplicate Row(s)" 
+                              Command="{Binding DuplicateRowsCommand}" 
+                              CommandParameter="{Binding #DataGrid.SelectedItems}" />
+                    <MenuItem Header="Copy Row(s) to JSON" 
+                              Command="{Binding CopyRowsToJsonCommand}" 
+                              CommandParameter="{Binding #DataGrid.SelectedItems}" />
                     <Separator />
-                    <MenuItem Header="Remove Row" 
-                              Command="{Binding RemoveRowCommand}" 
-                              CommandParameter="{Binding SelectedRow}"
+                    <MenuItem Header="Remove Row(s)" 
+                              Command="{Binding RemoveRowsCommand}" 
+                              CommandParameter="{Binding #DataGrid.SelectedItems}"
                               Foreground="{DynamicResource DangerColor}" />
                 </ContextMenu>
             </dg:DataGrid.ContextMenu>

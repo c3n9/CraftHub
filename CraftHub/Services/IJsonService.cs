@@ -13,4 +13,7 @@ public interface IJsonService
 
     /// <summary>Serialize rows to JSON string.</summary>
     string SerializeToJson(IReadOnlyList<DynamicDataRow> rows, IReadOnlyList<JsonPropertyDefinition> properties);
+
+    /// <summary>Serialize a single row to JSON string as an object.</summary>
+    string SerializeSingleRowToJson(DynamicDataRow row, IReadOnlyList<JsonPropertyDefinition> properties);
 }
