@@ -105,11 +105,16 @@
         <Border Grid.Row="2" Background="{DynamicResource ElevatedBackground}" Padding="8,0"
                 Margin="8,6,8,8" CornerRadius="8">
             <Grid ColumnDefinitions="*,Auto">
-                <Grid ColumnDefinitions="Auto,*" Grid.Column="0">
-                    <TextBlock Grid.Column="0" Text="Schema:" FontSize="12" Foreground="{DynamicResource TextMuted}"
-                               VerticalAlignment="Center" Margin="0,0,6,0" />
-                    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,8,0">
-                        <ItemsControl ItemsSource="{Binding Properties}">
+                <Grid RowDefinitions="Auto,*" 
+                      Grid.Column="0">
+                    <TextBlock Grid.Row="0" Text="Schema:" FontSize="12" Foreground="{DynamicResource TextMuted}"
+                               VerticalAlignment="Center" Margin="5" />
+                    <ScrollViewer Grid.Row="1"
+                                  HorizontalScrollBarVisibility="Visible"
+                                  VerticalScrollBarVisibility="Disabled">
+                        <Border Padding="0,0,0,15">
+                            <ItemsControl ItemsSource="{Binding Properties}"
+                                          Margin="0,5">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel Orientation="Horizontal" Spacing="4"/>
@@ -118,7 +123,7 @@
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate DataType="{x:Type models:JsonPropertyDefinition}">
                                     <Border Background="{DynamicResource BorderLight}" CornerRadius="4"
-                                            Padding="8,3" Cursor="Hand">
+                                            Padding="8,3" Cursor="Hand" Margin="0,0,6,0">
                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                             <TextBlock FontSize="12" Foreground="{DynamicResource TextSecondary}">
                                                 <TextBlock.Text>
@@ -137,6 +142,7 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
+                        </Border>
                     </ScrollViewer>
                 </Grid>
             </Grid>
