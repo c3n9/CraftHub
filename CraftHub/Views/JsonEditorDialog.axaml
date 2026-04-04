@@ -7,7 +7,7 @@
         Title="Nested Object Editor"
         Width="700" Height="500"
         WindowStartupLocation="CenterOwner"
-        Background="#16162a"
+        Background="{DynamicResource AppBackground}"
         x:DataType="vm:JsonEditorViewModel">
     
     <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="10">
@@ -19,10 +19,12 @@
             <Button Content="+ Row" Command="{Binding AddRowCommand}" Classes="toolbar-btn" IsVisible="{Binding !IsObjectMode}" />
         </StackPanel>
 
-        <dg:DataGrid Grid.Row="1" x:Name="NestedDataGrid"
+        <DataGrid Grid.Row="1" x:Name="NestedDataGrid"
                      ItemsSource="{Binding Rows}"
                      AutoGenerateColumns="False" CanUserReorderColumns="True"
-                     CanUserResizeColumns="True" Background="#1a1a2e" RowBackground="#1a1a2e" />
+                     CanUserResizeColumns="True"
+                     Background="{DynamicResource ElevatedBackground}"
+                     RowBackground="{DynamicResource SurfaceBackground}"/>
 
         <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" Margin="0,8">
             <ItemsControl ItemsSource="{Binding Properties}">
@@ -33,9 +35,10 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type models:JsonPropertyDefinition}">
-                        <Border Background="#2a2a42" CornerRadius="4" Padding="6,2">
+                        <Border Background="{DynamicResource ElevatedBackground}" CornerRadius="4" Padding="6,2"
+                                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="4">
-                                <TextBlock Text="{Binding Name}" Foreground="#8888cc" FontSize="12" />
+                                <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextSecondary}" FontSize="12" />
                                 <Button Content="✕" Classes="close-tab" Command="{Binding $parent[Window].DataContext.RemovePropertyCommand}" CommandParameter="{Binding}" />
                             </StackPanel>
                         </Border>
@@ -45,7 +48,7 @@
         </ScrollViewer>
 
         <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
-            <TextBlock Text="{Binding StatusText}" Foreground="#6666aa" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" />
             <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
                 <Button Content="Cancel" Command="{Binding CancelCommand}" Width="80" HorizontalContentAlignment="Center" />
                 <Button Content="Save" Command="{Binding SubmitCommand}" Width="80" Classes="accent-btn" HorizontalContentAlignment="Center" />

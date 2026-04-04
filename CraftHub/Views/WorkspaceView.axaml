@@ -40,7 +40,6 @@
 
                 <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
                 
-                <TextBlock Text="🔍" VerticalAlignment="Center" Margin="4,0,0,0" Foreground="{DynamicResource TextMuted}" />
                 <TextBox Text="{Binding SearchQuery}" Watermark="Search by value..." 
                          Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13" />
             </StackPanel>
@@ -78,7 +77,7 @@
         </Border>
 
         <!-- DataGrid -->
-        <dg:DataGrid Grid.Row="3"
+        <DataGrid Grid.Row="3"
                   x:Name="DataGrid"
                   ItemsSource="{Binding Rows}"
                   SelectedItem="{Binding SelectedRow}"
@@ -88,11 +87,11 @@
                   CanUserSortColumns="True"
                   SelectionMode="Extended"
                   IsReadOnly="False"
-                  Margin="8,8,8,0"
+                  Margin="10"
                   FontSize="14"
                   Background="{DynamicResource ElevatedBackground}"
                   RowBackground="{DynamicResource ElevatedBackground}">
-            <dg:DataGrid.ContextMenu>
+            <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Duplicate Row(s)" 
                               Command="{Binding DuplicateRowsCommand}" 
@@ -106,21 +105,21 @@
                               CommandParameter="{Binding #DataGrid.SelectedItems}"
                               Foreground="{DynamicResource DangerColor}" />
                 </ContextMenu>
-            </dg:DataGrid.ContextMenu>
-        </dg:DataGrid>
+            </DataGrid.ContextMenu>
+        </DataGrid>
 
         <!-- Schema / Status bar -->
-        <Border Grid.Row="2" Background="{DynamicResource ElevatedBackground}" Padding="8,6"
+        <Border Grid.Row="2" Background="{DynamicResource ElevatedBackground}" Padding="8,0"
                 Margin="8,6,8,8" CornerRadius="8">
             <Grid ColumnDefinitions="*,Auto">
                 <Grid ColumnDefinitions="Auto,*" Grid.Column="0">
                     <TextBlock Grid.Column="0" Text="Schema:" FontSize="12" Foreground="{DynamicResource TextMuted}"
                                VerticalAlignment="Center" Margin="0,0,6,0" />
-                    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" AllowAutoHide="False" Margin="0,0,8,0">
+                    <ScrollViewer Grid.Column="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled" Margin="0,0,8,0">
                         <ItemsControl ItemsSource="{Binding Properties}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,0,6" />
+                                    <StackPanel Orientation="Horizontal" Spacing="4"/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
@@ -147,10 +146,6 @@
                         </ItemsControl>
                     </ScrollViewer>
                 </Grid>
-
-                <TextBlock Grid.Column="1" Text="{Binding StatusText}"
-                           FontSize="12" Foreground="{DynamicResource TextSecondary}"
-                           VerticalAlignment="Center" />
             </Grid>
         </Border>
     </Grid>

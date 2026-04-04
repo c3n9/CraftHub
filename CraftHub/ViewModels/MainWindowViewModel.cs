@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CraftHub.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace CraftHub.ViewModels;
@@ -16,9 +17,10 @@ public partial class MainWindowViewModel : ViewModelBase
 
     public ObservableCollection<WorkspaceViewModel> Workspaces { get; } = new();
 
-    public MainWindowViewModel(IServiceProvider serviceProvider)
+    public MainWindowViewModel(IServiceProvider serviceProvider, ThemeService themeService)
     {
         _serviceProvider = serviceProvider;
+        themeService.SwitchTheme(themeService.CurrentTheme); 
         AddWorkspace();
     }
 

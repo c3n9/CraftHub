@@ -18,6 +18,4 @@ public partial class JsonFieldMappingViewModel : ViewModelBase
     {
         Fields = new ObservableCollection<JsonFieldMapping>(fields);
     }
-
-    // Commands are bound by dialog code-behind to close with result
 }

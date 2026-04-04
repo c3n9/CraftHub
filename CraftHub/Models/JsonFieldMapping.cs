@@ -8,7 +8,7 @@ namespace CraftHub.Models;
 public partial class JsonFieldMapping : ObservableObject
 {
     [ObservableProperty] private string _fieldName = string.Empty;
-    [ObservableProperty] private JsonFieldType _detectedType = JsonFieldType.String;
-    [ObservableProperty] private JsonFieldType _selectedType = JsonFieldType.String;
+    [ObservableProperty] private JsonFieldType _detectedType;
+    [ObservableProperty] private JsonFieldType _selectedType;
     [ObservableProperty] private string _sampleValue = string.Empty;
 }

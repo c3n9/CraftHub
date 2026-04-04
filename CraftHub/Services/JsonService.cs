@@ -74,13 +74,15 @@ public class JsonService : IJsonService
     private void AddFieldMapping(JsonElement el, string name, List<JsonFieldMapping> fields)
     {
         var detected = InferType(el);
-        fields.Add(new JsonFieldMapping
+        var mapping = new JsonFieldMapping
         {
             FieldName = name,
             DetectedType = detected,
             SelectedType = detected,
             SampleValue = el.ToString() ?? ""
-        });
+        };
+    
+        fields.Add(mapping);
     }
 
     private static JsonFieldType InferType(JsonElement el) => el.ValueKind switch

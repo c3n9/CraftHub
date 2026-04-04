@@ -3,22 +3,23 @@
         xmlns:vm="using:CraftHub.ViewModels"
         xmlns:models="using:CraftHub.Models"
         x:Class="CraftHub.Views.JsonFieldMappingDialog"
+        x:Name="DialogRoot"
         Title="Import JSON — Field Type Mapping"
         Width="650" Height="500"
         WindowStartupLocation="CenterOwner"
-        Background="#16162a"
+        Background="{DynamicResource AppBackground}"
         CanResize="False">
 
     <Grid RowDefinitions="Auto,*,Auto">
 
         <!-- Header -->
-        <Border Grid.Row="0" Background="#1e1e32" Padding="20,16">
+        <Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="20,16">
             <StackPanel Spacing="4">
                 <TextBlock Text="Configure Field Types"
                            FontSize="18" FontWeight="SemiBold"
-                           Foreground="White" />
+                           Foreground="{DynamicResource TextPrimary}" />
                 <TextBlock Text="Select the data type for each detected JSON field."
-                           FontSize="13" Foreground="#6666aa" />
+                           FontSize="13" Foreground="{DynamicResource TextSecondary}" />
             </StackPanel>
         </Border>
 
@@ -27,14 +28,15 @@
             <ItemsControl ItemsSource="{Binding Fields}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type models:JsonFieldMapping}">
-                        <Border Background="#1e1e32" CornerRadius="8"
-                                Padding="16,12" Margin="0,4">
+                        <Border Background="{DynamicResource ElevatedBackground}" CornerRadius="8"
+                                Padding="16,12" Margin="0,4"
+                                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                             <Grid ColumnDefinitions="*,Auto,Auto">
                                 <StackPanel Spacing="2">
                                     <TextBlock Text="{Binding FieldName}"
                                                FontSize="14" FontWeight="SemiBold"
-                                               Foreground="White" />
-                                    <TextBlock FontSize="12" Foreground="#666680">
+                                               Foreground="{DynamicResource TextPrimary}" />
+                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}">
                                         <TextBlock.Text>
                                             <MultiBinding StringFormat="Sample: {0}">
                                                 <Binding Path="SampleValue" />
@@ -46,7 +48,7 @@
                                 <TextBlock Grid.Column="1"
                                            VerticalAlignment="Center"
                                            Margin="12,0"
-                                           FontSize="12" Foreground="#555570">
+                                           FontSize="12" Foreground="{DynamicResource TextSecondary}">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="detected: {0}">
                                             <Binding Path="DetectedType" />
@@ -55,8 +57,8 @@
                                 </TextBlock>
 
                                 <ComboBox Grid.Column="2"
-                                          ItemsSource="{Binding $parent[Window].DataContext.AvailableTypes}"
-                                          SelectedItem="{Binding SelectedType}"
+                                          ItemsSource="{Binding DataContext.AvailableTypes, ElementName=DialogRoot}"
+                                          SelectedItem="{Binding SelectedType, Mode=TwoWay}"
                                           Width="130" FontSize="13"
                                           CornerRadius="6"
                                           VerticalAlignment="Center" />
@@ -68,8 +70,8 @@
         </ScrollViewer>
 
         <!-- Footer buttons -->
-        <Border Grid.Row="2" Background="#1a1a2e" Padding="16,12"
-                BorderBrush="#2a2a3e" BorderThickness="0,1,0,0">
+        <Border Grid.Row="2" Background="{DynamicResource SurfaceBackground}" Padding="16,12"
+                BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
                 <Button Content="Cancel" Classes="toolbar-btn"
                         x:Name="CancelButton" MinWidth="80" />

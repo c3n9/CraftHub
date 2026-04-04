@@ -136,5 +136,24 @@
             <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
             <Setter Property="CornerRadius" Value="8" />
         </Style>
+        
+        <!-- Scroll viewer styles -->
+        <Style Selector="ScrollViewer ScrollBar[Orientation=Horizontal]">
+            <Setter Property="AllowAutoHide" Value="False" />
+        </Style>
+
+        <Style Selector="ScrollViewer ScrollBar[Orientation=Horizontal] > Track">
+            
+        </Style>
+        
+        <Style Selector="ScrollViewer">
+            
+        </Style>
+
+        <Style Selector="ScrollViewer ScrollBar[Orientation=Horizontal] Thumb">
+            <Setter Property="CornerRadius" Value="18"/>
+            <Setter Property="Height" Value="1"/>
+        </Style>
+
     </Application.Styles>
 </Application>
