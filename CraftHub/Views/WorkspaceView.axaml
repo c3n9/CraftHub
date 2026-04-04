@@ -64,13 +64,6 @@
                           Height="{Binding #TBPropertyName.Bounds.Height}"
                           CornerRadius="6" />
 
-                <ComboBox ItemsSource="{Binding AvailableTypes}"
-                          SelectedItem="{Binding SelectedArrayElementType}"
-                          IsVisible="{Binding IsArrayTypeSelected}"
-                          Height="{Binding #TBPropertyName.Bounds.Height}"
-                          Width="140" FontSize="14"
-                          CornerRadius="6" />
-
                 <Button Classes="accent-btn" Content="+ Add"
                         Command="{Binding AddPropertyCommand}" />
             </StackPanel>

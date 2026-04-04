@@ -24,8 +24,6 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private string _header = "Tab";
     [ObservableProperty] private string _propertyName = string.Empty;
     [ObservableProperty] private JsonFieldType _selectedType = JsonFieldType.String;
-    [ObservableProperty] private JsonFieldType _selectedArrayElementType = JsonFieldType.String;
-    [ObservableProperty] private bool _isArrayTypeSelected;
     [ObservableProperty] private string _statusText = "Ready";
     [ObservableProperty] private DynamicDataRow? _selectedRow;
     [ObservableProperty] private string _searchQuery = string.Empty;
@@ -49,11 +47,6 @@ public partial class WorkspaceViewModel : ViewModelBase
         _dialogService = dialogService;
     }
 
-    partial void OnSelectedTypeChanged(JsonFieldType value)
-    {
-        IsArrayTypeSelected = value == JsonFieldType.Array;
-    }
-
     [RelayCommand]
     private void AddProperty()
     {
@@ -73,7 +66,6 @@ public partial class WorkspaceViewModel : ViewModelBase
         {
             Name = PropertyName,
             FieldType = SelectedType,
-            ArrayElementType = SelectedArrayElementType
         };
 
         Properties.Add(prop);
