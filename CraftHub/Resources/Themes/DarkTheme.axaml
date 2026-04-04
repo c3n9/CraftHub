@@ -13,9 +13,11 @@
     <SolidColorBrush x:Key="TextSecondary" Color="#A1A1AA" />
     <SolidColorBrush x:Key="TextMuted" Color="#71717A" />
     <SolidColorBrush x:Key="TextOnAccent" Color="#FFFFFF" />
+    <SolidColorBrush x:Key="HighlightBackground" Color="#2563EB" />
+    <SolidColorBrush x:Key="HighlightForeground" Color="#FFFFFF" />
 
     <!-- Accents -->
-    <SolidColorBrush x:Key="AccentPrimary" Color="#4F46E5" /> <!-- Indigo -->
+    <SolidColorBrush x:Key="AccentPrimary" Color="#4F46E5" /> 
     <SolidColorBrush x:Key="AccentHover" Color="#6366F1" />
     <SolidColorBrush x:Key="AccentPressed" Color="#4338CA" />
     

@@ -1,0 +1,24 @@
+<Styles xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Style Selector="ScrollViewer">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="ScrollViewer ScrollBar[Orientation=Horizontal]">
+        <Setter Property="AllowAutoHide" Value="False" />
+    </Style>
+
+    <Style Selector="ScrollViewer ScrollBar[Orientation=Horizontal] Thumb">
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Height" Value="6" />
+        <Setter Property="Background" Value="{DynamicResource BorderColor}" />
+    </Style>
+
+    <Style Selector="ScrollViewer ScrollBar[Orientation=Vertical] Thumb">
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Width" Value="8" />
+        <Setter Property="Background" Value="{DynamicResource BorderColor}" />
+    </Style>
+
+</Styles>

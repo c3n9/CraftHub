@@ -8,8 +8,8 @@ namespace CraftHub.Helpers;
 
 public static class TextBlockHelper
 {
-    private static readonly IBrush HighlightBrush = SolidColorBrush.Parse("#FFFFD700"); // Standard Gold/Yellow
-    private static readonly IBrush HighlightForeground = Brushes.Black;
+    private static IBrush HighlightBrush => GetBrush("HighlightBackground", Brushes.Gold);
+    private static IBrush HighlightForeground => GetBrush("HighlightForeground", Brushes.Black);
 
     public static readonly AttachedProperty<string?> HighlightTextProperty =
         AvaloniaProperty.RegisterAttached<TextBlock, string?>("HighlightText", typeof(TextBlockHelper));
@@ -27,6 +27,16 @@ public static class TextBlockHelper
     {
         HighlightTextProperty.Changed.AddClassHandler<TextBlock>(OnHighlightChanged);
         OriginalTextProperty.Changed.AddClassHandler<TextBlock>(OnHighlightChanged);
+    }
+
+    private static IBrush GetBrush(string key, IBrush fallback)
+    {
+        if (Application.Current?.TryFindResource(key, out var resource) == true && resource is IBrush brush)
+        {
+            return brush;
+        }
+
+        return fallback;
     }
 
     private static void OnHighlightChanged(TextBlock textBlock, AvaloniaPropertyChangedEventArgs e)
