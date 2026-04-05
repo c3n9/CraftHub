@@ -78,6 +78,7 @@ public partial class WorkspaceView : UserControl
             };
 
             var isComplexType = prop.FieldType == JsonFieldType.Object || prop.FieldType == JsonFieldType.Array;
+            var isBoolType = prop.FieldType == JsonFieldType.Bool;
 
             column.CellTemplate = new FuncDataTemplate<DynamicDataRow>((row, ns) => 
             {
@@ -145,20 +146,38 @@ public partial class WorkspaceView : UserControl
                 }
                 else
                 {
-                    var tb = new TextBlock
+                    if (isBoolType)
                     {
-                        VerticalAlignment = VerticalAlignment.Top,
-                        Margin = new Avalonia.Thickness(12, 8, 12, 8),
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap
-                    };
-                    tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding
+                        var cb = new CheckBox
+                        {
+                            VerticalAlignment = VerticalAlignment.Center,
+                            Margin = new Avalonia.Thickness(12, 8, 12, 8)
+                        };
+                        cb.Bind(CheckBox.IsCheckedProperty, new Binding
+                        {
+                            Path = $"[{prop.Name}]",
+                            Mode = BindingMode.TwoWay,
+                            Converter = new DynamicRowBoolConverter()
+                        });
+                        border.Child = cb;
+                    }
+                    else
                     {
-                        Path = ".",
-                        Converter = new DynamicRowValueConverter(),
-                        ConverterParameter = prop.Name
-                    });
-                    tb.Bind(TextBlockHelper.HighlightTextProperty, new Binding("DataContext.SearchQuery") { RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) } });
-                    border.Child = tb;
+                        var tb = new TextBlock
+                        {
+                            VerticalAlignment = VerticalAlignment.Top,
+                            Margin = new Avalonia.Thickness(12, 8, 12, 8),
+                            TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                        };
+                        tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding
+                        {
+                            Path = ".",
+                            Converter = new DynamicRowValueConverter(),
+                            ConverterParameter = prop.Name
+                        });
+                        tb.Bind(TextBlockHelper.HighlightTextProperty, new Binding("DataContext.SearchQuery") { RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) } });
+                        border.Child = tb;
+                    }
                 }
                 
                 return border;
@@ -168,18 +187,36 @@ public partial class WorkspaceView : UserControl
             {
                 column.CellEditingTemplate = new FuncDataTemplate<DynamicDataRow>((row, ns) => 
                 {
-                    var tb = new TextBox
+                    if (isBoolType)
                     {
-                        Classes = { "grid-editor" },
-                        VerticalAlignment = VerticalAlignment.Stretch,
-                        VerticalContentAlignment = VerticalAlignment.Top,
-                        HorizontalContentAlignment = HorizontalAlignment.Left,
-                        TextWrapping = TextWrapping.Wrap,
-                        AcceptsReturn = true
-                    };
-                    tb.Text = row[prop.Name];
-                    tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
-                    return tb;
+                        var cb = new CheckBox
+                        {
+                            VerticalAlignment = VerticalAlignment.Center,
+                            Margin = new Avalonia.Thickness(12, 8, 12, 8)
+                        };
+                        cb.Bind(CheckBox.IsCheckedProperty, new Binding
+                        {
+                            Path = $"[{prop.Name}]",
+                            Mode = BindingMode.TwoWay,
+                            Converter = new DynamicRowBoolConverter()
+                        });
+                        return cb;
+                    }
+                    else
+                    {
+                        var tb = new TextBox
+                        {
+                            Classes = { "grid-editor" },
+                            VerticalAlignment = VerticalAlignment.Stretch,
+                            VerticalContentAlignment = VerticalAlignment.Top,
+                            HorizontalContentAlignment = HorizontalAlignment.Left,
+                            TextWrapping = TextWrapping.Wrap,
+                            AcceptsReturn = true
+                        };
+                        tb.Text = row[prop.Name];
+                        tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
+                        return tb;
+                    }
                 });
             }
             else

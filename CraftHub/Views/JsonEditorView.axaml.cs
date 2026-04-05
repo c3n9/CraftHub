@@ -67,6 +67,7 @@ public partial class JsonEditorView : Window
             };
 
             var isComplexType = prop.FieldType == JsonFieldType.Object || prop.FieldType == JsonFieldType.Array;
+            var isBoolType = prop.FieldType == JsonFieldType.Bool;
 
             column.CellTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<DynamicDataRow>((row, ns) => 
             {
@@ -121,21 +122,39 @@ public partial class JsonEditorView : Window
                 }
                 else
                 {
-                    var tb = new Avalonia.Controls.TextBlock
+                    if (isBoolType)
                     {
-                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                        Margin = new Avalonia.Thickness(12, 0),
-                        TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
-                        TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
-                        MaxLines = 1
-                    };
-                    tb.Bind(Avalonia.Controls.TextBlock.TextProperty, new Avalonia.Data.Binding
+                        var cb = new Avalonia.Controls.CheckBox
+                        {
+                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                            Margin = new Avalonia.Thickness(12, 0)
+                        };
+                        cb.Bind(Avalonia.Controls.CheckBox.IsCheckedProperty, new Avalonia.Data.Binding
+                        {
+                            Path = $"[{prop.Name}]",
+                            Mode = Avalonia.Data.BindingMode.TwoWay,
+                            Converter = new CraftHub.Converters.DynamicRowBoolConverter()
+                        });
+                        border.Child = cb;
+                    }
+                    else
                     {
-                        Path = ".",
-                        Converter = new CraftHub.Converters.DynamicRowValueConverter(),
-                        ConverterParameter = prop.Name
-                    });
-                    border.Child = tb;
+                        var tb = new Avalonia.Controls.TextBlock
+                        {
+                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                            Margin = new Avalonia.Thickness(12, 0),
+                            TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
+                            TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
+                            MaxLines = 1
+                        };
+                        tb.Bind(Avalonia.Controls.TextBlock.TextProperty, new Avalonia.Data.Binding
+                        {
+                            Path = ".",
+                            Converter = new CraftHub.Converters.DynamicRowValueConverter(),
+                            ConverterParameter = prop.Name
+                        });
+                        border.Child = tb;
+                    }
                 }
                 
                 return border;
@@ -145,15 +164,33 @@ public partial class JsonEditorView : Window
             {
                 column.CellEditingTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<DynamicDataRow>((row, ns) => 
                 {
-                    var tb = new Avalonia.Controls.TextBox
+                    if (isBoolType)
                     {
-                        VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                        Margin = new Avalonia.Thickness(4, 0),
-                        Padding = new Avalonia.Thickness(0)
-                    };
-                    tb.Text = row[prop.Name];
-                    tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
-                    return tb;
+                        var cb = new Avalonia.Controls.CheckBox
+                        {
+                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                            Margin = new Avalonia.Thickness(12, 0)
+                        };
+                        cb.Bind(Avalonia.Controls.CheckBox.IsCheckedProperty, new Avalonia.Data.Binding
+                        {
+                            Path = $"[{prop.Name}]",
+                            Mode = Avalonia.Data.BindingMode.TwoWay,
+                            Converter = new CraftHub.Converters.DynamicRowBoolConverter()
+                        });
+                        return cb;
+                    }
+                    else
+                    {
+                        var tb = new Avalonia.Controls.TextBox
+                        {
+                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
+                            Margin = new Avalonia.Thickness(4, 0),
+                            Padding = new Avalonia.Thickness(0)
+                        };
+                        tb.Text = row[prop.Name];
+                        tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
+                        return tb;
+                    }
                 });
             }
             else
