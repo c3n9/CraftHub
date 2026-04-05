@@ -17,21 +17,7 @@
    - CraftHub simplifies the process of working with JSON files.
    - Easily fill in the required data within the application, and CraftHub will generate the corresponding JSON representation.
    - With just a few clicks, you can export the JSON file, ready to be utilized in your projects.
-## Getting 
-To get started with CraftHub, follow these simple steps:
-## Installation
-Clone the repository.  
-```bash
-git clone https://github.com/c3n9/CraftHub.git
-```
-## Explore and Create Classes
-Navigate the user-friendly interface to explore existing classes or create your own.
-## Manage Your Classes
-Save and manage your custom classes within CraftHub for easy access and organization.
-## Generate and Export JSON
-Fill in the necessary information, generate JSON representations, and export them for your projects.
-## Contributions
-CraftHub welcomes contributions from the open-source community. If you encounter issues or have ideas for improvements, feel free to submit a pull request or open an issue on our GitHub repository.
+
 ## License
 CraftHub is licensed under the MIT License. Feel free to use, modify, and distribute the application in accordance with the terms of the license.
 
@@ -39,7 +25,6 @@ CraftHub is licensed under the MIT License. Feel free to use, modify, and distri
 
 ## Screenshots
 
-![image](https://github.com/user-attachments/assets/7d6853b6-55d5-4db8-a66e-15623c95b7f8)
+<img width="1012" height="740" alt="Снимок экрана 2026-04-05 в 13 09 21" src="https://github.com/user-attachments/assets/9aa4b487-c7cf-47b1-a0ca-366dc5ac71b3" />
 
-
-
+<img width="1012" height="740" alt="Снимок экрана 2026-04-05 в 13 09 39" src="https://github.com/user-attachments/assets/db179b86-bf01-4b6d-9263-d9314031aedd" />
