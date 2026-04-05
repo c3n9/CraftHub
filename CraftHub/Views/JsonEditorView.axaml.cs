@@ -7,11 +7,11 @@ using CraftHub.ViewModels;
 
 namespace CraftHub.Views;
 
-public partial class JsonEditorDialog : Window
+public partial class JsonEditorView : Window
 {
     private JsonEditorViewModel? _currentVm;
 
-    public JsonEditorDialog()
+    public JsonEditorView()
     {
         InitializeComponent();
         

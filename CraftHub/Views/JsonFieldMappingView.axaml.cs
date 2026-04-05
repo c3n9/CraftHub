@@ -7,9 +7,9 @@ using CraftHub.ViewModels;
 
 namespace CraftHub.Views;
 
-public partial class JsonFieldMappingDialog : Window
+public partial class JsonFieldMappingView : Window
 {
-    public JsonFieldMappingDialog()
+    public JsonFieldMappingView()
     {
         InitializeComponent();
 

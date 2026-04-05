@@ -4,7 +4,7 @@
         xmlns:models="using:CraftHub.Models"
         xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        x:Class="CraftHub.Views.JsonEditorDialog"
+        x:Class="CraftHub.Views.JsonEditorView"
         Title="Nested Object Editor"
         Width="700" Height="500"
         WindowStartupLocation="CenterOwner"

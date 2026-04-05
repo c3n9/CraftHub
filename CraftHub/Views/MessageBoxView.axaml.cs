@@ -3,9 +3,9 @@ using Avalonia.Controls;
 
 namespace CraftHub.Views;
 
-public partial class MessageBoxDialog : Window
+public partial class MessageBoxView : Window
 {
-    public MessageBoxDialog()
+    public MessageBoxView()
     {
         InitializeComponent();
         DataContext = this;
@@ -21,7 +21,7 @@ public partial class MessageBoxDialog : Window
     }
 
     public static readonly StyledProperty<string> TitleTextProperty =
-        AvaloniaProperty.Register<MessageBoxDialog, string>(nameof(TitleText), string.Empty);
+        AvaloniaProperty.Register<MessageBoxView, string>(nameof(TitleText), string.Empty);
 
     public string MessageText
     {
@@ -30,7 +30,7 @@ public partial class MessageBoxDialog : Window
     }
 
     public static readonly StyledProperty<string> MessageTextProperty =
-        AvaloniaProperty.Register<MessageBoxDialog, string>(nameof(MessageText), string.Empty);
+        AvaloniaProperty.Register<MessageBoxView, string>(nameof(MessageText), string.Empty);
 
     public bool IsConfirm
     {
@@ -39,7 +39,7 @@ public partial class MessageBoxDialog : Window
     }
 
     public static readonly StyledProperty<bool> IsConfirmProperty =
-        AvaloniaProperty.Register<MessageBoxDialog, bool>(nameof(IsConfirm));
+        AvaloniaProperty.Register<MessageBoxView, bool>(nameof(IsConfirm));
 
     private void CloseWithResult(bool result)
     {

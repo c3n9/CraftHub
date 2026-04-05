@@ -29,7 +29,7 @@ public class DialogService : IDialogService
         var window = GetMainWindow();
         if (window == null) return null;
 
-        var dialog = new JsonFieldMappingDialog();
+        var dialog = new JsonFieldMappingView();
         var vm = new JsonFieldMappingViewModel(fields);
         dialog.DataContext = vm;
 
@@ -42,7 +42,7 @@ public class DialogService : IDialogService
         var window = GetMainWindow();
         if (window == null) return;
 
-        var msgDialog = new MessageBoxDialog
+        var msgDialog = new MessageBoxView
         {
             Title = title,
             TitleText = title,
@@ -58,7 +58,7 @@ public class DialogService : IDialogService
         var window = GetMainWindow();
         if (window == null) return false;
 
-        var msgDialog = new MessageBoxDialog
+        var msgDialog = new MessageBoxView
         {
             Title = title,
             TitleText = title,
@@ -83,7 +83,7 @@ public class DialogService : IDialogService
         var window = GetMainWindow();
         if (window == null) return null;
 
-        var dialog = new JsonEditorDialog { Title = title };
+        var dialog = new JsonEditorView { Title = title };
         var vm = new JsonEditorViewModel(initialJson, type, jsonService, this, _notificationService);
         dialog.DataContext = vm;
         
