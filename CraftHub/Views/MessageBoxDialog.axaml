@@ -30,13 +30,18 @@
                   Spacing="8">
         <Button x:Name="CancelButton"
                 Classes="tab-btn"
+                VerticalContentAlignment="Center"
                 Content="Cancel"
-                MinWidth="90"
+                Height="34"
+                Width="96"
+                MinWidth="96"
                 IsVisible="{Binding IsConfirm}" />
         <Button x:Name="OkButton"
                 Classes="accent-btn"
                 Content="OK"
-                MinWidth="90" />
+                Height="34"
+                Width="96"
+                MinWidth="96" />
       </StackPanel>
     </StackPanel>
   </Border>

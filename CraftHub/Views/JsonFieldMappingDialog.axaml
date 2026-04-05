@@ -4,7 +4,7 @@
         xmlns:models="using:CraftHub.Models"
         x:Class="CraftHub.Views.JsonFieldMappingDialog"
         x:Name="DialogRoot"
-        Title="Import JSON — Field Type Mapping"
+        Title="Import JSON"
         Width="650" Height="500"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackground}"
@@ -73,9 +73,12 @@
         <Border Grid.Row="2" Background="{DynamicResource SurfaceBackground}" Padding="16,12"
                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                <Button Content="Cancel" Classes="toolbar-btn"
+                <Button Content="Cancel" Classes="tab-btn"
+                        VerticalContentAlignment="Center"
+                        Height="34"
                         x:Name="CancelButton" MinWidth="80" />
                 <Button Content="Import" Classes="accent-btn"
+                        Height="34"
                         x:Name="ConfirmButton" MinWidth="80" />
             </StackPanel>
         </Border>
