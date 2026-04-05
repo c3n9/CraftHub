@@ -19,7 +19,11 @@
                                Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="10" Grid.Column="1" HorizontalAlignment="Right">
-                    <Button Content="🌗" Classes="toolbar-btn" Command="{Binding ToggleThemeCommand}"
+                    <Button Content="🔔" Classes="toolbar-btn"
+                            Command="{Binding ToggleNotificationManagerCommand}"
+                            ToolTip.Tip="Notifications" FontSize="16" />
+                    <Button Content="🌗" Classes="toolbar-btn"
+                            Command="{Binding ToggleThemeCommand}"
                             ToolTip.Tip="Toggle Theme" FontSize="16" />
                 </StackPanel>
             </Grid>
@@ -73,6 +77,59 @@
                             ToolTip.Tip="Add new workspace" />
                 </StackPanel>
             </ScrollViewer>
+        </Border>
+
+        <!-- Notification overlays -->
+        <StackPanel Grid.RowSpan="3"
+                    Margin="20"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Spacing="8"
+                    IsVisible="{Binding ShowPopupOverlay}">
+            <ItemsControl ItemsSource="{Binding ActiveNotifications}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" Spacing="8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </StackPanel>
+
+        <Border Grid.RowSpan="3"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="20"
+                Width="320"
+                Padding="16"
+                CornerRadius="16"
+                Background="{DynamicResource SurfaceBackground}"
+                BorderBrush="{DynamicResource BorderColor}"
+                BorderThickness="1"
+                IsVisible="{Binding IsNotificationManagerOpen}">
+            <StackPanel Spacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="Notifications" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimary}" />
+                    <Button Content="×" Classes="close-tab"
+                            Grid.Column="1"
+                            Command="{Binding ToggleNotificationManagerCommand}"
+                            Margin="0" />
+                </Grid>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
+                    <ToggleSwitch IsChecked="{Binding ShowNotificationPopups}"
+                                  OffContent="Popups off"
+                                  OnContent="Popups on" />
+                    <Button Content="Clear all" Classes="tab-btn"
+                            Command="{Binding ClearNotificationHistoryCommand}"
+                            FontSize="12"
+                            Padding="10,4" />
+                </StackPanel>
+                <ScrollViewer x:Name="NotificationHistoryScroll"
+                              MaxHeight="260"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <ItemsControl ItemsSource="{Binding Notifications}"
+                                  ItemTemplate="{StaticResource NotificationRowTemplate}" />
+                </ScrollViewer>
+            </StackPanel>
         </Border>
     </Grid>
 </Window>

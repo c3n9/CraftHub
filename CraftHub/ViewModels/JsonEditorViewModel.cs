@@ -12,12 +12,12 @@ public partial class JsonEditorViewModel : ViewModelBase
 {
     private readonly IJsonService _jsonService;
     private readonly IDialogService _dialogService;
+    private readonly NotificationService _notificationService;
     private readonly JsonFieldType _expectedType;
 
     [ObservableProperty] private string _propertyNameInput = string.Empty;
     [ObservableProperty] private JsonFieldType _selectedType = JsonFieldType.String;
     [ObservableProperty] private bool _isObjectMode;
-    [ObservableProperty] private string _statusText = "Ready";
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
@@ -26,23 +26,21 @@ public partial class JsonEditorViewModel : ViewModelBase
     public event EventHandler<string>? JsonSubmitted;
     public event EventHandler? Cancelled;
 
-    public JsonEditorViewModel(string initialJson, JsonFieldType expectedType, IJsonService jsonService, IDialogService dialogService)
+    public JsonEditorViewModel(string initialJson, JsonFieldType expectedType, IJsonService jsonService, IDialogService dialogService, NotificationService notificationService)
     {
         _jsonService = jsonService;
         _dialogService = dialogService;
+        _notificationService = notificationService;
         _expectedType = expectedType;
         IsObjectMode = expectedType == JsonFieldType.Object;
-        
-        // Initialize from JSON
+
         if (!string.IsNullOrWhiteSpace(initialJson))
         {
             try
             {
-                // Ensure it looks like object or array
                 if (!initialJson.TrimStart().StartsWith("{") && !initialJson.TrimStart().StartsWith("["))
                 {
-                    if (expectedType == JsonFieldType.Array) initialJson = "[]";
-                    else initialJson = "{}";
+                    initialJson = expectedType == JsonFieldType.Array ? "[]" : "{}";
                 }
 
                 var detectedFields = _jsonService.DetectFields(initialJson);
@@ -54,16 +52,21 @@ public partial class JsonEditorViewModel : ViewModelBase
                         FieldType = field.SelectedType
                     });
                 }
-                
+
                 var dataRows = _jsonService.ParseJsonData(initialJson, Properties);
-                foreach (var r in dataRows) Rows.Add(r);
+                foreach (var row in dataRows)
+                {
+                    Rows.Add(row);
+                }
             }
-            catch { }
+            catch
+            {
+                // best-effort parsing, silently continue
+            }
         }
 
         if (Rows.Count == 0 && IsObjectMode)
         {
-            // Object mode must have 1 row!
             Rows.Add(new DynamicDataRow());
         }
     }
@@ -79,6 +82,7 @@ public partial class JsonEditorViewModel : ViewModelBase
             Name = PropertyNameInput,
             FieldType = SelectedType
         };
+
         Properties.Add(prop);
         foreach (var row in Rows) row.InitializeProperty(prop.Name);
         PropertyNameInput = string.Empty;
@@ -95,7 +99,7 @@ public partial class JsonEditorViewModel : ViewModelBase
     [RelayCommand]
     private void AddRow()
     {
-        if (IsObjectMode) return; // Cannot add rows to an object
+        if (IsObjectMode) return;
         var row = new DynamicDataRow();
         foreach (var prop in Properties) row.InitializeProperty(prop.Name);
         Rows.Add(row);
@@ -106,17 +110,14 @@ public partial class JsonEditorViewModel : ViewModelBase
     {
         try
         {
-            // Serialize
-            // Note: SerializeToJson expects an array output currently. We need to handle object vs array correctly.
             var json = _jsonService.SerializeToJson(Rows, Properties);
-            
-            // SerializeToJson always returns an array `[ { ... } ]`. If we expected an object, we need to extract the first element!
+
             if (IsObjectMode)
             {
                 using var doc = System.Text.Json.JsonDocument.Parse(json);
                 if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array && doc.RootElement.GetArrayLength() > 0)
                 {
-                    json = doc.RootElement[0].GetRawText(); // The actual `{ ... }`
+                    json = doc.RootElement[0].GetRawText();
                 }
                 else
                 {
@@ -128,7 +129,7 @@ public partial class JsonEditorViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            StatusText = $"Error: {ex.Message}";
+            _notificationService.Publish(NotificationType.Error, $"Editor error: {ex.Message}");
         }
     }
 
@@ -149,16 +150,15 @@ public partial class JsonEditorViewModel : ViewModelBase
             {
                 newRow.InitializeProperty(kvp.Key, kvp.Value);
             }
+
             newRow[propertyName] = newValue;
-            
-            // Force Avalonia DataGrid to refresh the row entirely
             var idx = Rows.IndexOf(row);
-            if (idx >= 0) 
+            if (idx >= 0)
             {
                 Rows[idx] = newRow;
             }
 
-            StatusText = $"✓ Updated recursive '{propertyName}'";
+            _notificationService.Publish(NotificationType.Success, $"Updated '{propertyName}'");
         }
     }
 }

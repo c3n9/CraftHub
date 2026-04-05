@@ -20,11 +20,11 @@ public partial class WorkspaceViewModel : ViewModelBase
     private readonly IJsonService _jsonService;
     private readonly IClassParserService _classParserService;
     private readonly IDialogService _dialogService;
+    private readonly NotificationService _notificationService;
 
     [ObservableProperty] private string _header = "Tab";
     [ObservableProperty] private string _propertyName = string.Empty;
     [ObservableProperty] private JsonFieldType _selectedType = JsonFieldType.String;
-    [ObservableProperty] private string _statusText = "Ready";
     [ObservableProperty] private DynamicDataRow? _selectedRow;
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private bool _isActive;
@@ -35,16 +35,21 @@ public partial class WorkspaceViewModel : ViewModelBase
     public event EventHandler? CloseRequested;
     public event EventHandler? ColumnsChanged;
 
+    private void NotifySuccess(string message) => _notificationService.Publish(NotificationType.Success, message);
+    private void NotifyWarning(string message) => _notificationService.Publish(NotificationType.Warning, message);
+
     public WorkspaceViewModel(
         IFileDialogService fileDialogService,
         IJsonService jsonService,
         IClassParserService classParserService,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        NotificationService notificationService)
     {
         _fileDialogService = fileDialogService;
         _jsonService = jsonService;
         _classParserService = classParserService;
         _dialogService = dialogService;
+        _notificationService = notificationService;
     }
 
     [RelayCommand]
@@ -52,13 +57,13 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(PropertyName))
         {
-            StatusText = "⚠ Enter property name";
+            NotifyWarning("⚠ Enter property name");
             return;
         }
 
         if (Properties.Any(p => p.Name == PropertyName))
         {
-            StatusText = "⚠ Property with this name already exists";
+            NotifyWarning("⚠ Property with this name already exists");
             return;
         }
 
@@ -75,7 +80,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             row.InitializeProperty(prop.Name);
 
         PropertyName = string.Empty;
-        StatusText = $"✓ Property '{prop.Name}' added";
+        NotifySuccess($"✓ Property '{prop.Name}' added");
         ColumnsChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -86,7 +91,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         Properties.Remove(prop);
         foreach (var row in Rows)
             row.RemoveProperty(prop.Name);
-        StatusText = $"✓ Property '{prop.Name}' removed";
+        NotifySuccess($"✓ Property '{prop.Name}' removed");
         ColumnsChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -97,7 +102,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         foreach (var prop in Properties)
             row.InitializeProperty(prop.Name);
         Rows.Add(row);
-        StatusText = $"✓ Row added ({Rows.Count} total)";
+        NotifySuccess($"✓ Row added ({Rows.Count} total)");
     }
 
     [RelayCommand]
@@ -114,7 +119,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         foreach (var row in toRemove)
             Rows.Remove(row);
 
-        StatusText = $"✓ {toRemove.Count} row(s) removed";
+        NotifySuccess($"✓ {toRemove.Count} row(s) removed");
     }
 
     [RelayCommand]
@@ -133,7 +138,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             DuplicateSingleRow(row);
         }
 
-        StatusText = $"✓ {toDuplicate.Count} row(s) duplicated to bottom";
+        NotifySuccess($"✓ {toDuplicate.Count} row(s) duplicated to bottom");
     }
 
     private void DuplicateSingleRow(DynamicDataRow row)
@@ -173,7 +178,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
 
         await _dialogService.CopyToClipboardAsync(json);
-        StatusText = $"✓ {selectedRows.Count} row(s) copied to clipboard as JSON";
+        NotifySuccess($"✓ {selectedRows.Count} row(s) copied to clipboard as JSON");
     }
 
     [RelayCommand]
@@ -221,7 +226,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             Rows.Add(row);
 
         Header = Path.GetFileNameWithoutExtension(path);
-        StatusText = $"✓ Imported {Rows.Count} rows, {Properties.Count} fields";
+        NotifySuccess($"✓ Imported {Rows.Count} rows, {Properties.Count} fields");
         ColumnsChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -244,7 +249,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         var json = _jsonService.SerializeToJson(Rows, Properties);
         await File.WriteAllTextAsync(path, json, Encoding.UTF8);
-        StatusText = $"✓ Exported to {Path.GetFileName(path)}";
+        NotifySuccess($"✓ Exported to {Path.GetFileName(path)}");
     }
 
     [RelayCommand]
@@ -273,7 +278,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         Rows.Clear();
         Header = className;
-        StatusText = $"✓ Imported class '{className}' with {Properties.Count} properties";
+        NotifySuccess($"✓ Imported class '{className}' with {Properties.Count} properties");
         ColumnsChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -298,7 +303,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         var code = _classParserService.GenerateClassCode(className, Properties);
         await File.WriteAllTextAsync(path, code, Encoding.UTF8);
         Header = className;
-        StatusText = $"✓ Exported class '{className}'";
+        NotifySuccess($"✓ Exported class '{className}'");
     }
 
     [RelayCommand]
@@ -327,7 +332,7 @@ public partial class WorkspaceViewModel : ViewModelBase
                 Rows[idx] = newRow;
             }
 
-            StatusText = $"✓ Updated '{propertyName}'";
+            NotifySuccess($"✓ Updated '{propertyName}'");
         }
     }
 }

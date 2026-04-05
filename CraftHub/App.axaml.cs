@@ -22,6 +22,7 @@ public class App : Application
         var services = new ServiceCollection();
 
         // Register services
+        services.AddSingleton<NotificationService>();
         services.AddSingleton<IFileDialogService, FileDialogService>();
         services.AddSingleton<IJsonService, JsonService>();
         services.AddSingleton<IClassParserService, ClassParserService>();
@@ -46,5 +47,4 @@ public class App : Application
         base.OnFrameworkInitializationCompleted();
     }
 }
-
 

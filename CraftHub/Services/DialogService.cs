@@ -11,6 +11,12 @@ namespace CraftHub.Services;
 
 public class DialogService : IDialogService
 {
+    private readonly NotificationService _notificationService;
+
+    public DialogService(NotificationService notificationService)
+    {
+        _notificationService = notificationService;
+    }
     private static Window? GetMainWindow()
     {
         if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -130,7 +136,7 @@ public class DialogService : IDialogService
         if (window == null) return null;
 
         var dialog = new JsonEditorDialog { Title = title };
-        var vm = new JsonEditorViewModel(initialJson, type, jsonService, this);
+        var vm = new JsonEditorViewModel(initialJson, type, jsonService, this, _notificationService);
         dialog.DataContext = vm;
         
         return await dialog.ShowDialog<string?>(window);

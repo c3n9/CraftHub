@@ -47,12 +47,9 @@
             </ItemsControl>
         </ScrollViewer>
 
-        <Grid Grid.Row="3" ColumnDefinitions="*,Auto">
-            <TextBlock Text="{Binding StatusText}" Foreground="{DynamicResource TextSecondary}" VerticalAlignment="Center" />
-            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
-                <Button Content="Cancel" Command="{Binding CancelCommand}" Width="80" HorizontalContentAlignment="Center" />
-                <Button Content="Save" Command="{Binding SubmitCommand}" Width="80" Classes="accent-btn" HorizontalContentAlignment="Center" />
-            </StackPanel>
-        </Grid>
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+            <Button Content="Cancel" Command="{Binding CancelCommand}" Width="80" HorizontalContentAlignment="Center" />
+            <Button Content="Save" Command="{Binding SubmitCommand}" Width="80" Classes="accent-btn" HorizontalContentAlignment="Center" />
+        </StackPanel>
     </Grid>
 </Window>

@@ -1,10 +1,49 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="using:CraftHub"
+             xmlns:converters="using:CraftHub.Converters"
+             xmlns:models="using:CraftHub.Models"
              x:Class="CraftHub.App"
              RequestedThemeVariant="Default">
     <Application.DataTemplates>
         <local:ViewLocator/>
+        <!-- Implicit template used by the notification popup ItemsControl (no ItemTemplate set). -->
+        <DataTemplate DataType="models:Notification">
+            <Border Classes="notification-toast">
+                <Grid ColumnDefinitions="4,Auto,*,Auto" RowDefinitions="Auto,Auto">
+                    <Border Classes="notification-accent"
+                            Grid.RowSpan="2"
+                            Background="{Binding Type, Converter={StaticResource NotificationBrush}}" />
+
+                    <TextBlock Grid.Column="1"
+                               Grid.RowSpan="2"
+                               Classes="notification-icon"
+                               Text="{Binding Icon}"
+                               Foreground="{Binding Type, Converter={StaticResource NotificationBrush}}"
+                               VerticalAlignment="Center" />
+
+                    <TextBlock Grid.Column="2"
+                               Grid.Row="0"
+                               Classes="notification-message"
+                               Text="{Binding Message}"
+                               MaxLines="2"
+                               TextTrimming="CharacterEllipsis"
+                               TextWrapping="Wrap" />
+
+                    <TextBlock Grid.Column="2"
+                               Grid.Row="1"
+                               Classes="notification-timestamp"
+                               Text="{Binding TimestampLabel}" />
+
+                    <Button Grid.Column="3"
+                            Grid.RowSpan="2"
+                            Classes="notification-close"
+                            Content="✕"
+                            Command="{Binding DataContext.DismissNotificationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                            CommandParameter="{Binding}" />
+                </Grid>
+            </Border>
+        </DataTemplate>
     </Application.DataTemplates>
 
     <Application.Resources>
@@ -12,6 +51,42 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="/Resources/Themes/ThemeHolder.axaml" />
             </ResourceDictionary.MergedDictionaries>
+            <converters:NotificationTypeToBrushConverter x:Key="NotificationBrush" />
+            <!-- Used by the notification manager list (MainWindow.axaml uses StaticResource). -->
+            <DataTemplate x:Key="NotificationRowTemplate" DataType="models:Notification">
+                <Border Classes="notification-row">
+                    <Grid ColumnDefinitions="4,Auto,*,Auto" RowDefinitions="Auto,Auto">
+                        <Border Classes="notification-accent"
+                                Grid.RowSpan="2"
+                                Background="{Binding Type, Converter={StaticResource NotificationBrush}}" />
+
+                        <TextBlock Grid.Column="1"
+                                   Grid.RowSpan="2"
+                                   Classes="notification-icon"
+                                   Text="{Binding Icon}"
+                                   Foreground="{Binding Type, Converter={StaticResource NotificationBrush}}"
+                                   VerticalAlignment="Center" />
+
+                        <TextBlock Grid.Column="2"
+                                   Grid.Row="0"
+                                   Classes="notification-message"
+                                   Text="{Binding Message}"
+                                   TextWrapping="Wrap" />
+
+                        <TextBlock Grid.Column="2"
+                                   Grid.Row="1"
+                                   Classes="notification-timestamp"
+                                   Text="{Binding TimestampLabel}" />
+
+                        <Button Grid.Column="3"
+                                Grid.RowSpan="2"
+                                Classes="notification-close"
+                                Content="✕"
+                                Command="{Binding DataContext.DismissHistoryNotificationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                CommandParameter="{Binding}" />
+                    </Grid>
+                </Border>
+            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 
@@ -29,6 +104,7 @@
         <StyleInclude Source="/Resources/Styles/ComboBoxStyles.axaml" />
         <StyleInclude Source="/Resources/Styles/DataGridStyles.axaml" />
         <StyleInclude Source="/Resources/Styles/ScrollViewerStyles.axaml" />
+        <StyleInclude Source="/Resources/Styles/NotificationStyles.axaml" />
 
     </Application.Styles>
 </Application>

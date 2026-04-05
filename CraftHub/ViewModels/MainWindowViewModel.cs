@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CraftHub.Models;
 using CraftHub.Services;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,17 +12,69 @@ namespace CraftHub.ViewModels;
 public partial class MainWindowViewModel : ViewModelBase
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly NotificationService _notificationService;
 
     [ObservableProperty] private WorkspaceViewModel? _selectedWorkspace;
     [ObservableProperty] private int _selectedWorkspaceIndex;
+    [ObservableProperty] private bool _isNotificationManagerOpen;
+    [ObservableProperty] private bool _showNotificationPopups = true;
+
+    public bool ShowPopupOverlay => ShowNotificationPopups && !IsNotificationManagerOpen;
 
     public ObservableCollection<WorkspaceViewModel> Workspaces { get; } = new();
 
-    public MainWindowViewModel(IServiceProvider serviceProvider, ThemeService themeService)
+    public ReadOnlyObservableCollection<Notification> Notifications => _notificationService.Notifications;
+    public ReadOnlyObservableCollection<Notification> ActiveNotifications => _notificationService.ActiveNotifications;
+
+    public MainWindowViewModel(IServiceProvider serviceProvider, ThemeService themeService, NotificationService notificationService)
     {
         _serviceProvider = serviceProvider;
+        _notificationService = notificationService;
+        ShowNotificationPopups = _notificationService.ShowPopups;
         themeService.SwitchTheme(themeService.CurrentTheme); 
         AddWorkspace();
+    }
+
+    partial void OnShowNotificationPopupsChanged(bool value)
+    {
+        _notificationService.ShowPopups = value;
+        OnPropertyChanged(nameof(ShowPopupOverlay));
+    }
+
+    partial void OnIsNotificationManagerOpenChanged(bool value)
+    {
+        _notificationService.PopupsSuppressed = value;
+        OnPropertyChanged(nameof(ShowPopupOverlay));
+    }
+
+    [RelayCommand]
+    private void ToggleNotificationManager()
+    {
+        IsNotificationManagerOpen = !IsNotificationManagerOpen;
+    }
+
+    [RelayCommand]
+    private void DismissNotification(Notification notification)
+    {
+        _notificationService.Dismiss(notification);
+    }
+
+    [RelayCommand]
+    private void DismissHistoryNotification(Notification notification)
+    {
+        _notificationService.DismissHistory(notification);
+    }
+
+    [RelayCommand]
+    private void ClearNotificationHistory()
+    {
+        _notificationService.ClearHistory();
+    }
+
+    [RelayCommand]
+    private void ToggleNotificationPopups()
+    {
+        ShowNotificationPopups = !ShowNotificationPopups;
     }
 
     [RelayCommand]
