@@ -5,6 +5,7 @@ using CraftHub.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace CraftHub.ViewModels;
 
@@ -89,9 +90,16 @@ public partial class JsonEditorViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void RemoveProperty(JsonPropertyDefinition? prop)
+    private async Task RemovePropertyAsync(JsonPropertyDefinition? prop)
     {
         if (prop == null) return;
+        var confirmed = await _dialogService.ShowConfirmAsync(
+            "Remove property",
+            $"Remove '{prop.Name}' from the schema?");
+        if (!confirmed)
+        {
+            return;
+        }
         Properties.Remove(prop);
         foreach (var row in Rows) row.RemoveProperty(prop.Name);
     }

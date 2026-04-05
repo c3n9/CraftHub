@@ -2,6 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="using:CraftHub.ViewModels"
         xmlns:views="using:CraftHub.Views"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         x:Class="CraftHub.Views.MainWindow"
         Title="CraftHub"
         MinWidth="900" MinHeight="600"
@@ -19,10 +20,10 @@
                                Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="10" Grid.Column="1" HorizontalAlignment="Right">
-                    <Button Content="🔔" Classes="toolbar-btn"
+                    <Button Content="{materialIcons:MaterialIconExt Kind=BellNotificationOutline}" Classes="toolbar-btn"
                             Command="{Binding ToggleNotificationManagerCommand}"
                             ToolTip.Tip="Notifications" FontSize="16" />
-                    <Button Content="🌗" Classes="toolbar-btn"
+                    <Button Content="{materialIcons:MaterialIconExt Kind=ThemeLightDark}" Classes="toolbar-btn"
                             Command="{Binding ToggleThemeCommand}"
                             ToolTip.Tip="Toggle Theme" FontSize="16" />
                 </StackPanel>
@@ -43,9 +44,9 @@
         <!-- Bottom tab bar -->
         <Border Grid.Row="2" Background="{DynamicResource ElevatedBackground}" Padding="8,6"
                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+            <ScrollViewer HorizontalScrollBarVisibility="Visible"
                           VerticalScrollBarVisibility="Disabled">
-                <StackPanel Orientation="Horizontal" Spacing="0">
+                <StackPanel Orientation="Horizontal" Spacing="0" Margin="0,0,0,20">
                     <ItemsControl ItemsSource="{Binding Workspaces}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
@@ -54,25 +55,28 @@
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>
                             <DataTemplate DataType="{x:Type vm:WorkspaceViewModel}">
-                                <Border Background="{DynamicResource BorderLight}">
-                                    <StackPanel Orientation="Horizontal">
-                                        <Button Classes="tab-btn"
-                                                Classes.tab-active="{Binding IsActive}"
-                                                Content="{Binding Header}"
-                                                Command="{Binding $parent[Window].DataContext.SelectWorkspaceCommand}"
-                                                CommandParameter="{Binding}" />
-                                        <Button Classes="close-tab"
-                                                Content="✕"
+                                <Button Classes="tab-shell"
+                                        Classes.tab-active="{Binding IsActive}"
+                                        Command="{Binding $parent[Window].DataContext.SelectWorkspaceCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Grid ColumnDefinitions="*,Auto">
+                                        <TextBlock Text="{Binding Header}"
+                                                   VerticalAlignment="Center"
+                                                   Margin="6,0,0,0" />
+                                        <Button Classes="tab-close"
+                                                Grid.Column="1"
+                                                Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
+                                                Margin="6,0,0,0"
                                                 Command="{Binding CloseCommand}" />
-                                    </StackPanel>
-                                </Border>
+                                    </Grid>
+                                </Button>
                                 
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
 
                     <Button Classes="tab-add"
-                            Content="+"
+                            Content="{materialIcons:MaterialIconExt Kind=PlusThick}"
                             Command="{Binding AddWorkspaceCommand}"
                             ToolTip.Tip="Add new workspace" />
                 </StackPanel>
@@ -109,7 +113,7 @@
             <StackPanel Spacing="12">
                 <Grid ColumnDefinitions="*,Auto">
                     <TextBlock Text="Notifications" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimary}" />
-                    <Button Content="×" Classes="close-tab"
+                    <Button Content="{materialIcons:MaterialIconExt Kind=CloseThick}" Classes="close-tab"
                             Grid.Column="1"
                             Command="{Binding ToggleNotificationManagerCommand}"
                             Margin="0" />
@@ -125,9 +129,32 @@
                 </StackPanel>
                 <ScrollViewer x:Name="NotificationHistoryScroll"
                               MaxHeight="260"
+                              VerticalScrollBarVisibility="Visible"
                               HorizontalScrollBarVisibility="Disabled">
-                    <ItemsControl ItemsSource="{Binding Notifications}"
-                                  ItemTemplate="{StaticResource NotificationRowTemplate}" />
+                    <Grid RowDefinitions="Auto,*">
+                        <TextBlock Grid.Row="0"
+                                   Text="No notifications yet"
+                                   Foreground="{DynamicResource TextMuted}"
+                                   FontSize="12"
+                                   HorizontalAlignment="Center"
+                                   Margin="0,10">
+                            <TextBlock.IsVisible>
+                                <Binding Path="Notifications.Count"
+                                         Converter="{StaticResource CountToVisibility}"
+                                         ConverterParameter="empty" />
+                            </TextBlock.IsVisible>
+                        </TextBlock>
+
+                        <ItemsControl Grid.Row="1"
+                                      ItemsSource="{Binding Notifications}"
+                                      ItemTemplate="{StaticResource NotificationRowTemplate}">
+                            <ItemsControl.IsVisible>
+                                <Binding Path="Notifications.Count"
+                                         Converter="{StaticResource CountToVisibility}"
+                                         ConverterParameter="notEmpty" />
+                            </ItemsControl.IsVisible>
+                        </ItemsControl>
+                    </Grid>
                 </ScrollViewer>
             </StackPanel>
         </Border>

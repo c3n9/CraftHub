@@ -3,6 +3,7 @@
         xmlns:vm="using:CraftHub.ViewModels"
         xmlns:models="using:CraftHub.Models"
         xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         x:Class="CraftHub.Views.JsonEditorDialog"
         Title="Nested Object Editor"
         Width="700" Height="500"
@@ -15,8 +16,18 @@
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
             <TextBox Text="{Binding PropertyNameInput}" Watermark="New Field" Width="150" />
             <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Width="100" />
-            <Button Content="+ Prop" Command="{Binding AddPropertyCommand}" Classes="toolbar-btn" />
-            <Button Content="+ Row" Command="{Binding AddRowCommand}" Classes="toolbar-btn" IsVisible="{Binding !IsObjectMode}" />
+            <Button Command="{Binding AddPropertyCommand}" Classes="toolbar-btn">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <materialIcons:MaterialIcon Kind="PlusThick" Width="16" Height="16" />
+                    <TextBlock Text="Prop" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+            <Button Command="{Binding AddRowCommand}" Classes="toolbar-btn" IsVisible="{Binding !IsObjectMode}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <materialIcons:MaterialIcon Kind="TableRowPlusAfter" Width="16" Height="16" />
+                    <TextBlock Text="Row" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
         </StackPanel>
 
         <DataGrid Grid.Row="1" x:Name="NestedDataGrid"
@@ -39,7 +50,7 @@
                                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextSecondary}" FontSize="12" />
-                                <Button Content="✕" Classes="close-tab" Command="{Binding $parent[Window].DataContext.RemovePropertyCommand}" CommandParameter="{Binding}" />
+                                <Button Content="{materialIcons:MaterialIconExt Kind=CloseThick}" Classes="close-tab" Command="{Binding $parent[Window].DataContext.RemovePropertyCommand}" CommandParameter="{Binding}" />
                             </StackPanel>
                         </Border>
                     </DataTemplate>

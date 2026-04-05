@@ -5,6 +5,39 @@
         <Setter Property="Background" Value="Transparent" />
     </Style>
 
+    <Style Selector="ScrollBar">
+        <Setter Property="Background" Value="Transparent" />
+    </Style>
+
+    <Style Selector="ScrollBar RepeatButton">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="ScrollBar[Orientation=Horizontal]">
+        <Setter Property="AllowAutoHide" Value="False" />
+    </Style>
+    <Style Selector="ScrollBar[Orientation=Horizontal] Thumb">
+        <Setter Property="CornerRadius" Value="18" />
+        <Setter Property="Height" Value="6" />
+        <Setter Property="Background" Value="{DynamicResource BorderColor}" />
+    </Style>
+    <Style Selector="ScrollBar[Orientation=Horizontal] Thumb:pointerover">
+        <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+    </Style>
+
+    <Style Selector="ScrollBar[Orientation=Vertical]">
+        <Setter Property="AllowAutoHide" Value="False" />
+    </Style>
+    <Style Selector="ScrollBar[Orientation=Vertical] Thumb">
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Width" Value="8" />
+        <Setter Property="Background" Value="{DynamicResource BorderColor}" />
+    </Style>
+    <Style Selector="ScrollBar[Orientation=Vertical] Thumb:pointerover">
+        <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+    </Style>
+
     <Style Selector="ScrollViewer ScrollBar[Orientation=Horizontal]">
         <Setter Property="AllowAutoHide" Value="False" />
     </Style>
@@ -14,11 +47,17 @@
         <Setter Property="Height" Value="6" />
         <Setter Property="Background" Value="{DynamicResource BorderColor}" />
     </Style>
+    <Style Selector="ScrollViewer ScrollBar[Orientation=Horizontal] Thumb:pointerover">
+        <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+    </Style>
 
     <Style Selector="ScrollViewer ScrollBar[Orientation=Vertical] Thumb">
         <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Width" Value="8" />
         <Setter Property="Background" Value="{DynamicResource BorderColor}" />
+    </Style>
+    <Style Selector="ScrollViewer ScrollBar[Orientation=Vertical] Thumb:pointerover">
+        <Setter Property="Background" Value="{DynamicResource BorderLight}" />
     </Style>
 
 </Styles>

@@ -57,13 +57,13 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(PropertyName))
         {
-            NotifyWarning("⚠ Enter property name");
+            NotifyWarning("Enter property name");
             return;
         }
 
         if (Properties.Any(p => p.Name == PropertyName))
         {
-            NotifyWarning("⚠ Property with this name already exists");
+            NotifyWarning("Property with this name already exists");
             return;
         }
 
@@ -80,18 +80,25 @@ public partial class WorkspaceViewModel : ViewModelBase
             row.InitializeProperty(prop.Name);
 
         PropertyName = string.Empty;
-        NotifySuccess($"✓ Property '{prop.Name}' added");
+        NotifySuccess($"Property '{prop.Name}' added");
         ColumnsChanged?.Invoke(this, EventArgs.Empty);
     }
 
     [RelayCommand]
-    private void RemoveProperty(JsonPropertyDefinition? prop)
+    private async Task RemovePropertyAsync(JsonPropertyDefinition? prop)
     {
         if (prop == null) return;
+        var confirmed = await _dialogService.ShowConfirmAsync(
+            "Remove property",
+            $"Remove '{prop.Name}' from the schema?");
+        if (!confirmed)
+        {
+            return;
+        }
         Properties.Remove(prop);
         foreach (var row in Rows)
             row.RemoveProperty(prop.Name);
-        NotifySuccess($"✓ Property '{prop.Name}' removed");
+        NotifySuccess($"Property '{prop.Name}' removed");
         ColumnsChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -102,24 +109,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         foreach (var prop in Properties)
             row.InitializeProperty(prop.Name);
         Rows.Add(row);
-        NotifySuccess($"✓ Row added ({Rows.Count} total)");
-    }
-
-    [RelayCommand]
-    private void RemoveRows(object? parameter)
-    {
-        if (parameter is not IList items || items.Count == 0)
-        {
-            if (SelectedRow != null)
-                Rows.Remove(SelectedRow);
-            return;
-        }
-
-        var toRemove = items.Cast<DynamicDataRow>().ToList();
-        foreach (var row in toRemove)
-            Rows.Remove(row);
-
-        NotifySuccess($"✓ {toRemove.Count} row(s) removed");
+        NotifySuccess($"Row added ({Rows.Count} total)");
     }
 
     [RelayCommand]
@@ -138,7 +128,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             DuplicateSingleRow(row);
         }
 
-        NotifySuccess($"✓ {toDuplicate.Count} row(s) duplicated to bottom");
+        NotifySuccess($"{toDuplicate.Count} row(s) duplicated to bottom");
     }
 
     private void DuplicateSingleRow(DynamicDataRow row)
@@ -178,7 +168,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
 
         await _dialogService.CopyToClipboardAsync(json);
-        NotifySuccess($"✓ {selectedRows.Count} row(s) copied to clipboard as JSON");
+        NotifySuccess($"{selectedRows.Count} row(s) copied to clipboard as JSON");
     }
 
     [RelayCommand]
@@ -226,7 +216,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             Rows.Add(row);
 
         Header = Path.GetFileNameWithoutExtension(path);
-        NotifySuccess($"✓ Imported {Rows.Count} rows, {Properties.Count} fields");
+        NotifySuccess($"Imported {Rows.Count} rows, {Properties.Count} fields");
         ColumnsChanged?.Invoke(this, EventArgs.Empty);
     }
 
@@ -249,7 +239,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         var json = _jsonService.SerializeToJson(Rows, Properties);
         await File.WriteAllTextAsync(path, json, Encoding.UTF8);
-        NotifySuccess($"✓ Exported to {Path.GetFileName(path)}");
+        NotifySuccess($"Exported to {Path.GetFileName(path)}");
     }
 
     [RelayCommand]

@@ -59,11 +59,22 @@ public partial class WorkspaceView : UserControl
         {
             var header = $"{prop.Name} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})";
 
+            var headerText = new TextBlock
+            {
+                Text = header,
+                TextTrimming = TextTrimming.CharacterEllipsis,
+                TextWrapping = TextWrapping.NoWrap,
+                MaxLines = 1,
+                VerticalAlignment = VerticalAlignment.Center
+            };
+            ToolTip.SetTip(headerText, header);
+
             var column = new DataGridTemplateColumn
             {
-                Header = header,
-                Width = DataGridLength.Auto,
-                IsReadOnly = false
+                Header = headerText,
+                Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                MinWidth = 140,
+                IsReadOnly = false,
             };
 
             var isComplexType = prop.FieldType == JsonFieldType.Object || prop.FieldType == JsonFieldType.Array;
@@ -75,7 +86,12 @@ public partial class WorkspaceView : UserControl
                 {
                     Converter = new SearchHighlightConverter()
                 };
-                mb.Bindings.Add(new Binding($"[{prop.Name}]"));
+                mb.Bindings.Add(new Binding
+                {
+                    Path = ".",
+                    Converter = new DynamicRowValueConverter(),
+                    ConverterParameter = prop.Name
+                });
                 mb.Bindings.Add(new Binding("DataContext.SearchQuery") { RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) } });
                 border.Bind(Border.BackgroundProperty, mb);
 
@@ -88,17 +104,25 @@ public partial class WorkspaceView : UserControl
                         Margin = new Avalonia.Thickness(12, 12, 8, 12),
                         Foreground = Brushes.LightGray,
                         TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                        MaxLines = 3
                     };
-                    tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding($"[{prop.Name}]") 
-                    { 
-                        Converter = new JsonPreviewConverter() 
+                    tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding
+                    {
+                        Path = ".",
+                        Converter = new DynamicRowJsonPreviewConverter(),
+                        ConverterParameter = prop.Name
                     });
                     tb.Bind(TextBlockHelper.HighlightTextProperty, new Binding("DataContext.SearchQuery") { RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) } });
                     
                     var editBtn = new Button
                     {
-                        Content = "📝",
+                        Content = new Material.Icons.Avalonia.MaterialIcon
+                        {
+                            Kind = Material.Icons.MaterialIconKind.PencilOutline,
+                            Width = 16,
+                            Height = 16
+                        },
                         Padding = new Avalonia.Thickness(4, 2),
                         Margin = new Avalonia.Thickness(0, 0, 4, 0),
                         Cursor = Avalonia.Input.Cursor.Parse("Hand"),
@@ -123,10 +147,16 @@ public partial class WorkspaceView : UserControl
                 {
                     var tb = new TextBlock
                     {
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Margin = new Avalonia.Thickness(12, 0)
+                        VerticalAlignment = VerticalAlignment.Top,
+                        Margin = new Avalonia.Thickness(12, 8, 12, 8),
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap
                     };
-                    tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding($"[{prop.Name}]") { Mode = BindingMode.TwoWay });
+                    tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding
+                    {
+                        Path = ".",
+                        Converter = new DynamicRowValueConverter(),
+                        ConverterParameter = prop.Name
+                    });
                     tb.Bind(TextBlockHelper.HighlightTextProperty, new Binding("DataContext.SearchQuery") { RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) } });
                     border.Child = tb;
                 }
@@ -140,11 +170,15 @@ public partial class WorkspaceView : UserControl
                 {
                     var tb = new TextBox
                     {
-                        VerticalAlignment = VerticalAlignment.Center,
-                        Margin = new Avalonia.Thickness(4, 0),
-                        Padding = new Avalonia.Thickness(0)
+                        Classes = { "grid-editor" },
+                        VerticalAlignment = VerticalAlignment.Stretch,
+                        VerticalContentAlignment = VerticalAlignment.Top,
+                        HorizontalContentAlignment = HorizontalAlignment.Left,
+                        TextWrapping = TextWrapping.Wrap,
+                        AcceptsReturn = true
                     };
-                    tb.Bind(TextBox.TextProperty, new Binding($"[{prop.Name}]") { Mode = BindingMode.TwoWay });
+                    tb.Text = row[prop.Name];
+                    tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
                     return tb;
                 });
             }

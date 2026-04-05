@@ -3,6 +3,7 @@
              xmlns:local="using:CraftHub"
              xmlns:converters="using:CraftHub.Converters"
              xmlns:models="using:CraftHub.Models"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="CraftHub.App"
              RequestedThemeVariant="Default">
     <Application.DataTemplates>
@@ -15,12 +16,14 @@
                             Grid.RowSpan="2"
                             Background="{Binding Type, Converter={StaticResource NotificationBrush}}" />
 
-                    <TextBlock Grid.Column="1"
-                               Grid.RowSpan="2"
-                               Classes="notification-icon"
-                               Text="{Binding Icon}"
-                               Foreground="{Binding Type, Converter={StaticResource NotificationBrush}}"
-                               VerticalAlignment="Center" />
+                    <Border Grid.Column="1"
+                            Grid.RowSpan="2"
+                            Classes="notification-icon-wrap">
+                        <materialIcons:MaterialIcon Classes="notification-icon"
+                                                    Kind="{Binding Type, Converter={StaticResource NotificationIconKind}}"
+                                                    Foreground="{Binding Type, Converter={StaticResource NotificationBrush}}"
+                                                    VerticalAlignment="Center" />
+                    </Border>
 
                     <TextBlock Grid.Column="2"
                                Grid.Row="0"
@@ -38,7 +41,7 @@
                     <Button Grid.Column="3"
                             Grid.RowSpan="2"
                             Classes="notification-close"
-                            Content="✕"
+                            Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
                             Command="{Binding DataContext.DismissNotificationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                             CommandParameter="{Binding}" />
                 </Grid>
@@ -52,6 +55,8 @@
                 <ResourceInclude Source="/Resources/Themes/ThemeHolder.axaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:NotificationTypeToBrushConverter x:Key="NotificationBrush" />
+            <converters:NotificationTypeToIconKindConverter x:Key="NotificationIconKind" />
+            <converters:CountToVisibilityConverter x:Key="CountToVisibility" />
             <!-- Used by the notification manager list (MainWindow.axaml uses StaticResource). -->
             <DataTemplate x:Key="NotificationRowTemplate" DataType="models:Notification">
                 <Border Classes="notification-row">
@@ -60,12 +65,14 @@
                                 Grid.RowSpan="2"
                                 Background="{Binding Type, Converter={StaticResource NotificationBrush}}" />
 
-                        <TextBlock Grid.Column="1"
-                                   Grid.RowSpan="2"
-                                   Classes="notification-icon"
-                                   Text="{Binding Icon}"
-                                   Foreground="{Binding Type, Converter={StaticResource NotificationBrush}}"
-                                   VerticalAlignment="Center" />
+                        <Border Grid.Column="1"
+                                Grid.RowSpan="2"
+                                Classes="notification-icon-wrap">
+                            <materialIcons:MaterialIcon Classes="notification-icon"
+                                                        Kind="{Binding Type, Converter={StaticResource NotificationIconKind}}"
+                                                        Foreground="{Binding Type, Converter={StaticResource NotificationBrush}}"
+                                                        VerticalAlignment="Center" />
+                        </Border>
 
                         <TextBlock Grid.Column="2"
                                    Grid.Row="0"
@@ -81,7 +88,7 @@
                         <Button Grid.Column="3"
                                 Grid.RowSpan="2"
                                 Classes="notification-close"
-                                Content="✕"
+                                Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
                                 Command="{Binding DataContext.DismissHistoryNotificationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                                 CommandParameter="{Binding}" />
                     </Grid>
@@ -97,6 +104,7 @@
                 <ColorPaletteResources x:Key="Dark" Accent="#4F46E5" RegionColor="#12121A" ErrorText="#EF4444" />
             </FluentTheme.Palettes>
         </FluentTheme>
+        <materialIcons:MaterialIconStyles />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
         <StyleInclude Source="/Resources/Styles/ControlStyles.axaml" />
         <StyleInclude Source="/Resources/Styles/ButtonStyles.axaml" />

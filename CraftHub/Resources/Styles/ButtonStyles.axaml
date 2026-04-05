@@ -10,8 +10,8 @@
         <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
-    <Style Selector="Button.toolbar-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource AccentPrimary}" />
+    <Style Selector="Button.toolbar-btn:pointerover">
+        <Setter Property="Background" Value="{DynamicResource AccentHover}" />
         <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
     </Style>
 
@@ -48,7 +48,7 @@
         <Setter Property="FontSize" Value="13" />
         <Setter Property="Cursor" Value="Hand" />
     </Style>
-    <Style Selector="Button.tab-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Style Selector="Button.tab-btn:pointerover">
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
     </Style>
@@ -62,6 +62,46 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}" />
         <Setter Property="Margin" Value="4,0" />
         <Setter Property="FontSize" Value="13" />
+    </Style>
+
+    <!-- New tab shell styling (close button inside the tab) -->
+    <Style Selector="Button.tab-shell">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+        <Setter Property="CornerRadius" Value="8" />
+        <Setter Property="Margin" Value="4,0" />
+        <Setter Property="Padding" Value="6,2" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button.tab-shell:pointerover">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+    </Style>
+    <Style Selector="Button.tab-shell.tab-active">
+        <Setter Property="Background" Value="{DynamicResource AccentPrimary}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}" />
+    </Style>
+
+    <Style Selector="Button.tab-close">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="4" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="MinWidth" Value="20" />
+        <Setter Property="MinHeight" Value="20" />
+    </Style>
+    <Style Selector="Button.tab-shell.tab-active Button.tab-close">
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+    </Style>
+    <Style Selector="Button.tab-close:pointerover">
+        <Setter Property="Background" Value="{DynamicResource DangerColor}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
     </Style>
 
     <Style Selector="Button.tab-add">

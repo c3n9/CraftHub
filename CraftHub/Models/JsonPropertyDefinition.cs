@@ -13,6 +13,13 @@ public partial class JsonPropertyDefinition : ObservableObject
     [ObservableProperty] private JsonFieldType _fieldType = JsonFieldType.String;
     [ObservableProperty] private JsonFieldType _arrayElementType = JsonFieldType.String;
 
+    public string TypeLabel => GetTypeDisplayName(FieldType);
+
+    partial void OnFieldTypeChanged(JsonFieldType value)
+    {
+        OnPropertyChanged(nameof(TypeLabel));
+    }
+
     /// <summary>Child properties for Object type fields.</summary>
     public ObservableCollection<JsonPropertyDefinition> Children { get; } = new();
 

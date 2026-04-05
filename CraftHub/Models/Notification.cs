@@ -26,13 +26,5 @@ public sealed class Notification
     public NotificationType Type { get; }
     public DateTimeOffset Timestamp { get; }
 
-    public string Icon => Type switch
-    {
-        NotificationType.Success => "✔",
-        NotificationType.Warning => "⚠",
-        NotificationType.Error => "✖",
-        _ => "ℹ"
-    };
-
     public string TimestampLabel => Timestamp.ToString("t");
 }

@@ -49,9 +49,19 @@ public partial class JsonEditorDialog : Window
         {
             var header = $"{prop.Name} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})";
 
+            var headerText = new Avalonia.Controls.TextBlock
+            {
+                Text = header,
+                TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
+                TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
+                MaxLines = 1,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
+            };
+            Avalonia.Controls.ToolTip.SetTip(headerText, header);
+
             var column = new Avalonia.Controls.DataGridTemplateColumn
             {
-                Header = header,
+                Header = headerText,
                 Width = Avalonia.Controls.DataGridLength.Auto,
                 IsReadOnly = false
             };
@@ -71,16 +81,24 @@ public partial class JsonEditorDialog : Window
                         Margin = new Avalonia.Thickness(12, 12, 8, 12),
                         Foreground = Avalonia.Media.Brushes.LightGray,
                         TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                        MaxLines = 3
                     };
-                    tb.Bind(Avalonia.Controls.TextBlock.TextProperty, new Avalonia.Data.Binding($"[{prop.Name}]") 
-                    { 
-                        Converter = new CraftHub.Converters.JsonPreviewConverter() 
+                    tb.Bind(Avalonia.Controls.TextBlock.TextProperty, new Avalonia.Data.Binding
+                    {
+                        Path = ".",
+                        Converter = new CraftHub.Converters.DynamicRowJsonPreviewConverter(),
+                        ConverterParameter = prop.Name
                     });
                     
                     var editBtn = new Avalonia.Controls.Button
                     {
-                        Content = "📝",
+                        Content = new Material.Icons.Avalonia.MaterialIcon
+                        {
+                            Kind = Material.Icons.MaterialIconKind.PencilOutline,
+                            Width = 16,
+                            Height = 16
+                        },
                         Padding = new Avalonia.Thickness(4, 2),
                         Margin = new Avalonia.Thickness(0, 0, 4, 0),
                         Cursor = Avalonia.Input.Cursor.Parse("Hand"),
@@ -106,9 +124,17 @@ public partial class JsonEditorDialog : Window
                     var tb = new Avalonia.Controls.TextBlock
                     {
                         VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                        Margin = new Avalonia.Thickness(12, 0)
+                        Margin = new Avalonia.Thickness(12, 0),
+                        TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
+                        TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
+                        MaxLines = 1
                     };
-                    tb.Bind(Avalonia.Controls.TextBlock.TextProperty, new Avalonia.Data.Binding($"[{prop.Name}]") { Mode = Avalonia.Data.BindingMode.TwoWay });
+                    tb.Bind(Avalonia.Controls.TextBlock.TextProperty, new Avalonia.Data.Binding
+                    {
+                        Path = ".",
+                        Converter = new CraftHub.Converters.DynamicRowValueConverter(),
+                        ConverterParameter = prop.Name
+                    });
                     border.Child = tb;
                 }
                 
@@ -125,7 +151,8 @@ public partial class JsonEditorDialog : Window
                         Margin = new Avalonia.Thickness(4, 0),
                         Padding = new Avalonia.Thickness(0)
                     };
-                    tb.Bind(Avalonia.Controls.TextBox.TextProperty, new Avalonia.Data.Binding($"[{prop.Name}]") { Mode = Avalonia.Data.BindingMode.TwoWay });
+                    tb.Text = row[prop.Name];
+                    tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
                     return tb;
                 });
             }

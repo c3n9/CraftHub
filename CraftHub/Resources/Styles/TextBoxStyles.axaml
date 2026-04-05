@@ -13,5 +13,13 @@
     <Style Selector="TextBox:focus /template/ Border">
         <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}" />
     </Style>
+    <Style Selector="TextBox.grid-editor">
+        <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="Margin" Value="6,4" />
+        <Setter Property="MinHeight" Value="40" />
+    </Style>
 
 </Styles>

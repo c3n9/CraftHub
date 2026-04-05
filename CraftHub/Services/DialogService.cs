@@ -42,37 +42,15 @@ public class DialogService : IDialogService
         var window = GetMainWindow();
         if (window == null) return;
 
-        var msgDialog = new Window
+        var msgDialog = new MessageBoxDialog
         {
             Title = title,
-            Width = 400,
-            Height = 180,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Content = new StackPanel
-            {
-                Margin = new Avalonia.Thickness(20),
-                Spacing = 16,
-                Children =
-                {
-                    new TextBlock
-                    {
-                        Text = message,
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap
-                    },
-                    new Button
-                    {
-                        Content = "OK",
-                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                        MinWidth = 80
-                    }
-                }
-            }
+            TitleText = title,
+            MessageText = message,
+            IsConfirm = false
         };
 
-        var okButton = ((StackPanel)msgDialog.Content).Children[1] as Button;
-        okButton!.Click += (_, _) => msgDialog.Close();
-
-        await msgDialog.ShowDialog(window);
+        await msgDialog.ShowDialog<bool>(window);
     }
 
     public async Task<bool> ShowConfirmAsync(string title, string message)
@@ -80,45 +58,15 @@ public class DialogService : IDialogService
         var window = GetMainWindow();
         if (window == null) return false;
 
-        var confirmed = false;
-        var msgDialog = new Window
+        var msgDialog = new MessageBoxDialog
         {
             Title = title,
-            Width = 400,
-            Height = 180,
-            WindowStartupLocation = WindowStartupLocation.CenterOwner,
-            Content = new StackPanel
-            {
-                Margin = new Avalonia.Thickness(20),
-                Spacing = 16,
-                Children =
-                {
-                    new TextBlock
-                    {
-                        Text = message,
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap
-                    },
-                    new StackPanel
-                    {
-                        Orientation = Avalonia.Layout.Orientation.Horizontal,
-                        HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Center,
-                        Spacing = 12,
-                        Children =
-                        {
-                            new Button { Content = "Yes", MinWidth = 80, Tag = "yes" },
-                            new Button { Content = "No", MinWidth = 80, Tag = "no" }
-                        }
-                    }
-                }
-            }
+            TitleText = title,
+            MessageText = message,
+            IsConfirm = true
         };
 
-        var buttonPanel = ((StackPanel)msgDialog.Content).Children[1] as StackPanel;
-        (buttonPanel!.Children[0] as Button)!.Click += (_, _) => { confirmed = true; msgDialog.Close(); };
-        (buttonPanel.Children[1] as Button)!.Click += (_, _) => { confirmed = false; msgDialog.Close(); };
-
-        await msgDialog.ShowDialog(window);
-        return confirmed;
+        return await msgDialog.ShowDialog<bool>(window);
     }
 
     public async Task CopyToClipboardAsync(string text)
