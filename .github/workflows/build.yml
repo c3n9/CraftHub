@@ -1,0 +1,70 @@
+name: Build All Platforms
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_win_x86:
+        description: 'Build Windows x86'
+        required: false
+        type: boolean
+        default: true
+      build_win_x64:
+        description: 'Build Windows x64'
+        required: false
+        type: boolean
+        default: true
+      build_win_arm64:
+        description: 'Build Windows ARM64'
+        required: false
+        type: boolean
+        default: true
+      build_linux_x64:
+        description: 'Build Linux x64'
+        required: false
+        type: boolean
+        default: true
+      build_linux_arm64:
+        description: 'Build Linux ARM64'
+        required: false
+        type: boolean
+        default: true
+      build_osx_x64:
+        description: 'Build macOS Intel (x64)'
+        required: false
+        type: boolean
+        default: true
+      build_osx_arm64:
+        description: 'Build macOS Silicon (ARM64)'
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  linux-x64:
+    if: ${{ github.event.inputs.build_linux_x64 == 'true' }}
+    uses: ./.github/workflows/build-linux-x64.yml
+    secrets: inherit
+  linux-arm64:
+    if: ${{ github.event.inputs.build_linux_arm64 == 'true' }}
+    uses: ./.github/workflows/build-linux-arm64.yml
+    secrets: inherit
+  mac-x64:
+    if: ${{ github.event.inputs.build_osx_x64 == 'true' }}
+    uses: ./.github/workflows/build-mac-x64.yml
+    secrets: inherit
+  mac-arm64:
+    if: ${{ github.event.inputs.build_osx_arm64 == 'true' }}
+    uses: ./.github/workflows/build-mac-arm64.yml
+    secrets: inherit
+  win-x64:
+    if: ${{ github.event.inputs.build_win_x64 == 'true' }}
+    uses: ./.github/workflows/build-win-x64.yml
+    secrets: inherit
+  win-arm64:
+    if: ${{ github.event.inputs.build_win_arm64 == 'true' }}
+    uses: ./.github/workflows/build-win-arm64.yml
+    secrets: inherit
+  win-x86:
+    if: ${{ github.event.inputs.build_win_x86 == 'true' }}
+    uses: ./.github/workflows/build-win-x32.yml
+    secrets: inherit

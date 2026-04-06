@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=CraftHub
+Comment=CraftHub features a powerful JSON editor and JSON creation tools, alongside an intuitive platform for uploading existing programming language classes or building new ones from scratch.
+Icon=crafthub
+Exec=/usr/share/crafthub/CraftHub %F %U
+StartupWMClass=crafthub
+Terminal=false
+Type=Application
+Categories=Development
+GenericName=CraftHub
+Keywords=json; hub; crafthub

@@ -1,0 +1,38 @@
+name: Build Windows Arm64
+
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Read version from version.txt
+        id: version
+        run: |
+          version=$(cat ./build-resources/version.txt | tr -d '\n\r')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Version read from version.txt: $version"
+
+      - name: Install nsis
+        run: | 
+          sudo dpkg --add-architecture i386
+          sudo apt-get install -y nsis nsis-doc nsis-pluginapi software-properties-common apt-transport-https
+
+      - name: Build project and hash computer
+        run: | 
+          cd build-win
+          chmod a+x ./buildArm64.sh
+          ./buildArm64.sh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          files: |
+            ./build-win/crafthub_arm64.exe
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

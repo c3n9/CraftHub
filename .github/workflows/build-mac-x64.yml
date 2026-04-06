@@ -1,0 +1,33 @@
+name: Build Mac x64
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Read version from version.txt
+        id: version
+        run: |
+          version=$(cat ./build-resources/version.txt | tr -d '\n\r')
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "Version read from version.txt: $version"
+
+      - name: Build project and hash computer
+        run: | 
+          cd build-mac
+          chmod a+x ./build.sh
+          ./build.sh
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Release v${{ steps.version.outputs.version }}
+          files: |
+            ./build-mac/staging_folder/CraftHub_x64.dmg
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

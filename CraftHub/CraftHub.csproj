@@ -55,4 +55,8 @@
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <AvaloniaResource Remove="logo.ico" />
+  </ItemGroup>
 </Project>

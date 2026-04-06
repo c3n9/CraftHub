@@ -1,0 +1,11 @@
+Package: crafthub
+Version: currentVersionIsPlacedHere
+Section: devel
+Priority: optional
+Architecture: arm64
+Installed-Size: 153600
+Depends: libx11-6, libice6, libsm6, libfontconfig1, ca-certificates, tzdata, libc6, libgcc1, libgssapi-krb5-2, libstdc++6, zlib1g, libssl1.0.0 | libssl1.0.2 | libssl1.1 | libssl3, libicu | libicu76 | libicu75 | libicu74 | libicu73 | libicu72 | libicu71 | libicu70 | libicu69 | libicu68 | libicu67 | libicu66 | libicu65 | libicu63 | libicu60 | libicu57 | libicu55 | libicu52
+Maintainer: Manakov Arseniy
+Homepage: https://github.com/c3n9/CraftHub
+Description: CraftHub features a powerful JSON editor and JSON creation tools, alongside an intuitive platform for uploading existing programming language classes or building new ones from scratch.
+Copyright: 2026 Manakov Corp.
