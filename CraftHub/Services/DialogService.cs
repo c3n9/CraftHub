@@ -69,6 +69,23 @@ public class DialogService : IDialogService
         return await msgDialog.ShowDialog<bool>(window);
     }
 
+    public async Task<string?> ShowInputDialogAsync(string title, string message, string initialValue, string? placeholder = null)
+    {
+        var window = GetMainWindow();
+        if (window == null) return null;
+
+        var dialog = new InputDialogView
+        {
+            Title = title,
+            TitleText = title,
+            MessageText = message,
+            InputText = initialValue,
+            PlaceholderText = placeholder ?? string.Empty
+        };
+
+        return await dialog.ShowDialog<string?>(window);
+    }
+
     public async Task CopyToClipboardAsync(string text)
     {
         var window = GetMainWindow();

@@ -302,6 +302,36 @@ public partial class WorkspaceViewModel : ViewModelBase
         CloseRequested?.Invoke(this, EventArgs.Empty);
     }
 
+    [RelayCommand]
+    private async Task RenameAsync()
+    {
+        var newName = await _dialogService.ShowInputDialogAsync(
+            "Rename workspace",
+            "Enter a new name for this tab.",
+            Header,
+            "Workspace name");
+
+        if (newName == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            NotifyWarning("Workspace name can't be empty");
+            return;
+        }
+
+        var trimmed = newName.Trim();
+        if (trimmed == Header)
+        {
+            return;
+        }
+
+        Header = trimmed;
+        NotifySuccess($"Workspace renamed to '{Header}'");
+    }
+
     public async Task EditJsonCellAsync(DynamicDataRow row, string propertyName, JsonFieldType type)
     {
         var currentValue = row[propertyName];

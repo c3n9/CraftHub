@@ -1,0 +1,53 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="CraftHub.Views.InputDialogView"
+        Width="440"
+        Height="160"
+        SizeToContent="Height"
+        CanResize="False"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        TransparencyLevelHint="Transparent"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent">
+  <Border Background="{DynamicResource SurfaceBackground}"
+          BorderBrush="{DynamicResource BorderColor}"
+          BorderThickness="1"
+          CornerRadius="12"
+          Padding="20">
+    <StackPanel Spacing="12">
+      <TextBlock Text="{Binding TitleText}"
+                 FontSize="14"
+                 FontWeight="SemiBold"
+                 Foreground="{DynamicResource TextPrimary}" />
+      <TextBlock Text="{Binding MessageText}"
+                 TextWrapping="Wrap"
+                 Foreground="{DynamicResource TextSecondary}"
+                 Margin="0,2,0,4" />
+      <TextBox x:Name="InputBox"
+               Text="{Binding InputText, Mode=TwoWay}"
+               Watermark="{Binding PlaceholderText}"
+               FontSize="13"
+               Height="34"
+               CornerRadius="6" />
+      <StackPanel Orientation="Horizontal"
+                  HorizontalAlignment="Right"
+                  Spacing="8">
+        <Button x:Name="CancelButton"
+                Classes="tab-btn"
+                VerticalContentAlignment="Center"
+                Content="Cancel"
+                Height="34"
+                Width="96"
+                MinWidth="96" />
+        <Button x:Name="OkButton"
+                Classes="accent-btn"
+                Content="OK"
+                Height="34"
+                Width="96"
+                MinWidth="96" />
+      </StackPanel>
+    </StackPanel>
+  </Border>
+</Window>

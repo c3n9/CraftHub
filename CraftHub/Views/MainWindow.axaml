@@ -59,6 +59,12 @@
                                         Classes.tab-active="{Binding IsActive}"
                                         Command="{Binding $parent[Window].DataContext.SelectWorkspaceCommand}"
                                         CommandParameter="{Binding}">
+                                    <Button.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem Header="Rename"
+                                                      Command="{Binding RenameCommand}" />
+                                        </ContextMenu>
+                                    </Button.ContextMenu>
                                     <Grid ColumnDefinitions="*,Auto">
                                         <TextBlock Text="{Binding Header}"
                                                    VerticalAlignment="Center"
