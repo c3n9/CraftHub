@@ -1,6 +1,8 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using Avalonia;
+using Avalonia.Styling;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CraftHub.Models;
@@ -127,6 +129,22 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var ts = _serviceProvider.GetRequiredService<Services.ThemeService>();
         var currentTheme = ts.CurrentTheme;
-        ts.SwitchTheme(ts.CurrentTheme == Models.Enums.ThemeType.Dark ? Models.Enums.ThemeType.Light : Models.Enums.ThemeType.Dark);
+        Models.Enums.ThemeType targetTheme;
+
+        if (currentTheme == Models.Enums.ThemeType.Default)
+        {
+            var actualVariant = Application.Current?.ActualThemeVariant;
+            targetTheme = actualVariant == ThemeVariant.Dark
+                ? Models.Enums.ThemeType.Light
+                : Models.Enums.ThemeType.Dark;
+        }
+        else
+        {
+            targetTheme = currentTheme == Models.Enums.ThemeType.Dark
+                ? Models.Enums.ThemeType.Light
+                : Models.Enums.ThemeType.Dark;
+        }
+
+        ts.SwitchTheme(targetTheme);
     }
 }
