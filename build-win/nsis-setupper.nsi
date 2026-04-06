@@ -2,12 +2,12 @@ Unicode True
 RequestExecutionLevel admin
 
 !define APP_NAME "CraftHub"
-!define COMP_NAME "Arseniy Corp."
+!define COMP_NAME "Manakov Corporation"
 !define WEB_SITE "https://github.com/c3n9/CraftHub"
 !ifndef VERSION
 !define VERSION "1.0.0"
 !endif
-!define COPYRIGHT "[Arseniy Corp., 2026]"
+!define COPYRIGHT "[Manakov Corporation, 2026]"
 !define DESCRIPTION "CraftHub features a powerful JSON editor and JSON creation tools, alongside an intuitive platform for uploading existing programming language classes or building new ones from scratch."
 !define INSTALLER_NAME "crafthub_x64.exe"
 !define MAIN_APP_EXE "CraftHub.exe"
