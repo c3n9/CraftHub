@@ -24,12 +24,12 @@
         </Border>
 
         <!-- Fields list -->
-        <ScrollViewer Grid.Row="1" Padding="16,8">
-            <ItemsControl ItemsSource="{Binding Fields}">
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
+            <ItemsControl ItemsSource="{Binding Fields}" Margin="10">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate DataType="{x:Type models:JsonFieldMapping}">
                         <Border Background="{DynamicResource ElevatedBackground}" CornerRadius="8"
-                                Padding="16,12" Margin="0,4"
+                                Padding="16,12" Margin="0,4,15,4"
                                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
                             <Grid ColumnDefinitions="*,Auto,Auto">
                                 <StackPanel Spacing="2">
