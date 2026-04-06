@@ -1,5 +1,7 @@
 name: Build Linux Arm64
 
+on:
+  workflow_dispatch:
 
 jobs:
   build:

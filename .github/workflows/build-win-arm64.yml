@@ -1,5 +1,7 @@
 name: Build Windows Arm64
 
+on:
+  workflow_dispatch:
 
 jobs:
   build:
