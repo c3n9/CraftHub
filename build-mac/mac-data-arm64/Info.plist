@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIconFile</key>
-    <string>CraftHubIcon.icns</string>
+    <string>CraftHubIcon</string>
     <key>CFBundleIdentifier</key>
     <string>com.manakov.crafthub</string>
     <key>CFBundleName</key>
