@@ -2,7 +2,7 @@ name: Build Windows x86
 
 on:
   workflow_dispatch:
-
+  workflow_call:
 jobs:
   build:
     runs-on: ubuntu-24.04
