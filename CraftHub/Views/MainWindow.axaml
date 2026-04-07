@@ -20,6 +20,12 @@
                                Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="10" Grid.Column="1" HorizontalAlignment="Right">
+                    <Button Content="{materialIcons:MaterialIconExt Kind=Update}" 
+                            Foreground="{DynamicResource WarningColor}"
+                            IsVisible="{Binding ShowUpdateButton}"
+                            Classes="toolbar-btn"
+                            Command="{Binding DownloadAndStartUpdateCommand}"
+                            ToolTip.Tip="Update" FontSize="16" />
                     <Button Content="{materialIcons:MaterialIconExt Kind=BellNotificationOutline}" Classes="toolbar-btn"
                             Command="{Binding ToggleNotificationManagerCommand}"
                             ToolTip.Tip="Notifications" FontSize="16" />

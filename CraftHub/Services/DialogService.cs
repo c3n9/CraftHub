@@ -1,11 +1,13 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using CraftHub.Models;
 using CraftHub.ViewModels;
 using CraftHub.Views;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CraftHub.Services;
 
@@ -105,5 +107,43 @@ public class DialogService : IDialogService
         dialog.DataContext = vm;
         
         return await dialog.ShowDialog<string?>(window);
+    }
+
+    public async Task<ProgressResult> ShowProgressDialogAsync(string title, Func<IProgress<UpdateProgress>, CancellationToken, Task> task)
+    {
+        var window = GetMainWindow();
+        if (window == null) return ProgressResult.Error("No main window found");
+
+        var dialog = new ProgressDialogView
+        {
+            TitleText = title,
+            MessageText = "Starting...",
+            IsIndeterminate = true
+        };
+
+        ProgressResult result = ProgressResult.Canceled();
+
+        var taskRun = Task.Run(async () =>
+        {
+            try
+            {
+                await dialog.RunWithProgress(task);
+                result = ProgressResult.Success();
+            }
+            catch (OperationCanceledException)
+            {
+                result = ProgressResult.Canceled();
+            }
+            catch (Exception ex)
+            {
+                result = ProgressResult.Error(ex.Message);
+            }
+        });
+
+        await dialog.ShowDialog(window);
+
+        await taskRun;
+
+        return result;
     }
 }

@@ -1,6 +1,9 @@
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using CraftHub.Models;
+using CraftHub.Views;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace CraftHub.Services;
 
@@ -23,4 +26,6 @@ public interface IDialogService
 
     /// <summary>Open a visual nested editor for JSON.</summary>
     Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService);
+
+    Task<ProgressResult> ShowProgressDialogAsync(string title, Func<IProgress<UpdateProgress>, CancellationToken, Task> task);
 }

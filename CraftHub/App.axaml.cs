@@ -30,6 +30,7 @@ public class App : Application
         services.AddSingleton<ThemeService>();
         
         // Register ViewModels
+        services.AddSingleton<MainWindow>();
         services.AddSingleton<MainWindowViewModel>();
         services.AddTransient<WorkspaceViewModel>();
 
@@ -38,10 +39,9 @@ public class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var mainVm = Services.GetRequiredService<MainWindowViewModel>();
-            desktop.MainWindow = new MainWindow
-            {
-                DataContext = mainVm
-            };
+            var mainWindow = Services.GetRequiredService<MainWindow>();
+            mainWindow.DataContext = mainVm;
+            desktop.MainWindow = mainWindow;
         }
 
         base.OnFrameworkInitializationCompleted();

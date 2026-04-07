@@ -1,0 +1,60 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="CraftHub.Views.ProgressDialogView"
+        Width="440"
+        Height="180"
+        SizeToContent="Height"
+        CanResize="False"
+        SystemDecorations="None"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        TransparencyLevelHint="Transparent"
+        WindowStartupLocation="CenterOwner"
+        Background="Transparent">
+    
+    <Border Background="{DynamicResource SurfaceBackground}"
+            BorderBrush="{DynamicResource BorderColor}"
+            BorderThickness="1"
+            CornerRadius="12"
+            Padding="20">
+        
+        <StackPanel Spacing="12">
+            <TextBlock Text="{Binding TitleText}"
+                       FontSize="14"
+                       FontWeight="SemiBold"
+                       Foreground="{DynamicResource TextPrimary}" />
+            
+            <TextBlock Text="{Binding MessageText}"
+                       TextWrapping="Wrap"
+                       Foreground="{DynamicResource TextSecondary}"
+                       Margin="0,2,0,4" />
+            
+            <StackPanel Spacing="8">
+                <ProgressBar x:Name="ProgressBar"
+                             Value="{Binding ProgressValue}"
+                             Minimum="0"
+                             Maximum="100"
+                             Height="6"
+                             CornerRadius="3"
+                             IsIndeterminate="{Binding IsIndeterminate}" />
+                
+                <TextBlock Text="{Binding StatusText}"
+                           FontSize="11"
+                           Foreground="{DynamicResource TextTertiary}"
+                           HorizontalAlignment="Right" />
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="8">
+                <Button x:Name="CancelButton"
+                        Classes="tab-btn"
+                        Content="Cancel"
+                        Height="34"
+                        Width="96"
+                        MinWidth="96"
+                        IsEnabled="{Binding IsCancelEnabled}" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</Window>
