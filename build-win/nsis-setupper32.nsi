@@ -54,35 +54,44 @@ InstallDir "${INSTALL_DIR}"
 
 !include "MUI2.nsh"
 
+; --- Предупреждения о прерывании установки ---
 !define MUI_ABORTWARNING
 !define MUI_UNABORTWARNING
 
+; --- Страница приветствия ---
 !insertmacro MUI_PAGE_WELCOME
 
+; --- Лицензионное соглашение, если задано ---
 !ifdef LICENSE_TXT
-!insertmacro MUI_PAGE_LICENSE "${LICENSE_TXT}"
+    !insertmacro MUI_PAGE_LICENSE "${LICENSE_TXT}"
 !endif
 
+; --- Выбор папки установки ---
 !insertmacro MUI_PAGE_DIRECTORY
 
+; --- Страница выбора Start Menu ---
 !ifdef REG_START_MENU
-!define MUI_STARTMENUPAGE_DEFAULTFOLDER "${APP_NAME}"
-!define MUI_STARTMENUPAGE_REGISTRY_ROOT "${REG_ROOT}"
-!define MUI_STARTMENUPAGE_REGISTRY_KEY "${UNINSTALL_PATH}"
-!define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${REG_START_MENU}"
-!insertmacro MUI_PAGE_STARTMENU Application $SM_Folder
+    !define MUI_STARTMENUPAGE_DEFAULTFOLDER "${APP_NAME}"
+    !define MUI_STARTMENUPAGE_REGISTRY_ROOT "${REG_ROOT}"
+    !define MUI_STARTMENUPAGE_REGISTRY_KEY "${UNINSTALL_PATH}"
+    !define MUI_STARTMENUPAGE_REGISTRY_VALUENAME "${REG_START_MENU}"
+    !insertmacro MUI_PAGE_STARTMENU Application $SM_Folder
 !endif
 
+; --- Страница копирования файлов ---
 !insertmacro MUI_PAGE_INSTFILES
 
+; --- Финальная страница с галочкой "Launch CraftHub" ---
+!define MUI_FINISHPAGE_RUN "$INSTDIR\${MAIN_APP_EXE}"
+!define MUI_FINISHPAGE_RUN_TEXT "Launch ${APP_NAME}"
 !insertmacro MUI_PAGE_FINISH
 
+; --- Страницы удаления (Uninstall) ---
 !insertmacro MUI_UNPAGE_CONFIRM
-
 !insertmacro MUI_UNPAGE_INSTFILES
-
 !insertmacro MUI_UNPAGE_FINISH
 
+; --- Язык интерфейса ---
 !insertmacro MUI_LANGUAGE "English"
 
 ######################################################################
