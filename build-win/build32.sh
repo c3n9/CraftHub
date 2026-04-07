@@ -18,10 +18,6 @@ mkdir -p staging_folder32
 cp -f -a ../CraftHub/bin/Release/net9.0/win-x86/publish/. ./staging_folder32/ # copies all files from publish dir
 echo "CraftHub copied"
 
-# Stables
-cp ../build-resources/computed_stables.txt ./staging_folder32/computed_stables.txt
-echo "Stables copied"
-
 # Make .exe file
 makensis -V1 -DVERSION=$buildVersion ./nsis-setupper32.nsi
 echo ".exe created"
