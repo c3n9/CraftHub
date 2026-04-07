@@ -276,6 +276,7 @@ public partial class MainWindowViewModel : ViewModelBase
             Process.Start(new ProcessStartInfo
             {
                 FileName = filePath,
+                Arguments = $"/S /D={AppContext.BaseDirectory}",
                 UseShellExecute = true
             });
         }
