@@ -9,7 +9,7 @@ RequestExecutionLevel admin
 !endif
 !define COPYRIGHT "[Manakov Corporation, 2026]"
 !define DESCRIPTION "CraftHub features a powerful JSON editor and JSON creation tools, alongside an intuitive platform for uploading existing programming language classes or building new ones from scratch."
-!define INSTALLER_NAME "crafthub_x64.exe"
+!define INSTALLER_NAME "crafthub_arm64.exe"
 !define MAIN_APP_EXE "CraftHub.exe"
 !define ICON "../build-resources/logo.ico"
 !define BANNER "../build-resources/banner.bmp"
