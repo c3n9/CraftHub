@@ -212,8 +212,11 @@
                                 <MenuItem Header="Duplicate Row(s)"
                                           Command="{Binding DuplicateRowsCommand}"
                                           CommandParameter="{Binding #DataGrid.SelectedItems}" />
-                                <MenuItem Header="Copy Row(s) to JSON"
+                                <MenuItem Header="Copy Row(s) as array to JSON"
                                           Command="{Binding CopyRowsToJsonCommand}"
+                                          CommandParameter="{Binding #DataGrid.SelectedItems}" />
+                                <MenuItem Header="Copy Row(s) as objects to JSON"
+                                          Command="{Binding CopyRowsToJsonAsObjectsCommand}"
                                           CommandParameter="{Binding #DataGrid.SelectedItems}" />
                                 <Separator />
                                 <MenuItem Header="Remove Row(s)"

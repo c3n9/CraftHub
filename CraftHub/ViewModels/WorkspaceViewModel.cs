@@ -172,6 +172,39 @@ public partial class WorkspaceViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task CopyRowsToJsonAsObjectsAsync(object? parameter)
+    {
+        IList? items = parameter as IList;
+        List<DynamicDataRow> selectedRows;
+
+        if (items == null || items.Count == 0)
+        {
+            if (SelectedRow == null) return;
+            selectedRows = new List<DynamicDataRow> { SelectedRow };
+        }
+        else
+        {
+            selectedRows = items.Cast<DynamicDataRow>().ToList();
+        }
+
+        string json;
+
+        if (selectedRows.Count == 1)
+        {
+            json = _jsonService.SerializeSingleRowToJson(selectedRows[0], Properties);
+        }
+        else
+        {
+            var objects = selectedRows.Select(row => _jsonService.SerializeSingleRowToJson(row, Properties));
+
+            json = string.Join(", ", objects);
+        }
+
+        await _dialogService.CopyToClipboardAsync(json);
+        NotifySuccess($"{selectedRows.Count} row(s) copied to clipboard as JSON");
+    }
+
+    [RelayCommand]
     private async Task ImportJsonAsync()
     {
         var filters = new List<FilePickerFileType>
