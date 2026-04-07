@@ -81,7 +81,7 @@ InstallDir "${INSTALL_DIR}"
 ; --- Страница копирования файлов ---
 !insertmacro MUI_PAGE_INSTFILES
 
-; --- Финальная страница с галочкой "Launch CraftHub" ---
+; --- Финальная страница с галочкой "Launch CraftHub" (только для GUI) ---
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${MAIN_APP_EXE}"
 !define MUI_FINISHPAGE_RUN_TEXT "Launch ${APP_NAME}"
 !insertmacro MUI_PAGE_FINISH
@@ -93,6 +93,13 @@ InstallDir "${INSTALL_DIR}"
 
 ; --- Язык интерфейса ---
 !insertmacro MUI_LANGUAGE "English"
+
+######################################################################
+
+; Функция для запуска программы (используется в silent режиме)
+Function LaunchApplication
+    Exec '"$INSTDIR\${MAIN_APP_EXE}"'
+FunctionEnd
 
 ######################################################################
 
@@ -146,10 +153,17 @@ Section -Icons_Reg
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "DisplayIcon" "$INSTDIR\${MAIN_APP_EXE}"
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "DisplayVersion" "${VERSION}"
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "Publisher" "${COMP_NAME}"
+    WriteRegDWORD ${REG_ROOT} "${UNINSTALL_PATH}" "NoModify" 1
+    WriteRegDWORD ${REG_ROOT} "${UNINSTALL_PATH}" "NoRepair" 1
 
     !ifdef WEB_SITE
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "URLInfoAbout" "${WEB_SITE}"
     !endif
+
+    ; --- Silent режим: автоматический запуск после установки ---
+    ${If} ${Silent}
+        Call LaunchApplication
+    ${EndIf}
 SectionEnd
 
 ######################################################################

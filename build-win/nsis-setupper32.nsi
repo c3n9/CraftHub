@@ -96,6 +96,12 @@ InstallDir "${INSTALL_DIR}"
 
 ######################################################################
 
+Function LaunchApplication
+    Exec '"$INSTDIR\${MAIN_APP_EXE}"'
+FunctionEnd
+
+######################################################################
+
 Section -MainProgram
 	${INSTALL_TYPE}
 
@@ -146,10 +152,17 @@ Section -Icons_Reg
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "DisplayIcon" "$INSTDIR\${MAIN_APP_EXE}"
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "DisplayVersion" "${VERSION}"
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "Publisher" "${COMP_NAME}"
+    WriteRegDWORD ${REG_ROOT} "${UNINSTALL_PATH}" "NoModify" 1
+    WriteRegDWORD ${REG_ROOT} "${UNINSTALL_PATH}" "NoRepair" 1
 
     !ifdef WEB_SITE
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "URLInfoAbout" "${WEB_SITE}"
     !endif
+
+    ; --- Silent режим: автоматический запуск после установки ---
+    ${If} ${Silent}
+        Call LaunchApplication
+    ${EndIf}
 SectionEnd
 
 ######################################################################
