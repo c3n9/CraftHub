@@ -54,6 +54,27 @@ InstallDir "${INSTALL_DIR}"
 
 !include "MUI2.nsh"
 
+; --- Переменные ---
+Var INSTDIR_OVERRIDE
+Var SM_Folder
+
+; --- Обработка командной строки ---
+Function .onInit
+    ; Получаем параметры командной строки
+    ${GetParameters} $R0
+
+    ; Проверяем наличие /D="..." и подставляем INSTDIR
+    ${GetOptions} $R0 "/D=" $INSTDIR_OVERRIDE
+    StrCmp $INSTDIR_OVERRIDE "" 0 +2
+        StrCpy $INSTDIR $INSTDIR_OVERRIDE
+
+    ; Проверяем наличие /RUN и сохраняем флаг для финальной страницы
+    ${GetOptions} $R0 "/RUN" $R1
+    StrCmp $R1 "" done
+        StrCpy $INSTDIR_OVERRIDE $INSTDIR
+    done:
+FunctionEnd
+
 ; --- Предупреждения о прерывании установки ---
 !define MUI_ABORTWARNING
 !define MUI_UNABORTWARNING
@@ -84,6 +105,15 @@ InstallDir "${INSTALL_DIR}"
 ; --- Финальная страница с галочкой "Launch CraftHub" ---
 !define MUI_FINISHPAGE_RUN "$INSTDIR\${MAIN_APP_EXE}"
 !define MUI_FINISHPAGE_RUN_TEXT "Launch ${APP_NAME}"
+
+; --- Функция автозапуска при консольном обновлении ---
+Function AutoRunIfConsole
+    StrCmp $INSTDIR_OVERRIDE "" done
+        Exec "$INSTDIR\${MAIN_APP_EXE}"
+    done:
+FunctionEnd
+
+!define MUI_FINISHPAGE_RUN_FUNCTION AutoRunIfConsole
 !insertmacro MUI_PAGE_FINISH
 
 ; --- Страницы удаления (Uninstall) ---
