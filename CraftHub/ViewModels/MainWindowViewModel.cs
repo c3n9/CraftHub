@@ -125,7 +125,7 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         var confirmed = await _dialogService.ShowConfirmAsync(
             "New version",
-            $"Do you want to download the new version?");
+            $"Do you want to download the new version? Save all files before starting the installation.");
         if (!confirmed)
         {
             return;
