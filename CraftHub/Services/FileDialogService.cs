@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
+using CraftHub.Core;
 
 namespace CraftHub.Services;
 
@@ -16,30 +17,34 @@ public class FileDialogService : IFileDialogService
         return null;
     }
 
-    public async Task<string?> OpenFileAsync(string title, IReadOnlyList<FilePickerFileType> filters)
+    public async Task<string?> OpenFileAsync(string title, IReadOnlyList<FileFilter> filters)
     {
         var sp = GetStorageProvider();
         if (sp == null) return null;
+
+        var avaloniaFilters = filters.Select(f => new FilePickerFileType(f.Name) { Patterns = f.Patterns }).ToList();
 
         var result = await sp.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = title,
             AllowMultiple = false,
-            FileTypeFilter = filters
+            FileTypeFilter = avaloniaFilters
         });
 
         return result.FirstOrDefault()?.Path.LocalPath;
     }
 
-    public async Task<string?> SaveFileAsync(string title, IReadOnlyList<FilePickerFileType> filters)
+    public async Task<string?> SaveFileAsync(string title, IReadOnlyList<FileFilter> filters)
     {
         var sp = GetStorageProvider();
         if (sp == null) return null;
 
+        var avaloniaFilters = filters.Select(f => new FilePickerFileType(f.Name) { Patterns = f.Patterns }).ToList();
+
         var result = await sp.SaveFilePickerAsync(new FilePickerSaveOptions
         {
             Title = title,
-            FileTypeChoices = filters
+            FileTypeChoices = avaloniaFilters
         });
 
         return result?.Path.LocalPath;

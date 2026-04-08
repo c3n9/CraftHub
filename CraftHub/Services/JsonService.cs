@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using CraftHub.Models;
+using CraftHub.Core;
+using CraftHub.Domain.Enums;
+using CraftHub.Domain.Models;
 
 namespace CraftHub.Services;
 

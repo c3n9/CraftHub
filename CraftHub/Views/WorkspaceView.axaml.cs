@@ -9,6 +9,8 @@ using CraftHub.Converters;
 using CraftHub.Models;
 using CraftHub.ViewModels;
 using CraftHub.Helpers;
+using CraftHub.Domain.Models;
+using CraftHub.Domain.Enums;
 
 namespace CraftHub.Views;
 

@@ -2,15 +2,18 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using CraftHub.Services;
+using CraftHub.Services.ServicesCollectionExtension;
 using CraftHub.ViewModels;
 using CraftHub.Views;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 
 namespace CraftHub;
 
 public class App : Application
 {
-    public static ServiceProvider? Services { get; private set; }
+    public IServiceProvider Services { get; private set; }
+    public new static App Current => (App)Application.Current;
 
     public override void Initialize()
     {
@@ -19,22 +22,13 @@ public class App : Application
 
     public override void OnFrameworkInitializationCompleted()
     {
-        var services = new ServiceCollection();
+        var collection = new ServiceCollection();
 
-        // Register services
-        services.AddSingleton<NotificationService>();
-        services.AddSingleton<IFileDialogService, FileDialogService>();
-        services.AddSingleton<IJsonService, JsonService>();
-        services.AddSingleton<IClassParserService, ClassParserService>();
-        services.AddSingleton<IDialogService, DialogService>();
-        services.AddSingleton<ThemeService>();
-        
-        // Register ViewModels
-        services.AddSingleton<MainWindow>();
-        services.AddSingleton<MainWindowViewModel>();
-        services.AddTransient<WorkspaceViewModel>();
+        collection.AddCommonServices();
+        collection.AddViewModels();
+        collection.AddViews();
 
-        Services = services.BuildServiceProvider();
+        Services = collection.BuildServiceProvider();
 
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {

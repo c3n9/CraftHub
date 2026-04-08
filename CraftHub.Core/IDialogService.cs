@@ -1,11 +1,9 @@
-using CraftHub.Models;
-using CraftHub.Views;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
 
-namespace CraftHub.Services;
+
+using CraftHub.Domain.Enums;
+using CraftHub.Domain.Models;
+
+namespace CraftHub.Core;
 
 public interface IDialogService
 {

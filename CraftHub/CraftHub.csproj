@@ -65,4 +65,8 @@
 	<ItemGroup>
 		<AvaloniaResource Remove="logo.ico" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\CraftHub.Core\CraftHub.Core.csproj" />
+	</ItemGroup>
 </Project>

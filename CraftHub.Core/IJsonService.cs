@@ -1,7 +1,7 @@
-using System.Collections.Generic;
-using CraftHub.Models;
 
-namespace CraftHub.Services;
+using CraftHub.Domain.Models;
+
+namespace CraftHub.Core;
 
 public interface IJsonService
 {

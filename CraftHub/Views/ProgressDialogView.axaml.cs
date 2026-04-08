@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
+using CraftHub.Domain.Models;
 using CraftHub.Models;
 using System;
 using System.ComponentModel;

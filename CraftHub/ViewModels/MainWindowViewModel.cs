@@ -1,11 +1,12 @@
 using Avalonia;
 using Avalonia.Styling;
-using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CraftHub.Core;
+using CraftHub.Domain.Models;
+using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.Services;
-using CraftHub.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
@@ -197,7 +198,7 @@ public partial class MainWindowViewModel : ViewModelBase
                                 {
                                     var updateProgress = new UpdateProgress();
                                     updateProgress.BytesReceived = totalRead;
-                                    updateProgress.Status = $"Downloading... {updateProgress.FormattedProgress}";
+                                    updateProgress.Status = $"Downloading... {FileSizeHelper.FormatFileSize(updateProgress.BytesReceived)}";
                                     progress.Report(updateProgress);
                                 }
                             }

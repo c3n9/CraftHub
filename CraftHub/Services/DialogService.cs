@@ -1,6 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using CraftHub.Core;
+using CraftHub.Domain.Enums;
+using CraftHub.Domain.Models;
 using CraftHub.Models;
 using CraftHub.ViewModels;
 using CraftHub.Views;

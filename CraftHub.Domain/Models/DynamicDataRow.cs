@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 
-namespace CraftHub.Models;
+namespace CraftHub.Domain.Models;
 
 /// <summary>
 /// A row of data with dynamic properties accessed via string indexer.

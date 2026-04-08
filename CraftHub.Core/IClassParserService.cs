@@ -1,7 +1,7 @@
-using System.Collections.Generic;
+using CraftHub.Domain.Models;
 using CraftHub.Models;
 
-namespace CraftHub.Services;
+namespace CraftHub.Core;
 
 public interface IClassParserService
 {

@@ -1,4 +1,4 @@
-namespace CraftHub.Models;
+namespace CraftHub.Domain.Enums;
 
 /// <summary>
 /// Supported JSON field types including nested types for complex structures.

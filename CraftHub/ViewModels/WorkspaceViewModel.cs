@@ -6,9 +6,11 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CraftHub.Core;
+using CraftHub.Domain.Enums;
+using CraftHub.Domain.Models;
 using CraftHub.Models;
 using CraftHub.Services;
 
@@ -207,9 +209,9 @@ public partial class WorkspaceViewModel : ViewModelBase
     [RelayCommand]
     private async Task ImportJsonAsync()
     {
-        var filters = new List<FilePickerFileType>
+        var filters = new List<FileFilter>
         {
-            new("JSON files") { Patterns = new[] { "*.json" } }
+            new("JSON files", new[] { "*.json" })
         };
 
         var path = await _fileDialogService.OpenFileAsync("Import JSON", filters);
@@ -262,9 +264,9 @@ public partial class WorkspaceViewModel : ViewModelBase
             return;
         }
 
-        var filters = new List<FilePickerFileType>
+        var filters = new List<FileFilter>
         {
-            new("JSON files") { Patterns = new[] { "*.json" } }
+            new("JSON files", new[] { "*.json" })
         };
 
         var path = await _fileDialogService.SaveFileAsync("Export JSON", filters);
@@ -278,9 +280,9 @@ public partial class WorkspaceViewModel : ViewModelBase
     [RelayCommand]
     private async Task ImportClassAsync()
     {
-        var filters = new List<FilePickerFileType>
+        var filters = new List<FileFilter>
         {
-            new("C# files") { Patterns = new[] { "*.cs" } }
+            new("C# files", new[] { "*.cs" })
         };
 
         var path = await _fileDialogService.OpenFileAsync("Import C# Class", filters);
@@ -314,9 +316,9 @@ public partial class WorkspaceViewModel : ViewModelBase
             return;
         }
 
-        var filters = new List<FilePickerFileType>
+        var filters = new List<FileFilter>
         {
-            new("C# files") { Patterns = new[] { "*.cs" } }
+            new("C# files", new[] { "*.cs" })
         };
 
         var path = await _fileDialogService.SaveFileAsync("Export C# Class", filters);

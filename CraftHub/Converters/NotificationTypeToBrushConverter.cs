@@ -11,21 +11,18 @@ public class NotificationTypeToBrushConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        var key = value is NotificationType type ? type switch
+        if (value is NotificationType type)
         {
-            NotificationType.Success => "SuccessColor",
-            NotificationType.Warning => "WarningColor",
-            NotificationType.Error => "DangerColor",
-            _ => "AccentPrimary"
-        } : "AccentPrimary";
-
-        var resources = Application.Current?.Resources;
-        if (resources != null && resources.TryGetResource(key, null, out var resource) &&
-            resource is IBrush brush)
-        {
-            return brush;
+            switch (type)
+            {
+                case NotificationType.Success:
+                    return new SolidColorBrush(Color.FromArgb(255, 16, 185, 129));
+                case NotificationType.Warning:
+                    return new SolidColorBrush(Color.FromArgb(255, 245, 158, 11));
+                case NotificationType.Error:
+                    return new SolidColorBrush(Color.FromArgb(255, 239, 68, 68));
+            }
         }
-
         return Brushes.Gray;
     }
 

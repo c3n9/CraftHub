@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CraftHub.Domain.Enums;
 
-namespace CraftHub.Models;
+namespace CraftHub.Domain.Models;
 
 /// <summary>
 /// Represents a detected JSON field and user-selected type for import mapping.

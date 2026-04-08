@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using Avalonia.Data.Converters;
+using CraftHub.Domain.Models;
 using CraftHub.Models;
 
 namespace CraftHub.Converters;

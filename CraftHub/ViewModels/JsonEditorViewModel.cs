@@ -1,5 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CraftHub.Core;
+using CraftHub.Domain.Enums;
+using CraftHub.Domain.Models;
 using CraftHub.Models;
 using CraftHub.Services;
 using System;

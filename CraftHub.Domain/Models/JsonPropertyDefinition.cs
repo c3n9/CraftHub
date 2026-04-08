@@ -1,7 +1,8 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CraftHub.Domain.Enums;
 
-namespace CraftHub.Models;
+namespace CraftHub.Domain.Models;
 
 /// <summary>
 /// Defines a single property (column) in the JSON schema.

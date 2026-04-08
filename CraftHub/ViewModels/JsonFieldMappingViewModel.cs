@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using CraftHub.Models;
+using CraftHub.Domain.Enums;
+using CraftHub.Domain.Models;
 
 namespace CraftHub.ViewModels;
 

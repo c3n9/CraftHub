@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using CraftHub.Domain.Models;
 using CraftHub.Models;
 using CraftHub.ViewModels;
 
