@@ -40,6 +40,8 @@
                 Classes="accent-btn"
                 Content="OK"
                 Height="34"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
                 Width="96"
                 MinWidth="96" />
       </StackPanel>

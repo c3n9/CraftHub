@@ -8,7 +8,6 @@
              RequestedThemeVariant="Default">
     <Application.DataTemplates>
         <local:ViewLocator/>
-        <!-- Implicit template used by the notification popup ItemsControl (no ItemTemplate set). -->
         <DataTemplate DataType="models:Notification">
             <Border Classes="notification-toast">
                 <Grid ColumnDefinitions="4,Auto,*,Auto" RowDefinitions="Auto,Auto">
@@ -57,7 +56,6 @@
             <converters:NotificationTypeToBrushConverter x:Key="NotificationBrush" />
             <converters:NotificationTypeToIconKindConverter x:Key="NotificationIconKind" />
             <converters:CountToVisibilityConverter x:Key="CountToVisibility" />
-            <!-- Used by the notification manager list (MainWindow.axaml uses StaticResource). -->
             <DataTemplate x:Key="NotificationRowTemplate" DataType="models:Notification">
                 <Border Classes="notification-row">
                     <Grid ColumnDefinitions="4,Auto,*,Auto" RowDefinitions="Auto,Auto">

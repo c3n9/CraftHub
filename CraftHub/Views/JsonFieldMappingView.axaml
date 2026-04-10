@@ -75,10 +75,13 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
                 <Button Content="Cancel" Classes="tab-btn"
                         VerticalContentAlignment="Center"
+                        HorizontalContentAlignment="Center"
                         Height="34"
                         x:Name="CancelButton" MinWidth="80" />
                 <Button Content="Import" Classes="accent-btn"
                         Height="34"
+                        VerticalContentAlignment="Center"
+                        HorizontalContentAlignment="Center"
                         x:Name="ConfirmButton" MinWidth="80" />
             </StackPanel>
         </Border>

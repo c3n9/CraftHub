@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
 using CraftHub.Domain.Models;
+using CraftHub.Helpers;
 using CraftHub.Models;
 using System;
 using System.ComponentModel;
@@ -15,10 +16,12 @@ namespace CraftHub.Views;
 public partial class ProgressDialogView : Window, INotifyPropertyChanged
 {
     private string _titleText = "Updating CraftHub";
+
     private string _messageText = "Preparing update...";
     private int _progressValue = 0;
     private bool _isIndeterminate = true;
     private string _statusText = "Starting...";
+    private string _downloadingProcessLog = "0 Mb / 100 Mb";
     private bool _isCancelEnabled = true;
     private bool _isCanceled = false;
     private bool _isFinished = false;
@@ -45,6 +48,15 @@ public partial class ProgressDialogView : Window, INotifyPropertyChanged
         set
         {
             _titleText = value;
+            OnPropertyChanged();
+        }
+    }
+    public string DownloadingProcessLog
+    {
+        get => _downloadingProcessLog;
+        set
+        {
+            _downloadingProcessLog = value;
             OnPropertyChanged();
         }
     }
@@ -139,6 +151,14 @@ public partial class ProgressDialogView : Window, INotifyPropertyChanged
 
                 if (p.IsIndeterminate)
                     IsIndeterminate = true;
+
+                if(p.BytesReceived > 0)
+                {
+                    if(p.TotalBytes > 0)
+                    {
+                        DownloadingProcessLog = $"{FileSizeHelper.FormatFileSize(p.BytesReceived)} / {FileSizeHelper.FormatFileSize(p.TotalBytes)}";
+                    }
+                }
             });
         });
 
@@ -157,6 +177,7 @@ public partial class ProgressDialogView : Window, INotifyPropertyChanged
                 IsCancelEnabled = true;
                 CancelButton.Content = "Close";
                 CancelButton.IsEnabled = true;
+                DownloadingProcessLog = string.Empty;
             });
 
             return result;

@@ -29,7 +29,6 @@
                Text="{Binding InputText, Mode=TwoWay}"
                Watermark="{Binding PlaceholderText}"
                FontSize="13"
-               Height="34"
                CornerRadius="6" />
       <StackPanel Orientation="Horizontal"
                   HorizontalAlignment="Right"
@@ -37,16 +36,16 @@
         <Button x:Name="CancelButton"
                 Classes="tab-btn"
                 VerticalContentAlignment="Center"
+                HorizontalContentAlignment="Center"
                 Content="Cancel"
-                Height="34"
-                Width="96"
-                MinWidth="96" />
+                Height="34" />
         <Button x:Name="OkButton"
                 Classes="accent-btn"
                 Content="OK"
-                Height="34"
-                Width="96"
-                MinWidth="96" />
+                Width="{Binding #CancelButton.Bounds.Width}"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
+                Height="34" />
       </StackPanel>
     </StackPanel>
   </Border>

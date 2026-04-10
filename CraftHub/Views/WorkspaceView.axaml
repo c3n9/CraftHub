@@ -1,233 +1,236 @@
 <UserControl xmlns="https://github.com/avaloniaui"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:CraftHub.ViewModels"
-             xmlns:models="using:CraftHub.Domain.Models"
-             xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
-             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-             x:Class="CraftHub.Views.WorkspaceView"
-             x:DataType="vm:WorkspaceViewModel">
+			 xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+			 xmlns:vm="using:CraftHub.ViewModels"
+			 xmlns:models="using:CraftHub.Domain.Models"
+			 xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+			 xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+			 x:Class="CraftHub.Views.WorkspaceView"
+			 x:DataType="vm:WorkspaceViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*">
+	<Grid RowDefinitions="Auto,Auto,*">
 
-        <!-- Toolbar Row 1: Actions -->
-        <Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="8,6"
-                CornerRadius="8" Margin="8,8,8,0">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-                <Button Classes="toolbar-btn" Command="{Binding ImportJsonCommand}"
-                        ToolTip.Tip="Import data from JSON file">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <materialIcons:MaterialIcon Kind="FileImportOutline" Width="16" Height="16" />
-                        <TextBlock Text="Import JSON" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button Classes="toolbar-btn" Command="{Binding ExportJsonCommand}"
-                        ToolTip.Tip="Export data to JSON file">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <materialIcons:MaterialIcon Kind="FileExportOutline" Width="16" Height="16" />
-                        <TextBlock Text="Export JSON" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
+		<!-- Toolbar Row 1: Actions -->
+		<Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="8,6"
+				CornerRadius="8" Margin="8,8,8,0">
+			<StackPanel Orientation="Horizontal" Spacing="4">
+				<Button Classes="toolbar-btn" Command="{Binding ImportJsonCommand}"
+						ToolTip.Tip="Import data from JSON file">
+					<StackPanel Orientation="Horizontal" Spacing="6">
+						<materialIcons:MaterialIcon Kind="FileImportOutline" Width="16" Height="16" />
+						<TextBlock Text="Import JSON" VerticalAlignment="Center" />
+					</StackPanel>
+				</Button>
+				<Button Classes="toolbar-btn" Command="{Binding ExportJsonCommand}"
+						ToolTip.Tip="Export data to JSON file">
+					<StackPanel Orientation="Horizontal" Spacing="6">
+						<materialIcons:MaterialIcon Kind="FileExportOutline" Width="16" Height="16" />
+						<TextBlock Text="Export JSON" VerticalAlignment="Center" />
+					</StackPanel>
+				</Button>
 
-                <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 
-                <Button Classes="toolbar-btn" Command="{Binding ImportClassCommand}"
-                        ToolTip.Tip="Import schema from C# class file">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <materialIcons:MaterialIcon Kind="FileCodeOutline" Width="16" Height="16" />
-                        <TextBlock Text="Import Class" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
-                <Button Classes="toolbar-btn" Command="{Binding ExportClassCommand}"
-                        ToolTip.Tip="Export schema as C# class file">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <materialIcons:MaterialIcon Kind="FileCode" Width="16" Height="16" />
-                        <TextBlock Text="Export Class" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
+				<Button Classes="toolbar-btn" Command="{Binding ImportClassCommand}"
+						ToolTip.Tip="Import schema from C# class file">
+					<StackPanel Orientation="Horizontal" Spacing="6">
+						<materialIcons:MaterialIcon Kind="FileCodeOutline" Width="16" Height="16" />
+						<TextBlock Text="Import Class" VerticalAlignment="Center" />
+					</StackPanel>
+				</Button>
+				<Button Classes="toolbar-btn" Command="{Binding ExportClassCommand}"
+						ToolTip.Tip="Export schema as C# class file">
+					<StackPanel Orientation="Horizontal" Spacing="6">
+						<materialIcons:MaterialIcon Kind="FileCode" Width="16" Height="16" />
+						<TextBlock Text="Export Class" VerticalAlignment="Center" />
+					</StackPanel>
+				</Button>
 
-                <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 
-                <Button Classes="toolbar-btn"
-                        Command="{Binding AddRowCommand}"
-                        ToolTip.Tip="Add new data row">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <materialIcons:MaterialIcon Kind="TableRowPlusAfter" Width="16" Height="16" />
-                        <TextBlock Text="Row" VerticalAlignment="Center" />
-                    </StackPanel>
-                </Button>
+				<Button Classes="toolbar-btn"
+						Command="{Binding AddRowCommand}"
+						ToolTip.Tip="Add new data row">
+					<StackPanel Orientation="Horizontal" Spacing="6">
+						<materialIcons:MaterialIcon Kind="TableRowPlusAfter" Width="16" Height="16" />
+						<TextBlock Text="Row" VerticalAlignment="Center" />
+					</StackPanel>
+				</Button>
 
-                <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 
-                <TextBox Text="{Binding SearchQuery}" Watermark="Search by value..."
-                         Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13" />
-            </StackPanel>
-        </Border>
+				<TextBox Text="{Binding SearchQuery}" Watermark="Search by value..."
+						 Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13" />
+			</StackPanel>
+		</Border>
 
-        <!-- Toolbar Row 2: Add Property -->
-        <Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}" Padding="8,6"
-                CornerRadius="8" Margin="8,6,8,0">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-                <TextBlock Text="Add Property:" VerticalAlignment="Center"
-                           Foreground="{DynamicResource TextMuted}" FontSize="13" />
+		<!-- Toolbar Row 2: Add Property -->
+		<Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}" Padding="8,6"
+				CornerRadius="8" Margin="8,6,8,0">
+			<StackPanel Orientation="Horizontal" Spacing="8">
+				<TextBlock Text="Add Property:" VerticalAlignment="Center"
+						   Foreground="{DynamicResource TextMuted}" FontSize="13" />
 
-                <TextBox Text="{Binding PropertyName}"
-                         Watermark="Property name"
-                         Width="200" FontSize="14"
-                         x:Name="TBPropertyName"
-                         CornerRadius="6" />
+				<TextBox Text="{Binding PropertyName}"
+						 Watermark="Property name"
+						 Width="200" FontSize="14"
+						 x:Name="TBPropertyName"
+						 CornerRadius="6" />
 
-                <ComboBox ItemsSource="{Binding AvailableTypes}"
-                          SelectedItem="{Binding SelectedType}"
-                          Width="140" FontSize="14"
-                          Height="{Binding #TBPropertyName.Bounds.Height}"
-                          CornerRadius="6" />
+				<ComboBox ItemsSource="{Binding AvailableTypes}"
+						  SelectedItem="{Binding SelectedType}"
+						  Width="140" FontSize="14"
+						  Height="{Binding #TBPropertyName.Bounds.Height}"
+						  CornerRadius="6" />
 
-                <Button Classes="accent-btn" Content="+ Add"
-                        Command="{Binding AddPropertyCommand}" />
-            </StackPanel>
-        </Border>
+				<Button Classes="accent-btn" Content="+ Add"
+						Height="{Binding #TBPropertyName.Bounds.Height}"
+						VerticalContentAlignment="Center"
+						HorizontalContentAlignment="Center"
+						Command="{Binding AddPropertyCommand}" />
+			</StackPanel>
+		</Border>
 
-        <!-- Schema + Data -->
-        <Grid Grid.Row="2" Margin="10">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="320" MinWidth="240" />
-                <ColumnDefinition Width="10" />
-                <ColumnDefinition Width="*" MinWidth="520" />
-            </Grid.ColumnDefinitions>
-            <Border Grid.Column="0"
-                    Background="{DynamicResource SurfaceBackground}"
-                    BorderBrush="{DynamicResource BorderColor}"
-                    BorderThickness="1"
-                    CornerRadius="12"
-                    Padding="12">
-                <Grid RowDefinitions="Auto,Auto,*">
-                    <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
-                        <TextBlock Text="Schema"
-                                   FontSize="13"
-                                   FontWeight="SemiBold"
-                                   Foreground="{DynamicResource TextPrimary}" />
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding Properties.Count, StringFormat={}Fields: {0}}"
-                                   FontSize="12"
-                                   Foreground="{DynamicResource TextMuted}"
-                                   VerticalAlignment="Center" />
-                    </Grid>
+		<!-- Schema + Data -->
+		<Grid Grid.Row="2" Margin="10">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="320" MinWidth="240" />
+				<ColumnDefinition Width="10" />
+				<ColumnDefinition Width="*" MinWidth="520" />
+			</Grid.ColumnDefinitions>
+			<Border Grid.Column="0"
+					Background="{DynamicResource SurfaceBackground}"
+					BorderBrush="{DynamicResource BorderColor}"
+					BorderThickness="1"
+					CornerRadius="12"
+					Padding="12">
+				<Grid RowDefinitions="Auto,Auto,*">
+					<Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
+						<TextBlock Text="Schema"
+								   FontSize="13"
+								   FontWeight="SemiBold"
+								   Foreground="{DynamicResource TextPrimary}" />
+						<TextBlock Grid.Column="1"
+								   Text="{Binding Properties.Count, StringFormat={}Fields: {0}}"
+								   FontSize="12"
+								   Foreground="{DynamicResource TextMuted}"
+								   VerticalAlignment="Center" />
+					</Grid>
 
-                    <ScrollViewer Grid.Row="2"
-                                  HorizontalScrollBarVisibility="Disabled"
-                                  VerticalScrollBarVisibility="Visible">
-                        <ItemsControl ItemsSource="{Binding Properties}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Orientation="Vertical" Spacing="6" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="{x:Type models:JsonPropertyDefinition}">
-                                    <Border Background="{DynamicResource ElevatedBackground}"
-                                            BorderBrush="{DynamicResource BorderLight}"
-                                            BorderThickness="1"
-                                            Margin="0,0,20,0"
-                                            CornerRadius="10"
-                                            Padding="10">
-                                        <Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
-                                            <TextBlock Grid.Column="0"
-                                                       Grid.Row="0"
-                                                       Text="{Binding Name}"
-                                                       FontSize="13"
-                                                       Foreground="{DynamicResource TextPrimary}"
-                                                       TextWrapping="Wrap"
-                                                       ToolTip.Tip="{Binding Name}" />
+					<ScrollViewer Grid.Row="2"
+								  HorizontalScrollBarVisibility="Disabled"
+								  VerticalScrollBarVisibility="Visible">
+						<ItemsControl ItemsSource="{Binding Properties}">
+							<ItemsControl.ItemsPanel>
+								<ItemsPanelTemplate>
+									<StackPanel Orientation="Vertical" Spacing="6" />
+								</ItemsPanelTemplate>
+							</ItemsControl.ItemsPanel>
+							<ItemsControl.ItemTemplate>
+								<DataTemplate DataType="{x:Type models:JsonPropertyDefinition}">
+									<Border Background="{DynamicResource ElevatedBackground}"
+											BorderBrush="{DynamicResource BorderLight}"
+											BorderThickness="1"
+											Margin="0,0,20,0"
+											CornerRadius="10"
+											Padding="10">
+										<Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+											<TextBlock Grid.Column="0"
+													   Grid.Row="0"
+													   Text="{Binding Name}"
+													   FontSize="13"
+													   Foreground="{DynamicResource TextPrimary}"
+													   TextWrapping="Wrap"
+													   ToolTip.Tip="{Binding Name}" />
 
-                                            <Border Grid.Column="1"
-                                                    Grid.Row="0"
-                                                    Background="{DynamicResource BorderLight}"
-                                                    CornerRadius="999"
-                                                    Padding="8,2"
-                                                    Margin="8,0,0,0"
-                                                    VerticalAlignment="Center">
-                                                <TextBlock Text="{Binding TypeLabel}"
-                                                           FontSize="11"
-                                                           Foreground="{DynamicResource TextSecondary}" />
-                                            </Border>
+											<Border Grid.Column="1"
+													Grid.Row="0"
+													Background="{DynamicResource BorderLight}"
+													CornerRadius="999"
+													Padding="8,2"
+													Margin="8,0,0,0"
+													VerticalAlignment="Center">
+												<TextBlock Text="{Binding TypeLabel}"
+														   FontSize="11"
+														   Foreground="{DynamicResource TextSecondary}" />
+											</Border>
 
-                                            <Button Grid.Column="2"
-                                                    Grid.Row="0"
-                                                    Classes="close-tab"
-                                                    Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
-                                                    ToolTip.Tip="Remove field"
-                                                    Command="{Binding $parent[UserControl].DataContext.RemovePropertyCommand}"
-                                                    CommandParameter="{Binding}" />
+											<Button Grid.Column="2"
+													Grid.Row="0"
+													Classes="close-tab"
+													Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
+													ToolTip.Tip="Remove field"
+													Command="{Binding $parent[UserControl].DataContext.RemovePropertyCommand}"
+													CommandParameter="{Binding}" />
 
-                                            <TextBlock Grid.Column="0"
-                                                       Grid.Row="1"
-                                                       Grid.ColumnSpan="3"
-                                                       Text="{Binding Path=FieldType, StringFormat={}Type: {0}}"
-                                                       FontSize="11"
-                                                       Foreground="{DynamicResource TextMuted}"
-                                                       Margin="0,6,0,0" />
-                                        </Grid>
-                                    </Border>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
-                </Grid>
-            </Border>
+											<TextBlock Grid.Column="0"
+													   Grid.Row="1"
+													   Grid.ColumnSpan="3"
+													   Text="{Binding Path=FieldType, StringFormat={}Type: {0}}"
+													   FontSize="11"
+													   Foreground="{DynamicResource TextMuted}"
+													   Margin="0,6,0,0" />
+										</Grid>
+									</Border>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</ScrollViewer>
+				</Grid>
+			</Border>
 
 
-            <GridSplitter Width="5"
-                          Background="Transparent"
-                          HorizontalAlignment="Stretch"
-                          VerticalAlignment="Stretch"
-                          Grid.Column="1"
-                          ResizeDirection="Columns"
-                          ResizeBehavior="PreviousAndNext" />
+			<GridSplitter Width="5"
+						  Background="Transparent"
+						  HorizontalAlignment="Stretch"
+						  VerticalAlignment="Stretch"
+						  Grid.Column="1"
+						  ResizeDirection="Columns"
+						  ResizeBehavior="PreviousAndNext" />
 
-            <Border Grid.Column="2"
-                    CornerRadius="10"
-                    Background="{DynamicResource BorderColor}"
-                    Padding="1">
-                <Border CornerRadius="9"
-                        Background="{DynamicResource ElevatedBackground}"
-                        ClipToBounds="True">
-                    <DataGrid x:Name="DataGrid"
-                              MinWidth="520"
-                              ItemsSource="{Binding Rows}"
-                              SelectedItem="{Binding SelectedRow}"
-                              AutoGenerateColumns="False"
-                              CanUserReorderColumns="True"
-                              CanUserResizeColumns="True"
-                              CanUserSortColumns="True"
-                          SelectionMode="Extended"
-                          IsReadOnly="False"
-                          HorizontalScrollBarVisibility="Auto"
-                          VerticalScrollBarVisibility="Auto"
-                              FontSize="14"
-                              Background="Transparent"
-                              BorderThickness="0"
-                              RowBackground="{DynamicResource ElevatedBackground}">
-                        <DataGrid.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Duplicate Row(s)"
-                                          Command="{Binding DuplicateRowsCommand}"
-                                          CommandParameter="{Binding #DataGrid.SelectedItems}" />
-                                <MenuItem Header="Copy Row(s) as array to JSON"
-                                          Command="{Binding CopyRowsToJsonCommand}"
-                                          CommandParameter="{Binding #DataGrid.SelectedItems}" />
-                                <MenuItem Header="Copy Row(s) as objects to JSON"
-                                          Command="{Binding CopyRowsToJsonAsObjectsCommand}"
-                                          CommandParameter="{Binding #DataGrid.SelectedItems}" />
-                                <Separator />
-                                <MenuItem Header="Remove Row(s)"
-                                          Command="{Binding RemoveRowsCommand}"
-                                          CommandParameter="{Binding #DataGrid.SelectedItems}"
-                                          Foreground="{DynamicResource DangerColor}" />
-                            </ContextMenu>
-                        </DataGrid.ContextMenu>
-                    </DataGrid>
-                </Border>
-            </Border>
-        </Grid>
-    </Grid>
+			<Border Grid.Column="2"
+					CornerRadius="10"
+					Background="{DynamicResource BorderColor}"
+					Padding="1">
+				<Border CornerRadius="9"
+						Background="{DynamicResource ElevatedBackground}"
+						ClipToBounds="True">
+					<DataGrid x:Name="DataGrid"
+							  MinWidth="520"
+							  ItemsSource="{Binding Rows}"
+							  SelectedItem="{Binding SelectedRow}"
+							  AutoGenerateColumns="False"
+							  CanUserReorderColumns="True"
+							  CanUserResizeColumns="True"
+							  CanUserSortColumns="True"
+							  SelectionMode="Extended"
+							  IsReadOnly="False"
+							  HorizontalScrollBarVisibility="Auto"
+							  VerticalScrollBarVisibility="Auto"
+							  FontSize="14"
+							  Background="Transparent"
+							  BorderThickness="0"
+							  RowBackground="{DynamicResource ElevatedBackground}">
+						<DataGrid.ContextMenu>
+							<ContextMenu>
+								<MenuItem Header="Duplicate Row(s)"
+										  Command="{Binding DuplicateRowsCommand}"
+										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+								<MenuItem Header="Copy Row(s) as array to JSON"
+										  Command="{Binding CopyRowsToJsonCommand}"
+										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+								<MenuItem Header="Copy Row(s) as objects to JSON"
+										  Command="{Binding CopyRowsToJsonAsObjectsCommand}"
+										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+								<Separator />
+								<MenuItem Header="Remove Row(s)"
+										  Command="{Binding RemoveRowsCommand}"
+										  CommandParameter="{Binding #DataGrid.SelectedItems}"
+										  Foreground="{DynamicResource DangerColor}" />
+							</ContextMenu>
+						</DataGrid.ContextMenu>
+					</DataGrid>
+				</Border>
+			</Border>
+		</Grid>
+	</Grid>
 </UserControl>

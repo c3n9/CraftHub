@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Styling;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CraftHub.Core;
@@ -17,6 +18,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Tmds.DBus.Protocol;
 
 namespace CraftHub.ViewModels;
 
@@ -52,8 +54,8 @@ public partial class MainWindowViewModel : ViewModelBase
         AddWorkspace();
         CheckUpdate();
     }
-    private GitHubRelease _latestRelease;
-    private async void CheckUpdate()
+    private GitHubRelease? _latestRelease;
+    private void CheckUpdate()
     {
         Task.Run(async () =>
         {
@@ -68,6 +70,11 @@ public partial class MainWindowViewModel : ViewModelBase
                 {
                     ShowUpdateButton = true;
                     _latestRelease = release;
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        var existing = _notificationService.Notifications.FirstOrDefault(n => n.Message.Contains("new version"));
+                        _notificationService.Publish(NotificationType.Info, "The new version is available now.");
+                    });
                 }
             }
         });
@@ -76,31 +83,34 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private GitHubAsset GetPlatformSpecificAsset(List<GitHubAsset> assets)
     {
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        if(assets != null)
         {
-            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
-                return assets.FirstOrDefault(a => a.Name.Contains("arm64") && a.Name.EndsWith(".exe"));
-            else if (RuntimeInformation.ProcessArchitecture == Architecture.X86)
-                return assets.FirstOrDefault(a => a.Name.Contains("x86") && a.Name.EndsWith(".exe"));
-            else
-                return assets.FirstOrDefault(a => a.Name.Contains("x64") && a.Name.EndsWith(".exe"));
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-        {
-            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
-                return assets.FirstOrDefault(a => a.Name.Contains("arm64") && a.Name.EndsWith(".deb"));
-            else
-                return assets.FirstOrDefault(a => (a.Name.Contains("amd64") || a.Name.Contains("x64")) && a.Name.EndsWith(".deb"));
-        }
-        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-        {
-            if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
-                return assets.FirstOrDefault(a => a.Name.Contains("arm64") && a.Name.EndsWith(".dmg"));
-            else
-                return assets.FirstOrDefault(a => (a.Name.Contains("x64") || a.Name.Contains("amd64")) && a.Name.EndsWith(".dmg"));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+                    return assets.FirstOrDefault(a => a.Name.Contains("arm64") && a.Name.EndsWith(".exe"));
+                else if (RuntimeInformation.ProcessArchitecture == Architecture.X86)
+                    return assets.FirstOrDefault(a => a.Name.Contains("x86") && a.Name.EndsWith(".exe"));
+                else
+                    return assets.FirstOrDefault(a => a.Name.Contains("x64") && a.Name.EndsWith(".exe"));
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+                    return assets.FirstOrDefault(a => a.Name.Contains("arm64") && a.Name.EndsWith(".deb"));
+                else
+                    return assets.FirstOrDefault(a => (a.Name.Contains("amd64") || a.Name.Contains("x64")) && a.Name.EndsWith(".deb"));
+            }
+            else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                if (RuntimeInformation.ProcessArchitecture == Architecture.Arm64)
+                    return assets.FirstOrDefault(a => a.Name.Contains("arm64") && a.Name.EndsWith(".dmg"));
+                else
+                    return assets.FirstOrDefault(a => (a.Name.Contains("x64") || a.Name.Contains("amd64")) && a.Name.EndsWith(".dmg"));
+            }
         }
 
-        return null;
+        return default;
     }
 
     partial void OnShowNotificationPopupsChanged(bool value)
@@ -162,7 +172,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 using (var client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "CraftHub-Updater");
-                    client.Timeout = TimeSpan.FromMinutes(30);
+                    client.Timeout = TimeSpan.FromMinutes(5);
 
                     using (var response = await client.GetAsync(asset.BrowserDownloadUrl,
                            HttpCompletionOption.ResponseHeadersRead, cancellationToken))
@@ -245,7 +255,9 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-
+    /// <summary>
+    /// Вычисляет SHA256-хеш скачанного файла и сравнивает с ожидаемым хешем.
+    /// </summary>
     private async Task<bool> VerifyChecksum(string filePath, string expectedSha256)
     {
         if (string.IsNullOrEmpty(expectedSha256))
@@ -265,7 +277,7 @@ public partial class MainWindowViewModel : ViewModelBase
         }
     }
 
-    private async Task CloseApplication()
+    private void CloseApplication()
     {
         Environment.Exit(0);
     }
