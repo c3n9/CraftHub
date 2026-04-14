@@ -194,7 +194,9 @@
 				<Border CornerRadius="9"
 						Background="{DynamicResource ElevatedBackground}"
 						ClipToBounds="True">
-					<DataGrid x:Name="DataGrid"
+					<ScrollViewer HorizontalScrollBarVisibility="Auto"
+								  Padding="0,0,0,-10">
+						<DataGrid x:Name="DataGrid"
 							  MinWidth="520"
 							  ItemsSource="{Binding Rows}"
 							  SelectedItem="{Binding SelectedRow}"
@@ -204,11 +206,12 @@
 							  CanUserSortColumns="True"
 							  SelectionMode="Extended"
 							  IsReadOnly="False"
-							  HorizontalScrollBarVisibility="Auto"
+							  HorizontalScrollBarVisibility="Disabled"
 							  VerticalScrollBarVisibility="Auto"
 							  FontSize="14"
 							  Background="Transparent"
 							  BorderThickness="0"
+							  
 							  RowBackground="{DynamicResource ElevatedBackground}">
 						<DataGrid.ContextMenu>
 							<ContextMenu>
@@ -229,6 +232,8 @@
 							</ContextMenu>
 						</DataGrid.ContextMenu>
 					</DataGrid>
+					</ScrollViewer>
+					
 				</Border>
 			</Border>
 		</Grid>
