@@ -58,7 +58,7 @@ public class JsonService : IJsonService
             int i = 0;
             foreach (var item in element.EnumerateArray())
             {
-                var name = string.IsNullOrEmpty(prefix) ? $"<{i}>" : $"{prefix}.<{i}>";
+                var name = string.IsNullOrEmpty(prefix) ? $"<{i}>" : $"{prefix}_<{i}>";
                 if (item.ValueKind == JsonValueKind.Object || item.ValueKind == JsonValueKind.Array)
                 {
                     DetectFieldsRecursive(item, name, fields);
