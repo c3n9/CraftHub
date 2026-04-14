@@ -6,4 +6,11 @@
         <Setter Property="BorderThickness" Value="0" />
     </Style>
 
+    <Style Selector="DataGridColumnHeader">
+        <Setter Property="AreSeparatorsVisible" Value="True" />
+        <Setter Property="SeparatorBrush" Value="{DynamicResource BorderColor}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="MinHeight" Value="40" />
+    </Style>
+
 </Styles>

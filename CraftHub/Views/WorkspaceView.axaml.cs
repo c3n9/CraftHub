@@ -61,22 +61,23 @@ public partial class WorkspaceView : UserControl
         {
             var header = $"{prop.Name} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})";
 
-            var headerText = new TextBlock
-            {
-                Text = header,
-                TextTrimming = TextTrimming.CharacterEllipsis,
-                TextWrapping = TextWrapping.NoWrap,
-                MaxLines = 1,
-                VerticalAlignment = VerticalAlignment.Center
-            };
-            ToolTip.SetTip(headerText, header);
-
             var column = new DataGridTemplateColumn
             {
-                Header = headerText,
-                Width = new DataGridLength(1, DataGridLengthUnitType.Star),
-                MinWidth = 140,
+                Header = header,
+                HeaderTemplate = new FuncDataTemplate<object>((_, _) => new TextBlock 
+                { 
+                    Text = header,
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    [!ToolTip.TipProperty] = new Binding { Source = header } 
+                }),
+                Width = DataGridLength.Auto,
+                MinWidth = 100,
                 IsReadOnly = false,
+                SortMemberPath = $"[{prop.Name}]",
+                CanUserSort = true,
+                CanUserResize = true
             };
 
             var isComplexType = prop.FieldType == JsonFieldType.Object || prop.FieldType == JsonFieldType.Array;
@@ -106,8 +107,8 @@ public partial class WorkspaceView : UserControl
                         VerticalAlignment = VerticalAlignment.Top,
                         Margin = new Avalonia.Thickness(12, 12, 8, 12),
                         Foreground = Brushes.LightGray,
-                        TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
-                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                        TextTrimming = TextTrimming.CharacterEllipsis,
+                        TextWrapping = TextWrapping.Wrap,
                         MaxLines = 3
                     };
                     tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding
@@ -169,8 +170,8 @@ public partial class WorkspaceView : UserControl
                         {
                             VerticalAlignment = VerticalAlignment.Top,
                             Margin = new Avalonia.Thickness(12, 8, 12, 8),
-                            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
-                            TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
+                            TextWrapping = TextWrapping.Wrap,
+                            TextTrimming = TextTrimming.CharacterEllipsis,
                             MaxLines = 3
                         };
                         tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding

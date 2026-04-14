@@ -390,4 +390,42 @@ public partial class WorkspaceViewModel : ViewModelBase
             NotifySuccess($"✓ Updated '{propertyName}'");
         }
     }
+
+    [RelayCommand]
+    private async Task RemoveRowsAsync(object? parameter)
+    {
+        if (parameter is not IList items || items.Count == 0)
+        {
+            if (SelectedRow != null)
+                await RemoveSingleRowAsync(SelectedRow);
+            return;
+        }
+
+        var toRemove = items.Cast<DynamicDataRow>().ToList();
+        var confirmed = await _dialogService.ShowConfirmAsync(
+            "Remove rows",
+            $"Remove {toRemove.Count} selected row(s)?");
+
+        if (!confirmed) return;
+
+        foreach (var row in toRemove)
+        {
+            Rows.Remove(row);
+        }
+
+        NotifySuccess($"Removed {toRemove.Count} row(s)");
+    }
+
+    private async Task RemoveSingleRowAsync(DynamicDataRow row)
+    {
+        var confirmed = await _dialogService.ShowConfirmAsync(
+            "Remove row",
+            "Are you sure you want to remove this row?");
+
+        if (confirmed)
+        {
+            Rows.Remove(row);
+            NotifySuccess("Row removed");
+        }
+    }
 }
