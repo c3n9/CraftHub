@@ -73,12 +73,12 @@
         <Border Grid.Row="2" Background="{DynamicResource SurfaceBackground}" Padding="16,12"
                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                <Button Content="Cancel" Classes="tab-btn"
+                <Button Content="{DynamicResource BtnCancel}" Classes="tab-btn"
                         VerticalContentAlignment="Center"
                         HorizontalContentAlignment="Center"
                         Height="34"
                         x:Name="CancelButton" MinWidth="80" />
-                <Button Content="Import" Classes="accent-btn"
+                <Button Content="{DynamicResource BtnImport}" Classes="accent-btn"
                         Height="34"
                         VerticalContentAlignment="Center"
                         HorizontalContentAlignment="Center"

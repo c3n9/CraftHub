@@ -36,6 +36,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _showUpdateButton = false;
     [ObservableProperty] private bool _isDownloading = false;
     [ObservableProperty] private double _downloadProgress = 0;
+    [ObservableProperty] private string _currentLang = Services.LanguageService.Instance.CurrentLang;
 
     public bool ShowPopupOverlay => ShowNotificationPopups && !IsNotificationManagerOpen;
 
@@ -74,7 +75,7 @@ public partial class MainWindowViewModel : ViewModelBase
                         Dispatcher.UIThread.Post(() =>
                         {
                             ShowUpdateButton = true;
-                            _notificationService.Publish(NotificationType.Info, "The new version is available now.");
+                            _notificationService.Publish(NotificationType.Info, Services.LanguageService.Instance.Get("UpdateAvailableMsg"));
                         });
                     }
                 }
@@ -138,9 +139,10 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private async Task DownloadAndStartUpdate()
     {
+        var ls = Services.LanguageService.Instance;
         var confirmed = await _dialogService.ShowConfirmAsync(
-            "New version",
-            $"Do you want to download the new version? Save all files before starting the installation.");
+            ls.Get("NewVersionTitle"),
+            ls.Get("NewVersionConfirmMsg"));
         if (!confirmed)
         {
             return;
@@ -150,7 +152,7 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             if (_latestRelease?.Assets == null)
             {
-                await _dialogService.ShowMessageAsync("Error", "No release information available");
+                await _dialogService.ShowMessageAsync(ls.Get("ErrorTitle"), ls.Get("NoReleaseInfoMsg"));
                 return;
             }
 
@@ -256,16 +258,16 @@ public partial class MainWindowViewModel : ViewModelBase
 
             if (result.IsCanceled)
             {
-                await _dialogService.ShowMessageAsync("Cancelled", "Update was cancelled by user");
+                await _dialogService.ShowMessageAsync(ls.Get("UpdateCancelledTitle"), ls.Get("UpdateCancelledMsg"));
             }
             else if (!result.IsSuccess && !string.IsNullOrEmpty(result.ErrorMessage))
             {
-                await _dialogService.ShowMessageAsync("Update Failed", result.ErrorMessage);
+                await _dialogService.ShowMessageAsync(ls.Get("UpdateFailedTitle"), result.ErrorMessage);
             }
         }
         catch (Exception ex)
         {
-            await _dialogService.ShowMessageAsync("Error", $"Update failed: {ex.Message}");
+            await _dialogService.ShowMessageAsync(ls.Get("ErrorTitle"), $"{ls.Get("UpdateFailedTitle")}: {ex.Message}");
         }
     }
 
@@ -391,6 +393,14 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         if (oldValue != null) oldValue.IsActive = false;
         if (newValue != null) newValue.IsActive = true;
+    }
+
+    [RelayCommand]
+    private void ToggleLanguage()
+    {
+        var ls = Services.LanguageService.Instance;
+        ls.Toggle();
+        CurrentLang = ls.CurrentLang;
     }
 
     [RelayCommand]

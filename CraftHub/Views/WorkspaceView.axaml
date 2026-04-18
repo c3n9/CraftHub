@@ -14,34 +14,34 @@
 				CornerRadius="8" Margin="8,8,8,0">
 			<StackPanel Orientation="Horizontal" Spacing="4">
 				<Button Classes="toolbar-btn" Command="{Binding ImportJsonCommand}"
-						ToolTip.Tip="Import data from JSON file">
+						ToolTip.Tip="{DynamicResource ImportJsonTip}">
 					<StackPanel Orientation="Horizontal" Spacing="6">
 						<materialIcons:MaterialIcon Kind="FileImportOutline" Width="16" Height="16" />
-						<TextBlock Text="Import JSON" VerticalAlignment="Center" />
+						<TextBlock Text="{DynamicResource ImportJson}" VerticalAlignment="Center" />
 					</StackPanel>
 				</Button>
 				<Button Classes="toolbar-btn" Command="{Binding ExportJsonCommand}"
-						ToolTip.Tip="Export data to JSON file">
+						ToolTip.Tip="{DynamicResource ExportJsonTip}">
 					<StackPanel Orientation="Horizontal" Spacing="6">
 						<materialIcons:MaterialIcon Kind="FileExportOutline" Width="16" Height="16" />
-						<TextBlock Text="Export JSON" VerticalAlignment="Center" />
+						<TextBlock Text="{DynamicResource ExportJson}" VerticalAlignment="Center" />
 					</StackPanel>
 				</Button>
 
 				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 
 				<Button Classes="toolbar-btn" Command="{Binding ImportClassCommand}"
-						ToolTip.Tip="Import schema from C# class file">
+						ToolTip.Tip="{DynamicResource ImportClassTip}">
 					<StackPanel Orientation="Horizontal" Spacing="6">
 						<materialIcons:MaterialIcon Kind="FileCodeOutline" Width="16" Height="16" />
-						<TextBlock Text="Import Class" VerticalAlignment="Center" />
+						<TextBlock Text="{DynamicResource ImportClass}" VerticalAlignment="Center" />
 					</StackPanel>
 				</Button>
 				<Button Classes="toolbar-btn" Command="{Binding ExportClassCommand}"
-						ToolTip.Tip="Export schema as C# class file">
+						ToolTip.Tip="{DynamicResource ExportClassTip}">
 					<StackPanel Orientation="Horizontal" Spacing="6">
 						<materialIcons:MaterialIcon Kind="FileCode" Width="16" Height="16" />
-						<TextBlock Text="Export Class" VerticalAlignment="Center" />
+						<TextBlock Text="{DynamicResource ExportClass}" VerticalAlignment="Center" />
 					</StackPanel>
 				</Button>
 
@@ -49,16 +49,16 @@
 
 				<Button Classes="toolbar-btn"
 						Command="{Binding AddRowCommand}"
-						ToolTip.Tip="Add new data row">
+						ToolTip.Tip="{DynamicResource AddRowTip}">
 					<StackPanel Orientation="Horizontal" Spacing="6">
 						<materialIcons:MaterialIcon Kind="TableRowPlusAfter" Width="16" Height="16" />
-						<TextBlock Text="Row" VerticalAlignment="Center" />
+						<TextBlock Text="{DynamicResource AddRowBtn}" VerticalAlignment="Center" />
 					</StackPanel>
 				</Button>
 
 				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 
-				<TextBox Text="{Binding SearchQuery}" Watermark="Search by value..."
+				<TextBox Text="{Binding SearchQuery}" Watermark="{DynamicResource SearchWatermark}"
 						 Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13" />
 			</StackPanel>
 		</Border>
@@ -67,11 +67,11 @@
 		<Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}" Padding="8,6"
 				CornerRadius="8" Margin="8,6,8,0">
 			<StackPanel Orientation="Horizontal" Spacing="8">
-				<TextBlock Text="Add Property:" VerticalAlignment="Center"
+				<TextBlock Text="{DynamicResource AddPropertyLabel}" VerticalAlignment="Center"
 						   Foreground="{DynamicResource TextMuted}" FontSize="13" />
 
 				<TextBox Text="{Binding PropertyName}"
-						 Watermark="Property name"
+						 Watermark="{DynamicResource PropertyNameWatermark}"
 						 Width="200" FontSize="14"
 						 x:Name="TBPropertyName"
 						 CornerRadius="6" />
@@ -82,7 +82,7 @@
 						  Height="{Binding #TBPropertyName.Bounds.Height}"
 						  CornerRadius="6" />
 
-				<Button Classes="accent-btn" Content="+ Add"
+				<Button Classes="accent-btn" Content="{DynamicResource AddPropertyBtn}"
 						Height="{Binding #TBPropertyName.Bounds.Height}"
 						VerticalContentAlignment="Center"
 						HorizontalContentAlignment="Center"
@@ -91,7 +91,7 @@
 		</Border>
 
 		<!-- Schema + Data -->
-		<Grid Grid.Row="2" Margin="10">
+		<Grid Grid.Row="2" Margin="10" x:Name="ContentGrid">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="320" MinWidth="240" />
 				<ColumnDefinition Width="10" />
@@ -104,13 +104,19 @@
 					CornerRadius="12"
 					Padding="12">
 				<Grid RowDefinitions="Auto,Auto,*">
-					<Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="0,0,0,10">
-						<TextBlock Text="Schema"
+					<Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
+						<TextBlock Text="{DynamicResource SchemaHeader}"
 								   FontSize="13"
 								   FontWeight="SemiBold"
 								   Foreground="{DynamicResource TextPrimary}" />
 						<TextBlock Grid.Column="1"
-								   Text="{Binding Properties.Count, StringFormat={}Fields: {0}}"
+								   Text="{DynamicResource FieldsLabel}"
+								   FontSize="12"
+								   Foreground="{DynamicResource TextMuted}"
+								   VerticalAlignment="Center"
+								   Margin="0,0,4,0" />
+						<TextBlock Grid.Column="2"
+								   Text="{Binding Properties.Count}"
 								   FontSize="12"
 								   Foreground="{DynamicResource TextMuted}"
 								   VerticalAlignment="Center" />
@@ -158,7 +164,7 @@
 													Grid.Row="0"
 													Classes="close-tab"
 													Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
-													ToolTip.Tip="Remove field"
+													ToolTip.Tip="{DynamicResource RemoveFieldTip}"
 													Command="{Binding $parent[UserControl].DataContext.RemovePropertyCommand}"
 													CommandParameter="{Binding}" />
 
@@ -212,21 +218,20 @@
 							  FontSize="14"
 							  Background="Transparent"
 							  BorderThickness="0"
-							  
 							  RowBackground="{DynamicResource ElevatedBackground}">
 						<DataGrid.ContextMenu>
 							<ContextMenu>
-								<MenuItem Header="Duplicate Row(s)"
+								<MenuItem Header="{DynamicResource DuplicateRows}"
 										  Command="{Binding DuplicateRowsCommand}"
 										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
-								<MenuItem Header="Copy Row(s) as array to JSON"
+								<MenuItem Header="{DynamicResource CopyRowsAsArray}"
 										  Command="{Binding CopyRowsToJsonCommand}"
 										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
-								<MenuItem Header="Copy Row(s) as objects to JSON"
+								<MenuItem Header="{DynamicResource CopyRowsAsObjects}"
 										  Command="{Binding CopyRowsToJsonAsObjectsCommand}"
 										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
 								<Separator />
-								<MenuItem Header="Remove Row(s)"
+								<MenuItem Header="{DynamicResource RemoveRows}"
 										  Command="{Binding RemoveRowsCommand}"
 										  CommandParameter="{Binding #DataGrid.SelectedItems}"
 										  Foreground="{DynamicResource DangerColor}" />
@@ -234,10 +239,11 @@
 						</DataGrid.ContextMenu>
 					</DataGrid>
 					</ScrollViewer>
-					
+
 				</Border>
 			</Border>
 		</Grid>
+
 		<!-- Status Bar -->
 		<Border Grid.Row="3"
 				Background="{DynamicResource ElevatedBackground}"
@@ -247,7 +253,7 @@
 			<StackPanel Orientation="Horizontal" Spacing="24">
 
 				<StackPanel Orientation="Horizontal" Spacing="5">
-					<TextBlock Text="Rows:"
+					<TextBlock Text="{DynamicResource RowsStatusLabel}"
 							   FontSize="12"
 							   VerticalAlignment="Center"
 							   Foreground="{DynamicResource TextMuted}" />
@@ -261,7 +267,7 @@
 				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="0,3" />
 
 				<StackPanel Orientation="Horizontal" Spacing="5">
-					<TextBlock Text="Selected:"
+					<TextBlock Text="{DynamicResource SelectedStatusLabel}"
 							   FontSize="12"
 							   VerticalAlignment="Center"
 							   Foreground="{DynamicResource TextMuted}" />
@@ -275,7 +281,7 @@
 				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="0,3" />
 
 				<StackPanel Orientation="Horizontal" Spacing="5">
-					<TextBlock Text="Size:"
+					<TextBlock Text="{DynamicResource SizeStatusLabel}"
 							   FontSize="12"
 							   VerticalAlignment="Center"
 							   Foreground="{DynamicResource TextMuted}" />

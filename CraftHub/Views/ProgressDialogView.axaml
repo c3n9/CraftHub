@@ -57,7 +57,7 @@
 						Spacing="8">
 				<Button x:Name="CancelButton"
 						Classes="tab-btn"
-						Content="Cancel"
+						Content="{DynamicResource BtnCancel}"
 						Height="34"
 						Width="96"
 						MinWidth="96"

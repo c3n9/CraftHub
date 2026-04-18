@@ -1,0 +1,101 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- Toolbar – WorkspaceView -->
+    <x:String x:Key="ImportJson">Импорт JSON</x:String>
+    <x:String x:Key="ExportJson">Экспорт JSON</x:String>
+    <x:String x:Key="ImportClass">Импорт класса</x:String>
+    <x:String x:Key="ExportClass">Экспорт класса</x:String>
+    <x:String x:Key="AddRowBtn">Строка</x:String>
+    <x:String x:Key="AddPropertyLabel">Добавить поле:</x:String>
+    <x:String x:Key="AddPropertyBtn">+ Добавить</x:String>
+    <x:String x:Key="SchemaHeader">Схема</x:String>
+    <x:String x:Key="FieldsLabel">Полей:</x:String>
+
+    <!-- Watermarks -->
+    <x:String x:Key="SearchWatermark">Поиск по значению...</x:String>
+    <x:String x:Key="PropertyNameWatermark">Имя поля</x:String>
+
+    <!-- Status bar -->
+    <x:String x:Key="RowsStatusLabel">Строки:</x:String>
+    <x:String x:Key="SelectedStatusLabel">Выбрано:</x:String>
+    <x:String x:Key="SizeStatusLabel">Размер:</x:String>
+
+    <!-- Tooltips – WorkspaceView -->
+    <x:String x:Key="ImportJsonTip">Импортировать данные из JSON файла</x:String>
+    <x:String x:Key="ExportJsonTip">Экспортировать данные в JSON файл</x:String>
+    <x:String x:Key="ImportClassTip">Импортировать схему из C# класса</x:String>
+    <x:String x:Key="ExportClassTip">Экспортировать схему в C# класс</x:String>
+    <x:String x:Key="AddRowTip">Добавить новую строку</x:String>
+    <x:String x:Key="RemoveFieldTip">Удалить поле</x:String>
+
+    <!-- Tooltips – MainWindow -->
+    <x:String x:Key="UpdateTip">Обновить</x:String>
+    <x:String x:Key="NotificationsTip">Уведомления</x:String>
+    <x:String x:Key="ToggleThemeTip">Сменить тему</x:String>
+    <x:String x:Key="ToggleLanguageTip">Сменить язык</x:String>
+    <x:String x:Key="AddWorkspaceTip">Новая вкладка</x:String>
+
+    <!-- MainWindow – notification panel -->
+    <x:String x:Key="NotificationsTitle">Уведомления</x:String>
+    <x:String x:Key="NoNotificationsYet">Нет уведомлений</x:String>
+    <x:String x:Key="PopupsOff">Уведомл. выкл.</x:String>
+    <x:String x:Key="PopupsOn">Уведомл. вкл.</x:String>
+    <x:String x:Key="ClearAll">Очистить</x:String>
+    <x:String x:Key="RenameTab">Переименовать</x:String>
+
+    <!-- DataGrid context menu -->
+    <x:String x:Key="DuplicateRows">Дублировать строку(и)</x:String>
+    <x:String x:Key="CopyRowsAsArray">Скопировать строку(и) как массив JSON</x:String>
+    <x:String x:Key="CopyRowsAsObjects">Скопировать строку(и) как объекты JSON</x:String>
+    <x:String x:Key="RemoveRows">Удалить строку(и)</x:String>
+
+    <!-- WorkspaceViewModel – warnings / dialogs -->
+    <x:String x:Key="EnterPropertyName">Введите имя поля</x:String>
+    <x:String x:Key="PropertyAlreadyExists">Поле с таким именем уже существует</x:String>
+    <x:String x:Key="RemovePropertyTitle">Удалить поле</x:String>
+    <x:String x:Key="RemovePropertyMsg">Удалить '{0}' из схемы?</x:String>
+    <x:String x:Key="PropertyAdded">Поле '{0}' добавлено</x:String>
+    <x:String x:Key="PropertyRemoved">Поле '{0}' удалено</x:String>
+    <x:String x:Key="RowAdded">Строка добавлена ({0} всего)</x:String>
+    <x:String x:Key="RowsDuplicatedMsg">{0} строк(и) продублировано</x:String>
+    <x:String x:Key="RowsCopiedMsg">{0} строк(и) скопировано в буфер как JSON</x:String>
+    <x:String x:Key="ImportTitle">Импорт</x:String>
+    <x:String x:Key="ExportTitle">Экспорт</x:String>
+    <x:String x:Key="NoFieldsDetectedMsg">В JSON файле не обнаружены поля.</x:String>
+    <x:String x:Key="AddPropsBeforeExport">Добавьте поля перед экспортом.</x:String>
+    <x:String x:Key="ImportedMsg">Импортировано {0} строк, {1} полей</x:String>
+    <x:String x:Key="ExportedMsg">Экспортировано в {0}</x:String>
+    <x:String x:Key="NoPropsFoundMsg">Свойства не найдены в файле класса.</x:String>
+    <x:String x:Key="ImportedClassMsg">✓ Класс '{0}' импортирован, {1} свойств</x:String>
+    <x:String x:Key="ExportedClassMsg">✓ Класс '{0}' экспортирован</x:String>
+    <x:String x:Key="RemoveRowTitle">Удалить строку</x:String>
+    <x:String x:Key="RemoveRowMsg">Вы уверены, что хотите удалить эту строку?</x:String>
+    <x:String x:Key="RemoveRowsTitle">Удалить строки</x:String>
+    <x:String x:Key="RemoveRowsMsg">Удалить {0} выбранных строк(и)?</x:String>
+    <x:String x:Key="RowRemovedMsg">Строка удалена</x:String>
+    <x:String x:Key="RowsRemovedMsg">Удалено {0} строк(и)</x:String>
+    <x:String x:Key="WorkspaceNameEmpty">Имя вкладки не может быть пустым</x:String>
+    <x:String x:Key="WorkspaceRenamedMsg">Вкладка переименована в '{0}'</x:String>
+    <x:String x:Key="RenameWorkspaceTitle">Переименовать вкладку</x:String>
+    <x:String x:Key="RenameWorkspacePrompt">Введите новое имя для вкладки.</x:String>
+    <x:String x:Key="WorkspaceNameLabel">Имя вкладки</x:String>
+    <x:String x:Key="UpdatedCellMsg">✓ Обновлено '{0}'</x:String>
+
+    <!-- Dialog buttons -->
+    <x:String x:Key="BtnOk">ОК</x:String>
+    <x:String x:Key="BtnCancel">Отмена</x:String>
+    <x:String x:Key="BtnSave">Сохранить</x:String>
+    <x:String x:Key="BtnImport">Импортировать</x:String>
+
+    <!-- MainWindowViewModel – update / error dialogs -->
+    <x:String x:Key="UpdateAvailableMsg">Доступна новая версия.</x:String>
+    <x:String x:Key="NewVersionTitle">Новая версия</x:String>
+    <x:String x:Key="NewVersionConfirmMsg">Хотите скачать новую версию? Сохраните все файлы перед установкой.</x:String>
+    <x:String x:Key="ErrorTitle">Ошибка</x:String>
+    <x:String x:Key="NoReleaseInfoMsg">Информация о релизе недоступна</x:String>
+    <x:String x:Key="UpdateCancelledTitle">Отменено</x:String>
+    <x:String x:Key="UpdateCancelledMsg">Обновление отменено пользователем</x:String>
+    <x:String x:Key="UpdateFailedTitle">Ошибка обновления</x:String>
+
+</ResourceDictionary>

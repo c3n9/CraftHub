@@ -25,13 +25,19 @@
 							IsVisible="{Binding ShowUpdateButton}"
 							Classes="toolbar-btn"
 							Command="{Binding DownloadAndStartUpdateCommand}"
-							ToolTip.Tip="Update" FontSize="16" />
+							ToolTip.Tip="{DynamicResource UpdateTip}" FontSize="16" />
 					<Button Content="{materialIcons:MaterialIconExt Kind=BellNotificationOutline}" Classes="toolbar-btn"
 							Command="{Binding ToggleNotificationManagerCommand}"
-							ToolTip.Tip="Notifications" FontSize="16" />
-					<Button Content="{materialIcons:MaterialIconExt Kind=ThemeLightDark}" Classes="toolbar-btn"
+							ToolTip.Tip="{DynamicResource NotificationsTip}" FontSize="16" />
+					<Button Classes="toolbar-btn"
 							Command="{Binding ToggleThemeCommand}"
-							ToolTip.Tip="Toggle Theme" FontSize="16" />
+							Content="{materialIcons:MaterialIconExt Kind=ThemeLightDark}"
+							ToolTip.Tip="{DynamicResource ToggleThemeTip}" FontSize="16" />
+					<Button Classes="toolbar-btn"
+							Command="{Binding ToggleLanguageCommand}"
+							ToolTip.Tip="{DynamicResource ToggleLanguageTip}"
+							Content="{Binding CurrentLang}"
+							FontSize="13" FontWeight="SemiBold"/>
 				</StackPanel>
 			</Grid>
 		</Border>
@@ -67,7 +73,7 @@
 										CommandParameter="{Binding}">
 									<Button.ContextMenu>
 										<ContextMenu>
-											<MenuItem Header="Rename"
+											<MenuItem Header="{DynamicResource RenameTab}"
 													  Command="{Binding RenameCommand}" />
 										</ContextMenu>
 									</Button.ContextMenu>
@@ -90,7 +96,7 @@
 					<Button Classes="tab-add"
 							Content="{materialIcons:MaterialIconExt Kind=PlusThick}"
 							Command="{Binding AddWorkspaceCommand}"
-							ToolTip.Tip="Add new workspace" />
+							ToolTip.Tip="{DynamicResource AddWorkspaceTip}" />
 				</StackPanel>
 			</ScrollViewer>
 		</Border>
@@ -124,7 +130,7 @@
 				IsVisible="{Binding IsNotificationManagerOpen}">
 			<StackPanel Spacing="12">
 				<Grid ColumnDefinitions="*,Auto">
-					<TextBlock Text="Notifications" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimary}" />
+					<TextBlock Text="{DynamicResource NotificationsTitle}" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimary}" />
 					<Button Content="{materialIcons:MaterialIconExt Kind=CloseThick}" Classes="close-tab"
 							Grid.Column="1"
 							Command="{Binding ToggleNotificationManagerCommand}"
@@ -132,9 +138,9 @@
 				</Grid>
 				<StackPanel Orientation="Horizontal" VerticalAlignment="Center" Spacing="8">
 					<ToggleSwitch IsChecked="{Binding ShowNotificationPopups}"
-								  OffContent="Popups off"
-								  OnContent="Popups on" />
-					<Button Content="Clear all" Classes="tab-btn"
+								  OffContent="{DynamicResource PopupsOff}"
+								  OnContent="{DynamicResource PopupsOn}" />
+					<Button Content="{DynamicResource ClearAll}" Classes="tab-btn"
 							Command="{Binding ClearNotificationHistoryCommand}"
 							FontSize="12"
 							Padding="10,4" />
@@ -145,7 +151,7 @@
 							  HorizontalScrollBarVisibility="Disabled">
 					<Grid RowDefinitions="Auto,*">
 						<TextBlock Grid.Row="0"
-								   Text="No notifications yet"
+								   Text="{DynamicResource NoNotificationsYet}"
 								   Foreground="{DynamicResource TextMuted}"
 								   FontSize="12"
 								   HorizontalAlignment="Center"

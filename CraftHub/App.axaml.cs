@@ -30,6 +30,9 @@ public class App : Application
 
         Services = collection.BuildServiceProvider();
 
+        // Initialize localization – must run after Application.Current is fully ready
+        LanguageService.Instance.Initialize();
+
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             var mainVm = Services.GetRequiredService<MainWindowViewModel>();

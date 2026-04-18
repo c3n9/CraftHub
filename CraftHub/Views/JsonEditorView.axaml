@@ -59,8 +59,8 @@
         </ScrollViewer>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-            <Button Content="Cancel" Command="{Binding CancelCommand}" Width="80" HorizontalContentAlignment="Center" />
-            <Button Content="Save" Command="{Binding SubmitCommand}" Width="80" Classes="accent-btn" HorizontalContentAlignment="Center" />
+            <Button Content="{DynamicResource BtnCancel}" Command="{Binding CancelCommand}" Width="80" HorizontalContentAlignment="Center" />
+            <Button Content="{DynamicResource BtnSave}" Command="{Binding SubmitCommand}" Width="80" Classes="accent-btn" HorizontalContentAlignment="Center" />
         </StackPanel>
     </Grid>
 </Window>

@@ -37,11 +37,11 @@
                 Classes="tab-btn"
                 VerticalContentAlignment="Center"
                 HorizontalContentAlignment="Center"
-                Content="Cancel"
+                Content="{DynamicResource BtnCancel}"
                 Height="34" />
         <Button x:Name="OkButton"
                 Classes="accent-btn"
-                Content="OK"
+                Content="{DynamicResource BtnOk}"
                 Width="{Binding #CancelButton.Bounds.Width}"
                 HorizontalContentAlignment="Center"
                 VerticalContentAlignment="Center"
