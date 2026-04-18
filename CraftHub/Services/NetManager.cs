@@ -7,9 +7,13 @@ namespace CraftHub.Services
     public static class NetManager
     {
         private static readonly HttpClient _httpClient = new HttpClient();
-        public static async Task<HttpResponseMessage> Get(string url)
+        static NetManager()
         {
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "CraftHub-Updater");
+        }
+        
+        public static async Task<HttpResponseMessage> Get(string url)
+        {
             var response = await _httpClient.GetAsync(url);
             return response;
         }

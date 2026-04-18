@@ -20,7 +20,6 @@ public class DynamicDataRow : INotifyPropertyChanged
         {
             _values[key] = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("Item[]"));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(null));
         }
     }
 

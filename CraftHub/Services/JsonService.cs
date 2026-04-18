@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using CraftHub.Core;
@@ -32,12 +33,14 @@ public class JsonService : IJsonService
 
             DetectFieldsRecursive(firstObj, "", fields);
         }
-        catch { /* Invalid JSON, return empty */ }
+        catch (JsonException ex) { Debug.WriteLine($"DetectFields: invalid JSON — {ex.Message}"); }
         return fields;
     }
 
-    private void DetectFieldsRecursive(JsonElement element, string prefix, List<JsonFieldMapping> fields)
+    private void DetectFieldsRecursive(JsonElement element, string prefix, List<JsonFieldMapping> fields, int depth = 0)
     {
+        if (depth > 50) return;
+
         if (element.ValueKind == JsonValueKind.Object)
         {
             foreach (var prop in element.EnumerateObject())
@@ -45,7 +48,7 @@ public class JsonService : IJsonService
                 var name = string.IsNullOrEmpty(prefix) ? prop.Name : $"{prefix}_{prop.Name}";
                 if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
                 {
-                    DetectFieldsRecursive(prop.Value, name, fields);
+                    DetectFieldsRecursive(prop.Value, name, fields, depth + 1);
                 }
                 else
                 {
@@ -61,7 +64,7 @@ public class JsonService : IJsonService
                 var name = string.IsNullOrEmpty(prefix) ? $"<{i}>" : $"{prefix}_<{i}>";
                 if (item.ValueKind == JsonValueKind.Object || item.ValueKind == JsonValueKind.Array)
                 {
-                    DetectFieldsRecursive(item, name, fields);
+                    DetectFieldsRecursive(item, name, fields, depth + 1);
                 }
                 else
                 {
@@ -137,7 +140,7 @@ public class JsonService : IJsonService
                 rows.Add(row);
             }
         }
-        catch { /* Return whatever was parsed */ }
+        catch (JsonException ex) { Debug.WriteLine($"ParseJsonData: invalid JSON — {ex.Message}"); }
         return rows;
     }
 
@@ -215,8 +218,8 @@ public class JsonService : IJsonService
 
             if (p.StartsWith("<") && p.EndsWith(">"))
             {
+                if (current is not JsonArray array) return;
                 int idx = int.TryParse(p.Trim('<', '>'), out var j) ? j : 0;
-                var array = (JsonArray)current;
                 while (array.Count <= idx) array.Add(null);
                 if (array[idx] == null)
                 {
@@ -226,7 +229,7 @@ public class JsonService : IJsonService
             }
             else
             {
-                var obj = (JsonObject)current;
+                if (current is not JsonObject obj) return;
                 if (!obj.ContainsKey(p) || obj[p] == null)
                 {
                     obj[p] = nextIsArray ? new JsonArray() : new JsonObject();
@@ -240,14 +243,14 @@ public class JsonService : IJsonService
 
         if (leaf.StartsWith("<") && leaf.EndsWith(">"))
         {
+            if (current is not JsonArray array) return;
             int idx = int.TryParse(leaf.Trim('<', '>'), out var j) ? j : 0;
-            var array = (JsonArray)current;
             while (array.Count <= idx) array.Add(null);
             array[idx] = leafNode;
         }
         else
         {
-            var obj = (JsonObject)current;
+            if (current is not JsonObject obj) return;
             obj[leaf] = leafNode;
         }
     }

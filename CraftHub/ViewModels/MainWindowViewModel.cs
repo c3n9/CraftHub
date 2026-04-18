@@ -59,26 +59,31 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         Task.Run(async () =>
         {
-            string currentVersion = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "version.txt")).Trim();
-            var response = await NetManager.Get("https://api.github.com/repos/c3n9/CraftHub/releases/latest");
-            if (response.IsSuccessStatusCode)
+            try
             {
-                var release = await NetManager.ParseHttpResponseMessage<GitHubRelease>(response);
-                string latestVersion = release.TagName.TrimStart('v');
-
-                if (latestVersion != currentVersion)
+                string currentVersion = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "version.txt")).Trim();
+                var response = await NetManager.Get("https://api.github.com/repos/c3n9/CraftHub/releases/latest");
+                if (response.IsSuccessStatusCode)
                 {
-                    ShowUpdateButton = true;
-                    _latestRelease = release;
-                    Dispatcher.UIThread.Post(() =>
+                    var release = await NetManager.ParseHttpResponseMessage<GitHubRelease>(response);
+                    string latestVersion = release?.TagName?.TrimStart('v') ?? string.Empty;
+
+                    if (!string.IsNullOrEmpty(latestVersion) && latestVersion != currentVersion)
                     {
-                        var existing = _notificationService.Notifications.FirstOrDefault(n => n.Message.Contains("new version"));
-                        _notificationService.Publish(NotificationType.Info, "The new version is available now.");
-                    });
+                        _latestRelease = release;
+                        Dispatcher.UIThread.Post(() =>
+                        {
+                            ShowUpdateButton = true;
+                            _notificationService.Publish(NotificationType.Info, "The new version is available now.");
+                        });
+                    }
                 }
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"CheckUpdate failed: {ex.Message}");
+            }
         });
-
     }
 
     private GitHubAsset GetPlatformSpecificAsset(List<GitHubAsset> assets)
@@ -160,7 +165,13 @@ public partial class MainWindowViewModel : ViewModelBase
 
             var result = await _dialogService.ShowProgressDialogAsync("Updating CraftHub", async (progress, cancellationToken) =>
             {
-                string downloadPath = Path.Combine(Path.GetTempPath(), asset.Name);
+                var sanitizedName = Path.GetFileName(asset.Name);
+                if (string.IsNullOrEmpty(sanitizedName))
+                    throw new InvalidOperationException("Invalid asset filename.");
+
+                string downloadPath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), sanitizedName));
+                if (!downloadPath.StartsWith(Path.GetFullPath(Path.GetTempPath())))
+                    throw new InvalidOperationException("Asset filename contains invalid path characters.");
 
                 progress.Report(new UpdateProgress
                 {
@@ -173,9 +184,12 @@ public partial class MainWindowViewModel : ViewModelBase
                 {
                     client.DefaultRequestHeaders.Add("User-Agent", "CraftHub-Updater");
                     client.Timeout = TimeSpan.FromMinutes(5);
-
-                    using (var response = await client.GetAsync(asset.BrowserDownloadUrl,
-                           HttpCompletionOption.ResponseHeadersRead, cancellationToken))
+                    
+                    var uri = new Uri(asset.BrowserDownloadUrl);
+                    if (!uri.Host.EndsWith(".github.com") && uri.Host != "github.com")
+                        throw new Exception("The link has been replaced, and the github version cannot be installed.");
+                    
+                    using (var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
                     {
                         response.EnsureSuccessStatusCode();
 
@@ -295,7 +309,12 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
         {
-            Process.Start("sudo", $"dpkg -i \"{filePath}\"");
+            Process.Start(new ProcessStartInfo
+            {
+                FileName = "sudo",
+                ArgumentList = { "dpkg", "-i", filePath },
+                UseShellExecute = false
+            });
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
