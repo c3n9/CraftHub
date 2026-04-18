@@ -30,12 +30,18 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private DynamicDataRow? _selectedRow;
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private bool _isActive;
+    [ObservableProperty] private int _selectedRowsCount = 0;
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
     public Array AvailableTypes => Enum.GetValues(typeof(JsonFieldType));
     public event EventHandler? CloseRequested;
     public event EventHandler? ColumnsChanged;
+
+    public int TotalRows => Rows.Count;
+
+    private string _dataSizeKb = "0.0 KB";
+    public string DataSizeKb => _dataSizeKb;
 
     private void NotifySuccess(string message) => _notificationService.Publish(NotificationType.Success, message);
     private void NotifyWarning(string message) => _notificationService.Publish(NotificationType.Warning, message);
@@ -52,6 +58,34 @@ public partial class WorkspaceViewModel : ViewModelBase
         _classParserService = classParserService;
         _dialogService = dialogService;
         _notificationService = notificationService;
+
+        Rows.CollectionChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(TotalRows));
+            UpdateDataSize();
+        };
+        Properties.CollectionChanged += (_, _) => UpdateDataSize();
+    }
+
+    private void UpdateDataSize()
+    {
+        try
+        {
+            if (Rows.Count == 0 || Properties.Count == 0)
+            {
+                _dataSizeKb = "0.0 KB";
+            }
+            else
+            {
+                var json = _jsonService.SerializeToJson(Rows, Properties);
+                _dataSizeKb = $"{Encoding.UTF8.GetByteCount(json) / 1024.0:F1} KB";
+            }
+        }
+        catch
+        {
+            _dataSizeKb = "? KB";
+        }
+        OnPropertyChanged(nameof(DataSizeKb));
     }
 
     [RelayCommand]

@@ -7,7 +7,7 @@
 			 x:Class="CraftHub.Views.WorkspaceView"
 			 x:DataType="vm:WorkspaceViewModel">
 
-	<Grid RowDefinitions="Auto,Auto,*">
+	<Grid RowDefinitions="Auto,Auto,*,Auto">
 
 		<!-- Toolbar Row 1: Actions -->
 		<Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="8,6"
@@ -198,6 +198,7 @@
 								  Padding="0,0,0,-10">
 						<DataGrid x:Name="DataGrid"
 							  MinWidth="520"
+							  RowHeaderWidth="48"
 							  ItemsSource="{Binding Rows}"
 							  SelectedItem="{Binding SelectedRow}"
 							  AutoGenerateColumns="False"
@@ -237,5 +238,56 @@
 				</Border>
 			</Border>
 		</Grid>
+		<!-- Status Bar -->
+		<Border Grid.Row="3"
+				Background="{DynamicResource ElevatedBackground}"
+				BorderBrush="{DynamicResource BorderColor}"
+				BorderThickness="0,1,0,0"
+				Padding="14,5">
+			<StackPanel Orientation="Horizontal" Spacing="24">
+
+				<StackPanel Orientation="Horizontal" Spacing="5">
+					<TextBlock Text="Rows:"
+							   FontSize="12"
+							   VerticalAlignment="Center"
+							   Foreground="{DynamicResource TextMuted}" />
+					<TextBlock Text="{Binding TotalRows}"
+							   FontSize="12"
+							   FontWeight="SemiBold"
+							   VerticalAlignment="Center"
+							   Foreground="{DynamicResource TextPrimary}" />
+				</StackPanel>
+
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="0,3" />
+
+				<StackPanel Orientation="Horizontal" Spacing="5">
+					<TextBlock Text="Selected:"
+							   FontSize="12"
+							   VerticalAlignment="Center"
+							   Foreground="{DynamicResource TextMuted}" />
+					<TextBlock Text="{Binding SelectedRowsCount}"
+							   FontSize="12"
+							   FontWeight="SemiBold"
+							   VerticalAlignment="Center"
+							   Foreground="{DynamicResource TextPrimary}" />
+				</StackPanel>
+
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="0,3" />
+
+				<StackPanel Orientation="Horizontal" Spacing="5">
+					<TextBlock Text="Size:"
+							   FontSize="12"
+							   VerticalAlignment="Center"
+							   Foreground="{DynamicResource TextMuted}" />
+					<TextBlock Text="{Binding DataSizeKb}"
+							   FontSize="12"
+							   FontWeight="SemiBold"
+							   VerticalAlignment="Center"
+							   Foreground="{DynamicResource TextPrimary}" />
+				</StackPanel>
+
+			</StackPanel>
+		</Border>
+
 	</Grid>
 </UserControl>

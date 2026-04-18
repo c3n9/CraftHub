@@ -20,6 +20,19 @@ public partial class WorkspaceView : UserControl
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
+        DataGrid.LoadingRow += OnDataGridLoadingRow;
+        DataGrid.SelectionChanged += OnDataGridSelectionChanged;
+    }
+
+    private void OnDataGridLoadingRow(object? sender, DataGridRowEventArgs e)
+    {
+        e.Row.Header = (e.Row.Index + 1).ToString();
+    }
+
+    private void OnDataGridSelectionChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (DataContext is WorkspaceViewModel vm)
+            vm.SelectedRowsCount = DataGrid.SelectedItems?.Count ?? 0;
     }
 
     private WorkspaceViewModel? _currentVm;
