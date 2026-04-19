@@ -7,6 +7,12 @@
 			 x:Class="CraftHub.Views.WorkspaceView"
 			 x:DataType="vm:WorkspaceViewModel">
 
+	<UserControl.KeyBindings>
+		<KeyBinding Gesture="Ctrl+Z" Command="{Binding UndoCommand}" />
+		<KeyBinding Gesture="Ctrl+Y" Command="{Binding RedoCommand}" />
+		<KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoCommand}" />
+	</UserControl.KeyBindings>
+
 	<Grid RowDefinitions="Auto,Auto,*,Auto">
 
 		<!-- Toolbar Row 1: Actions -->
@@ -54,6 +60,19 @@
 						<materialIcons:MaterialIcon Kind="TableRowPlusAfter" Width="16" Height="16" />
 						<TextBlock Text="{DynamicResource AddRowBtn}" VerticalAlignment="Center" />
 					</StackPanel>
+				</Button>
+
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
+
+				<Button Classes="toolbar-btn"
+						Command="{Binding UndoCommand}"
+						ToolTip.Tip="{Binding UndoTooltip}">
+					<materialIcons:MaterialIcon Kind="Undo" Width="16" Height="16" />
+				</Button>
+				<Button Classes="toolbar-btn"
+						Command="{Binding RedoCommand}"
+						ToolTip.Tip="{Binding RedoTooltip}">
+					<materialIcons:MaterialIcon Kind="Redo" Width="16" Height="16" />
 				</Button>
 
 				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />

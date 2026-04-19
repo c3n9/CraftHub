@@ -21,6 +21,16 @@
     <x:String x:Key="SelectedStatusLabel">Выбрано:</x:String>
     <x:String x:Key="SizeStatusLabel">Размер:</x:String>
 
+    <!-- Undo / Redo -->
+    <x:String x:Key="UndoTip">Отменить</x:String>
+    <x:String x:Key="RedoTip">Повторить</x:String>
+    <x:String x:Key="UndoDescAddRow">Добавление строки</x:String>
+    <x:String x:Key="UndoDescRemoveRows">Удаление {0} строк(и)</x:String>
+    <x:String x:Key="UndoDescDuplicateRows">Дублирование {0} строк(и)</x:String>
+    <x:String x:Key="UndoDescEditCell">Редактирование '{0}'</x:String>
+    <x:String x:Key="UndoDescAddProperty">Добавление поля '{0}'</x:String>
+    <x:String x:Key="UndoDescRemoveProperty">Удаление поля '{0}'</x:String>
+
     <!-- Tooltips – WorkspaceView -->
     <x:String x:Key="ImportJsonTip">Импортировать данные из JSON файла</x:String>
     <x:String x:Key="ExportJsonTip">Экспортировать данные в JSON файл</x:String>

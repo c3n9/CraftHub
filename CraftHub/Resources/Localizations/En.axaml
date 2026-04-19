@@ -21,6 +21,16 @@
     <x:String x:Key="SelectedStatusLabel">Selected:</x:String>
     <x:String x:Key="SizeStatusLabel">Size:</x:String>
 
+    <!-- Undo / Redo -->
+    <x:String x:Key="UndoTip">Undo</x:String>
+    <x:String x:Key="RedoTip">Redo</x:String>
+    <x:String x:Key="UndoDescAddRow">Add row</x:String>
+    <x:String x:Key="UndoDescRemoveRows">Remove {0} row(s)</x:String>
+    <x:String x:Key="UndoDescDuplicateRows">Duplicate {0} row(s)</x:String>
+    <x:String x:Key="UndoDescEditCell">Edit '{0}'</x:String>
+    <x:String x:Key="UndoDescAddProperty">Add property '{0}'</x:String>
+    <x:String x:Key="UndoDescRemoveProperty">Remove property '{0}'</x:String>
+
     <!-- Tooltips – WorkspaceView -->
     <x:String x:Key="ImportJsonTip">Import data from JSON file</x:String>
     <x:String x:Key="ExportJsonTip">Export data to JSON file</x:String>
