@@ -1,11 +1,15 @@
-using System;
-using System.Collections.Specialized;
 using Avalonia.Controls;
 using Avalonia.Data;
+using CraftHub.Core;
 using CraftHub.Domain.Enums;
 using CraftHub.Domain.Models;
+using CraftHub.Helpers;
 using CraftHub.Models;
+using CraftHub.Services;
 using CraftHub.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Specialized;
 
 namespace CraftHub.Views;
 
@@ -16,7 +20,7 @@ public partial class JsonEditorView : Window
     public JsonEditorView()
     {
         InitializeComponent();
-        
+
         DataContextChanged += OnDataContextChanged;
     }
 
@@ -31,7 +35,7 @@ public partial class JsonEditorView : Window
         {
             _currentVm = vm;
             vm.Properties.CollectionChanged += OnPropertiesChanged;
-            
+
             vm.JsonSubmitted += (s, res) => Close(res);
             vm.Cancelled += (s, args) => Close(null);
 
@@ -71,7 +75,7 @@ public partial class JsonEditorView : Window
             var isComplexType = prop.FieldType == JsonFieldType.Object || prop.FieldType == JsonFieldType.Array;
             var isBoolType = prop.FieldType == JsonFieldType.Bool;
 
-            column.CellTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<DynamicDataRow>((row, ns) => 
+            column.CellTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<DynamicDataRow>((row, ns) =>
             {
                 var border = new Avalonia.Controls.Border();
 
@@ -93,7 +97,7 @@ public partial class JsonEditorView : Window
                         Converter = new CraftHub.Converters.DynamicRowJsonPreviewConverter(),
                         ConverterParameter = prop.Name
                     });
-                    
+
                     var editBtn = new Avalonia.Controls.Button
                     {
                         Content = new Material.Icons.Avalonia.MaterialIcon
@@ -109,8 +113,8 @@ public partial class JsonEditorView : Window
                         Background = Avalonia.Media.Brushes.Transparent
                     };
                     Avalonia.Controls.Grid.SetColumn(editBtn, 1);
-                    
-                    editBtn.Click += async (s, e) => 
+
+                    editBtn.Click += async (s, e) =>
                     {
                         if (DataContext is JsonEditorViewModel vmCtx)
                         {
@@ -158,13 +162,13 @@ public partial class JsonEditorView : Window
                         border.Child = tb;
                     }
                 }
-                
+
                 return border;
             });
 
             if (!isComplexType)
             {
-                column.CellEditingTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<DynamicDataRow>((row, ns) => 
+                column.CellEditingTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<DynamicDataRow>((row, ns) =>
                 {
                     if (isBoolType)
                     {
@@ -201,6 +205,27 @@ public partial class JsonEditorView : Window
             }
 
             NestedDataGrid.Columns.Add(column);
+        }
+    }
+
+    private bool _isConfirmedClose = false;
+
+    private async void Window_Closing(object? sender, WindowClosingEventArgs e)
+    {
+        if (_isConfirmedClose) return;
+
+        e.Cancel = true;
+
+        var dialogService = App.Current.Services.GetRequiredService<IDialogService>();
+        var confirmed = await dialogService.ShowConfirmAsync(Localizer.Get("ClosingWarningTitle"), Localizer.Get("ClosingWarningMsg"));
+        if (!confirmed)
+        {
+            return;
+        }
+        if (confirmed)
+        {
+            _isConfirmedClose = true;
+            Close();
         }
     }
 }

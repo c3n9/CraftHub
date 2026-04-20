@@ -7,6 +7,7 @@
     <x:String x:Key="ImportClass">Import Class</x:String>
     <x:String x:Key="ExportClass">Export Class</x:String>
     <x:String x:Key="AddRowBtn">Row</x:String>
+    <x:String x:Key="AddPropBtn">Property</x:String>
     <x:String x:Key="AddPropertyLabel">Add Property:</x:String>
     <x:String x:Key="AddPropertyBtn">+ Add</x:String>
     <x:String x:Key="SchemaHeader">Schema</x:String>
@@ -38,6 +39,7 @@
     <x:String x:Key="ExportClassTip">Export schema as C# class file</x:String>
     <x:String x:Key="AddRowTip">Add new data row</x:String>
     <x:String x:Key="RemoveFieldTip">Remove field</x:String>
+    <x:String x:Key="AddPropertyTip">Add property</x:String>
 
     <!-- Tooltips – MainWindow -->
     <x:String x:Key="UpdateTip">Update</x:String>
@@ -91,6 +93,8 @@
     <x:String x:Key="RenameWorkspacePrompt">Enter a new name for this tab.</x:String>
     <x:String x:Key="WorkspaceNameLabel">Workspace name</x:String>
     <x:String x:Key="UpdatedCellMsg">✓ Updated '{0}'</x:String>
+    <x:String x:Key="ClosingWarningTitle">Warning</x:String>
+    <x:String x:Key="ClosingWarningMsg">Unsaved data will be lost. Are you sure you want to close?</x:String>
 
     <!-- Dialog buttons -->
     <x:String x:Key="BtnOk">OK</x:String>

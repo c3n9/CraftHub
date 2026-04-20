@@ -6,61 +6,193 @@
         xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         x:Class="CraftHub.Views.JsonEditorView"
         Title="Nested Object Editor"
-        Width="700" Height="500"
+		MinHeight="500" MinWidth="950"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource AppBackground}"
-        x:DataType="vm:JsonEditorViewModel">
+        x:DataType="vm:JsonEditorViewModel"
+		Closing="Window_Closing">
     
-    <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="10">
+    <Grid RowDefinitions="Auto, *, Auto" Margin="10">
         
         <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
-            <TextBox Text="{Binding PropertyNameInput}" Watermark="New Field" Width="150" />
-            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Width="100" />
-            <Button Command="{Binding AddPropertyCommand}" Classes="toolbar-btn">
+            <TextBox x:Name="TBPropertyName" Text="{Binding PropertyNameInput}" Watermark="{DynamicResource PropertyNameWatermark}" Width="150" />
+            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Width="100" Height="{Binding #TBPropertyName.Bounds.Height}"/>
+            <Button Command="{Binding AddPropertyCommand}" Classes="toolbar-btn"
+					ToolTip.Tip="{DynamicResource AddPropertyTip}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <materialIcons:MaterialIcon Kind="PlusThick" Width="16" Height="16" />
-                    <TextBlock Text="Prop" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource AddPropBtn}" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
-            <Button Command="{Binding AddRowCommand}" Classes="toolbar-btn" IsVisible="{Binding !IsObjectMode}">
+            <Button Command="{Binding AddRowCommand}" Classes="toolbar-btn" IsVisible="{Binding !IsObjectMode}"
+					ToolTip.Tip="{DynamicResource AddRowTip}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <materialIcons:MaterialIcon Kind="TableRowPlusAfter" Width="16" Height="16" />
-                    <TextBlock Text="Row" VerticalAlignment="Center" />
+                    <TextBlock Text="{DynamicResource AddRowBtn}" VerticalAlignment="Center" />
                 </StackPanel>
             </Button>
         </StackPanel>
 
-        <DataGrid Grid.Row="1" x:Name="NestedDataGrid"
-                     ItemsSource="{Binding Rows}"
-                     AutoGenerateColumns="False" CanUserReorderColumns="True"
-                     CanUserResizeColumns="True"
-                     Background="{DynamicResource ElevatedBackground}"
-                     RowBackground="{DynamicResource SurfaceBackground}"/>
+        <Grid Grid.Row="1" Margin="10" x:Name="ContentGrid">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="320" MinWidth="240" />
+				<ColumnDefinition Width="10" />
+				<ColumnDefinition Width="*" MinWidth="520" />
+			</Grid.ColumnDefinitions>
+			<Border Grid.Column="0"
+					Background="{DynamicResource SurfaceBackground}"
+					BorderBrush="{DynamicResource BorderColor}"
+					BorderThickness="1"
+					CornerRadius="12"
+					Padding="12">
+				<Grid RowDefinitions="Auto,Auto,*">
+					<Grid Grid.Row="0" ColumnDefinitions="*,Auto,Auto" Margin="0,0,0,10">
+						<TextBlock Text="{DynamicResource SchemaHeader}"
+								   FontSize="13"
+								   FontWeight="SemiBold"
+								   Foreground="{DynamicResource TextPrimary}" />
+						<TextBlock Grid.Column="1"
+								   Text="{DynamicResource FieldsLabel}"
+								   FontSize="12"
+								   Foreground="{DynamicResource TextMuted}"
+								   VerticalAlignment="Center"
+								   Margin="0,0,4,0" />
+						<TextBlock Grid.Column="2"
+								   Text="{Binding Properties.Count}"
+								   FontSize="12"
+								   Foreground="{DynamicResource TextMuted}"
+								   VerticalAlignment="Center" />
+					</Grid>
 
-        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" Margin="0,8">
-            <ItemsControl ItemsSource="{Binding Properties}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal" Spacing="4" />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type models:JsonPropertyDefinition}">
-                        <Border Background="{DynamicResource ElevatedBackground}" CornerRadius="4" Padding="6,2"
-                                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
-                            <StackPanel Orientation="Horizontal" Spacing="4">
-                                <TextBlock Text="{Binding Name}" Foreground="{DynamicResource TextSecondary}" FontSize="12" />
-                                <Button Content="{materialIcons:MaterialIconExt Kind=CloseThick}" Classes="close-tab" Command="{Binding $parent[Window].DataContext.RemovePropertyCommand}" CommandParameter="{Binding}" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+					<ScrollViewer Grid.Row="2"
+								  HorizontalScrollBarVisibility="Disabled"
+								  VerticalScrollBarVisibility="Visible">
+						<ItemsControl ItemsSource="{Binding Properties}">
+							<ItemsControl.ItemsPanel>
+								<ItemsPanelTemplate>
+									<StackPanel Orientation="Vertical" Spacing="6" />
+								</ItemsPanelTemplate>
+							</ItemsControl.ItemsPanel>
+							<ItemsControl.ItemTemplate>
+								<DataTemplate DataType="{x:Type models:JsonPropertyDefinition}">
+									<Border Background="{DynamicResource ElevatedBackground}"
+											BorderBrush="{DynamicResource BorderLight}"
+											BorderThickness="1"
+											Margin="0,0,20,0"
+											CornerRadius="10"
+											Padding="10">
+										<Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+											<TextBlock Grid.Column="0"
+													   Grid.Row="0"
+													   Text="{Binding Name}"
+													   FontSize="13"
+													   Foreground="{DynamicResource TextPrimary}"
+													   TextWrapping="Wrap"
+													   ToolTip.Tip="{Binding Name}" />
+
+											<Border Grid.Column="1"
+													Grid.Row="0"
+													Background="{DynamicResource BorderLight}"
+													CornerRadius="999"
+													Padding="8,2"
+													Margin="8,0,0,0"
+													VerticalAlignment="Center">
+												<TextBlock Text="{Binding TypeLabel}"
+														   FontSize="11"
+														   Foreground="{DynamicResource TextSecondary}" />
+											</Border>
+
+											<Button Grid.Column="2"
+													Grid.Row="0"
+													Classes="close-tab"
+													Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
+													ToolTip.Tip="{DynamicResource RemoveFieldTip}"
+													Command="{Binding $parent[Window].DataContext.RemovePropertyCommand}"
+													CommandParameter="{Binding}" />
+
+											<TextBlock Grid.Column="0"
+													   Grid.Row="1"
+													   Grid.ColumnSpan="3"
+													   Text="{Binding Path=FieldType, StringFormat={}Type: {0}}"
+													   FontSize="11"
+													   Foreground="{DynamicResource TextMuted}"
+													   Margin="0,6,0,0" />
+										</Grid>
+									</Border>
+								</DataTemplate>
+							</ItemsControl.ItemTemplate>
+						</ItemsControl>
+					</ScrollViewer>
+				</Grid>
+			</Border>
+
+
+			<GridSplitter Width="5"
+						  Background="Transparent"
+						  HorizontalAlignment="Stretch"
+						  VerticalAlignment="Stretch"
+						  Grid.Column="1"
+						  ResizeDirection="Columns"
+						  ResizeBehavior="PreviousAndNext" />
+
+			<Border Grid.Column="2"
+					CornerRadius="10"
+					Background="{DynamicResource BorderColor}"
+					Padding="1">
+				<Border CornerRadius="9"
+						Background="{DynamicResource ElevatedBackground}"
+						ClipToBounds="True">
+					<ScrollViewer HorizontalScrollBarVisibility="Auto"
+								  Padding="0,0,0,-10">
+						<DataGrid x:Name="NestedDataGrid"
+							  MinWidth="520"
+							  RowHeaderWidth="48"
+							  ItemsSource="{Binding Rows}"
+							  SelectedItem="{Binding SelectedRow}"
+							  AutoGenerateColumns="False"
+							  CanUserReorderColumns="True"
+							  CanUserResizeColumns="True"
+							  CanUserSortColumns="True"
+							  SelectionMode="Extended"
+							  IsReadOnly="False"
+							  HorizontalScrollBarVisibility="Disabled"
+							  VerticalScrollBarVisibility="Auto"
+							  FontSize="14"
+							  Background="Transparent"
+							  BorderThickness="0"
+							  RowBackground="{DynamicResource ElevatedBackground}">
+						<DataGrid.ContextMenu>
+							<ContextMenu>
+								<MenuItem Header="{DynamicResource DuplicateRows}"
+										  Command="{Binding DuplicateRowsCommand}"
+										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+								<MenuItem Header="{DynamicResource CopyRowsAsArray}"
+										  Command="{Binding CopyRowsToJsonCommand}"
+										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+								<MenuItem Header="{DynamicResource CopyRowsAsObjects}"
+										  Command="{Binding CopyRowsToJsonAsObjectsCommand}"
+										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+								<Separator />
+								<MenuItem Header="{DynamicResource RemoveRows}"
+										  Command="{Binding RemoveRowsCommand}"
+										  CommandParameter="{Binding #DataGrid.SelectedItems}"
+										  Foreground="{DynamicResource DangerColor}" />
+							</ContextMenu>
+						</DataGrid.ContextMenu>
+					</DataGrid>
+					</ScrollViewer>
+
+				</Border>
+			</Border>
+		</Grid>
 
         <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-            <Button Content="{DynamicResource BtnCancel}" Command="{Binding CancelCommand}" Width="80" HorizontalContentAlignment="Center" />
-            <Button Content="{DynamicResource BtnSave}" Command="{Binding SubmitCommand}" Width="80" Classes="accent-btn" HorizontalContentAlignment="Center" />
+            <Button Content="{DynamicResource BtnCancel}"
+                    Command="{Binding CancelCommand}" 
+                    Width="110" HorizontalContentAlignment="Center" />
+            <Button Content="{DynamicResource BtnSave}"
+                    Command="{Binding SubmitCommand}" 
+                    Width="110" Classes="accent-btn" HorizontalContentAlignment="Center" />
         </StackPanel>
     </Grid>
 </Window>

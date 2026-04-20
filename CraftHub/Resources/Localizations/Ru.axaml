@@ -7,6 +7,7 @@
     <x:String x:Key="ImportClass">Импорт класса</x:String>
     <x:String x:Key="ExportClass">Экспорт класса</x:String>
     <x:String x:Key="AddRowBtn">Строка</x:String>
+    <x:String x:Key="AddPropBtn">Свойство</x:String>
     <x:String x:Key="AddPropertyLabel">Добавить поле:</x:String>
     <x:String x:Key="AddPropertyBtn">+ Добавить</x:String>
     <x:String x:Key="SchemaHeader">Схема</x:String>
@@ -38,6 +39,7 @@
     <x:String x:Key="ExportClassTip">Экспортировать схему в C# класс</x:String>
     <x:String x:Key="AddRowTip">Добавить новую строку</x:String>
     <x:String x:Key="RemoveFieldTip">Удалить поле</x:String>
+    <x:String x:Key="AddPropertyTip">Добавить свойство</x:String>
 
     <!-- Tooltips – MainWindow -->
     <x:String x:Key="UpdateTip">Обновить</x:String>
@@ -91,7 +93,9 @@
     <x:String x:Key="RenameWorkspacePrompt">Введите новое имя для вкладки.</x:String>
     <x:String x:Key="WorkspaceNameLabel">Имя вкладки</x:String>
     <x:String x:Key="UpdatedCellMsg">✓ Обновлено '{0}'</x:String>
-
+    <x:String x:Key="ClosingWarningTitle">Предупреждение</x:String>
+    <x:String x:Key="ClosingWarningMsg">Несохраненные данные будут утеряны. Вы уверены что хотите закрыть?</x:String>
+    
     <!-- Dialog buttons -->
     <x:String x:Key="BtnOk">ОК</x:String>
     <x:String x:Key="BtnCancel">Отмена</x:String>

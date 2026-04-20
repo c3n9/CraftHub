@@ -1,10 +1,13 @@
+using Avalonia.Controls;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
+using CraftHub.Core;
+using CraftHub.Helpers;
+using CraftHub.ViewModels;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using Avalonia.Controls;
-using Avalonia.Threading;
-using Avalonia.Interactivity;
-using CraftHub.ViewModels;
 
 namespace CraftHub.Views;
 
@@ -108,5 +111,26 @@ public partial class MainWindow : Window
     private void UpdateTabVisuals()
     {
         // Tab visuals are handled via styles
+    }
+    
+    private bool _isConfirmedClose = false;
+
+    private async void Window_Closing(object? sender, WindowClosingEventArgs e)
+    {
+        if (_isConfirmedClose) return;
+
+        e.Cancel = true;
+
+        var dialogService = App.Current.Services.GetRequiredService<IDialogService>();
+        var confirmed = await dialogService.ShowConfirmAsync(Localizer.Get("ClosingWarningTitle"), Localizer.Get("ClosingWarningMsg"));
+        if (!confirmed)
+        {
+            return;
+        }
+        if (confirmed)
+        {
+            _isConfirmedClose = true;
+            Close(); 
+        }
     }
 }

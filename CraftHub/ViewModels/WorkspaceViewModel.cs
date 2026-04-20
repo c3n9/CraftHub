@@ -11,6 +11,7 @@ using CommunityToolkit.Mvvm.Input;
 using CraftHub.Core;
 using CraftHub.Domain.Enums;
 using CraftHub.Domain.Models;
+using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.Services;
 using CraftHub.Services.Actions;
@@ -55,13 +56,13 @@ public partial class WorkspaceViewModel : ViewModelBase
 
     /// <summary>Dynamic tooltip: "Undo: Add row" or just "Undo" when stack is empty.</summary>
     public string UndoTooltip => UndoRedo.UndoDescription is { } d
-        ? $"{L("UndoTip")}: {d}"
-        : L("UndoTip");
+        ? $"{Localizer.Get("UndoTip")}: {d}"
+        : Localizer.Get("UndoTip");
 
     /// <summary>Dynamic tooltip: "Redo: Add row" or just "Redo" when stack is empty.</summary>
     public string RedoTooltip => UndoRedo.RedoDescription is { } d
-        ? $"{L("RedoTip")}: {d}"
-        : L("RedoTip");
+        ? $"{Localizer.Get("RedoTip")}: {d}"
+        : Localizer.Get("RedoTip");
 
     [RelayCommand(CanExecute = nameof(CanUndo))]
     private void Undo() => UndoRedo.Undo();
@@ -75,8 +76,6 @@ public partial class WorkspaceViewModel : ViewModelBase
 
     private void NotifySuccess(string message) => _notificationService.Publish(NotificationType.Success, message);
     private void NotifyWarning(string message) => _notificationService.Publish(NotificationType.Warning, message);
-    private static string L(string key) => LanguageService.Instance.Get(key);
-    private static string L(string key, params object[] args) => LanguageService.Instance.Get(key, args);
 
     private void FireColumnsChanged() => ColumnsChanged?.Invoke(this, EventArgs.Empty);
 
@@ -154,13 +153,13 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(PropertyName))
         {
-            NotifyWarning(L("EnterPropertyName"));
+            NotifyWarning(Localizer.Get("EnterPropertyName"));
             return;
         }
 
         if (Properties.Any(p => p.Name == PropertyName))
         {
-            NotifyWarning(L("PropertyAlreadyExists"));
+            NotifyWarning(Localizer.Get("PropertyAlreadyExists"));
             return;
         }
 
@@ -177,7 +176,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         UndoRedo.Push(new AddPropertyAction(Properties, Rows, prop, FireColumnsChanged));
 
         PropertyName = string.Empty;
-        NotifySuccess(L("PropertyAdded", prop.Name));
+        NotifySuccess(Localizer.Get("PropertyAdded", prop.Name));
         FireColumnsChanged();
     }
 
@@ -187,8 +186,8 @@ public partial class WorkspaceViewModel : ViewModelBase
         if (prop == null) return;
 
         var confirmed = await _dialogService.ShowConfirmAsync(
-            L("RemovePropertyTitle"),
-            L("RemovePropertyMsg", prop.Name));
+            Localizer.Get("RemovePropertyTitle"),
+            Localizer.Get("RemovePropertyMsg", prop.Name));
         if (!confirmed) return;
 
         // Capture state before removal for undo
@@ -201,7 +200,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         UndoRedo.Push(new RemovePropertyAction(Properties, Rows, prop, propIndex, savedValues, FireColumnsChanged));
 
-        NotifySuccess(L("PropertyRemoved", prop.Name));
+        NotifySuccess(Localizer.Get("PropertyRemoved", prop.Name));
         FireColumnsChanged();
     }
 
@@ -218,7 +217,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         Rows.Add(row);
         UndoRedo.Push(new AddRowAction(Rows, row));
-        NotifySuccess(L("RowAdded", Rows.Count));
+        NotifySuccess(Localizer.Get("RowAdded", Rows.Count));
     }
 
     [RelayCommand]
@@ -241,7 +240,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             duplicated.Add(DuplicateSingleRow(row));
 
         UndoRedo.Push(new DuplicateRowsAction(Rows, duplicated));
-        NotifySuccess(L("RowsDuplicatedMsg", source.Count));
+        NotifySuccess(Localizer.Get("RowsDuplicatedMsg", source.Count));
     }
 
     private DynamicDataRow DuplicateSingleRow(DynamicDataRow row)
@@ -265,8 +264,8 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         var toRemove = items.Cast<DynamicDataRow>().ToList();
         var confirmed = await _dialogService.ShowConfirmAsync(
-            L("RemoveRowsTitle"),
-            L("RemoveRowsMsg", toRemove.Count));
+            Localizer.Get("RemoveRowsTitle"),
+            Localizer.Get("RemoveRowsMsg", toRemove.Count));
         if (!confirmed) return;
 
         // Capture indices BEFORE removal so undo can restore positions
@@ -279,20 +278,20 @@ public partial class WorkspaceViewModel : ViewModelBase
             Rows.Remove(item.Row);
 
         UndoRedo.Push(new RemoveRowsAction(Rows, withIndices.Select(x => (x.Index, x.Row))));
-        NotifySuccess(L("RowsRemovedMsg", withIndices.Count));
+        NotifySuccess(Localizer.Get("RowsRemovedMsg", withIndices.Count));
     }
 
     private async Task RemoveSingleRowAsync(DynamicDataRow row)
     {
         var confirmed = await _dialogService.ShowConfirmAsync(
-            L("RemoveRowTitle"),
-            L("RemoveRowMsg"));
+            Localizer.Get("RemoveRowTitle"),
+            Localizer.Get("RemoveRowMsg"));
         if (!confirmed) return;
 
         var idx = Rows.IndexOf(row);
         Rows.Remove(row);
         UndoRedo.Push(new RemoveRowsAction(Rows, new[] { (idx, row) }));
-        NotifySuccess(L("RowRemovedMsg"));
+        NotifySuccess(Localizer.Get("RowRemovedMsg"));
     }
 
     // -----------------------------------------------------------------------
@@ -317,7 +316,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         Rows[idx] = newRow;
         UndoRedo.Push(new EditJsonCellAction(Rows, row, newRow, propertyName));
-        NotifySuccess(L("UpdatedCellMsg", propertyName));
+        NotifySuccess(Localizer.Get("UpdatedCellMsg", propertyName));
     }
 
     // -----------------------------------------------------------------------
@@ -335,7 +334,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             : _jsonService.SerializeToJson(selectedRows, Properties);
 
         await _dialogService.CopyToClipboardAsync(json);
-        NotifySuccess(L("RowsCopiedMsg", selectedRows.Count));
+        NotifySuccess(Localizer.Get("RowsCopiedMsg", selectedRows.Count));
     }
 
     [RelayCommand]
@@ -349,7 +348,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             : string.Join(", ", selectedRows.Select(r => _jsonService.SerializeSingleRowToJson(r, Properties)));
 
         await _dialogService.CopyToClipboardAsync(json);
-        NotifySuccess(L("RowsCopiedMsg", selectedRows.Count));
+        NotifySuccess(Localizer.Get("RowsCopiedMsg", selectedRows.Count));
     }
 
     private List<DynamicDataRow>? ResolveSelectedRows(object? parameter)
@@ -379,7 +378,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             var detectedFields = _jsonService.DetectFields(json);
             if (detectedFields.Count == 0)
             {
-                await _dialogService.ShowMessageAsync(L("ImportTitle"), L("NoFieldsDetectedMsg"));
+                await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), Localizer.Get("NoFieldsDetectedMsg"));
                 return;
             }
 
@@ -397,7 +396,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         Header = Path.GetFileNameWithoutExtension(path);
         UndoRedo.Clear();   // destructive — clear history
-        NotifySuccess(L("ImportedMsg", Rows.Count, Properties.Count));
+        NotifySuccess(Localizer.Get("ImportedMsg", Rows.Count, Properties.Count));
         FireColumnsChanged();
     }
 
@@ -406,7 +405,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         if (Properties.Count == 0)
         {
-            await _dialogService.ShowMessageAsync(L("ExportTitle"), L("AddPropsBeforeExport"));
+            await _dialogService.ShowMessageAsync(Localizer.Get("ExportTitle"), Localizer.Get("AddPropsBeforeExport"));
             return;
         }
 
@@ -416,7 +415,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         var json = _jsonService.SerializeToJson(Rows, Properties);
         await File.WriteAllTextAsync(path, json, Encoding.UTF8);
-        NotifySuccess(L("ExportedMsg", Path.GetFileName(path)));
+        NotifySuccess(Localizer.Get("ExportedMsg", Path.GetFileName(path)));
     }
 
     [RelayCommand]
@@ -431,7 +430,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         if (parsedProps.Count == 0)
         {
-            await _dialogService.ShowMessageAsync(L("ImportTitle"), L("NoPropsFoundMsg"));
+            await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), Localizer.Get("NoPropsFoundMsg"));
             return;
         }
 
@@ -442,7 +441,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         Rows.Clear();
         Header = className;
         UndoRedo.Clear();   // destructive — clear history
-        NotifySuccess(L("ImportedClassMsg", className, Properties.Count));
+        NotifySuccess(Localizer.Get("ImportedClassMsg", className, Properties.Count));
         FireColumnsChanged();
     }
 
@@ -451,7 +450,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         if (Properties.Count == 0)
         {
-            await _dialogService.ShowMessageAsync(L("ExportTitle"), L("AddPropsBeforeExport"));
+            await _dialogService.ShowMessageAsync(Localizer.Get("ExportTitle"), Localizer.Get("AddPropsBeforeExport"));
             return;
         }
 
@@ -463,7 +462,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         var code = _classParserService.GenerateClassCode(className, Properties);
         await File.WriteAllTextAsync(path, code, Encoding.UTF8);
         Header = className;
-        NotifySuccess(L("ExportedClassMsg", className));
+        NotifySuccess(Localizer.Get("ExportedClassMsg", className));
     }
 
     // -----------------------------------------------------------------------
@@ -477,13 +476,13 @@ public partial class WorkspaceViewModel : ViewModelBase
     private async Task RenameAsync()
     {
         var newName = await _dialogService.ShowInputDialogAsync(
-            L("RenameWorkspaceTitle"), L("RenameWorkspacePrompt"), Header, L("WorkspaceNameLabel"));
+            Localizer.Get("RenameWorkspaceTitle"), Localizer.Get("RenameWorkspacePrompt"), Header, Localizer.Get("WorkspaceNameLabel"));
 
         if (newName == null) return;
 
         if (string.IsNullOrWhiteSpace(newName))
         {
-            NotifyWarning(L("WorkspaceNameEmpty"));
+            NotifyWarning(Localizer.Get("WorkspaceNameEmpty"));
             return;
         }
 
@@ -491,6 +490,6 @@ public partial class WorkspaceViewModel : ViewModelBase
         if (trimmed == Header) return;
 
         Header = trimmed;
-        NotifySuccess(L("WorkspaceRenamedMsg", Header));
+        NotifySuccess(Localizer.Get("WorkspaceRenamedMsg", Header));
     }
 }
