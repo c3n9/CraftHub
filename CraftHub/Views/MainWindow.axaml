@@ -16,10 +16,16 @@
 		<!-- Title bar area -->
 		<Border Grid.Row="0" Background="{DynamicResource ElevatedBackground}" Padding="16,10">
 			<Grid ColumnDefinitions="Auto,*">
-				<StackPanel Orientation="Horizontal" Spacing="10" Grid.Column="0">
+				<Grid Grid.Column="0"
+					  ColumnDefinitions="Auto,*">
 					<TextBlock Text="CraftHub" FontSize="18" FontWeight="Bold"
 							   Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" />
-				</StackPanel>
+					<TextBlock Text="{Binding CurrentVersion}"
+							   FontSize="11"
+							   Grid.Column="1"
+							   FontWeight="Bold"
+							   Foreground="{DynamicResource AccentPrimary}"/>
+				</Grid>
 				<StackPanel Orientation="Horizontal" Spacing="10" Grid.Column="1" HorizontalAlignment="Right">
 					<Button Content="{materialIcons:MaterialIconExt Kind=Update}"
 							Foreground="{DynamicResource WarningColor}"

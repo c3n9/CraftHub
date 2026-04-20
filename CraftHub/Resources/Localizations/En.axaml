@@ -78,6 +78,9 @@
     <x:String x:Key="RowAdded">Row added ({0} total)</x:String>
     <x:String x:Key="RowsDuplicatedMsg">{0} row(s) duplicated to bottom</x:String>
     <x:String x:Key="RowsCopiedMsg">{0} row(s) copied to clipboard as JSON</x:String>
+    <x:String x:Key="RowsCutMsg">{0} row(s) cut and copied to clipboard as JSON</x:String>
+    <x:String x:Key="RowsPasteMsg">{0} rows(s) inserted into the table</x:String>
+    <x:String x:Key="RowsPasteErrorMsg">Something went wrong. Failed to insert JSON</x:String>
     <x:String x:Key="ImportTitle">Import</x:String>
     <x:String x:Key="ExportTitle">Export</x:String>
     <x:String x:Key="NoFieldsDetectedMsg">No fields detected in JSON file.</x:String>

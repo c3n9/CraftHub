@@ -37,6 +37,7 @@ public partial class MainWindowViewModel : ViewModelBase
     [ObservableProperty] private bool _isDownloading = false;
     [ObservableProperty] private double _downloadProgress = 0;
     [ObservableProperty] private string _currentLang = Services.LanguageService.Instance.CurrentLang;
+    [ObservableProperty] private string _currentVersion = string.Empty;
 
     public bool ShowPopupOverlay => ShowNotificationPopups && !IsNotificationManagerOpen;
 
@@ -62,14 +63,14 @@ public partial class MainWindowViewModel : ViewModelBase
         {
             try
             {
-                string currentVersion = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "version.txt")).Trim();
+                CurrentVersion = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "version.txt")).Trim();
                 var response = await NetManager.Get("https://api.github.com/repos/c3n9/CraftHub/releases/latest");
                 if (response.IsSuccessStatusCode)
                 {
                     var release = await NetManager.ParseHttpResponseMessage<GitHubRelease>(response);
                     string latestVersion = release?.TagName?.TrimStart('v') ?? string.Empty;
 
-                    if (!string.IsNullOrEmpty(latestVersion) && latestVersion != currentVersion)
+                    if (!string.IsNullOrEmpty(latestVersion) && latestVersion != CurrentVersion)
                     {
                         _latestRelease = release;
                         Dispatcher.UIThread.Post(() =>

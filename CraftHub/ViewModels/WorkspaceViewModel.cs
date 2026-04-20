@@ -86,6 +86,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
     private void NotifySuccess(string message) => _notificationService.Publish(NotificationType.Success, message);
     private void NotifyWarning(string message) => _notificationService.Publish(NotificationType.Warning, message);
+    private void NotifyError(string message) => _notificationService.Publish(NotificationType.Error, message);
 
     private void FireColumnsChanged() => ColumnsChanged?.Invoke(this, EventArgs.Empty);
 
@@ -345,6 +346,44 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         await _dialogService.CopyToClipboardAsync(json);
         NotifySuccess(Localizer.Get("RowsCopiedMsg", selectedRows.Count));
+    }
+
+    [RelayCommand]
+    private async Task PasteRowsToDataGridAsync(object? parameter)
+    {
+        var json = await _dialogService.GetFromClipboardAsync();
+        if (string.IsNullOrWhiteSpace(json)) return;
+        var pasteData = _jsonService.ParseJsonData(json, Properties);
+        foreach (var row in pasteData)
+        {
+            Rows.Add(row);
+        }
+        if (pasteData == null || pasteData.Count <= 0)
+        {
+            NotifyError(Localizer.Get("RowsPasteErrorMsg", pasteData.Count));
+        }
+        else
+        {
+            NotifySuccess(Localizer.Get("RowsPasteMsg"));
+        }
+    }
+
+    [RelayCommand]
+    private async Task CutRowsToDataGridAsync(object? parameter)
+    {
+        var selectedRows = ResolveSelectedRows(parameter);
+        if (selectedRows == null) return;
+
+        var json = selectedRows.Count == 1
+            ? _jsonService.SerializeSingleRowToJson(selectedRows[0], Properties)
+            : _jsonService.SerializeToJson(selectedRows, Properties);
+
+        await _dialogService.CopyToClipboardAsync(json);
+
+        foreach (var row in selectedRows)
+            Rows.Remove(row);
+
+        NotifySuccess(Localizer.Get("RowsCutMsg", selectedRows.Count));
     }
 
     [RelayCommand]

@@ -29,4 +29,5 @@ public interface IDialogService
     Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService);
 
     Task<ProgressResult> ShowProgressDialogAsync(string title, Func<IProgress<UpdateProgress>, CancellationToken, Task> task);
+    Task<string?> GetFromClipboardAsync();
 }

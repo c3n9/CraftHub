@@ -7,6 +7,7 @@ using CraftHub.Domain.Models;
 using CraftHub.Models;
 using CraftHub.ViewModels;
 using CraftHub.Views;
+using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Threading;
@@ -158,5 +159,11 @@ public class DialogService : IDialogService
         await taskRun;
 
         return result;
+    }
+
+    public async Task<string?> GetFromClipboardAsync()
+    {
+        var clipboard = TopLevel.GetTopLevel(App.Current.Services.GetRequiredService<MainWindow>())?.Clipboard;
+        return await clipboard?.GetTextAsync();
     }
 }

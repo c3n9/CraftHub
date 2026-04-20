@@ -267,6 +267,11 @@
 								  Background="Transparent"
 								  BorderThickness="0"
 								  RowBackground="{DynamicResource ElevatedBackground}">
+							<DataGrid.KeyBindings>
+								<KeyBinding Gesture="Ctrl+C" Command="{Binding CopyRowsToJsonCommand}" CommandParameter="{Binding #DataGrid.SelectedItems}" />
+								<KeyBinding Gesture="Ctrl+V" Command="{Binding PasteRowsToDataGridCommand}" />
+								<KeyBinding Gesture="Ctrl+X" Command="{Binding CutRowsToDataGridCommand}" CommandParameter="{Binding #DataGrid.SelectedItems}" />
+							</DataGrid.KeyBindings>
 							<DataGrid.ContextMenu>
 								<ContextMenu>
 									<MenuItem Header="{DynamicResource DuplicateRows}"

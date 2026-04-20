@@ -78,6 +78,9 @@
     <x:String x:Key="RowAdded">Строка добавлена ({0} всего)</x:String>
     <x:String x:Key="RowsDuplicatedMsg">{0} строк(и) продублировано</x:String>
     <x:String x:Key="RowsCopiedMsg">{0} строк(и) скопировано в буфер как JSON</x:String>
+    <x:String x:Key="RowsCutMsg">{0} строк(и) вырезано скопировано в буфер как JSON</x:String>
+    <x:String x:Key="RowsPasteMsg">{0} строк(и) вставлено в таблицу</x:String>
+    <x:String x:Key="RowsPasteErrorMsg">Что-то пошло не так. Не удалось вставить JSON</x:String>
     <x:String x:Key="ImportTitle">Импорт</x:String>
     <x:String x:Key="ExportTitle">Экспорт</x:String>
     <x:String x:Key="NoFieldsDetectedMsg">В JSON файле не обнаружены поля.</x:String>
