@@ -6,4 +6,20 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <!-- JSON editor error banner — style-based to avoid DynamicResource init issues -->
+    <Style Selector="Border.json-error-banner">
+        <Setter Property="Background" Value="{DynamicResource ElevatedBackground}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource DangerColor}" />
+        <Setter Property="BorderThickness" Value="3,0,0,0" />
+        <Setter Property="CornerRadius" Value="4" />
+        <Setter Property="Padding" Value="12,8" />
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+    <Style Selector="Border.json-error-banner TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource DangerColor}" />
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="TextWrapping" Value="Wrap" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
 </Styles>

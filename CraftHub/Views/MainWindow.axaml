@@ -5,7 +5,7 @@
 		xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
 		x:Class="CraftHub.Views.MainWindow"
 		Title="CraftHub"
-		MinWidth="900" MinHeight="600"
+		MinWidth="1100" MinHeight="600"
 		Width="1200" Height="750"
 		WindowStartupLocation="CenterScreen"
 		Background="{DynamicResource AppBackground}"

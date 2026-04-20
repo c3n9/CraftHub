@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CraftHub.Core;
@@ -36,7 +37,8 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private int _selectedRowsCount = 0;
     [ObservableProperty] private bool _isJsonEditorMode = false;
     [ObservableProperty] private string _rawJsonText = string.Empty;
-    [ObservableProperty] private string _jsonEditorError = string.Empty;
+    [ObservableProperty] private string _jsonEditorError;
+    [ObservableProperty] private bool _isJsonEditorErrorVisible;
 
     public bool IsTableEditorMode => !IsJsonEditorMode;
 
@@ -487,6 +489,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             ? _jsonService.SerializeToJson(Rows, Properties)
             : Properties.Count > 0 ? "[]" : "{}";
         JsonEditorError = string.Empty;
+        IsJsonEditorErrorVisible = false;
         IsJsonEditorMode = true;
     }
 
@@ -518,12 +521,14 @@ public partial class WorkspaceViewModel : ViewModelBase
 
             UndoRedo.Clear();
             JsonEditorError = string.Empty;
+            IsJsonEditorErrorVisible = false;
             IsJsonEditorMode = false;
             FireColumnsChanged();
             NotifySuccess(Localizer.Get("JsonAppliedMsg"));
         }
         catch (JsonException ex)
         {
+            IsJsonEditorErrorVisible = true;
             JsonEditorError = $"{Localizer.Get("InvalidJsonError")}: {ex.Message}";
         }
     }

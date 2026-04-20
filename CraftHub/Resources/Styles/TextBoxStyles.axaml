@@ -13,6 +13,32 @@
     <Style Selector="TextBox:focus /template/ Border">
         <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}" />
     </Style>
+    <Style Selector="TextBox.json-editor">
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="TextBox.json-editor /template/ Border">
+        <Setter Property="Background" Value="{DynamicResource ElevatedBackground}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="TextBox.json-editor:pointerover /template/ Border">
+        <Setter Property="Background" Value="{DynamicResource ElevatedBackground}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="TextBox.json-editor:focus /template/ Border">
+        <Setter Property="Background" Value="{DynamicResource ElevatedBackground}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BoxShadow" Value="none" />
+    </Style>
+    <Style Selector="TextBox.json-editor:focus-within /template/ Border">
+        <Setter Property="Background" Value="{DynamicResource ElevatedBackground}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BoxShadow" Value="none" />
+    </Style>
+
     <Style Selector="TextBox.grid-editor">
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
         <Setter Property="BorderThickness" Value="1" />

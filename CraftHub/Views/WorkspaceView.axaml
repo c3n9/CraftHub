@@ -251,41 +251,41 @@
 					<ScrollViewer HorizontalScrollBarVisibility="Auto"
 								  Padding="0,0,0,-10">
 						<DataGrid x:Name="DataGrid"
-							  MinWidth="520"
-							  RowHeaderWidth="48"
-							  ItemsSource="{Binding Rows}"
-							  SelectedItem="{Binding SelectedRow}"
-							  AutoGenerateColumns="False"
-							  CanUserReorderColumns="True"
-							  CanUserResizeColumns="True"
-							  CanUserSortColumns="True"
-							  SelectionMode="Extended"
-							  IsReadOnly="False"
-							  HorizontalScrollBarVisibility="Disabled"
-							  VerticalScrollBarVisibility="Auto"
-							  FontSize="14"
-							  Background="Transparent"
-							  BorderThickness="0"
-							  RowBackground="{DynamicResource ElevatedBackground}">
-						<DataGrid.ContextMenu>
-							<ContextMenu>
-								<MenuItem Header="{DynamicResource DuplicateRows}"
-										  Command="{Binding DuplicateRowsCommand}"
-										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
-								<MenuItem Header="{DynamicResource CopyRowsAsArray}"
-										  Command="{Binding CopyRowsToJsonCommand}"
-										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
-								<MenuItem Header="{DynamicResource CopyRowsAsObjects}"
-										  Command="{Binding CopyRowsToJsonAsObjectsCommand}"
-										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
-								<Separator />
-								<MenuItem Header="{DynamicResource RemoveRows}"
-										  Command="{Binding RemoveRowsCommand}"
-										  CommandParameter="{Binding #DataGrid.SelectedItems}"
-										  Foreground="{DynamicResource DangerColor}" />
-							</ContextMenu>
-						</DataGrid.ContextMenu>
-					</DataGrid>
+								  MinWidth="520"
+								  RowHeaderWidth="48"
+								  ItemsSource="{Binding Rows}"
+								  SelectedItem="{Binding SelectedRow}"
+								  AutoGenerateColumns="False"
+								  CanUserReorderColumns="True"
+								  CanUserResizeColumns="True"
+								  CanUserSortColumns="True"
+								  SelectionMode="Extended"
+								  IsReadOnly="False"
+								  HorizontalScrollBarVisibility="Disabled"
+								  VerticalScrollBarVisibility="Auto"
+								  FontSize="14"
+								  Background="Transparent"
+								  BorderThickness="0"
+								  RowBackground="{DynamicResource ElevatedBackground}">
+							<DataGrid.ContextMenu>
+								<ContextMenu>
+									<MenuItem Header="{DynamicResource DuplicateRows}"
+											  Command="{Binding DuplicateRowsCommand}"
+											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+									<MenuItem Header="{DynamicResource CopyRowsAsArray}"
+											  Command="{Binding CopyRowsToJsonCommand}"
+											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+									<MenuItem Header="{DynamicResource CopyRowsAsObjects}"
+											  Command="{Binding CopyRowsToJsonAsObjectsCommand}"
+											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+									<Separator />
+									<MenuItem Header="{DynamicResource RemoveRows}"
+											  Command="{Binding RemoveRowsCommand}"
+											  CommandParameter="{Binding #DataGrid.SelectedItems}"
+											  Foreground="{DynamicResource DangerColor}" />
+								</ContextMenu>
+							</DataGrid.ContextMenu>
+						</DataGrid>
 					</ScrollViewer>
 
 				</Border>
@@ -298,25 +298,23 @@
 
 			<!-- Error banner -->
 			<Border Grid.Row="0"
-					Background="{DynamicResource ElevatedBackground}"
-					BorderBrush="{DynamicResource DangerColor}"
-					BorderThickness="3,0,0,0"
-					CornerRadius="4"
-					Padding="12,8"
-					Margin="0,0,0,8"
-					IsVisible="{Binding JsonEditorError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-				<StackPanel Orientation="Horizontal" Spacing="8">
-					<materialIcons:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16"
-							Foreground="{DynamicResource DangerColor}" />
-					<TextBlock Text="{Binding JsonEditorError}"
-							   Foreground="{DynamicResource DangerColor}"
-							   FontSize="13"
-							   TextWrapping="Wrap"
-							   VerticalAlignment="Center" />
-				</StackPanel>
+					Classes="json-error-banner"
+					IsVisible="{Binding IsJsonEditorErrorVisible}">
+				<Grid ColumnDefinitions="Auto,*">
+					<materialIcons:MaterialIcon Grid.Column="0"
+												Kind="AlertCircleOutline"
+												Width="16"
+												Margin="0,0,8,0"
+												Height="16"
+												Foreground="{DynamicResource DangerColor}" />
+
+					<TextBlock Grid.Column="1"
+							   Text="{Binding JsonEditorError}"
+							   TextWrapping="Wrap" />
+				</Grid>
 			</Border>
 
-			<!-- JSON TextBox -->
+			<!-- JSON editor: outer ScrollViewer syncs line numbers and text together -->
 			<Border Grid.Row="1"
 					CornerRadius="10"
 					Background="{DynamicResource BorderColor}"
@@ -324,18 +322,40 @@
 				<Border CornerRadius="9"
 						Background="{DynamicResource ElevatedBackground}"
 						ClipToBounds="True">
-					<TextBox Text="{Binding RawJsonText, Mode=TwoWay}"
-							 AcceptsReturn="True"
-							 AcceptsTab="True"
-							 FontFamily="Cascadia Code,Cascadia Mono,Consolas,Courier New,monospace"
-							 FontSize="13"
-							 TextWrapping="Wrap"
-							 ScrollViewer.VerticalScrollBarVisibility="Auto"
-							 ScrollViewer.HorizontalScrollBarVisibility="Auto"
-							 BorderThickness="0"
-							 Background="Transparent"
-							 Padding="14,12"
-							 VerticalContentAlignment="Top" />
+					<Grid ColumnDefinitions="Auto,*">
+
+						<!-- Line numbers -->
+						<Border Grid.Column="0"
+								Background="{DynamicResource SurfaceBackground}"
+								BorderBrush="{DynamicResource BorderLight}"
+								BorderThickness="0,0,1,0">
+							<ScrollViewer x:Name="LineNumberScroller"
+										  HorizontalScrollBarVisibility="Disabled"
+										  VerticalScrollBarVisibility="Hidden"
+										  IsHitTestVisible="False">
+								<TextBlock x:Name="LineNumbersBlock"
+										   FontFamily="Cascadia Code,Cascadia Mono,Consolas,Courier New,monospace"
+										   FontSize="13"
+										   Padding="12,12,12,12"
+										   Foreground="{DynamicResource TextMuted}"
+										   TextAlignment="Right"
+										   Text="1" />
+							</ScrollViewer>
+						</Border>
+
+						<!-- Text editor -->
+						<TextBox Grid.Column="1"
+								 x:Name="JsonTextBox"
+								 Classes="json-editor"
+								 Text="{Binding RawJsonText, Mode=TwoWay}"
+								 AcceptsReturn="True"
+								 AcceptsTab="True"
+								 FontFamily="Cascadia Code,Cascadia Mono,Consolas,Courier New,monospace"
+								 FontSize="13"
+								 TextWrapping="NoWrap"
+								 Padding="14,12"
+								 VerticalContentAlignment="Top" />
+					</Grid>
 				</Border>
 			</Border>
 		</Grid>
@@ -345,6 +365,7 @@
 				Background="{DynamicResource ElevatedBackground}"
 				BorderBrush="{DynamicResource BorderColor}"
 				BorderThickness="0,1,0,0"
+				IsVisible="{Binding !IsJsonEditorMode}"
 				Padding="14,5">
 			<StackPanel Orientation="Horizontal" Spacing="24">
 

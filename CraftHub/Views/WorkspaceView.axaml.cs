@@ -1,11 +1,15 @@
 using System;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Threading;
+using Avalonia.VisualTree;
 using CraftHub.Converters;
 using CraftHub.Models;
 using CraftHub.ViewModels;
@@ -23,6 +27,10 @@ public partial class WorkspaceView : UserControl
     // Used by CellEditEnded to push an undo action only when the value actually changed.
     private (DynamicDataRow Row, string PropName, string OldValue)? _pendingEdit;
 
+    private TextBox? _jsonTextBox;
+    private ScrollViewer? _lineNumberScroller;
+    private TextBlock? _lineNumbersBlock;
+
     public WorkspaceView()
     {
         InitializeComponent();
@@ -30,6 +38,43 @@ public partial class WorkspaceView : UserControl
         DataGrid.LoadingRow    += OnDataGridLoadingRow;
         DataGrid.SelectionChanged += OnDataGridSelectionChanged;
         DataGrid.CellEditEnded += OnDataGridCellEditEnded;
+        InitJsonEditor();
+    }
+
+    // -----------------------------------------------------------------------
+    //  JSON editor — line numbers + scroll sync
+    // -----------------------------------------------------------------------
+
+    private void InitJsonEditor()
+    {
+        _jsonTextBox       = this.FindControl<TextBox>("JsonTextBox");
+        _lineNumberScroller = this.FindControl<ScrollViewer>("LineNumberScroller");
+        _lineNumbersBlock  = this.FindControl<TextBlock>("LineNumbersBlock");
+
+        if (_jsonTextBox == null || _lineNumbersBlock == null) return;
+
+        _jsonTextBox.TextChanged += (_, _) => RefreshLineNumbers();
+
+        // After the TextBox template is applied its internal ScrollViewer exists.
+        // Post to Background so the visual tree is fully ready before we search it.
+        _jsonTextBox.TemplateApplied += (_, _) =>
+            Dispatcher.UIThread.Post(HookScrollSync, DispatcherPriority.Background);
+    }
+
+    private void HookScrollSync()
+    {
+        if (_jsonTextBox == null || _lineNumberScroller == null) return;
+        var sv = _jsonTextBox.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
+        if (sv == null) return;
+        sv.ScrollChanged += (_, _) =>
+            _lineNumberScroller.Offset = new Vector(0, sv.Offset.Y);
+    }
+
+    private void RefreshLineNumbers()
+    {
+        if (_lineNumbersBlock == null || _jsonTextBox == null) return;
+        var count = (_jsonTextBox.Text ?? string.Empty).Split('\n').Length;
+        _lineNumbersBlock.Text = string.Join("\n", Enumerable.Range(1, count));
     }
 
     // -----------------------------------------------------------------------
