@@ -85,6 +85,8 @@
     <x:String x:Key="ImportedMsg">Imported {0} rows, {1} fields</x:String>
     <x:String x:Key="ExportedMsg">Exported to {0}</x:String>
     <x:String x:Key="NoPropsFoundMsg">No properties found in the class file.</x:String>
+    <x:String x:Key="SelectClassTitle">Select Class</x:String>
+    <x:String x:Key="SelectClassMsg">Multiple classes found. Select one to import:</x:String>
     <x:String x:Key="ImportedClassMsg">✓ Imported class '{0}' with {1} properties</x:String>
     <x:String x:Key="ExportedClassMsg">✓ Exported class '{0}'</x:String>
     <x:String x:Key="RemoveRowTitle">Remove row</x:String>

@@ -19,6 +19,9 @@ public interface IDialogService
     /// <summary>Show an input dialog and return user text.</summary>
     Task<string?> ShowInputDialogAsync(string title, string message, string initialValue, string? placeholder = null);
 
+    /// <summary>Show a selection dialog and return the chosen item, or null if cancelled.</summary>
+    Task<string?> ShowSelectDialogAsync(string title, string message, List<string> options);
+
     /// <summary>Copy text to clipboard.</summary>
     Task CopyToClipboardAsync(string text);
 

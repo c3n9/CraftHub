@@ -91,6 +91,16 @@ public class DialogService : IDialogService
         return await dialog.ShowDialog<string?>(window);
     }
 
+    public async Task<string?> ShowSelectDialogAsync(string title, string message, List<string> options)
+    {
+        var window = GetMainWindow();
+        if (window == null) return null;
+
+        var dialog = new SelectDialogView();
+        dialog.SetOptions(title, message, options);
+        return await dialog.ShowDialog<string?>(window);
+    }
+
     public async Task CopyToClipboardAsync(string text)
     {
         var window = GetMainWindow();

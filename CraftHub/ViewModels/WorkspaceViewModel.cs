@@ -439,7 +439,31 @@ public partial class WorkspaceViewModel : ViewModelBase
         if (path == null) return;
 
         var code = await File.ReadAllTextAsync(path);
-        var (className, parsedProps) = _classParserService.ParseClassFile(code);
+        var allClasses = _classParserService.ParseAllClasses(code);
+
+        if (allClasses.Count == 0)
+        {
+            await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), Localizer.Get("NoPropsFoundMsg"));
+            return;
+        }
+
+        string className;
+        List<JsonPropertyDefinition> parsedProps;
+
+        if (allClasses.Count == 1)
+        {
+            (className, parsedProps) = allClasses[0];
+        }
+        else
+        {
+            var classNames = allClasses.ConvertAll(c => c.className);
+            var selected = await _dialogService.ShowSelectDialogAsync(
+                Localizer.Get("SelectClassTitle"),
+                Localizer.Get("SelectClassMsg"),
+                classNames);
+            if (selected == null) return;
+            (className, parsedProps) = allClasses.Find(c => c.className == selected);
+        }
 
         if (parsedProps.Count == 0)
         {

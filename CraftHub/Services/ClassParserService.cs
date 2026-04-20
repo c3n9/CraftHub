@@ -18,25 +18,43 @@ public class ClassParserService : IClassParserService
 
     public (string className, List<JsonPropertyDefinition> properties) ParseClassFile(string code)
     {
-        var className = "Unknown";
-        var match = ClassNameRegex.Match(code);
-        if (match.Success) className = match.Groups[1].Value;
+        var all = ParseAllClasses(code);
+        return all.Count > 0 ? all[0] : ("Unknown", new List<JsonPropertyDefinition>());
+    }
 
-        var properties = new List<JsonPropertyDefinition>();
-        foreach (Match propMatch in PropertyRegex.Matches(code))
+    public List<(string className, List<JsonPropertyDefinition> properties)> ParseAllClasses(string code)
+    {
+        var classMatches = ClassNameRegex.Matches(code);
+        if (classMatches.Count == 0)
+            return new List<(string, List<JsonPropertyDefinition>)>();
+
+        var propMatches = PropertyRegex.Matches(code);
+        var result = new List<(string, List<JsonPropertyDefinition>)>();
+
+        for (var i = 0; i < classMatches.Count; i++)
         {
-            var typeName = propMatch.Groups[1].Value;
-            var propName = propMatch.Groups[2].Value;
-            var fieldType = MapCSharpType(typeName);
+            var classMatch = classMatches[i];
+            var className = classMatch.Groups[1].Value;
+            var classStart = classMatch.Index;
+            var classEnd = i + 1 < classMatches.Count ? classMatches[i + 1].Index : code.Length;
 
-            properties.Add(new JsonPropertyDefinition
+            var properties = new List<JsonPropertyDefinition>();
+            foreach (Match propMatch in propMatches)
             {
-                Name = propName,
-                FieldType = fieldType,
-            });
+                if (propMatch.Index < classStart || propMatch.Index >= classEnd) continue;
+                var typeName = propMatch.Groups[1].Value;
+                var propName = propMatch.Groups[2].Value;
+                properties.Add(new JsonPropertyDefinition
+                {
+                    Name = propName,
+                    FieldType = MapCSharpType(typeName),
+                });
+            }
+
+            result.Add((className, properties));
         }
 
-        return (className, properties);
+        return result;
     }
 
     private static JsonFieldType MapCSharpType(string csharpType)

@@ -85,6 +85,8 @@
     <x:String x:Key="ImportedMsg">Импортировано {0} строк, {1} полей</x:String>
     <x:String x:Key="ExportedMsg">Экспортировано в {0}</x:String>
     <x:String x:Key="NoPropsFoundMsg">Свойства не найдены в файле класса.</x:String>
+    <x:String x:Key="SelectClassTitle">Выбор класса</x:String>
+    <x:String x:Key="SelectClassMsg">Найдено несколько классов. Выберите один для импорта:</x:String>
     <x:String x:Key="ImportedClassMsg">✓ Класс '{0}' импортирован, {1} свойств</x:String>
     <x:String x:Key="ExportedClassMsg">✓ Класс '{0}' экспортирован</x:String>
     <x:String x:Key="RemoveRowTitle">Удалить строку</x:String>
