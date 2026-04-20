@@ -5,6 +5,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -33,6 +34,13 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private bool _isActive;
     [ObservableProperty] private int _selectedRowsCount = 0;
+    [ObservableProperty] private bool _isJsonEditorMode = false;
+    [ObservableProperty] private string _rawJsonText = string.Empty;
+    [ObservableProperty] private string _jsonEditorError = string.Empty;
+
+    public bool IsTableEditorMode => !IsJsonEditorMode;
+
+    partial void OnIsJsonEditorModeChanged(bool value) => OnPropertyChanged(nameof(IsTableEditorMode));
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
@@ -398,6 +406,9 @@ public partial class WorkspaceViewModel : ViewModelBase
         UndoRedo.Clear();   // destructive — clear history
         NotifySuccess(Localizer.Get("ImportedMsg", Rows.Count, Properties.Count));
         FireColumnsChanged();
+
+        if (IsJsonEditorMode)
+            RawJsonText = _jsonService.SerializeToJson(Rows, Properties);
     }
 
     [RelayCommand]
@@ -463,6 +474,58 @@ public partial class WorkspaceViewModel : ViewModelBase
         await File.WriteAllTextAsync(path, code, Encoding.UTF8);
         Header = className;
         NotifySuccess(Localizer.Get("ExportedClassMsg", className));
+    }
+
+    // -----------------------------------------------------------------------
+    //  JSON editor mode toggle
+    // -----------------------------------------------------------------------
+
+    [RelayCommand]
+    private void SwitchToJsonEditor()
+    {
+        RawJsonText = Rows.Count > 0 && Properties.Count > 0
+            ? _jsonService.SerializeToJson(Rows, Properties)
+            : Properties.Count > 0 ? "[]" : "{}";
+        JsonEditorError = string.Empty;
+        IsJsonEditorMode = true;
+    }
+
+    [RelayCommand]
+    private void SwitchToTableEditor()
+    {
+        if (string.IsNullOrWhiteSpace(RawJsonText))
+        {
+            IsJsonEditorMode = false;
+            return;
+        }
+
+        try
+        {
+            JsonDocument.Parse(RawJsonText);
+
+            if (Properties.Count == 0)
+            {
+                var detected = _jsonService.DetectFields(RawJsonText);
+                foreach (var field in detected)
+                    Properties.Add(new JsonPropertyDefinition { Name = field.FieldName, FieldType = field.SelectedType });
+                FireColumnsChanged();
+            }
+
+            var rows = _jsonService.ParseJsonData(RawJsonText, Properties);
+            Rows.Clear();
+            foreach (var row in rows)
+                Rows.Add(row);
+
+            UndoRedo.Clear();
+            JsonEditorError = string.Empty;
+            IsJsonEditorMode = false;
+            FireColumnsChanged();
+            NotifySuccess(Localizer.Get("JsonAppliedMsg"));
+        }
+        catch (JsonException ex)
+        {
+            JsonEditorError = $"{Localizer.Get("InvalidJsonError")}: {ex.Message}";
+        }
     }
 
     // -----------------------------------------------------------------------

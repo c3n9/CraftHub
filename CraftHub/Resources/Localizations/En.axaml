@@ -40,6 +40,12 @@
     <x:String x:Key="AddRowTip">Add new data row</x:String>
     <x:String x:Key="RemoveFieldTip">Remove field</x:String>
     <x:String x:Key="AddPropertyTip">Add property</x:String>
+    <x:String x:Key="SwitchToJsonBtn">JSON</x:String>
+    <x:String x:Key="SwitchToTableBtn">Table</x:String>
+    <x:String x:Key="SwitchToJsonTip">Switch to raw JSON editor</x:String>
+    <x:String x:Key="SwitchToTableTip">Apply changes and switch to table view</x:String>
+    <x:String x:Key="JsonAppliedMsg">JSON applied successfully</x:String>
+    <x:String x:Key="InvalidJsonError">Invalid JSON</x:String>
 
     <!-- Tooltips – MainWindow -->
     <x:String x:Key="UpdateTip">Update</x:String>

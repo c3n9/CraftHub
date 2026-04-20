@@ -40,6 +40,12 @@
     <x:String x:Key="AddRowTip">Добавить новую строку</x:String>
     <x:String x:Key="RemoveFieldTip">Удалить поле</x:String>
     <x:String x:Key="AddPropertyTip">Добавить свойство</x:String>
+    <x:String x:Key="SwitchToJsonBtn">JSON</x:String>
+    <x:String x:Key="SwitchToTableBtn">Таблица</x:String>
+    <x:String x:Key="SwitchToJsonTip">Переключить в редактор JSON</x:String>
+    <x:String x:Key="SwitchToTableTip">Применить изменения и вернуться к таблице</x:String>
+    <x:String x:Key="JsonAppliedMsg">JSON применён успешно</x:String>
+    <x:String x:Key="InvalidJsonError">Некорректный JSON</x:String>
 
     <!-- Tooltips – MainWindow -->
     <x:String x:Key="UpdateTip">Обновить</x:String>

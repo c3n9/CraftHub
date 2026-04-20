@@ -51,40 +51,68 @@
 					</StackPanel>
 				</Button>
 
-				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4"
+						IsVisible="{Binding IsTableEditorMode}" />
 
 				<Button Classes="toolbar-btn"
 						Command="{Binding AddRowCommand}"
-						ToolTip.Tip="{DynamicResource AddRowTip}">
+						ToolTip.Tip="{DynamicResource AddRowTip}"
+						IsVisible="{Binding IsTableEditorMode}">
 					<StackPanel Orientation="Horizontal" Spacing="6">
 						<materialIcons:MaterialIcon Kind="TableRowPlusAfter" Width="16" Height="16" />
 						<TextBlock Text="{DynamicResource AddRowBtn}" VerticalAlignment="Center" />
 					</StackPanel>
 				</Button>
 
-				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4"
+						IsVisible="{Binding IsTableEditorMode}" />
 
 				<Button Classes="toolbar-btn"
 						Command="{Binding UndoCommand}"
-						ToolTip.Tip="{Binding UndoTooltip}">
+						ToolTip.Tip="{Binding UndoTooltip}"
+						IsVisible="{Binding IsTableEditorMode}">
 					<materialIcons:MaterialIcon Kind="Undo" Width="16" Height="16" />
 				</Button>
 				<Button Classes="toolbar-btn"
 						Command="{Binding RedoCommand}"
-						ToolTip.Tip="{Binding RedoTooltip}">
+						ToolTip.Tip="{Binding RedoTooltip}"
+						IsVisible="{Binding IsTableEditorMode}">
 					<materialIcons:MaterialIcon Kind="Redo" Width="16" Height="16" />
 				</Button>
 
-				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4"
+						IsVisible="{Binding IsTableEditorMode}" />
 
 				<TextBox Text="{Binding SearchQuery}" Watermark="{DynamicResource SearchWatermark}"
-						 Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13" />
+						 Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13"
+						 IsVisible="{Binding IsTableEditorMode}" />
+
+				<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
+
+				<Button Classes="toolbar-btn" Command="{Binding SwitchToJsonEditorCommand}"
+						IsVisible="{Binding IsTableEditorMode}"
+						ToolTip.Tip="{DynamicResource SwitchToJsonTip}">
+					<StackPanel Orientation="Horizontal" Spacing="6">
+						<materialIcons:MaterialIcon Kind="CodeBraces" Width="16" Height="16" />
+						<TextBlock Text="{DynamicResource SwitchToJsonBtn}" VerticalAlignment="Center" />
+					</StackPanel>
+				</Button>
+
+				<Button Classes="toolbar-btn" Command="{Binding SwitchToTableEditorCommand}"
+						IsVisible="{Binding IsJsonEditorMode}"
+						ToolTip.Tip="{DynamicResource SwitchToTableTip}">
+					<StackPanel Orientation="Horizontal" Spacing="6">
+						<materialIcons:MaterialIcon Kind="TableLarge" Width="16" Height="16" />
+						<TextBlock Text="{DynamicResource SwitchToTableBtn}" VerticalAlignment="Center" />
+					</StackPanel>
+				</Button>
 			</StackPanel>
 		</Border>
 
 		<!-- Toolbar Row 2: Add Property -->
 		<Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}" Padding="8,6"
-				CornerRadius="8" Margin="8,6,8,0">
+				CornerRadius="8" Margin="8,6,8,0"
+				IsVisible="{Binding IsTableEditorMode}">
 			<StackPanel Orientation="Horizontal" Spacing="8">
 				<TextBlock Text="{DynamicResource AddPropertyLabel}" VerticalAlignment="Center"
 						   Foreground="{DynamicResource TextMuted}" FontSize="13" />
@@ -109,8 +137,9 @@
 			</StackPanel>
 		</Border>
 
-		<!-- Schema + Data -->
-		<Grid Grid.Row="2" Margin="10" x:Name="ContentGrid">
+		<!-- Schema + Data (Table Mode) -->
+		<Grid Grid.Row="2" Margin="10" x:Name="ContentGrid"
+			  IsVisible="{Binding IsTableEditorMode}">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="320" MinWidth="240" />
 				<ColumnDefinition Width="10" />
@@ -259,6 +288,54 @@
 					</DataGrid>
 					</ScrollViewer>
 
+				</Border>
+			</Border>
+		</Grid>
+
+		<!-- JSON Editor (JSON Mode) -->
+		<Grid Grid.Row="2" Margin="10" IsVisible="{Binding IsJsonEditorMode}"
+			  RowDefinitions="Auto,*">
+
+			<!-- Error banner -->
+			<Border Grid.Row="0"
+					Background="{DynamicResource ElevatedBackground}"
+					BorderBrush="{DynamicResource DangerColor}"
+					BorderThickness="3,0,0,0"
+					CornerRadius="4"
+					Padding="12,8"
+					Margin="0,0,0,8"
+					IsVisible="{Binding JsonEditorError, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<materialIcons:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16"
+							Foreground="{DynamicResource DangerColor}" />
+					<TextBlock Text="{Binding JsonEditorError}"
+							   Foreground="{DynamicResource DangerColor}"
+							   FontSize="13"
+							   TextWrapping="Wrap"
+							   VerticalAlignment="Center" />
+				</StackPanel>
+			</Border>
+
+			<!-- JSON TextBox -->
+			<Border Grid.Row="1"
+					CornerRadius="10"
+					Background="{DynamicResource BorderColor}"
+					Padding="1">
+				<Border CornerRadius="9"
+						Background="{DynamicResource ElevatedBackground}"
+						ClipToBounds="True">
+					<TextBox Text="{Binding RawJsonText, Mode=TwoWay}"
+							 AcceptsReturn="True"
+							 AcceptsTab="True"
+							 FontFamily="Cascadia Code,Cascadia Mono,Consolas,Courier New,monospace"
+							 FontSize="13"
+							 TextWrapping="Wrap"
+							 ScrollViewer.VerticalScrollBarVisibility="Auto"
+							 ScrollViewer.HorizontalScrollBarVisibility="Auto"
+							 BorderThickness="0"
+							 Background="Transparent"
+							 Padding="14,12"
+							 VerticalContentAlignment="Top" />
 				</Border>
 			</Border>
 		</Grid>
