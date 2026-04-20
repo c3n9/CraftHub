@@ -30,6 +30,7 @@ public partial class WorkspaceView : UserControl
     private TextBox? _jsonTextBox;
     private ScrollViewer? _lineNumberScroller;
     private TextBlock? _lineNumbersBlock;
+    private int _lastLineCount = -1;
 
     public WorkspaceView()
     {
@@ -73,7 +74,12 @@ public partial class WorkspaceView : UserControl
     private void RefreshLineNumbers()
     {
         if (_lineNumbersBlock == null || _jsonTextBox == null) return;
-        var count = (_jsonTextBox.Text ?? string.Empty).Split('\n').Length;
+        var text = _jsonTextBox.Text ?? string.Empty;
+        var count = 1;
+        foreach (var c in text)
+            if (c == '\n') count++;
+        if (count == _lastLineCount) return;
+        _lastLineCount = count;
         _lineNumbersBlock.Text = string.Join("\n", Enumerable.Range(1, count));
     }
 
