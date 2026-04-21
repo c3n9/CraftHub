@@ -283,6 +283,11 @@
 									<MenuItem Header="{DynamicResource CopyRowsAsObjects}"
 											  Command="{Binding CopyRowsToJsonAsObjectsCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+									<MenuItem Header="{DynamicResource PasteRowsFromClipboard}"
+											  Command="{Binding PasteRowsToDataGridCommand}"/>
+									<MenuItem Header="{DynamicResource CutRowsAndSaveToClipboard}"
+											  Command="{Binding CutRowsToDataGridCommand}"
+											  CommandParameter="{Binding #DataGrid.SelectedItems}"/>
 									<Separator />
 									<MenuItem Header="{DynamicResource RemoveRows}"
 											  Command="{Binding RemoveRowsCommand}"

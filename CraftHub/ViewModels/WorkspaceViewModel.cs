@@ -364,7 +364,8 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
         else
         {
-            NotifySuccess(Localizer.Get("RowsPasteMsg"));
+            UndoRedo.Push(new PasteRowsAction(Rows, pasteData));
+            NotifySuccess(Localizer.Get("RowsPasteMsg", pasteData.Count));
         }
     }
 
@@ -374,6 +375,11 @@ public partial class WorkspaceViewModel : ViewModelBase
         var selectedRows = ResolveSelectedRows(parameter);
         if (selectedRows == null) return;
 
+        var withIndices = selectedRows
+            .Select(r => (Index: Rows.IndexOf(r), Row: r))
+            .Where(x => x.Index >= 0)
+            .ToList();
+
         var json = selectedRows.Count == 1
             ? _jsonService.SerializeSingleRowToJson(selectedRows[0], Properties)
             : _jsonService.SerializeToJson(selectedRows, Properties);
@@ -382,6 +388,8 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         foreach (var row in selectedRows)
             Rows.Remove(row);
+
+        UndoRedo.Push(new RemoveRowsAction(Rows, withIndices.Select(x => (x.Index, x.Row))));
 
         NotifySuccess(Localizer.Get("RowsCutMsg", selectedRows.Count));
     }

@@ -28,6 +28,7 @@
     <x:String x:Key="UndoDescAddRow">Добавление строки</x:String>
     <x:String x:Key="UndoDescRemoveRows">Удаление {0} строк(и)</x:String>
     <x:String x:Key="UndoDescDuplicateRows">Дублирование {0} строк(и)</x:String>
+    <x:String x:Key="UndoDescPasteRows">Вставка {0} строк(и)</x:String>
     <x:String x:Key="UndoDescEditCell">Редактирование '{0}'</x:String>
     <x:String x:Key="UndoDescAddProperty">Добавление поля '{0}'</x:String>
     <x:String x:Key="UndoDescRemoveProperty">Удаление поля '{0}'</x:String>
@@ -46,6 +47,8 @@
     <x:String x:Key="SwitchToTableTip">Применить изменения и вернуться к таблице</x:String>
     <x:String x:Key="JsonAppliedMsg">JSON применён успешно</x:String>
     <x:String x:Key="InvalidJsonError">Некорректный JSON</x:String>
+    <x:String x:Key="PasteRowsFromClipboard">Добавить строки из буфера</x:String>
+    <x:String x:Key="CutRowsAndSaveToClipboard">Вырезать выделенные строки и сохранить в буфер</x:String>
 
     <!-- Tooltips – MainWindow -->
     <x:String x:Key="UpdateTip">Обновить</x:String>
