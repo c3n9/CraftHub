@@ -9,6 +9,23 @@
         <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Padding" Value="10,8" />
         <Setter Property="CaretBrush" Value="{DynamicResource AccentPrimary}" />
+        <Setter Property="ContextFlyout">
+            <MenuFlyout>
+                <MenuItem Header="{DynamicResource TbCut}"
+                          Command="{Binding $parent[TextBox].Cut}"
+                          InputGesture="Ctrl+X" />
+                <MenuItem Header="{DynamicResource TbCopy}"
+                          Command="{Binding $parent[TextBox].Copy}"
+                          InputGesture="Ctrl+C" />
+                <MenuItem Header="{DynamicResource TbPaste}"
+                          Command="{Binding $parent[TextBox].Paste}"
+                          InputGesture="Ctrl+V" />
+                <Separator />
+                <MenuItem Header="{DynamicResource TbSelectAll}"
+                          Command="{Binding $parent[TextBox].SelectAll}"
+                          InputGesture="Ctrl+A" />
+            </MenuFlyout>
+        </Setter>
     </Style>
     <Style Selector="TextBox:focus /template/ Border">
         <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}" />

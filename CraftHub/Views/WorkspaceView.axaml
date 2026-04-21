@@ -273,23 +273,27 @@
 								<KeyBinding Gesture="Ctrl+X" Command="{Binding CutRowsToDataGridCommand}" CommandParameter="{Binding #DataGrid.SelectedItems}" />
 							</DataGrid.KeyBindings>
 							<DataGrid.ContextMenu>
-								<ContextMenu>
-									<MenuItem Header="{DynamicResource DuplicateRows}"
-											  Command="{Binding DuplicateRowsCommand}"
+								<ContextMenu x:Name="DataGridContextMenu">
+									<MenuItem Header="{DynamicResource CtxCut}"
+											  InputGesture="Ctrl+X"
+											  Command="{Binding CutRowsToDataGridCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
-									<MenuItem Header="{DynamicResource CopyRowsAsArray}"
+									<MenuItem Header="{DynamicResource CtxCopyArray}"
+											  InputGesture="Ctrl+C"
 											  Command="{Binding CopyRowsToJsonCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
-									<MenuItem Header="{DynamicResource CopyRowsAsObjects}"
+									<MenuItem Header="{DynamicResource CtxCopyObjects}"
 											  Command="{Binding CopyRowsToJsonAsObjectsCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
-									<MenuItem Header="{DynamicResource PasteRowsFromClipboard}"
-											  Command="{Binding PasteRowsToDataGridCommand}"/>
-									<MenuItem Header="{DynamicResource CutRowsAndSaveToClipboard}"
-											  Command="{Binding CutRowsToDataGridCommand}"
-											  CommandParameter="{Binding #DataGrid.SelectedItems}"/>
+									<MenuItem Header="{DynamicResource CtxPaste}"
+											  InputGesture="Ctrl+V"
+											  Command="{Binding PasteRowsToDataGridCommand}" />
 									<Separator />
-									<MenuItem Header="{DynamicResource RemoveRows}"
+									<MenuItem Header="{DynamicResource CtxDuplicate}"
+											  Command="{Binding DuplicateRowsCommand}"
+											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+									<Separator />
+									<MenuItem Header="{DynamicResource CtxDelete}"
 											  Command="{Binding RemoveRowsCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}"
 											  Foreground="{DynamicResource DangerColor}" />

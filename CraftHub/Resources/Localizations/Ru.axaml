@@ -1,6 +1,12 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+    <!-- TextBox context menu -->
+    <x:String x:Key="TbCut">Вырезать</x:String>
+    <x:String x:Key="TbCopy">Копировать</x:String>
+    <x:String x:Key="TbPaste">Вставить</x:String>
+    <x:String x:Key="TbSelectAll">Выделить всё</x:String>
+
     <!-- Toolbar – WorkspaceView -->
     <x:String x:Key="ImportJson">Импорт JSON</x:String>
     <x:String x:Key="ExportJson">Экспорт JSON</x:String>
@@ -49,6 +55,12 @@
     <x:String x:Key="InvalidJsonError">Некорректный JSON</x:String>
     <x:String x:Key="PasteRowsFromClipboard">Добавить строки из буфера</x:String>
     <x:String x:Key="CutRowsAndSaveToClipboard">Вырезать выделенные строки и сохранить в буфер</x:String>
+    <x:String x:Key="CtxCut">Вырезать</x:String>
+    <x:String x:Key="CtxCopyArray">Копировать как массив</x:String>
+    <x:String x:Key="CtxCopyObjects">Копировать как объекты</x:String>
+    <x:String x:Key="CtxPaste">Вставить</x:String>
+    <x:String x:Key="CtxDuplicate">Дублировать</x:String>
+    <x:String x:Key="CtxDelete">Удалить</x:String>
 
     <!-- Tooltips – MainWindow -->
     <x:String x:Key="UpdateTip">Обновить</x:String>

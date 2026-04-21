@@ -40,6 +40,16 @@ public partial class WorkspaceView : UserControl
         DataGrid.SelectionChanged += OnDataGridSelectionChanged;
         DataGrid.CellEditEnded += OnDataGridCellEditEnded;
         InitJsonEditor();
+
+        // Refresh clipboard state each time the context menu is about to open
+        // so Paste is enabled/disabled correctly before the user sees the menu.
+        var ctx = DataGrid.ContextMenu;
+        if (ctx != null)
+            ctx.Opening += async (_, _) =>
+            {
+                if (DataContext is WorkspaceViewModel vm)
+                    await vm.RefreshClipboardStateAsync();
+            };
     }
 
     // -----------------------------------------------------------------------

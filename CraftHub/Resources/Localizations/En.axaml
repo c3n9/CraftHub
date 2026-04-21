@@ -1,6 +1,12 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
 					xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
 
+	<!-- TextBox context menu -->
+	<x:String x:Key="TbCut">Cut</x:String>
+	<x:String x:Key="TbCopy">Copy</x:String>
+	<x:String x:Key="TbPaste">Paste</x:String>
+	<x:String x:Key="TbSelectAll">Select All</x:String>
+
 	<!-- Toolbar – WorkspaceView -->
 	<x:String x:Key="ImportJson">Import JSON</x:String>
 	<x:String x:Key="ExportJson">Export JSON</x:String>
@@ -49,6 +55,12 @@
 	<x:String x:Key="InvalidJsonError">Invalid JSON</x:String>
 	<x:String x:Key="PasteRowsFromClipboard">Paste rows from clipboard</x:String>
 	<x:String x:Key="CutRowsAndSaveToClipboard">Cut selected rows and save to clipboard</x:String>
+	<x:String x:Key="CtxCut">Cut</x:String>
+	<x:String x:Key="CtxCopyArray">Copy as Array</x:String>
+	<x:String x:Key="CtxCopyObjects">Copy as Objects</x:String>
+	<x:String x:Key="CtxPaste">Paste</x:String>
+	<x:String x:Key="CtxDuplicate">Duplicate</x:String>
+	<x:String x:Key="CtxDelete">Delete</x:String>
 
 	<!-- Tooltips – MainWindow -->
 	<x:String x:Key="UpdateTip">Update</x:String>

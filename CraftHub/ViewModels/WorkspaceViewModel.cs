@@ -39,10 +39,33 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private string _rawJsonText = string.Empty;
     [ObservableProperty] private string _jsonEditorError;
     [ObservableProperty] private bool _isJsonEditorErrorVisible;
+    [ObservableProperty] private bool _hasClipboardContent;
 
     public bool IsTableEditorMode => !IsJsonEditorMode;
 
     partial void OnIsJsonEditorModeChanged(bool value) => OnPropertyChanged(nameof(IsTableEditorMode));
+
+    partial void OnSelectedRowsCountChanged(int value)
+    {
+        CopyRowsToJsonCommand.NotifyCanExecuteChanged();
+        CopyRowsToJsonAsObjectsCommand.NotifyCanExecuteChanged();
+        CutRowsToDataGridCommand.NotifyCanExecuteChanged();
+        DuplicateRowsCommand.NotifyCanExecuteChanged();
+        RemoveRowsCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnHasClipboardContentChanged(bool value)
+        => PasteRowsToDataGridCommand.NotifyCanExecuteChanged();
+
+    /// <summary>Called from the View when the context menu opens to refresh clipboard state.</summary>
+    internal async Task RefreshClipboardStateAsync()
+    {
+        var text = await _dialogService.GetFromClipboardAsync();
+        HasClipboardContent = !string.IsNullOrWhiteSpace(text);
+    }
+
+    private bool HasSelection(object? _) => SelectedRowsCount > 0;
+    private bool CanPaste() => HasClipboardContent;
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
@@ -231,7 +254,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         NotifySuccess(Localizer.Get("RowAdded", Rows.Count));
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(HasSelection))]
     private void DuplicateRows(object? parameter)
     {
         List<DynamicDataRow> source;
@@ -263,7 +286,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         return newRow;
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(HasSelection))]
     private async Task RemoveRowsAsync(object? parameter)
     {
         if (parameter is not IList items || items.Count == 0)
@@ -334,7 +357,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     //  Copy commands (read-only, no undo needed)
     // -----------------------------------------------------------------------
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(HasSelection))]
     private async Task CopyRowsToJsonAsync(object? parameter)
     {
         var selectedRows = ResolveSelectedRows(parameter);
@@ -348,7 +371,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         NotifySuccess(Localizer.Get("RowsCopiedMsg", selectedRows.Count));
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanPaste))]
     private async Task PasteRowsToDataGridAsync(object? parameter)
     {
         var json = await _dialogService.GetFromClipboardAsync();
@@ -369,7 +392,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(HasSelection))]
     private async Task CutRowsToDataGridAsync(object? parameter)
     {
         var selectedRows = ResolveSelectedRows(parameter);
@@ -394,7 +417,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         NotifySuccess(Localizer.Get("RowsCutMsg", selectedRows.Count));
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(HasSelection))]
     private async Task CopyRowsToJsonAsObjectsAsync(object? parameter)
     {
         var selectedRows = ResolveSelectedRows(parameter);
