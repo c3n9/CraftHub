@@ -59,7 +59,8 @@
     <x:String x:Key="CtxCopyArray">Копировать как массив</x:String>
     <x:String x:Key="CtxCopyObjects">Копировать как объекты</x:String>
     <x:String x:Key="CtxPaste">Вставить</x:String>
-    <x:String x:Key="CtxDuplicate">Дублировать</x:String>
+    <x:String x:Key="CtxDuplicate">Дублировать в конец</x:String>
+    <x:String x:Key="CtxDuplicateAfter">Дублировать после</x:String>
     <x:String x:Key="CtxDelete">Удалить</x:String>
 
     <!-- Tooltips – MainWindow -->

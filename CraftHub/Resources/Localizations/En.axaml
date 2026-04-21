@@ -59,7 +59,8 @@
 	<x:String x:Key="CtxCopyArray">Copy as Array</x:String>
 	<x:String x:Key="CtxCopyObjects">Copy as Objects</x:String>
 	<x:String x:Key="CtxPaste">Paste</x:String>
-	<x:String x:Key="CtxDuplicate">Duplicate</x:String>
+	<x:String x:Key="CtxDuplicate">Duplicate to end</x:String>
+	<x:String x:Key="CtxDuplicateAfter">Duplicate after</x:String>
 	<x:String x:Key="CtxDelete">Delete</x:String>
 
 	<!-- Tooltips – MainWindow -->

@@ -277,6 +277,29 @@ public partial class WorkspaceViewModel : ViewModelBase
         NotifySuccess(Localizer.Get("RowsDuplicatedMsg", source.Count));
     }
 
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void DuplicateBeRows(object? parameter)
+    {
+        List<DynamicDataRow> source;
+
+        if (parameter is not IList items || items.Count == 0)
+        {
+            if (SelectedRow == null) return;
+            source = new List<DynamicDataRow> { SelectedRow };
+        }
+        else
+        {
+            source = items.Cast<DynamicDataRow>().ToList();
+        }
+
+        var duplicated = new List<DynamicDataRow>();
+        foreach (var row in source)
+            duplicated.Add(DuplicateSingleRow(row));
+
+        UndoRedo.Push(new DuplicateRowsAction(Rows, duplicated));
+        NotifySuccess(Localizer.Get("RowsDuplicatedMsg", source.Count));
+    }
+
     private DynamicDataRow DuplicateSingleRow(DynamicDataRow row)
     {
         var newRow = new DynamicDataRow();
