@@ -36,8 +36,8 @@ public partial class JsonEditorView : Window
             _currentVm = vm;
             vm.Properties.CollectionChanged += OnPropertiesChanged;
 
-            vm.JsonSubmitted += (s, res) => Close(res);
-            vm.Cancelled += (s, args) => Close(null);
+            vm.JsonSubmitted += (s, res) => { _isConfirmedClose = true; Close(res); };
+            vm.Cancelled += (s, args) => { _isConfirmedClose = true; Close(null); };
 
             RebuildColumns(vm);
         }

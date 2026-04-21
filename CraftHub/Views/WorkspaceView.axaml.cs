@@ -221,10 +221,9 @@ public partial class WorkspaceView : UserControl
                     {
                         VerticalAlignment = VerticalAlignment.Top,
                         Margin = new Avalonia.Thickness(12, 12, 8, 12),
-                        Foreground = Brushes.LightGray,
                         TextTrimming = TextTrimming.CharacterEllipsis,
                         TextWrapping = TextWrapping.Wrap,
-                        MaxLines = 3
+                        MaxLines = 3,
                     };
                     tb.Bind(TextBlockHelper.OriginalTextProperty, new Binding
                     {

@@ -111,15 +111,15 @@ public class DialogService : IDialogService
         }
     }
 
-    public async Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService)
+    public async Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService, IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null)
     {
         var window = GetMainWindow();
         if (window == null) return null;
 
         var dialog = new JsonEditorView { Title = title };
-        var vm = new JsonEditorViewModel(initialJson, type, jsonService, this, _notificationService);
+        var vm = new JsonEditorViewModel(initialJson, type, jsonService, this, _notificationService, sharedProperties);
         dialog.DataContext = vm;
-        
+
         return await dialog.ShowDialog<string?>(window);
     }
 

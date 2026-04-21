@@ -1,5 +1,6 @@
 
 
+using System.Collections.ObjectModel;
 using CraftHub.Domain.Enums;
 using CraftHub.Domain.Models;
 
@@ -26,7 +27,12 @@ public interface IDialogService
     Task CopyToClipboardAsync(string text);
 
     /// <summary>Open a visual nested editor for JSON.</summary>
-    Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService);
+    /// <param name="sharedProperties">
+    ///   Schema shared across all cells of the same column.
+    ///   When non-null the editor will use (and modify) this collection instead of
+    ///   auto-detecting fields, so every cell in the column stays in sync.
+    /// </param>
+    Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService, IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null);
 
     Task<ProgressResult> ShowProgressDialogAsync(string title, Func<IProgress<UpdateProgress>, CancellationToken, Task> task);
     Task<string?> GetFromClipboardAsync();

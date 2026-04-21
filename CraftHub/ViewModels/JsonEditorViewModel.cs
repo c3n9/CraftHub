@@ -6,6 +6,7 @@ using CraftHub.Domain.Models;
 using CraftHub.Models;
 using CraftHub.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -30,13 +31,21 @@ public partial class JsonEditorViewModel : ViewModelBase
     public event EventHandler<string>? JsonSubmitted;
     public event EventHandler? Cancelled;
 
-    public JsonEditorViewModel(string initialJson, JsonFieldType expectedType, IJsonService jsonService, IDialogService dialogService, NotificationService notificationService)
+    public JsonEditorViewModel(string initialJson, JsonFieldType expectedType, IJsonService jsonService, IDialogService dialogService, NotificationService notificationService,
+        IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null)
     {
         _jsonService = jsonService;
         _dialogService = dialogService;
         _notificationService = notificationService;
         _expectedType = expectedType;
         IsObjectMode = expectedType == JsonFieldType.Object;
+
+        // Seed schema from shared properties first (other rows' merged schema).
+        if (sharedProperties != null)
+        {
+            foreach (var p in sharedProperties)
+                Properties.Add(new JsonPropertyDefinition { Name = p.Name, FieldType = p.FieldType });
+        }
 
         if (!string.IsNullOrWhiteSpace(initialJson))
         {
@@ -47,14 +56,18 @@ public partial class JsonEditorViewModel : ViewModelBase
                     initialJson = expectedType == JsonFieldType.Array ? "[]" : "{}";
                 }
 
+                // Detect any extra fields in this cell not yet in the shared schema.
                 var detectedFields = _jsonService.DetectFields(initialJson);
                 foreach (var field in detectedFields)
                 {
-                    Properties.Add(new JsonPropertyDefinition
+                    if (!Properties.Any(p => p.Name == field.FieldName))
                     {
-                        Name = field.FieldName,
-                        FieldType = field.SelectedType
-                    });
+                        Properties.Add(new JsonPropertyDefinition
+                        {
+                            Name = field.FieldName,
+                            FieldType = field.SelectedType
+                        });
+                    }
                 }
 
                 var dataRows = _jsonService.ParseJsonData(initialJson, Properties);
@@ -71,7 +84,9 @@ public partial class JsonEditorViewModel : ViewModelBase
 
         if (Rows.Count == 0 && IsObjectMode)
         {
-            Rows.Add(new DynamicDataRow());
+            var emptyRow = new DynamicDataRow();
+            foreach (var p in Properties) emptyRow.InitializeProperty(p.Name);
+            Rows.Add(emptyRow);
         }
     }
 
@@ -153,7 +168,24 @@ public partial class JsonEditorViewModel : ViewModelBase
     public async System.Threading.Tasks.Task EditJsonCellAsync(DynamicDataRow row, string propertyName, JsonFieldType type)
     {
         var currentValue = row[propertyName];
-        var newValue = await _dialogService.ShowJsonEditorDialogAsync($"Edit {propertyName}", currentValue, type, _jsonService);
+        // Merge schema from all rows in this nested column.
+        var merged = new System.Collections.Generic.List<JsonPropertyDefinition>();
+        var seen = new System.Collections.Generic.HashSet<string>(System.StringComparer.Ordinal);
+        foreach (var r in Rows)
+        {
+            var val = r[propertyName];
+            if (string.IsNullOrWhiteSpace(val)) continue;
+            try
+            {
+                foreach (var f in _jsonService.DetectFields(val))
+                    if (seen.Add(f.FieldName))
+                        merged.Add(new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType });
+            }
+            catch { }
+        }
+
+        var newValue = await _dialogService.ShowJsonEditorDialogAsync(
+            $"Edit {propertyName}", currentValue, type, _jsonService, merged.Count > 0 ? merged : null);
         if (newValue != null && newValue != currentValue)
         {
             var newRow = new DynamicDataRow();

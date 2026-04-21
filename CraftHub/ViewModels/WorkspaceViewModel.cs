@@ -335,8 +335,27 @@ public partial class WorkspaceViewModel : ViewModelBase
     public async Task EditJsonCellAsync(DynamicDataRow row, string propertyName, JsonFieldType type)
     {
         var currentValue = row[propertyName];
-        var newValue = await _dialogService.ShowJsonEditorDialogAsync(
-            $"Edit {propertyName}", currentValue, type, _jsonService);
+
+        // Build merged schema from all rows in this column so every cell shares the same fields.
+        var merged = new List<JsonPropertyDefinition>();
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var r in Rows)
+        {
+            var val = r[propertyName];
+            if (string.IsNullOrWhiteSpace(val)) continue;
+            try
+            {
+                foreach (var f in _jsonService.DetectFields(val))
+                {
+                    if (seen.Add(f.FieldName))
+                        merged.Add(new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType });
+                }
+            }
+            catch { }
+        }
+
+        var newValue = await _dialogService.ShowJsonEditorDialogAsync("Edit {propertyName}", currentValue, type, _jsonService,
+            merged.Count > 0 ? merged : null);
 
         if (newValue == null || newValue == currentValue) return;
 
