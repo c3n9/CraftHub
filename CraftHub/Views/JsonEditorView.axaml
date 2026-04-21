@@ -142,8 +142,7 @@
 				<Border CornerRadius="9"
 						Background="{DynamicResource ElevatedBackground}"
 						ClipToBounds="True">
-					<ScrollViewer HorizontalScrollBarVisibility="Auto"
-								  Padding="0,0,0,-10">
+					
 						<DataGrid x:Name="NestedDataGrid"
 							  MinWidth="520"
 							  RowHeaderWidth="48"
@@ -155,7 +154,7 @@
 							  CanUserSortColumns="True"
 							  SelectionMode="Extended"
 							  IsReadOnly="False"
-							  HorizontalScrollBarVisibility="Disabled"
+							  HorizontalScrollBarVisibility="Auto"
 							  VerticalScrollBarVisibility="Auto"
 							  FontSize="14"
 							  Background="Transparent"
@@ -180,7 +179,6 @@
 							</ContextMenu>
 						</DataGrid.ContextMenu>
 					</DataGrid>
-					</ScrollViewer>
 
 				</Border>
 			</Border>
