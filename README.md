@@ -24,6 +24,8 @@ CraftHub is licensed under the MIT License. Feel free to use, modify, and distri
 
 ## Screenshots
 
-<img width="1012" height="740" alt="Снимок экрана 2026-04-05 в 13 09 21" src="https://github.com/user-attachments/assets/9aa4b487-c7cf-47b1-a0ca-366dc5ac71b3" />
+<img width="1312" height="890" alt="Table" src="https://github.com/user-attachments/assets/4133d530-de59-4c8d-80ff-1949da40d45e" />
 
-<img width="1012" height="740" alt="Снимок экрана 2026-04-05 в 13 09 39" src="https://github.com/user-attachments/assets/db179b86-bf01-4b6d-9263-d9314031aedd" />
+<img width="1312" height="890" alt="Editor" src="https://github.com/user-attachments/assets/28c52e60-4e72-47ea-874b-6ef255f3d09f" />
+
+<img width="762" height="640" alt="Mapper" src="https://github.com/user-attachments/assets/30af21dd-115f-454d-bb9f-fda6d4612574" />
