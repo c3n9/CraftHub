@@ -11,9 +11,9 @@ using Avalonia.Media;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using CraftHub.Converters;
+using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.ViewModels;
-using CraftHub.Helpers;
 using CraftHub.Domain.Models;
 using CraftHub.Domain.Enums;
 using CraftHub.Services;
@@ -209,6 +209,7 @@ public partial class WorkspaceView : UserControl
                 MaxWidth = 600,
                 IsReadOnly = false,
                 SortMemberPath = $"[{prop.Name}]",
+                CustomSortComparer = new DynamicRowComparer(prop.Name, prop.FieldType),
                 CanUserSort = true,
                 CanUserResize = true
             };
