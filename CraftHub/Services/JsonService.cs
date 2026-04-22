@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using CraftHub.Core;
@@ -13,31 +14,31 @@ public class JsonService : IJsonService
 {
     public List<JsonFieldMapping> DetectFields(string json)
     {
-        var fields = new List<JsonFieldMapping>();
+        // Use an ordered dictionary so fields appear in first-seen order,
+        // but we scan ALL elements to catch fields that only appear in some rows.
+        var fieldDict = new Dictionary<string, JsonFieldMapping>(StringComparer.Ordinal);
         try
         {
             using var doc = JsonDocument.Parse(json);
             var root = doc.RootElement;
 
-            JsonElement firstObj;
             if (root.ValueKind == JsonValueKind.Array)
             {
-                if (root.GetArrayLength() == 0) return fields;
-                firstObj = root[0];
+                foreach (var element in root.EnumerateArray())
+                    if (element.ValueKind == JsonValueKind.Object)
+                        DetectFieldsRecursive(element, "", fieldDict);
             }
             else if (root.ValueKind == JsonValueKind.Object)
             {
-                firstObj = root;
+                DetectFieldsRecursive(root, "", fieldDict);
             }
-            else return fields;
-
-            DetectFieldsRecursive(firstObj, "", fields);
         }
         catch (JsonException ex) { Debug.WriteLine($"DetectFields: invalid JSON — {ex.Message}"); }
-        return fields;
+        return fieldDict.Values.ToList();
     }
 
-    private void DetectFieldsRecursive(JsonElement element, string prefix, List<JsonFieldMapping> fields, int depth = 0)
+    private void DetectFieldsRecursive(JsonElement element, string prefix,
+        Dictionary<string, JsonFieldMapping> fieldDict, int depth = 0)
     {
         if (depth > 50) return;
 
@@ -48,11 +49,11 @@ public class JsonService : IJsonService
                 var name = string.IsNullOrEmpty(prefix) ? prop.Name : $"{prefix}_{prop.Name}";
                 if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
                 {
-                    DetectFieldsRecursive(prop.Value, name, fields, depth + 1);
+                    DetectFieldsRecursive(prop.Value, name, fieldDict, depth + 1);
                 }
                 else
                 {
-                    AddFieldMapping(prop.Value, name, fields);
+                    MergeFieldMapping(prop.Value, name, fieldDict);
                 }
             }
         }
@@ -64,29 +65,45 @@ public class JsonService : IJsonService
                 var name = string.IsNullOrEmpty(prefix) ? $"<{i}>" : $"{prefix}_<{i}>";
                 if (item.ValueKind == JsonValueKind.Object || item.ValueKind == JsonValueKind.Array)
                 {
-                    DetectFieldsRecursive(item, name, fields, depth + 1);
+                    DetectFieldsRecursive(item, name, fieldDict, depth + 1);
                 }
                 else
                 {
-                    AddFieldMapping(item, name, fields);
+                    MergeFieldMapping(item, name, fieldDict);
                 }
                 i++;
             }
         }
     }
 
-    private void AddFieldMapping(JsonElement el, string name, List<JsonFieldMapping> fields)
+    /// <summary>
+    /// Adds a field to the dictionary on first encounter.
+    /// If the field was previously recorded as null/String-from-null and we now see
+    /// a concrete value, upgrades the detected type.
+    /// </summary>
+    private void MergeFieldMapping(JsonElement el, string name, Dictionary<string, JsonFieldMapping> fieldDict)
     {
+        var isNull = el.ValueKind == JsonValueKind.Null;
         var detected = InferType(el);
-        var mapping = new JsonFieldMapping
+        var sample = isNull ? "" : (el.ToString() ?? "");
+
+        if (!fieldDict.TryGetValue(name, out var existing))
         {
-            FieldName = name,
-            DetectedType = detected,
-            SelectedType = detected,
-            SampleValue = el.ToString() ?? ""
-        };
-    
-        fields.Add(mapping);
+            fieldDict[name] = new JsonFieldMapping
+            {
+                FieldName = name,
+                DetectedType = detected,
+                SelectedType = detected,
+                SampleValue = sample
+            };
+        }
+        else if (!isNull && string.IsNullOrEmpty(existing.SampleValue))
+        {
+            // Upgrade from null placeholder to the first concrete value we find.
+            existing.DetectedType = detected;
+            existing.SelectedType = detected;
+            existing.SampleValue = sample;
+        }
     }
 
     private static JsonFieldType InferType(JsonElement el) => el.ValueKind switch

@@ -774,12 +774,14 @@ public partial class WorkspaceViewModel : ViewModelBase
         {
             JsonDocument.Parse(RawJsonText);
 
-            if (Properties.Count == 0)
+            // Always detect fields from JSON and add any that are not yet in the schema.
+            // This covers both the "empty schema" case and the "user added new fields in JSON mode" case.
+            var detected = _jsonService.DetectFields(RawJsonText);
+            var existingNames = Properties.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
+            foreach (var field in detected)
             {
-                var detected = _jsonService.DetectFields(RawJsonText);
-                foreach (var field in detected)
+                if (!existingNames.Contains(field.FieldName))
                     Properties.Add(new JsonPropertyDefinition { Name = field.FieldName, FieldType = field.SelectedType });
-                FireColumnsChanged();
             }
 
             var rows = _jsonService.ParseJsonData(RawJsonText, Properties);
