@@ -51,6 +51,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         CopyRowsToJsonAsObjectsCommand.NotifyCanExecuteChanged();
         CutRowsToDataGridCommand.NotifyCanExecuteChanged();
         DuplicateRowsCommand.NotifyCanExecuteChanged();
+        DuplicateAfterRowsCommand.NotifyCanExecuteChanged();
         RemoveRowsCommand.NotifyCanExecuteChanged();
     }
 
@@ -257,55 +258,47 @@ public partial class WorkspaceViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(HasSelection))]
     private void DuplicateRows(object? parameter)
     {
-        List<DynamicDataRow> source;
+        var source = ResolveSelectedRows(parameter);
+        if (source == null || source.Count == 0) return;
 
-        if (parameter is not IList items || items.Count == 0)
-        {
-            if (SelectedRow == null) return;
-            source = new List<DynamicDataRow> { SelectedRow };
-        }
-        else
-        {
-            source = items.Cast<DynamicDataRow>().ToList();
-        }
+        var duplicated = source.Select(CreateDuplicateRow).ToList();
 
-        var duplicated = new List<DynamicDataRow>();
-        foreach (var row in source)
-            duplicated.Add(DuplicateSingleRow(row));
+        // Append to the end.
+        foreach (var row in duplicated)
+            Rows.Add(row);
 
         UndoRedo.Push(new DuplicateRowsAction(Rows, duplicated));
         NotifySuccess(Localizer.Get("RowsDuplicatedMsg", source.Count));
     }
 
     [RelayCommand(CanExecute = nameof(HasSelection))]
-    private void DuplicateBeRows(object? parameter)
+    private void DuplicateAfterRows(object? parameter)
     {
-        List<DynamicDataRow> source;
+        var source = ResolveSelectedRows(parameter);
+        if (source == null || source.Count == 0) return;
 
-        if (parameter is not IList items || items.Count == 0)
-        {
-            if (SelectedRow == null) return;
-            source = new List<DynamicDataRow> { SelectedRow };
-        }
-        else
-        {
-            source = items.Cast<DynamicDataRow>().ToList();
-        }
+        // Insert point = one position after the last selected row.
+        var insertAfter = source.OrderByDescending(r => Rows.IndexOf(r)).First();
+        int insertIdx = Rows.IndexOf(insertAfter) + 1;
 
-        var duplicated = new List<DynamicDataRow>();
-        foreach (var row in source)
-            duplicated.Add(DuplicateSingleRow(row));
+        var duplicated = source
+            .OrderBy(r => Rows.IndexOf(r))   // preserve original order
+            .Select(CreateDuplicateRow)
+            .ToList();
 
-        UndoRedo.Push(new DuplicateRowsAction(Rows, duplicated));
+        for (int i = 0; i < duplicated.Count; i++)
+            Rows.Insert(insertIdx + i, duplicated[i]);
+
+        UndoRedo.Push(new DuplicateRowsAction(Rows, duplicated, insertAfter));
         NotifySuccess(Localizer.Get("RowsDuplicatedMsg", source.Count));
     }
 
-    private DynamicDataRow DuplicateSingleRow(DynamicDataRow row)
+    /// <summary>Creates a copy of <paramref name="row"/> without adding it to <see cref="Rows"/>.</summary>
+    private DynamicDataRow CreateDuplicateRow(DynamicDataRow row)
     {
         var newRow = new DynamicDataRow();
         foreach (var prop in Properties)
             newRow.InitializeProperty(prop.Name, row[prop.Name]);
-        Rows.Add(newRow);
         return newRow;
     }
 

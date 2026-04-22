@@ -248,8 +248,6 @@
 				<Border CornerRadius="9"
 						Background="{DynamicResource ElevatedBackground}"
 						ClipToBounds="True">
-					<ScrollViewer HorizontalScrollBarVisibility="Auto"
-								  Padding="0,0,0,-10">
 						<DataGrid x:Name="DataGrid"
 								  MinWidth="520"
 								  RowHeaderWidth="48"
@@ -261,7 +259,7 @@
 								  CanUserSortColumns="True"
 								  SelectionMode="Extended"
 								  IsReadOnly="False"
-								  HorizontalScrollBarVisibility="Disabled"
+								  HorizontalScrollBarVisibility="Auto"
 								  VerticalScrollBarVisibility="Auto"
 								  FontSize="14"
 								  Background="Transparent"
@@ -292,8 +290,8 @@
 									<MenuItem Header="{DynamicResource CtxDuplicate}"
 											  Command="{Binding DuplicateRowsCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
-									<MenuItem Header="{DynamicResource CtxDuplicate}"
-											  Command="{Binding DuplicateRowsCommand}"
+									<MenuItem Header="{DynamicResource CtxDuplicateAfter}"
+											  Command="{Binding DuplicateAfterRowsCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
 									<Separator />
 									<MenuItem Header="{DynamicResource CtxDelete}"
@@ -303,7 +301,6 @@
 								</ContextMenu>
 							</DataGrid.ContextMenu>
 						</DataGrid>
-					</ScrollViewer>
 
 				</Border>
 			</Border>
