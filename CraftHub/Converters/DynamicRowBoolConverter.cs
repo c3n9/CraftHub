@@ -8,7 +8,12 @@ public sealed class DynamicRowBoolConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is string s && bool.TryParse(s, out var b)) return b;
+        if (value is string s)
+        {
+            if (bool.TryParse(s, out var b)) return b;
+            if (s == "1") return true;
+            if (s == "0") return false;
+        }
         return false;
     }
 
