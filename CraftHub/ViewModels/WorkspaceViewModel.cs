@@ -540,6 +540,14 @@ public partial class WorkspaceViewModel : ViewModelBase
     /// </summary>
     public async Task<bool> ImportFromPathAsync(string path)
     {
+        if (Properties.Count > 0 || Rows.Count > 0)
+        {
+            var confirmed = await _dialogService.ShowConfirmAsync(
+                Localizer.Get("ImportOverwriteTitle"),
+                Localizer.Get("ImportOverwriteMsg"));
+            if (!confirmed) return false;
+        }
+
         var json = await File.ReadAllTextAsync(path);
 
         if (Properties.Count == 0)
@@ -658,6 +666,14 @@ public partial class WorkspaceViewModel : ViewModelBase
     /// </summary>
     public async Task<bool> ImportClassFromPathAsync(string path)
     {
+        if (Properties.Count > 0 || Rows.Count > 0)
+        {
+            var confirmed = await _dialogService.ShowConfirmAsync(
+                Localizer.Get("ImportOverwriteTitle"),
+                Localizer.Get("ImportOverwriteMsg"));
+            if (!confirmed) return false;
+        }
+
         var code = await File.ReadAllTextAsync(path);
         var allClasses = _classParserService.ParseAllClasses(code);
         var fileName = Path.GetFileName(path);
@@ -790,7 +806,20 @@ public partial class WorkspaceViewModel : ViewModelBase
     // -----------------------------------------------------------------------
 
     [RelayCommand]
-    private void Close() => CloseRequested?.Invoke(this, EventArgs.Empty);
+    private async Task Close()
+    {
+        var mainWindowViewModel = App.Current.Services.GetRequiredService<MainWindowViewModel>();
+        if(mainWindowViewModel.Workspaces.Count == 1)
+        {
+            await _dialogService.ShowMessageAsync(Localizer.Get("CloseWorkspaceErrorTitle"), Localizer.Get("CloseWorkspaceErrorMsg"));
+            return;
+        }
+        var result = await _dialogService.ShowConfirmAsync(Localizer.Get("CloseWorkspaceTitle"), Localizer.Get("CloseWorkspaceMsg"));
+        if (result)
+        {
+            CloseRequested?.Invoke(this, EventArgs.Empty);
+        }
+    }
 
     [RelayCommand]
     private async Task RenameAsync()

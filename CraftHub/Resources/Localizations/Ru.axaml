@@ -108,8 +108,8 @@
     <x:String x:Key="NoPropsFoundMsg">Свойства не найдены в файле класса.</x:String>
     <x:String x:Key="SelectClassTitle">Выбор класса</x:String>
     <x:String x:Key="SelectClassMsg">Найдено несколько классов. Выберите один для импорта:</x:String>
-    <x:String x:Key="ImportedClassMsg">✓ Класс '{0}' импортирован, {1} свойств</x:String>
-    <x:String x:Key="ExportedClassMsg">✓ Класс '{0}' экспортирован</x:String>
+    <x:String x:Key="ImportedClassMsg">Класс '{0}' импортирован, {1} свойств</x:String>
+    <x:String x:Key="ExportedClassMsg">Класс '{0}' экспортирован</x:String>
     <x:String x:Key="RemoveRowTitle">Удалить строку</x:String>
     <x:String x:Key="RemoveRowMsg">Вы уверены, что хотите удалить эту строку?</x:String>
     <x:String x:Key="RemoveRowsTitle">Удалить строки</x:String>
@@ -121,9 +121,15 @@
     <x:String x:Key="RenameWorkspaceTitle">Переименовать вкладку</x:String>
     <x:String x:Key="RenameWorkspacePrompt">Введите новое имя для вкладки.</x:String>
     <x:String x:Key="WorkspaceNameLabel">Имя вкладки</x:String>
-    <x:String x:Key="UpdatedCellMsg">✓ Обновлено '{0}'</x:String>
+    <x:String x:Key="UpdatedCellMsg">Обновлено '{0}'</x:String>
     <x:String x:Key="ClosingWarningTitle">Предупреждение</x:String>
     <x:String x:Key="ClosingWarningMsg">Несохраненные данные будут утеряны. Вы уверены что хотите закрыть?</x:String>
+    <x:String x:Key="CloseWorkspaceErrorTitle">Невозможно закрыть</x:String>
+    <x:String x:Key="CloseWorkspaceErrorMsg">Должна оставаться хотя бы одна открытая вкладка.</x:String>
+    <x:String x:Key="CloseWorkspaceTitle">Закрыть вкладку</x:String>
+    <x:String x:Key="CloseWorkspaceMsg">Закрыть вкладку? Все несохранённые данные будут утеряны.</x:String>
+    <x:String x:Key="ImportOverwriteTitle">Импорт</x:String>
+    <x:String x:Key="ImportOverwriteMsg">На этой вкладке уже есть данные. Импорт перезапишет все строки и поля. Продолжить?</x:String>
     
     <!-- Dialog buttons -->
     <x:String x:Key="BtnOk">ОК</x:String>

@@ -108,8 +108,8 @@
 	<x:String x:Key="NoPropsFoundMsg">No properties found in the class file.</x:String>
 	<x:String x:Key="SelectClassTitle">Select Class</x:String>
 	<x:String x:Key="SelectClassMsg">Multiple classes found. Select one to import:</x:String>
-	<x:String x:Key="ImportedClassMsg">✓ Imported class '{0}' with {1} properties</x:String>
-	<x:String x:Key="ExportedClassMsg">✓ Exported class '{0}'</x:String>
+	<x:String x:Key="ImportedClassMsg">Imported class '{0}' with {1} properties</x:String>
+	<x:String x:Key="ExportedClassMsg">Exported class '{0}'</x:String>
 	<x:String x:Key="RemoveRowTitle">Remove row</x:String>
 	<x:String x:Key="RemoveRowMsg">Are you sure you want to remove this row?</x:String>
 	<x:String x:Key="RemoveRowsTitle">Remove rows</x:String>
@@ -121,9 +121,15 @@
 	<x:String x:Key="RenameWorkspaceTitle">Rename workspace</x:String>
 	<x:String x:Key="RenameWorkspacePrompt">Enter a new name for this tab.</x:String>
 	<x:String x:Key="WorkspaceNameLabel">Workspace name</x:String>
-	<x:String x:Key="UpdatedCellMsg">✓ Updated '{0}'</x:String>
+	<x:String x:Key="UpdatedCellMsg">Updated '{0}'</x:String>
 	<x:String x:Key="ClosingWarningTitle">Warning</x:String>
 	<x:String x:Key="ClosingWarningMsg">Unsaved data will be lost. Are you sure you want to close?</x:String>
+	<x:String x:Key="CloseWorkspaceErrorTitle">Cannot Close</x:String>
+	<x:String x:Key="CloseWorkspaceErrorMsg">At least one workspace tab must remain open.</x:String>
+	<x:String x:Key="CloseWorkspaceTitle">Close Tab</x:String>
+	<x:String x:Key="CloseWorkspaceMsg">Close this tab? All unsaved data will be lost.</x:String>
+	<x:String x:Key="ImportOverwriteTitle">Import</x:String>
+	<x:String x:Key="ImportOverwriteMsg">This tab already has data. Importing will overwrite all rows and properties. Continue?</x:String>
 
 	<!-- Dialog buttons -->
 	<x:String x:Key="BtnOk">OK</x:String>
