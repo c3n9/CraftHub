@@ -41,6 +41,12 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private bool _isJsonEditorErrorVisible;
     [ObservableProperty] private bool _hasClipboardContent;
 
+    /// <summary>
+    /// True while a DataGrid cell editor (TextBox) is active.
+    /// Disables the row-level clipboard commands so Ctrl+C/V/X fall through to the TextBox.
+    /// </summary>
+    [ObservableProperty] private bool _isCellEditing;
+
     public bool IsTableEditorMode => !IsJsonEditorMode;
 
     partial void OnIsJsonEditorModeChanged(bool value) => OnPropertyChanged(nameof(IsTableEditorMode));
@@ -58,6 +64,15 @@ public partial class WorkspaceViewModel : ViewModelBase
     partial void OnHasClipboardContentChanged(bool value)
         => PasteRowsToDataGridCommand.NotifyCanExecuteChanged();
 
+    partial void OnIsCellEditingChanged(bool value)
+    {
+        // Clipboard commands must yield to the cell TextBox while editing.
+        CopyRowsToJsonCommand.NotifyCanExecuteChanged();
+        CopyRowsToJsonAsObjectsCommand.NotifyCanExecuteChanged();
+        CutRowsToDataGridCommand.NotifyCanExecuteChanged();
+        PasteRowsToDataGridCommand.NotifyCanExecuteChanged();
+    }
+
     /// <summary>Called from the View when the context menu opens to refresh clipboard state.</summary>
     internal async Task RefreshClipboardStateAsync()
     {
@@ -66,7 +81,11 @@ public partial class WorkspaceViewModel : ViewModelBase
     }
 
     private bool HasSelection(object? _) => SelectedRowsCount > 0;
-    private bool CanPaste() => HasClipboardContent;
+
+    // Row-level clipboard commands must not fire while a cell TextBox is active,
+    // so that Ctrl+C/V/X fall through to the editor's built-in handling.
+    private bool CanCopyOrCut(object? _) => SelectedRowsCount > 0 && !IsCellEditing;
+    private bool CanPaste() => HasClipboardContent && !IsCellEditing;
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
@@ -392,7 +411,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     //  Copy commands (read-only, no undo needed)
     // -----------------------------------------------------------------------
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanCopyOrCut))]
     private async Task CopyRowsToJsonAsync(object? parameter)
     {
         var selectedRows = ResolveSelectedRows(parameter);
@@ -403,6 +422,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             : _jsonService.SerializeToJson(selectedRows, Properties);
 
         await _dialogService.CopyToClipboardAsync(json);
+        HasClipboardContent = true;   // enable Paste immediately, no context-menu refresh needed
         NotifySuccess(Localizer.Get("RowsCopiedMsg", selectedRows.Count));
     }
 
@@ -427,7 +447,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanCopyOrCut))]
     private async Task CutRowsToDataGridAsync(object? parameter)
     {
         var selectedRows = ResolveSelectedRows(parameter);
@@ -443,6 +463,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             : _jsonService.SerializeToJson(selectedRows, Properties);
 
         await _dialogService.CopyToClipboardAsync(json);
+        HasClipboardContent = true;   // enable Paste immediately
 
         foreach (var row in selectedRows)
             Rows.Remove(row);
@@ -452,7 +473,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         NotifySuccess(Localizer.Get("RowsCutMsg", selectedRows.Count));
     }
 
-    [RelayCommand(CanExecute = nameof(HasSelection))]
+    [RelayCommand(CanExecute = nameof(CanCopyOrCut))]
     private async Task CopyRowsToJsonAsObjectsAsync(object? parameter)
     {
         var selectedRows = ResolveSelectedRows(parameter);

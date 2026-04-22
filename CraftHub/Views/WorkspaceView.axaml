@@ -269,6 +269,7 @@
 								<KeyBinding Gesture="Ctrl+C" Command="{Binding CopyRowsToJsonCommand}" CommandParameter="{Binding #DataGrid.SelectedItems}" />
 								<KeyBinding Gesture="Ctrl+V" Command="{Binding PasteRowsToDataGridCommand}" />
 								<KeyBinding Gesture="Ctrl+X" Command="{Binding CutRowsToDataGridCommand}" CommandParameter="{Binding #DataGrid.SelectedItems}" />
+								<KeyBinding Gesture="Ctrl+D" Command="{Binding DuplicateAfterRowsCommand}" CommandParameter="{Binding #DataGrid.SelectedItems}" />
 							</DataGrid.KeyBindings>
 							<DataGrid.ContextMenu>
 								<ContextMenu x:Name="DataGridContextMenu">
@@ -291,6 +292,7 @@
 											  Command="{Binding DuplicateRowsCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
 									<MenuItem Header="{DynamicResource CtxDuplicateAfter}"
+											  InputGesture="Ctrl+D"
 											  Command="{Binding DuplicateAfterRowsCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
 									<Separator />

@@ -36,9 +36,15 @@ public partial class WorkspaceView : UserControl
     {
         InitializeComponent();
         DataContextChanged += OnDataContextChanged;
-        DataGrid.LoadingRow    += OnDataGridLoadingRow;
-        DataGrid.SelectionChanged += OnDataGridSelectionChanged;
-        DataGrid.CellEditEnded += OnDataGridCellEditEnded;
+        DataGrid.LoadingRow       += OnDataGridLoadingRow;
+        DataGrid.SelectionChanged  += OnDataGridSelectionChanged;
+        DataGrid.BeginningEdit     += (_, _) => SetCellEditing(true);
+        DataGrid.CellEditEnded     += OnDataGridCellEditEnded;
+        DataGrid.GotFocus          += async (_, _) =>
+        {
+            if (DataContext is WorkspaceViewModel vm)
+                await vm.RefreshClipboardStateAsync();
+        };
         InitJsonEditor();
 
         // Refresh clipboard state each time the context menu is about to open
@@ -111,19 +117,27 @@ public partial class WorkspaceView : UserControl
     }
 
     // -----------------------------------------------------------------------
-    //  Cell edit tracking for undo
+    //  Cell edit tracking for undo / clipboard guard
     // -----------------------------------------------------------------------
+
+    private void SetCellEditing(bool value)
+    {
+        if (DataContext is WorkspaceViewModel vm)
+            vm.IsCellEditing = value;
+    }
 
     private async void OnDataGridCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
     {
+        SetCellEditing(false);
+
         if (_pendingEdit == null) return;
-    
+
         var (row, propName, oldValue) = _pendingEdit.Value;
         _pendingEdit = null;
-    
+
         var newValue = row[propName];
         if (newValue == oldValue) return;
-    
+
         if (DataContext is WorkspaceViewModel vm)
             vm.UndoRedo.Push(new EditCellAction(row, propName, oldValue, newValue, DataGrid));
     }
