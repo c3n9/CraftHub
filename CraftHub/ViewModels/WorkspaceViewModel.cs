@@ -521,18 +521,27 @@ public partial class WorkspaceViewModel : ViewModelBase
             var mappedFields = await _dialogService.ShowFieldMappingDialogAsync(detectedFields);
             if (mappedFields == null) return;
 
-            // Validate that Array/Object fields actually contain valid JSON in the sample value.
-            // If not, the import would silently store raw strings and then crash the preview converter.
+            // Validate that Array/Object fields actually contain valid JSON of the correct kind.
+            // Numbers, booleans and plain strings are valid JSON but cannot be opened in the
+            // nested editor, which expects '[' or '{' as the first character.
             var typeErrors = new List<string>();
             foreach (var field in mappedFields)
             {
                 if (field.SelectedType is JsonFieldType.Object or JsonFieldType.Array
                     && !string.IsNullOrEmpty(field.SampleValue))
                 {
-                    try { JsonDocument.Parse(field.SampleValue); }
+                    var typeName = field.SelectedType == JsonFieldType.Array ? "Array" : "Object";
+                    var expectedKind = field.SelectedType == JsonFieldType.Array
+                        ? JsonValueKind.Array
+                        : JsonValueKind.Object;
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(field.SampleValue);
+                        if (doc.RootElement.ValueKind != expectedKind)
+                            typeErrors.Add($"  • '{field.FieldName}': \"{field.SampleValue}\" is not a valid {typeName}");
+                    }
                     catch (JsonException)
                     {
-                        var typeName = field.SelectedType == JsonFieldType.Array ? "Array" : "Object";
                         typeErrors.Add($"  • '{field.FieldName}': \"{field.SampleValue}\" is not a valid {typeName}");
                     }
                 }
