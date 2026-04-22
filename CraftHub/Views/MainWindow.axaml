@@ -51,7 +51,6 @@
 
 		<!-- Main content: current workspace -->
 		<Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}" Margin="0">
-			<ContentControl Content="{Binding SelectedWorkspace}">
 			<ItemsControl ItemsSource="{Binding Workspaces}">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
