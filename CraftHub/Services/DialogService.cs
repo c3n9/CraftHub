@@ -30,13 +30,13 @@ public class DialogService : IDialogService
         return null;
     }
 
-    public async Task<List<JsonFieldMapping>?> ShowFieldMappingDialogAsync(List<JsonFieldMapping> fields)
+    public async Task<List<JsonFieldMapping>?> ShowFieldMappingDialogAsync(List<JsonFieldMapping> fields, string? fileName = null)
     {
         var window = GetMainWindow();
         if (window == null) return null;
 
         var dialog = new JsonFieldMappingView();
-        var vm = new JsonFieldMappingViewModel(fields);
+        var vm = new JsonFieldMappingViewModel(fields, fileName);
         dialog.DataContext = vm;
 
         var result = await dialog.ShowDialog<List<JsonFieldMapping>?>(window);

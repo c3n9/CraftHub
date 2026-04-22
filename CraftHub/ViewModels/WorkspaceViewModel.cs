@@ -1,12 +1,3 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,6 +8,16 @@ using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.Services;
 using CraftHub.Services.Actions;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace CraftHub.ViewModels;
 
@@ -92,6 +93,13 @@ public partial class WorkspaceViewModel : ViewModelBase
     public Array AvailableTypes => Enum.GetValues(typeof(JsonFieldType));
     public event EventHandler? CloseRequested;
     public event EventHandler? ColumnsChanged;
+
+    /// <summary>
+    /// Set by MainWindowViewModel. Called when ImportJsonAsync needs a fresh workspace
+    /// for an additional file. Returns the new WorkspaceViewModel, or null if the tab
+    /// limit (15) has been reached.
+    /// </summary>
+    public Func<WorkspaceViewModel?>? RequestNewWorkspace { get; set; }
 
     public int TotalRows => Rows.Count;
 
@@ -504,9 +512,34 @@ public partial class WorkspaceViewModel : ViewModelBase
     private async Task ImportJsonAsync()
     {
         var filters = new List<FileFilter> { new("JSON files", new[] { "*.json" }) };
-        var path = await _fileDialogService.OpenFileAsync("Import JSON", filters);
-        if (path == null) return;
+        var paths = await _fileDialogService.OpenMultipleFilesAsync(Localizer.Get("ImportJson"), filters);
+        if (paths.Count == 0) return;
 
+        // First file goes into the current workspace (reuse it if empty, otherwise it will
+        // overwrite — consistent with the previous single-file behaviour).
+        await ImportFromPathAsync(paths[0]);
+
+        // Remaining files each get their own new workspace tab.
+        for (int i = 1; i < paths.Count; i++)
+        {
+            var newVm = RequestNewWorkspace?.Invoke();
+            if (newVm == null)
+            {
+                // Tab limit reached — notify and stop.
+                NotifyError(Localizer.Get("TabLimitReachedMsg", 15));
+                break;
+            }
+            await newVm.ImportFromPathAsync(paths[i]);
+        }
+    }
+
+    /// <summary>
+    /// Imports a single JSON file into this workspace.
+    /// Shows the field mapping dialog if the schema is not yet defined.
+    /// Returns false if the user cancelled the mapping dialog.
+    /// </summary>
+    public async Task<bool> ImportFromPathAsync(string path)
+    {
         var json = await File.ReadAllTextAsync(path);
 
         if (Properties.Count == 0)
@@ -515,7 +548,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             if (detectedFields.Count == 0)
             {
                 await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), Localizer.Get("NoFieldsDetectedMsg"));
-                return;
+                return false;
             }
 
             // Loop until the user either cancels or picks compatible types for every field.
@@ -524,8 +557,8 @@ public partial class WorkspaceViewModel : ViewModelBase
             List<JsonFieldMapping>? mappedFields;
             while (true)
             {
-                mappedFields = await _dialogService.ShowFieldMappingDialogAsync(detectedFields);
-                if (mappedFields == null) return;
+                mappedFields = await _dialogService.ShowFieldMappingDialogAsync(detectedFields, Path.GetFileName(path));
+                if (mappedFields == null) return false;
 
                 // Validate that Array/Object fields actually contain valid JSON of the correct kind.
                 // Numbers, booleans and plain strings are valid JSON but cannot be opened in the
@@ -576,6 +609,8 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         if (IsJsonEditorMode)
             RawJsonText = _jsonService.SerializeToJson(Rows, Properties);
+
+        return true;
     }
 
     [RelayCommand]
@@ -588,7 +623,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
 
         var filters = new List<FileFilter> { new("JSON files", new[] { "*.json" }) };
-        var path = await _fileDialogService.SaveFileAsync("Export JSON", filters);
+        var path = await _fileDialogService.SaveFileAsync("Export JSON", filters, Header);
         if (path == null) return;
 
         var json = _jsonService.SerializeToJson(Rows, Properties);
@@ -657,7 +692,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
 
         var filters = new List<FileFilter> { new("C# files", new[] { "*.cs" }) };
-        var path = await _fileDialogService.SaveFileAsync("Export C# Class", filters);
+        var path = await _fileDialogService.SaveFileAsync("Export C# Class", filters, Header);
         if (path == null) return;
 
         var className = Path.GetFileNameWithoutExtension(path);

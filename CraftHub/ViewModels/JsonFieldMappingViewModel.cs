@@ -14,8 +14,12 @@ public partial class JsonFieldMappingViewModel : ViewModelBase
 
     [ObservableProperty] private bool _confirmed;
 
-    public JsonFieldMappingViewModel(List<JsonFieldMapping> fields)
+    /// <summary>File name shown in the dialog header to avoid confusion during multi-file import.</summary>
+    public string? FileName { get; }
+
+    public JsonFieldMappingViewModel(List<JsonFieldMapping> fields, string? fileName = null)
     {
         Fields = new ObservableCollection<JsonFieldMapping>(fields);
+        FileName = fileName;
     }
 }

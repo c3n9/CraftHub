@@ -1,89 +1,101 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:CraftHub.ViewModels"
-        xmlns:models="using:CraftHub.Domain.Models"
-        x:Class="CraftHub.Views.JsonFieldMappingView"
-        x:Name="DialogRoot"
-        Title="Import JSON"
-        Width="650" Height="500"
-        WindowStartupLocation="CenterOwner"
-        Background="{DynamicResource AppBackground}"
-        CanResize="False">
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:CraftHub.ViewModels"
+		xmlns:models="using:CraftHub.Domain.Models"
+		x:Class="CraftHub.Views.JsonFieldMappingView"
+		x:Name="DialogRoot"
+		Title="Import JSON"
+		Width="650" Height="500"
+		MinWidth="650" MinHeight="500"
+		WindowStartupLocation="CenterOwner"
+		Background="{DynamicResource AppBackground}"
+		CanResize="False">
 
-    <Grid RowDefinitions="Auto,*,Auto">
+	<Grid RowDefinitions="Auto,*,Auto">
 
-        <!-- Header -->
-        <Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="20,16">
-            <StackPanel Spacing="4">
-                <TextBlock Text="Configure Field Types"
-                           FontSize="18" FontWeight="SemiBold"
-                           Foreground="{DynamicResource TextPrimary}" />
-                <TextBlock Text="Select the data type for each detected JSON field."
-                           FontSize="13" Foreground="{DynamicResource TextSecondary}" />
-            </StackPanel>
-        </Border>
+		<!-- Header -->
+		<Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="20,16">
+			<StackPanel Spacing="4">
+				<StackPanel Orientation="Horizontal" Spacing="5">
+					<TextBlock Text="Configure Field Types"
+							   FontSize="18" FontWeight="SemiBold"
+							   Foreground="{DynamicResource TextPrimary}" />
+					<TextBlock Text="{Binding FileName}"
+							   FontSize="18" FontWeight="SemiBold"
+							   Foreground="{DynamicResource AccentPrimary}"
+							   TextWrapping="Wrap"
+							   MaxWidth="400"
+							   MaxLines="1"
+							   TextTrimming="CharacterEllipsis"
+							   IsVisible="{Binding FileName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+				</StackPanel>
+				<TextBlock Text="Select the data type for each detected JSON field."
+						   FontSize="13" Foreground="{DynamicResource TextSecondary}" />
 
-        <!-- Fields list -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
-            <ItemsControl ItemsSource="{Binding Fields}" Margin="10">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate DataType="{x:Type models:JsonFieldMapping}">
-                        <Border Background="{DynamicResource ElevatedBackground}" CornerRadius="8"
-                                Padding="16,12" Margin="0,4,15,4"
-                                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
-                            <Grid ColumnDefinitions="*,Auto,Auto">
-                                <StackPanel Spacing="2">
-                                    <TextBlock Text="{Binding FieldName}"
-                                               FontSize="14" FontWeight="SemiBold"
-                                               Foreground="{DynamicResource TextPrimary}" />
-                                    <TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}">
-                                        <TextBlock.Text>
-                                            <MultiBinding StringFormat="Sample: {0}">
-                                                <Binding Path="SampleValue" />
-                                            </MultiBinding>
-                                        </TextBlock.Text>
-                                    </TextBlock>
-                                </StackPanel>
+			</StackPanel>
+		</Border>
 
-                                <TextBlock Grid.Column="1"
-                                           VerticalAlignment="Center"
-                                           Margin="12,0"
-                                           FontSize="12" Foreground="{DynamicResource TextSecondary}">
-                                    <TextBlock.Text>
-                                        <MultiBinding StringFormat="detected: {0}">
-                                            <Binding Path="DetectedType" />
-                                        </MultiBinding>
-                                    </TextBlock.Text>
-                                </TextBlock>
+		<!-- Fields list -->
+		<ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible">
+			<ItemsControl ItemsSource="{Binding Fields}" Margin="10">
+				<ItemsControl.ItemTemplate>
+					<DataTemplate DataType="{x:Type models:JsonFieldMapping}">
+						<Border Background="{DynamicResource ElevatedBackground}" CornerRadius="8"
+								Padding="16,12" Margin="0,4,15,4"
+								BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+							<Grid ColumnDefinitions="*,Auto,Auto">
+								<StackPanel Spacing="2">
+									<TextBlock Text="{Binding FieldName}"
+											   FontSize="14" FontWeight="SemiBold"
+											   Foreground="{DynamicResource TextPrimary}" />
+									<TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}">
+										<TextBlock.Text>
+											<MultiBinding StringFormat="Sample: {0}">
+												<Binding Path="SampleValue" />
+											</MultiBinding>
+										</TextBlock.Text>
+									</TextBlock>
+								</StackPanel>
 
-                                <ComboBox Grid.Column="2"
-                                          ItemsSource="{Binding DataContext.AvailableTypes, ElementName=DialogRoot}"
-                                          SelectedItem="{Binding SelectedType, Mode=TwoWay}"
-                                          Width="130" FontSize="13"
-                                          CornerRadius="6"
-                                          VerticalAlignment="Center" />
-                            </Grid>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+								<TextBlock Grid.Column="1"
+										   VerticalAlignment="Center"
+										   Margin="12,0"
+										   FontSize="12" Foreground="{DynamicResource TextSecondary}">
+									<TextBlock.Text>
+										<MultiBinding StringFormat="detected: {0}">
+											<Binding Path="DetectedType" />
+										</MultiBinding>
+									</TextBlock.Text>
+								</TextBlock>
 
-        <!-- Footer buttons -->
-        <Border Grid.Row="2" Background="{DynamicResource SurfaceBackground}" Padding="16,12"
-                BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                <Button Content="{DynamicResource BtnCancel}" Classes="tab-btn"
-                        VerticalContentAlignment="Center"
-                        HorizontalContentAlignment="Center"
-                        Height="34"
-                        x:Name="CancelButton" MinWidth="80" />
-                <Button Content="{DynamicResource BtnImport}" Classes="accent-btn"
-                        Height="34"
-                        VerticalContentAlignment="Center"
-                        HorizontalContentAlignment="Center"
-                        x:Name="ConfirmButton" MinWidth="80" />
-            </StackPanel>
-        </Border>
-    </Grid>
+								<ComboBox Grid.Column="2"
+										  ItemsSource="{Binding DataContext.AvailableTypes, ElementName=DialogRoot}"
+										  SelectedItem="{Binding SelectedType, Mode=TwoWay}"
+										  Width="130" FontSize="13"
+										  CornerRadius="6"
+										  VerticalAlignment="Center" />
+							</Grid>
+						</Border>
+					</DataTemplate>
+				</ItemsControl.ItemTemplate>
+			</ItemsControl>
+		</ScrollViewer>
+
+		<!-- Footer buttons -->
+		<Border Grid.Row="2" Background="{DynamicResource SurfaceBackground}" Padding="16,12"
+				BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+				<Button Content="{DynamicResource BtnCancel}" Classes="tab-btn"
+						VerticalContentAlignment="Center"
+						HorizontalContentAlignment="Center"
+						Height="34"
+						x:Name="CancelButton" MinWidth="80" />
+				<Button Content="{DynamicResource BtnImport}" Classes="accent-btn"
+						Height="34"
+						VerticalContentAlignment="Center"
+						HorizontalContentAlignment="Center"
+						x:Name="ConfirmButton" MinWidth="80" />
+			</StackPanel>
+		</Border>
+	</Grid>
 </Window>

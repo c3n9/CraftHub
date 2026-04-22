@@ -351,18 +351,28 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void AddWorkspace()
+    private void AddWorkspace() => TryAddWorkspace();
+
+    /// <summary>
+    /// Creates a new workspace tab and returns it, or returns null if the 15-tab limit is reached.
+    /// Used both by the "+" button and by WorkspaceViewModel.ImportJsonAsync for multi-file import.
+    /// </summary>
+    private WorkspaceViewModel? TryAddWorkspace()
     {
         if (Workspaces.Count >= 15)
-            return;
+        {
+            _notificationService.Publish(NotificationType.Error, Localizer.Get("TabLimitReachedMsg", 15));
+            return null;
+        }
 
         var vm = _serviceProvider.GetRequiredService<WorkspaceViewModel>();
         vm.Header = $"Tab {Workspaces.Count + 1}";
         vm.CloseRequested += OnWorkspaceCloseRequested;
+        vm.RequestNewWorkspace = TryAddWorkspace;   // propagate so imported tabs can also multi-import
         Workspaces.Add(vm);
         SelectedWorkspace = vm;
         SelectedWorkspaceIndex = Workspaces.Count - 1;
-
+        return vm;
     }
 
     [RelayCommand]

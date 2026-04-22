@@ -103,6 +103,7 @@
 	<x:String x:Key="AddPropsBeforeExport">Add properties before exporting.</x:String>
 	<x:String x:Key="ImportedMsg">Imported {0} rows, {1} fields</x:String>
 	<x:String x:Key="ImportTypeMismatchMsg">Cannot import: one or more fields have an incompatible type. Change the type or fix the data and try again.</x:String>
+	<x:String x:Key="TabLimitReachedMsg">Tab limit ({0}) reached. Remaining files were not imported.</x:String>
 	<x:String x:Key="ExportedMsg">Exported to {0}</x:String>
 	<x:String x:Key="NoPropsFoundMsg">No properties found in the class file.</x:String>
 	<x:String x:Key="SelectClassTitle">Select Class</x:String>

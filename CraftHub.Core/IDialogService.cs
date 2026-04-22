@@ -9,7 +9,7 @@ namespace CraftHub.Core;
 public interface IDialogService
 {
     /// <summary>Show the JSON field mapping dialog and return user-selected mappings.</summary>
-    Task<List<JsonFieldMapping>?> ShowFieldMappingDialogAsync(List<JsonFieldMapping> fields);
+    Task<List<JsonFieldMapping>?> ShowFieldMappingDialogAsync(List<JsonFieldMapping> fields, string? fileName = null);
 
     /// <summary>Show a message box.</summary>
     Task ShowMessageAsync(string title, string message);
