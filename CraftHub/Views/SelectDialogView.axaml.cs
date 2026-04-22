@@ -20,10 +20,11 @@ public partial class SelectDialogView : Window
         OptionsList.DoubleTapped += (_, _) => CloseWithResult(true);
     }
 
-    public void SetOptions(string title, string message, List<string> options)
+    public void SetOptions(string title, string message, string fileName, List<string> options)
     {
         TitleBlock.Text = title;
         MessageBlock.Text = message;
+        FileName.Text = fileName;
         OptionsList.ItemsSource = options;
         if (options.Count > 0)
         {

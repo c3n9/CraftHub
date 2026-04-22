@@ -92,13 +92,13 @@ public class DialogService : IDialogService
         return await dialog.ShowDialog<string?>(window);
     }
 
-    public async Task<string?> ShowSelectDialogAsync(string title, string message, List<string> options)
+    public async Task<string?> ShowSelectDialogAsync(string title, string message, string fileName, List<string> options)
     {
         var window = GetMainWindow();
         if (window == null) return null;
 
         var dialog = new SelectDialogView();
-        dialog.SetOptions(title, message, options);
+        dialog.SetOptions(title, message, fileName, options);
         return await dialog.ShowDialog<string?>(window);
     }
 

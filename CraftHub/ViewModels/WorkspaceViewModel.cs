@@ -635,16 +635,39 @@ public partial class WorkspaceViewModel : ViewModelBase
     private async Task ImportClassAsync()
     {
         var filters = new List<FileFilter> { new("C# files", new[] { "*.cs" }) };
-        var path = await _fileDialogService.OpenFileAsync("Import C# Class", filters);
-        if (path == null) return;
+        var paths = await _fileDialogService.OpenMultipleFilesAsync("Import C# Class", filters);
+        if (paths.Count == 0) return;
 
+        await ImportClassFromPathAsync(paths[0]);
+
+        for (int i = 1; i < paths.Count; i++)
+        {
+            var newVm = RequestNewWorkspace?.Invoke();
+            if (newVm == null)
+            {
+                NotifyError(Localizer.Get("TabLimitReachedMsg", 15));
+                break;
+            }
+            await newVm.ImportClassFromPathAsync(paths[i]);
+        }
+    }
+
+    /// <summary>
+    /// Импортирует один C# файл в этот workspace.
+    /// Возвращает false, если импорт был отменён или не найден ни один класс.
+    /// </summary>
+    public async Task<bool> ImportClassFromPathAsync(string path)
+    {
         var code = await File.ReadAllTextAsync(path);
         var allClasses = _classParserService.ParseAllClasses(code);
+        var fileName = Path.GetFileName(path);
 
         if (allClasses.Count == 0)
         {
-            await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), Localizer.Get("NoPropsFoundMsg"));
-            return;
+            await _dialogService.ShowMessageAsync(
+                Localizer.Get("ImportTitle"),
+                Localizer.Get("NoClassesFoundMsg"));
+            return false;
         }
 
         string className;
@@ -660,15 +683,18 @@ public partial class WorkspaceViewModel : ViewModelBase
             var selected = await _dialogService.ShowSelectDialogAsync(
                 Localizer.Get("SelectClassTitle"),
                 Localizer.Get("SelectClassMsg"),
+                fileName,
                 classNames);
-            if (selected == null) return;
+            if (selected == null) return false;
             (className, parsedProps) = allClasses.Find(c => c.className == selected);
         }
 
         if (parsedProps.Count == 0)
         {
-            await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), Localizer.Get("NoPropsFoundMsg"));
-            return;
+            await _dialogService.ShowMessageAsync(
+                Localizer.Get("ImportTitle"),
+                Localizer.Get("NoPropsFoundMsg"));
+            return false;
         }
 
         Properties.Clear();
@@ -680,6 +706,8 @@ public partial class WorkspaceViewModel : ViewModelBase
         UndoRedo.Clear();   // destructive — clear history
         NotifySuccess(Localizer.Get("ImportedClassMsg", className, Properties.Count));
         FireColumnsChanged();
+
+        return true;
     }
 
     [RelayCommand]

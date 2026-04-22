@@ -1,53 +1,65 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        x:Class="CraftHub.Views.SelectDialogView"
-        Width="400"
-        MinHeight="160"
-        SizeToContent="Height"
-        CanResize="False"
-        SystemDecorations="None"
-        ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaChromeHints="NoChrome"
-        TransparencyLevelHint="Transparent"
-        WindowStartupLocation="CenterOwner"
-        Background="Transparent">
-  <Border Background="{DynamicResource SurfaceBackground}"
-          BorderBrush="{DynamicResource BorderColor}"
-          BorderThickness="1"
-          CornerRadius="12"
-          Padding="20">
-    <StackPanel Spacing="12">
-      <TextBlock x:Name="TitleBlock"
-                 FontSize="14"
-                 FontWeight="SemiBold"
-                 Foreground="{DynamicResource TextPrimary}" />
-      <TextBlock x:Name="MessageBlock"
-                 TextWrapping="Wrap"
-                 Foreground="{DynamicResource TextSecondary}"
-                 Margin="0,2,0,4" />
-      <ListBox x:Name="OptionsList"
-               MaxHeight="200"
-               CornerRadius="6"
-               Background="{DynamicResource ElevatedBackground}"
-               BorderBrush="{DynamicResource BorderColor}"
-               BorderThickness="1" />
-      <StackPanel Orientation="Horizontal"
-                  HorizontalAlignment="Right"
-                  Spacing="8">
-        <Button x:Name="CancelButton"
-                Classes="tab-btn"
-                VerticalContentAlignment="Center"
-                HorizontalContentAlignment="Center"
-                Content="{DynamicResource BtnCancel}"
-                Height="34" />
-        <Button x:Name="OkButton"
-                Classes="accent-btn"
-                Content="{DynamicResource BtnOk}"
-                Width="{Binding #CancelButton.Bounds.Width}"
-                HorizontalContentAlignment="Center"
-                VerticalContentAlignment="Center"
-                Height="34" />
-      </StackPanel>
-    </StackPanel>
-  </Border>
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		x:Class="CraftHub.Views.SelectDialogView"
+		Width="400"
+		MinHeight="160"
+		MinWidth="400"
+		SizeToContent="Height"
+		CanResize="False"
+		SystemDecorations="None"
+		ExtendClientAreaToDecorationsHint="True"
+		ExtendClientAreaChromeHints="NoChrome"
+		TransparencyLevelHint="Transparent"
+		WindowStartupLocation="CenterOwner"
+		Background="Transparent">
+	<Border Background="{DynamicResource SurfaceBackground}"
+			BorderBrush="{DynamicResource BorderColor}"
+			BorderThickness="1"
+			CornerRadius="12"
+			Padding="20">
+		<StackPanel Spacing="12">
+			<StackPanel Orientation="Horizontal" Spacing="5">
+				<TextBlock x:Name="TitleBlock"
+						   FontSize="14"
+						   FontWeight="SemiBold"
+						   Foreground="{DynamicResource TextPrimary}" />
+				<TextBlock x:Name="FileName"
+						   FontSize="14"
+						   FontWeight="SemiBold"
+						   Foreground="{DynamicResource AccentPrimary}"
+						   TextWrapping="Wrap"
+						   MaxWidth="400"
+						   MaxLines="1"
+						   TextTrimming="CharacterEllipsis"
+						   IsVisible="{Binding FileName, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+			</StackPanel>
+			<TextBlock x:Name="MessageBlock"
+					   TextWrapping="Wrap"
+					   Foreground="{DynamicResource TextSecondary}"
+					   Margin="0,2,0,4" />
+			<ListBox x:Name="OptionsList"
+					 MaxHeight="200"
+					 CornerRadius="6"
+					 Background="{DynamicResource ElevatedBackground}"
+					 BorderBrush="{DynamicResource BorderColor}"
+					 BorderThickness="1" />
+			<StackPanel Orientation="Horizontal"
+						HorizontalAlignment="Right"
+						Spacing="8">
+				<Button x:Name="CancelButton"
+						Classes="tab-btn"
+						VerticalContentAlignment="Center"
+						HorizontalContentAlignment="Center"
+						Content="{DynamicResource BtnCancel}"
+						Height="34" />
+				<Button x:Name="OkButton"
+						Classes="accent-btn"
+						Content="{DynamicResource BtnOk}"
+						Width="{Binding #CancelButton.Bounds.Width}"
+						HorizontalContentAlignment="Center"
+						VerticalContentAlignment="Center"
+						Height="34" />
+			</StackPanel>
+		</StackPanel>
+	</Border>
 </Window>
