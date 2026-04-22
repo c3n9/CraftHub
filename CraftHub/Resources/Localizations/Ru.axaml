@@ -102,6 +102,7 @@
     <x:String x:Key="NoFieldsDetectedMsg">В JSON файле не обнаружены поля.</x:String>
     <x:String x:Key="AddPropsBeforeExport">Добавьте поля перед экспортом.</x:String>
     <x:String x:Key="ImportedMsg">Импортировано {0} строк, {1} полей</x:String>
+    <x:String x:Key="ImportTypeMismatchMsg">Невозможно импортировать: одно или несколько полей имеют несовместимый тип. Измените тип или исправьте данные и попробуйте снова.</x:String>
     <x:String x:Key="ExportedMsg">Экспортировано в {0}</x:String>
     <x:String x:Key="NoPropsFoundMsg">Свойства не найдены в файле класса.</x:String>
     <x:String x:Key="SelectClassTitle">Выбор класса</x:String>

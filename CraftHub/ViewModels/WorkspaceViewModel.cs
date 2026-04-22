@@ -521,6 +521,29 @@ public partial class WorkspaceViewModel : ViewModelBase
             var mappedFields = await _dialogService.ShowFieldMappingDialogAsync(detectedFields);
             if (mappedFields == null) return;
 
+            // Validate that Array/Object fields actually contain valid JSON in the sample value.
+            // If not, the import would silently store raw strings and then crash the preview converter.
+            var typeErrors = new List<string>();
+            foreach (var field in mappedFields)
+            {
+                if (field.SelectedType is JsonFieldType.Object or JsonFieldType.Array
+                    && !string.IsNullOrEmpty(field.SampleValue))
+                {
+                    try { JsonDocument.Parse(field.SampleValue); }
+                    catch (JsonException)
+                    {
+                        var typeName = field.SelectedType == JsonFieldType.Array ? "Array" : "Object";
+                        typeErrors.Add($"  • '{field.FieldName}': \"{field.SampleValue}\" is not a valid {typeName}");
+                    }
+                }
+            }
+            if (typeErrors.Count > 0)
+            {
+                var msg = Localizer.Get("ImportTypeMismatchMsg") + "\n\n" + string.Join("\n", typeErrors);
+                await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), msg);
+                return;
+            }
+
             foreach (var field in mappedFields)
                 Properties.Add(new JsonPropertyDefinition { Name = field.FieldName, FieldType = field.SelectedType });
         }
