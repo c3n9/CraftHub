@@ -149,11 +149,11 @@ public partial class JsonEditorView : Window
                     {
                         var tb = new Avalonia.Controls.TextBlock
                         {
-                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                            Margin = new Avalonia.Thickness(12, 0),
+                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+                            Margin = new Avalonia.Thickness(12, 8, 12, 8),
                             TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis,
-                            TextWrapping = Avalonia.Media.TextWrapping.NoWrap,
-                            MaxLines = 1
+                            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                            MaxLines = 3
                         };
                         tb.Bind(Avalonia.Controls.TextBlock.TextProperty, new Avalonia.Data.Binding
                         {
@@ -191,11 +191,14 @@ public partial class JsonEditorView : Window
                     {
                         var tb = new Avalonia.Controls.TextBox
                         {
-                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center,
-                            Margin = new Avalonia.Thickness(4, 0),
-                            Padding = new Avalonia.Thickness(0)
+                            Classes = { "grid-editor" },
+                            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Stretch,
+                            VerticalContentAlignment = Avalonia.Layout.VerticalAlignment.Top,
+                            HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Left,
+                            TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                            AcceptsReturn = true,
+                            Text = row[prop.Name]
                         };
-                        tb.Text = row[prop.Name];
                         tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
                         return tb;
                     }
