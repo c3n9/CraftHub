@@ -116,15 +116,11 @@ public partial class WorkspaceViewModel : ViewModelBase
     private bool CanRedo => UndoRedo.CanRedo;
 
     /// <summary>Dynamic tooltip: "Undo: Add row" or just "Undo" when stack is empty.</summary>
-    public string UndoTooltip => UndoRedo.UndoDescription is { } d
-        ? $"{Localizer.Get("UndoTip")}: {d}"
-        : Localizer.Get("UndoTip");
-
+    [ObservableProperty] public string _undoTooltip;
     /// <summary>Dynamic tooltip: "Redo: Add row" or just "Redo" when stack is empty.</summary>
-    public string RedoTooltip => UndoRedo.RedoDescription is { } d
-        ? $"{Localizer.Get("RedoTip")}: {d}"
-        : Localizer.Get("RedoTip");
-
+    [ObservableProperty] public string _redoTooltip;
+    
+    
     [RelayCommand(CanExecute = nameof(CanUndo))]
     private void Undo() => UndoRedo.Undo();
 
@@ -171,13 +167,25 @@ public partial class WorkspaceViewModel : ViewModelBase
             if (e.PropertyName is nameof(UndoRedoService.CanUndo) or null)
             {
                 UndoCommand.NotifyCanExecuteChanged();
-                OnPropertyChanged(nameof(UndoTooltip));
+                UndoTooltip = UndoRedo.UndoDescription is { } d
+                    ? $"{Localizer.Get("UndoTip")}: {d}"
+                    : Localizer.Get("UndoTip");
             }
             if (e.PropertyName is nameof(UndoRedoService.CanRedo) or null)
             {
                 RedoCommand.NotifyCanExecuteChanged();
-                OnPropertyChanged(nameof(RedoTooltip));
+                RedoTooltip = UndoRedo.RedoDescription is { } d
+                    ? $"{Localizer.Get("RedoTip")}: {d}"
+                    : Localizer.Get("RedoTip");
             }
+            if (e.PropertyName == nameof(UndoRedoService.UndoDescription))
+                UndoTooltip = UndoRedo.UndoDescription is { } d
+                    ? $"{Localizer.Get("UndoTip")}: {d}"
+                    : Localizer.Get("UndoTip");
+            if (e.PropertyName == nameof(UndoRedoService.RedoDescription))
+                RedoTooltip = UndoRedo.RedoDescription is { } d
+                    ? $"{Localizer.Get("RedoTip")}: {d}"
+                    : Localizer.Get("RedoTip");
         };
     }
 
