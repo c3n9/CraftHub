@@ -32,5 +32,13 @@ public class DynamicDataRow : INotifyPropertyChanged
 
     public void RemoveProperty(string name) => _values.Remove(name);
 
+    public void RenameProperty(string oldName, string newName)
+    {
+        if (!_values.TryGetValue(oldName, out var value)) return;
+        _values.Remove(oldName);
+        _values[newName] = value;
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(string.Empty));
+    }
+
     public IReadOnlyDictionary<string, string> GetAllValues() => _values;
 }

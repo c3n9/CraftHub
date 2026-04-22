@@ -187,7 +187,7 @@
 											Margin="0,0,20,0"
 											CornerRadius="10"
 											Padding="10">
-										<Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+										<Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto">
 											<TextBlock Grid.Column="0"
 													   Grid.Row="0"
 													   Text="{Binding Name}"
@@ -210,6 +210,14 @@
 
 											<Button Grid.Column="2"
 													Grid.Row="0"
+													Classes="edit-tab"
+													Content="{materialIcons:MaterialIconExt Kind=PencilOutline}"
+													ToolTip.Tip="{DynamicResource RenameFieldTip}"
+													Command="{Binding $parent[UserControl].DataContext.RenamePropertyCommand}"
+													CommandParameter="{Binding}" />
+
+											<Button Grid.Column="3"
+													Grid.Row="0"
 													Classes="close-tab"
 													Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
 													ToolTip.Tip="{DynamicResource RemoveFieldTip}"
@@ -218,7 +226,7 @@
 
 											<TextBlock Grid.Column="0"
 													   Grid.Row="1"
-													   Grid.ColumnSpan="3"
+													   Grid.ColumnSpan="4"
 													   Text="{Binding Path=FieldType, StringFormat={}Type: {0}}"
 													   FontSize="11"
 													   Foreground="{DynamicResource TextMuted}"

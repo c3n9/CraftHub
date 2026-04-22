@@ -143,5 +143,22 @@
 		<Setter Property="Background" Value="{DynamicResource DangerColor}" />
 		<Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
 	</Style>
+	
+	<Style Selector="Button.edit-tab">
+		<Setter Property="Background" Value="Transparent" />
+		<Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+		<Setter Property="BorderThickness" Value="0" />
+		<Setter Property="Padding" Value="4" />
+		<Setter Property="Margin" Value="4,0,0,0" />
+		<Setter Property="FontSize" Value="12" />
+		<Setter Property="CornerRadius" Value="4" />
+		<Setter Property="Cursor" Value="Hand" />
+		<Setter Property="MinWidth" Value="20" />
+		<Setter Property="MinHeight" Value="20" />
+	</Style>
+	<Style Selector="Button.edit-tab:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+		<Setter Property="Background" Value="{DynamicResource WarningColor}" />
+		<Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+	</Style>
 
 </Styles>

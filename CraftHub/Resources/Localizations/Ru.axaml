@@ -38,6 +38,7 @@
     <x:String x:Key="UndoDescEditCell">Редактирование '{0}'</x:String>
     <x:String x:Key="UndoDescAddProperty">Добавление поля '{0}'</x:String>
     <x:String x:Key="UndoDescRemoveProperty">Удаление поля '{0}'</x:String>
+    <x:String x:Key="UndoDescRenameProperty">Переименование '{0}' → '{1}'</x:String>
 
     <!-- Tooltips – WorkspaceView -->
     <x:String x:Key="ImportJsonTip">Импортировать данные из JSON файла</x:String>
@@ -46,6 +47,7 @@
     <x:String x:Key="ExportClassTip">Экспортировать схему в C# класс</x:String>
     <x:String x:Key="AddRowTip">Добавить новую строку</x:String>
     <x:String x:Key="RemoveFieldTip">Удалить поле</x:String>
+    <x:String x:Key="RenameFieldTip">Переименовать поле</x:String>
     <x:String x:Key="AddPropertyTip">Добавить свойство</x:String>
     <x:String x:Key="SwitchToJsonBtn">JSON</x:String>
     <x:String x:Key="SwitchToTableBtn">Таблица</x:String>
@@ -91,6 +93,9 @@
     <x:String x:Key="RemovePropertyMsg">Удалить '{0}' из схемы?</x:String>
     <x:String x:Key="PropertyAdded">Поле '{0}' добавлено</x:String>
     <x:String x:Key="PropertyRemoved">Поле '{0}' удалено</x:String>
+    <x:String x:Key="RenamePropertyTitle">Переименовать поле</x:String>
+    <x:String x:Key="RenamePropertyPrompt">Введите новое имя для поля.</x:String>
+    <x:String x:Key="PropertyRenamed">Поле '{0}' переименовано в '{1}'</x:String>
     <x:String x:Key="RowAdded">Строка добавлена ({0} всего)</x:String>
     <x:String x:Key="RowsDuplicatedMsg">{0} строк(и) продублировано</x:String>
     <x:String x:Key="RowsCopiedMsg">{0} строк(и) скопировано в буфер как JSON</x:String>

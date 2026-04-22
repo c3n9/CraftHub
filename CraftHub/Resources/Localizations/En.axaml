@@ -38,6 +38,7 @@
 	<x:String x:Key="UndoDescEditCell">Edit '{0}'</x:String>
 	<x:String x:Key="UndoDescAddProperty">Add property '{0}'</x:String>
 	<x:String x:Key="UndoDescRemoveProperty">Remove property '{0}'</x:String>
+	<x:String x:Key="UndoDescRenameProperty">Rename '{0}' → '{1}'</x:String>
 
 	<!-- Tooltips – WorkspaceView -->
 	<x:String x:Key="ImportJsonTip">Import data from JSON file</x:String>
@@ -46,6 +47,7 @@
 	<x:String x:Key="ExportClassTip">Export schema as C# class file</x:String>
 	<x:String x:Key="AddRowTip">Add new data row</x:String>
 	<x:String x:Key="RemoveFieldTip">Remove field</x:String>
+	<x:String x:Key="RenameFieldTip">Rename field</x:String>
 	<x:String x:Key="AddPropertyTip">Add property</x:String>
 	<x:String x:Key="SwitchToJsonBtn">JSON</x:String>
 	<x:String x:Key="SwitchToTableBtn">Table</x:String>
@@ -91,6 +93,9 @@
 	<x:String x:Key="RemovePropertyMsg">Remove '{0}' from the schema?</x:String>
 	<x:String x:Key="PropertyAdded">Property '{0}' added</x:String>
 	<x:String x:Key="PropertyRemoved">Property '{0}' removed</x:String>
+	<x:String x:Key="RenamePropertyTitle">Rename property</x:String>
+	<x:String x:Key="RenamePropertyPrompt">Enter a new name for this property.</x:String>
+	<x:String x:Key="PropertyRenamed">Property '{0}' renamed to '{1}'</x:String>
 	<x:String x:Key="RowAdded">Row added ({0} total)</x:String>
 	<x:String x:Key="RowsDuplicatedMsg">{0} row(s) duplicated to bottom</x:String>
 	<x:String x:Key="RowsCopiedMsg">{0} row(s) copied to clipboard as JSON</x:String>

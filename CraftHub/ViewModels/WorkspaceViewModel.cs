@@ -266,6 +266,47 @@ public partial class WorkspaceViewModel : ViewModelBase
         FireColumnsChanged();
     }
 
+    [RelayCommand]
+    private async Task RenamePropertyAsync(JsonPropertyDefinition? prop)
+    {
+        if (prop == null) return;
+
+        var newName = await _dialogService.ShowInputDialogAsync(
+            Localizer.Get("RenamePropertyTitle"),
+            Localizer.Get("RenamePropertyPrompt"),
+            prop.Name,
+            Localizer.Get("PropertyNameWatermark"));
+
+        if (newName == null) return;
+
+        newName = newName.Trim();
+
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            NotifyWarning(Localizer.Get("EnterPropertyName"));
+            return;
+        }
+
+        if (newName == prop.Name) return;
+
+        if (Properties.Any(p => p.Name == newName))
+        {
+            NotifyWarning(Localizer.Get("PropertyAlreadyExists"));
+            return;
+        }
+
+        var oldName = prop.Name;
+
+        prop.Name = newName;
+        foreach (var row in Rows)
+            row.RenameProperty(oldName, newName);
+
+        UndoRedo.Push(new RenamePropertyAction(prop, oldName, newName, Rows, FireColumnsChanged));
+
+        NotifySuccess(Localizer.Get("PropertyRenamed", oldName, newName));
+        FireColumnsChanged();
+    }
+
     // -----------------------------------------------------------------------
     //  Row commands
     // -----------------------------------------------------------------------
