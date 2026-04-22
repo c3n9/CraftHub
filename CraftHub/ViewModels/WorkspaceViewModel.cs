@@ -397,7 +397,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             catch { }
         }
 
-        var newValue = await _dialogService.ShowJsonEditorDialogAsync("Edit {propertyName}", currentValue, type, _jsonService,
+        var newValue = await _dialogService.ShowJsonEditorDialogAsync($"Edit {propertyName}", currentValue, type, _jsonService,
             merged.Count > 0 ? merged : null);
 
         if (newValue == null || newValue == currentValue) return;
