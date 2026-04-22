@@ -14,7 +14,7 @@
 
 	<Grid RowDefinitions="Auto, *, Auto" Margin="10">
 
-		<StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
+		<StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="10,0,0,10">
 			<TextBox x:Name="TBPropertyName" Text="{Binding PropertyNameInput}" Watermark="{DynamicResource PropertyNameWatermark}" Width="150" />
 			<ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Width="100" Height="{Binding #TBPropertyName.Bounds.Height}"/>
 			<Button Command="{Binding AddPropertyCommand}" Classes="toolbar-btn"
@@ -190,9 +190,10 @@
 			</Border>
 		</Grid>
 
-		<StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+		<StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,0,10,0">
 			<Button Content="{DynamicResource BtnCancel}"
 					Command="{Binding CancelCommand}"
+					Classes="tab-btn"
 					Width="110" HorizontalContentAlignment="Center" />
 			<Button Content="{DynamicResource BtnSave}"
 					Command="{Binding SubmitCommand}"
