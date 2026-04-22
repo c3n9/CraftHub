@@ -68,7 +68,9 @@ public partial class JsonEditorView : Window
             var column = new Avalonia.Controls.DataGridTemplateColumn
             {
                 Header = headerText,
-                Width = Avalonia.Controls.DataGridLength.Auto,
+                Width = Avalonia.Controls.DataGridLength.SizeToCells,
+                MinWidth = 100,
+                MaxWidth = 600,
                 IsReadOnly = false
             };
 

@@ -201,8 +201,12 @@ public partial class WorkspaceView : UserControl
                     HorizontalAlignment = HorizontalAlignment.Stretch,
                     [!ToolTip.TipProperty] = new Binding { Source = header }
                 }),
-                Width = DataGridLength.Auto,
+                // SizeToCells измеряет ВСЕ строки, а не только видимые —
+                // ширина колонки фиксируется по самой широкой ячейке сразу
+                // и не меняется при горизонтальном скролле.
+                Width = DataGridLength.SizeToCells,
                 MinWidth = 100,
+                MaxWidth = 600,
                 IsReadOnly = false,
                 SortMemberPath = $"[{prop.Name}]",
                 CanUserSort = true,

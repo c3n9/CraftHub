@@ -265,6 +265,12 @@
 								  Background="Transparent"
 								  BorderThickness="0"
 								  RowBackground="{DynamicResource ElevatedBackground}">
+							<DataGrid.Styles>
+								<!--Отступ снизу у презентера строк, чтобы горизонтальная полоса прокрутки не перекрывала контент-->
+								<Style Selector="DataGrid /template/ DataGridRowsPresenter">
+									<Setter Property="Margin" Value="0,0,0,16"/>
+								</Style>
+							</DataGrid.Styles>
 							<DataGrid.KeyBindings>
 								<KeyBinding Gesture="Ctrl+C" Command="{Binding CopyRowsToJsonCommand}" CommandParameter="{Binding #DataGrid.SelectedItems}" />
 								<KeyBinding Gesture="Ctrl+V" Command="{Binding PasteRowsToDataGridCommand}" />

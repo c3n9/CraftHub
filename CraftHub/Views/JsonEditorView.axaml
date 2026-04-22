@@ -1,39 +1,39 @@
 <Window xmlns="https://github.com/avaloniaui"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:vm="using:CraftHub.ViewModels"
-        xmlns:models="using:CraftHub.Domain.Models"
-        xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
-        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
-        x:Class="CraftHub.Views.JsonEditorView"
-        Title="Nested Object Editor"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:CraftHub.ViewModels"
+		xmlns:models="using:CraftHub.Domain.Models"
+		xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
+		xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+		x:Class="CraftHub.Views.JsonEditorView"
+		Title="Nested Object Editor"
 		MinHeight="500" MinWidth="950"
-        WindowStartupLocation="CenterOwner"
-        Background="{DynamicResource AppBackground}"
-        x:DataType="vm:JsonEditorViewModel"
+		WindowStartupLocation="CenterOwner"
+		Background="{DynamicResource AppBackground}"
+		x:DataType="vm:JsonEditorViewModel"
 		Closing="Window_Closing">
-    
-    <Grid RowDefinitions="Auto, *, Auto" Margin="10">
-        
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
-            <TextBox x:Name="TBPropertyName" Text="{Binding PropertyNameInput}" Watermark="{DynamicResource PropertyNameWatermark}" Width="150" />
-            <ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Width="100" Height="{Binding #TBPropertyName.Bounds.Height}"/>
-            <Button Command="{Binding AddPropertyCommand}" Classes="toolbar-btn"
-					ToolTip.Tip="{DynamicResource AddPropertyTip}">
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                    <materialIcons:MaterialIcon Kind="PlusThick" Width="16" Height="16" />
-                    <TextBlock Text="{DynamicResource AddPropBtn}" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-            <Button Command="{Binding AddRowCommand}" Classes="toolbar-btn" IsVisible="{Binding !IsObjectMode}"
-					ToolTip.Tip="{DynamicResource AddRowTip}">
-                <StackPanel Orientation="Horizontal" Spacing="6">
-                    <materialIcons:MaterialIcon Kind="TableRowPlusAfter" Width="16" Height="16" />
-                    <TextBlock Text="{DynamicResource AddRowBtn}" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
-        </StackPanel>
 
-        <Grid Grid.Row="1" Margin="10" x:Name="ContentGrid">
+	<Grid RowDefinitions="Auto, *, Auto" Margin="10">
+
+		<StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="0,0,0,10">
+			<TextBox x:Name="TBPropertyName" Text="{Binding PropertyNameInput}" Watermark="{DynamicResource PropertyNameWatermark}" Width="150" />
+			<ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Width="100" Height="{Binding #TBPropertyName.Bounds.Height}"/>
+			<Button Command="{Binding AddPropertyCommand}" Classes="toolbar-btn"
+					ToolTip.Tip="{DynamicResource AddPropertyTip}">
+				<StackPanel Orientation="Horizontal" Spacing="6">
+					<materialIcons:MaterialIcon Kind="PlusThick" Width="16" Height="16" />
+					<TextBlock Text="{DynamicResource AddPropBtn}" VerticalAlignment="Center" />
+				</StackPanel>
+			</Button>
+			<Button Command="{Binding AddRowCommand}" Classes="toolbar-btn" IsVisible="{Binding !IsObjectMode}"
+					ToolTip.Tip="{DynamicResource AddRowTip}">
+				<StackPanel Orientation="Horizontal" Spacing="6">
+					<materialIcons:MaterialIcon Kind="TableRowPlusAfter" Width="16" Height="16" />
+					<TextBlock Text="{DynamicResource AddRowBtn}" VerticalAlignment="Center" />
+				</StackPanel>
+			</Button>
+		</StackPanel>
+
+		<Grid Grid.Row="1" Margin="10" x:Name="ContentGrid">
 			<Grid.ColumnDefinitions>
 				<ColumnDefinition Width="320" MinWidth="240" />
 				<ColumnDefinition Width="10" />
@@ -142,8 +142,8 @@
 				<Border CornerRadius="9"
 						Background="{DynamicResource ElevatedBackground}"
 						ClipToBounds="True">
-					
-						<DataGrid x:Name="NestedDataGrid"
+
+					<DataGrid x:Name="NestedDataGrid"
 							  MinWidth="520"
 							  RowHeaderWidth="48"
 							  ItemsSource="{Binding Rows}"
@@ -160,6 +160,12 @@
 							  Background="Transparent"
 							  BorderThickness="0"
 							  RowBackground="{DynamicResource ElevatedBackground}">
+						<DataGrid.Styles>
+							<!--Отступ снизу у презентера строк, чтобы горизонтальная полоса прокрутки не перекрывала контент-->
+							<Style Selector="DataGrid /template/ DataGridRowsPresenter">
+								<Setter Property="Margin" Value="0,0,0,16"/>
+							</Style>
+						</DataGrid.Styles>
 						<DataGrid.ContextMenu>
 							<ContextMenu>
 								<MenuItem Header="{DynamicResource DuplicateRows}"
@@ -184,13 +190,13 @@
 			</Border>
 		</Grid>
 
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
-            <Button Content="{DynamicResource BtnCancel}"
-                    Command="{Binding CancelCommand}" 
-                    Width="110" HorizontalContentAlignment="Center" />
-            <Button Content="{DynamicResource BtnSave}"
-                    Command="{Binding SubmitCommand}" 
-                    Width="110" Classes="accent-btn" HorizontalContentAlignment="Center" />
-        </StackPanel>
-    </Grid>
+		<StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+			<Button Content="{DynamicResource BtnCancel}"
+					Command="{Binding CancelCommand}"
+					Width="110" HorizontalContentAlignment="Center" />
+			<Button Content="{DynamicResource BtnSave}"
+					Command="{Binding SubmitCommand}"
+					Width="110" Classes="accent-btn" HorizontalContentAlignment="Center" />
+		</StackPanel>
+	</Grid>
 </Window>
