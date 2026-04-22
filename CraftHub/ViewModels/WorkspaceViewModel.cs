@@ -518,39 +518,46 @@ public partial class WorkspaceViewModel : ViewModelBase
                 return;
             }
 
-            var mappedFields = await _dialogService.ShowFieldMappingDialogAsync(detectedFields);
-            if (mappedFields == null) return;
-
-            // Validate that Array/Object fields actually contain valid JSON of the correct kind.
-            // Numbers, booleans and plain strings are valid JSON but cannot be opened in the
-            // nested editor, which expects '[' or '{' as the first character.
-            var typeErrors = new List<string>();
-            foreach (var field in mappedFields)
+            // Loop until the user either cancels or picks compatible types for every field.
+            // JsonFieldMapping items are shared references so SelectedType changes made inside
+            // the dialog are preserved when we reopen it after showing an error.
+            List<JsonFieldMapping>? mappedFields;
+            while (true)
             {
-                if (field.SelectedType is JsonFieldType.Object or JsonFieldType.Array
-                    && !string.IsNullOrEmpty(field.SampleValue))
+                mappedFields = await _dialogService.ShowFieldMappingDialogAsync(detectedFields);
+                if (mappedFields == null) return;
+
+                // Validate that Array/Object fields actually contain valid JSON of the correct kind.
+                // Numbers, booleans and plain strings are valid JSON but cannot be opened in the
+                // nested editor, which expects '[' or '{' as the first character.
+                var typeErrors = new List<string>();
+                foreach (var field in mappedFields)
                 {
-                    var typeName = field.SelectedType == JsonFieldType.Array ? "Array" : "Object";
-                    var expectedKind = field.SelectedType == JsonFieldType.Array
-                        ? JsonValueKind.Array
-                        : JsonValueKind.Object;
-                    try
+                    if (field.SelectedType is JsonFieldType.Object or JsonFieldType.Array
+                        && !string.IsNullOrEmpty(field.SampleValue))
                     {
-                        using var doc = JsonDocument.Parse(field.SampleValue);
-                        if (doc.RootElement.ValueKind != expectedKind)
-                            typeErrors.Add($"  • '{field.FieldName}': \"{field.SampleValue}\" is not a valid {typeName}");
-                    }
-                    catch (JsonException)
-                    {
-                        typeErrors.Add($"  • '{field.FieldName}': \"{field.SampleValue}\" is not a valid {typeName}");
+                        var typeName = field.SelectedType == JsonFieldType.Array ? "Array" : "Object";
+                        var expectedKind = field.SelectedType == JsonFieldType.Array
+                            ? JsonValueKind.Array
+                            : JsonValueKind.Object;
+                        try
+                        {
+                            using var doc = JsonDocument.Parse(field.SampleValue);
+                            if (doc.RootElement.ValueKind != expectedKind)
+                                typeErrors.Add($"  • '{field.FieldName}': \"{field.SampleValue}\" → не {typeName}");
+                        }
+                        catch (JsonException)
+                        {
+                            typeErrors.Add($"  • '{field.FieldName}': \"{field.SampleValue}\" → не {typeName}");
+                        }
                     }
                 }
-            }
-            if (typeErrors.Count > 0)
-            {
+
+                if (typeErrors.Count == 0) break;   // all good, proceed
+
+                // Show error and reopen the dialog so the user can fix the types.
                 var msg = Localizer.Get("ImportTypeMismatchMsg") + "\n\n" + string.Join("\n", typeErrors);
                 await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), msg);
-                return;
             }
 
             foreach (var field in mappedFields)
