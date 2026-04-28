@@ -88,8 +88,8 @@ public partial class WorkspaceViewModel : ViewModelBase
     private bool CanCopyOrCut(object? _) => SelectedRowsCount > 0 && !IsCellEditing;
     private bool CanPaste() => HasClipboardContent && !IsCellEditing;
 
-    public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
-    public ObservableCollection<DynamicDataRow> Rows { get; } = new();
+    public BulkObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
+    public BulkObservableCollection<DynamicDataRow> Rows { get; } = new();
     public Array AvailableTypes => Enum.GetValues(typeof(JsonFieldType));
     public event EventHandler? CloseRequested;
     public event EventHandler? ColumnsChanged;
@@ -650,14 +650,13 @@ public partial class WorkspaceViewModel : ViewModelBase
                 await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), msg);
             }
 
-            foreach (var field in mappedFields)
-                Properties.Add(new JsonPropertyDefinition { Name = field.FieldName, FieldType = field.SelectedType });
+            Properties.AddRange(mappedFields.Select(f =>
+                new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType }));
         }
 
         var rows = _jsonService.ParseJsonData(json, Properties);
         Rows.Clear();
-        foreach (var row in rows)
-            Rows.Add(row);
+        Rows.AddRange(rows);
 
         Header = Path.GetFileNameWithoutExtension(path);
         UndoRedo.Clear();   // destructive — clear history
@@ -763,8 +762,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
 
         Properties.Clear();
-        foreach (var prop in parsedProps)
-            Properties.Add(prop);
+        Properties.AddRange(parsedProps);
 
         Rows.Clear();
         Header = className;
@@ -827,16 +825,14 @@ public partial class WorkspaceViewModel : ViewModelBase
             // This covers both the "empty schema" case and the "user added new fields in JSON mode" case.
             var detected = _jsonService.DetectFields(RawJsonText);
             var existingNames = Properties.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
-            foreach (var field in detected)
-            {
-                if (!existingNames.Contains(field.FieldName))
-                    Properties.Add(new JsonPropertyDefinition { Name = field.FieldName, FieldType = field.SelectedType });
-            }
+            var newFields = detected
+                .Where(f => !existingNames.Contains(f.FieldName))
+                .Select(f => new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType });
+            Properties.AddRange(newFields);
 
             var rows = _jsonService.ParseJsonData(RawJsonText, Properties);
             Rows.Clear();
-            foreach (var row in rows)
-                Rows.Add(row);
+            Rows.AddRange(rows);
 
             UndoRedo.Clear();
             JsonEditorError = string.Empty;
