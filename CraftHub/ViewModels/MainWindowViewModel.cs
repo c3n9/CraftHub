@@ -137,6 +137,21 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         IsNotificationManagerOpen = !IsNotificationManagerOpen;
     }
+    
+    [RelayCommand]
+    private async void GoToGitHubRepo()
+    {
+        var ls = Services.LanguageService.Instance;
+        var confirmed = await _dialogService.ShowConfirmAsync(
+            ls.Get("ClosingWarningTitle"),
+            ls.Get("GoToGitWarningMsg"));
+        if (!confirmed)
+        {
+            return;
+        }
+        Process.Start(new ProcessStartInfo("https://github.com/c3n9/CraftHub") { UseShellExecute = true });
+    }
+    
     [RelayCommand]
     private async Task DownloadAndStartUpdate()
     {

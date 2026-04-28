@@ -69,6 +69,7 @@
     <!-- Tooltips – MainWindow -->
     <x:String x:Key="UpdateTip">Обновить</x:String>
     <x:String x:Key="NotificationsTip">Уведомления</x:String>
+    <x:String x:Key="GitHub">GitHub</x:String>
     <x:String x:Key="ToggleThemeTip">Сменить тему</x:String>
     <x:String x:Key="ToggleLanguageTip">Сменить язык</x:String>
     <x:String x:Key="AddWorkspaceTip">Новая вкладка</x:String>
@@ -136,6 +137,7 @@
     <x:String x:Key="CloseWorkspaceMsg">Закрыть вкладку? Все несохранённые данные будут утеряны.</x:String>
     <x:String x:Key="ImportOverwriteTitle">Импорт</x:String>
     <x:String x:Key="ImportOverwriteMsg">На этой вкладке уже есть данные. Импорт перезапишет все строки и поля. Продолжить?</x:String>
+	<x:String x:Key="GoToGitWarningMsg">Вы можете перейти к репозиторию на GitHub. Если возникнут проблемы или предложения по улучшению, создавайте Issue.</x:String>
     
     <!-- Dialog buttons -->
     <x:String x:Key="BtnOk">ОК</x:String>

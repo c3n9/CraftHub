@@ -69,6 +69,7 @@
 	<!-- Tooltips – MainWindow -->
 	<x:String x:Key="UpdateTip">Update</x:String>
 	<x:String x:Key="NotificationsTip">Notifications</x:String>
+    <x:String x:Key="GitHub">GitHub</x:String>
 	<x:String x:Key="ToggleThemeTip">Toggle Theme</x:String>
 	<x:String x:Key="ToggleLanguageTip">Toggle Language</x:String>
 	<x:String x:Key="AddWorkspaceTip">Add new workspace</x:String>
@@ -136,7 +137,9 @@
 	<x:String x:Key="CloseWorkspaceMsg">Close this tab? All unsaved data will be lost.</x:String>
 	<x:String x:Key="ImportOverwriteTitle">Import</x:String>
 	<x:String x:Key="ImportOverwriteMsg">This tab already has data. Importing will overwrite all rows and properties. Continue?</x:String>
+	<x:String x:Key="GoToGitWarningMsg">You can go to the repository on GitHub. If you have any problems or suggestions for improvement, create an Issue.</x:String>
 
+	
 	<!-- Dialog buttons -->
 	<x:String x:Key="BtnOk">OK</x:String>
 	<x:String x:Key="BtnCancel">Cancel</x:String>
