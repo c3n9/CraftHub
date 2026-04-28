@@ -327,22 +327,28 @@
 			  RowDefinitions="Auto,*">
 
 			<!-- Error banner -->
-			<Border Grid.Row="0"
-					Classes="json-error-banner"
+			<Button Grid.Row="0"
+					x:Name="JsonErrorButton"
+					Classes="transparentBtn"
+					ToolTip.Tip="{DynamicResource ErrorBtnTip}"
 					IsVisible="{Binding IsJsonEditorErrorVisible}">
-				<Grid ColumnDefinitions="Auto,*">
-					<materialIcons:MaterialIcon Grid.Column="0"
-												Kind="AlertCircleOutline"
-												Width="16"
-												Margin="0,0,8,0"
-												Height="16"
-												Foreground="{DynamicResource DangerColor}" />
+				<Border Classes="json-error-banner">
+					<Grid ColumnDefinitions="Auto,*">
+						<materialIcons:MaterialIcon Grid.Column="0"
+													Kind="AlertCircleOutline"
+													Width="16"
+													Margin="0,0,8,0"
+													Height="16"
+													Foreground="{DynamicResource DangerColor}" />
 
-					<TextBlock Grid.Column="1"
-							   Text="{Binding JsonEditorError}"
-							   TextWrapping="Wrap" />
-				</Grid>
-			</Border>
+						<TextBlock Grid.Column="1"
+						           VerticalAlignment="Center"
+						           Margin="0,2,0,0"
+								   Text="{Binding JsonEditorError}"
+								   TextWrapping="Wrap" />
+					</Grid>
+				</Border>
+			</Button>
 
 			<!-- JSON editor: outer ScrollViewer syncs line numbers and text together -->
 			<Border Grid.Row="1"

@@ -40,6 +40,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private string _rawJsonText = string.Empty;
     [ObservableProperty] private string _jsonEditorError;
     [ObservableProperty] private bool _isJsonEditorErrorVisible;
+    [ObservableProperty] private long _jsonEditorErrorLine = -1;
     [ObservableProperty] private bool _hasClipboardContent;
 
     /// <summary>
@@ -837,6 +838,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             UndoRedo.Clear();
             JsonEditorError = string.Empty;
             IsJsonEditorErrorVisible = false;
+            JsonEditorErrorLine = -1;
             IsJsonEditorMode = false;
             FireColumnsChanged();
             NotifySuccess(Localizer.Get("JsonAppliedMsg"));
@@ -844,6 +846,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         catch (JsonException ex)
         {
             IsJsonEditorErrorVisible = true;
+            JsonEditorErrorLine = ex.LineNumber ?? -1;
             JsonEditorError = $"{Localizer.Get("InvalidJsonError")}: {ex.Message}";
         }
     }

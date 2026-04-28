@@ -64,6 +64,7 @@
     <x:String x:Key="CtxDuplicate">Дублировать в конец</x:String>
     <x:String x:Key="CtxDuplicateAfter">Дублировать после</x:String>
     <x:String x:Key="CtxDelete">Удалить</x:String>
+	<x:String x:Key="ErrorBtnTip">Нажмите, чтобы перейти к строке с ошибкой</x:String>
 
     <!-- Tooltips – MainWindow -->
     <x:String x:Key="UpdateTip">Обновить</x:String>

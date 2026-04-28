@@ -64,6 +64,7 @@
 	<x:String x:Key="CtxDuplicate">Duplicate to end</x:String>
 	<x:String x:Key="CtxDuplicateAfter">Duplicate after</x:String>
 	<x:String x:Key="CtxDelete">Delete</x:String>
+	<x:String x:Key="ErrorBtnTip">Click to go to the line with the error</x:String>
 
 	<!-- Tooltips – MainWindow -->
 	<x:String x:Key="UpdateTip">Update</x:String>
