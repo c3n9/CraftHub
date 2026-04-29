@@ -71,10 +71,3 @@ $VOLICON \
 echo "DMG created"
 cd ..
 
-# Moving files to volumes
-mkdir -p /home/build
-mkdir -p /home/build/inst
-mkdir -p /home/build/full
-yes | cp ./staging_folder_arm64/CraftHub_arm64.dmg /home/build/inst/crafthub_arm64.dmg
-yes | cp -f -a ./staging_folder_arm64/CraftHub.app/Contents/MacOS/. /home/build/full/
-echo "All files copied to volumes"

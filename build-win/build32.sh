@@ -22,10 +22,3 @@ echo "CraftHub copied"
 makensis -V1 -DVERSION=$buildVersion ./nsis-setupper32.nsi
 echo ".exe created"
 
-# Moving files to volumes
-mkdir -p /home/build
-mkdir -p /home/build/inst32
-mkdir -p /home/build/full32
-yes | cp ./crafthub_x86.exe /home/build/inst32/crafthub_x86.exe
-yes | cp -f -a ./staging_folder32/. /home/build/full32/ # copies all files from publish dir
-echo "All files copied to volumes"

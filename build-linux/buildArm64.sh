@@ -61,11 +61,3 @@ echo "Another icon copied"
 # Make .deb file
 dpkg-deb --root-owner-group --build ./staging_folder_arm64/ ./crafthub_arm64.deb
 echo ".deb created"
-
-# Moving files to volumes
-mkdir -p /home/build
-mkdir -p /home/build/instArm64
-mkdir -p /home/build/fullArm64
-yes | cp ./crafthub_arm64.deb /home/build/instArm64/crafthub_arm64.deb
-yes | cp -f -a ./staging_folder_arm64/usr/share/crafthub/. /home/build/fullArm64/ # copies all files from publish dir
-echo "All files copied to volumes"
