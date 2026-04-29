@@ -8,90 +8,17 @@
              RequestedThemeVariant="Default">
     <Application.DataTemplates>
         <local:ViewLocator/>
-        <DataTemplate DataType="models:Notification">
-            <Border Classes="notification-toast">
-                <Grid ColumnDefinitions="4,Auto,*,Auto" RowDefinitions="Auto,Auto">
-                    <Border Classes="notification-accent"
-                            Grid.RowSpan="2"
-                            Background="{Binding Type, Converter={StaticResource NotificationBrush}}" />
-
-                    <Border Grid.Column="1"
-                            Grid.RowSpan="2"
-                            Classes="notification-icon-wrap">
-                        <materialIcons:MaterialIcon Classes="notification-icon"
-                                                    Kind="{Binding Type, Converter={StaticResource NotificationIconKind}}"
-                                                    Foreground="{Binding Type, Converter={StaticResource NotificationBrush}}"
-                                                    VerticalAlignment="Center" />
-                    </Border>
-
-                    <TextBlock Grid.Column="2"
-                               Grid.Row="0"
-                               Classes="notification-message"
-                               Text="{Binding Message}"
-                               MaxLines="2"
-                               TextTrimming="CharacterEllipsis"
-                               TextWrapping="Wrap" />
-
-                    <TextBlock Grid.Column="2"
-                               Grid.Row="1"
-                               Classes="notification-timestamp"
-                               Text="{Binding TimestampLabel}" />
-
-                    <Button Grid.Column="3"
-                            Grid.RowSpan="2"
-                            Classes="notification-close"
-                            Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
-                            Command="{Binding DataContext.DismissNotificationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                            CommandParameter="{Binding}" />
-                </Grid>
-            </Border>
-        </DataTemplate>
     </Application.DataTemplates>
 
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="/Resources/Themes/ThemeHolder.axaml" />
+                <ResourceInclude Source="/Resources/Styles/DataTempates/DataTemplatesResourceDictionary.axaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:NotificationTypeToBrushConverter x:Key="NotificationBrush" />
             <converters:NotificationTypeToIconKindConverter x:Key="NotificationIconKind" />
             <converters:CountToVisibilityConverter x:Key="CountToVisibility" />
-            <DataTemplate x:Key="NotificationRowTemplate" DataType="models:Notification">
-                <Border Classes="notification-row">
-                    <Grid ColumnDefinitions="4,Auto,*,Auto" RowDefinitions="Auto,Auto">
-                        <Border Classes="notification-accent"
-                                Grid.RowSpan="2"
-                                Background="{Binding Type, Converter={StaticResource NotificationBrush}}" />
-
-                        <Border Grid.Column="1"
-                                Grid.RowSpan="2"
-                                Classes="notification-icon-wrap">
-                            <materialIcons:MaterialIcon Classes="notification-icon"
-                                                        Kind="{Binding Type, Converter={StaticResource NotificationIconKind}}"
-                                                        Foreground="{Binding Type, Converter={StaticResource NotificationBrush}}"
-                                                        VerticalAlignment="Center" />
-                        </Border>
-
-                        <TextBlock Grid.Column="2"
-                                   Grid.Row="0"
-                                   Classes="notification-message"
-                                   Text="{Binding Message}"
-                                   TextWrapping="Wrap" />
-
-                        <TextBlock Grid.Column="2"
-                                   Grid.Row="1"
-                                   Classes="notification-timestamp"
-                                   Text="{Binding TimestampLabel}" />
-
-                        <Button Grid.Column="3"
-                                Grid.RowSpan="2"
-                                Classes="notification-close"
-                                Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
-                                Command="{Binding DataContext.DismissHistoryNotificationCommand, RelativeSource={RelativeSource AncestorType=Window}}"
-                                CommandParameter="{Binding}" />
-                    </Grid>
-                </Border>
-            </DataTemplate>
         </ResourceDictionary>
     </Application.Resources>
 

@@ -120,7 +120,8 @@
 					VerticalAlignment="Bottom"
 					Spacing="8"
 					IsVisible="{Binding ShowPopupOverlay}">
-			<ItemsControl ItemsSource="{Binding ActiveNotifications}">
+			<ItemsControl ItemsSource="{Binding ActiveNotifications}"
+						  ItemTemplate="{StaticResource NotificationTemplate}">
 				<ItemsControl.ItemsPanel>
 					<ItemsPanelTemplate>
 						<StackPanel Orientation="Vertical" Spacing="8" />
