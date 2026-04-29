@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:vm="using:CraftHub.ViewModels"
 		xmlns:views="using:CraftHub.Views"
@@ -33,9 +33,12 @@
 							Classes="toolbar-btn"
 							Command="{Binding DownloadAndStartUpdateCommand}"
 							ToolTip.Tip="{DynamicResource UpdateTip}" FontSize="16" />
+					<Button Content="{materialIcons:MaterialIconExt Kind=Github}" Classes="toolbar-btn"
+							Command="{Binding GoToGitHubRepoCommand}"
+							ToolTip.Tip="{DynamicResource GitHub}" FontSize="16" />
 					<Button Content="{materialIcons:MaterialIconExt Kind=BellNotificationOutline}" Classes="toolbar-btn"
-							Command="{Binding ToggleNotificationManagerCommand}"
-							ToolTip.Tip="{DynamicResource NotificationsTip}" FontSize="16" />
+					        Command="{Binding ToggleNotificationManagerCommand}"
+					        ToolTip.Tip="{DynamicResource NotificationsTip}" FontSize="16" />
 					<Button Classes="toolbar-btn"
 							Command="{Binding ToggleThemeCommand}"
 							Content="{materialIcons:MaterialIconExt Kind=ThemeLightDark}"

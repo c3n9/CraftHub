@@ -40,6 +40,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private string _rawJsonText = string.Empty;
     [ObservableProperty] private string _jsonEditorError;
     [ObservableProperty] private bool _isJsonEditorErrorVisible;
+    [ObservableProperty] private long _jsonEditorErrorLine = -1;
     [ObservableProperty] private bool _hasClipboardContent;
 
     /// <summary>
@@ -88,8 +89,8 @@ public partial class WorkspaceViewModel : ViewModelBase
     private bool CanCopyOrCut(object? _) => SelectedRowsCount > 0 && !IsCellEditing;
     private bool CanPaste() => HasClipboardContent && !IsCellEditing;
 
-    public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
-    public ObservableCollection<DynamicDataRow> Rows { get; } = new();
+    public BulkObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
+    public BulkObservableCollection<DynamicDataRow> Rows { get; } = new();
     public Array AvailableTypes => Enum.GetValues(typeof(JsonFieldType));
     public event EventHandler? CloseRequested;
     public event EventHandler? ColumnsChanged;
@@ -116,15 +117,11 @@ public partial class WorkspaceViewModel : ViewModelBase
     private bool CanRedo => UndoRedo.CanRedo;
 
     /// <summary>Dynamic tooltip: "Undo: Add row" or just "Undo" when stack is empty.</summary>
-    public string UndoTooltip => UndoRedo.UndoDescription is { } d
-        ? $"{Localizer.Get("UndoTip")}: {d}"
-        : Localizer.Get("UndoTip");
-
+    [ObservableProperty] public string _undoTooltip;
     /// <summary>Dynamic tooltip: "Redo: Add row" or just "Redo" when stack is empty.</summary>
-    public string RedoTooltip => UndoRedo.RedoDescription is { } d
-        ? $"{Localizer.Get("RedoTip")}: {d}"
-        : Localizer.Get("RedoTip");
-
+    [ObservableProperty] public string _redoTooltip;
+    
+    
     [RelayCommand(CanExecute = nameof(CanUndo))]
     private void Undo() => UndoRedo.Undo();
 
@@ -171,13 +168,25 @@ public partial class WorkspaceViewModel : ViewModelBase
             if (e.PropertyName is nameof(UndoRedoService.CanUndo) or null)
             {
                 UndoCommand.NotifyCanExecuteChanged();
-                OnPropertyChanged(nameof(UndoTooltip));
+                UndoTooltip = UndoRedo.UndoDescription is { } d
+                    ? $"{Localizer.Get("UndoTip")}: {d}"
+                    : Localizer.Get("UndoTip");
             }
             if (e.PropertyName is nameof(UndoRedoService.CanRedo) or null)
             {
                 RedoCommand.NotifyCanExecuteChanged();
-                OnPropertyChanged(nameof(RedoTooltip));
+                RedoTooltip = UndoRedo.RedoDescription is { } d
+                    ? $"{Localizer.Get("RedoTip")}: {d}"
+                    : Localizer.Get("RedoTip");
             }
+            if (e.PropertyName == nameof(UndoRedoService.UndoDescription))
+                UndoTooltip = UndoRedo.UndoDescription is { } d
+                    ? $"{Localizer.Get("UndoTip")}: {d}"
+                    : Localizer.Get("UndoTip");
+            if (e.PropertyName == nameof(UndoRedoService.RedoDescription))
+                RedoTooltip = UndoRedo.RedoDescription is { } d
+                    ? $"{Localizer.Get("RedoTip")}: {d}"
+                    : Localizer.Get("RedoTip");
         };
     }
 
@@ -263,6 +272,47 @@ public partial class WorkspaceViewModel : ViewModelBase
         UndoRedo.Push(new RemovePropertyAction(Properties, Rows, prop, propIndex, savedValues, FireColumnsChanged));
 
         NotifySuccess(Localizer.Get("PropertyRemoved", prop.Name));
+        FireColumnsChanged();
+    }
+
+    [RelayCommand]
+    private async Task RenamePropertyAsync(JsonPropertyDefinition? prop)
+    {
+        if (prop == null) return;
+
+        var newName = await _dialogService.ShowInputDialogAsync(
+            Localizer.Get("RenamePropertyTitle"),
+            Localizer.Get("RenamePropertyPrompt"),
+            prop.Name,
+            Localizer.Get("PropertyNameWatermark"));
+
+        if (newName == null) return;
+
+        newName = newName.Trim();
+
+        if (string.IsNullOrWhiteSpace(newName))
+        {
+            NotifyWarning(Localizer.Get("EnterPropertyName"));
+            return;
+        }
+
+        if (newName == prop.Name) return;
+
+        if (Properties.Any(p => p.Name == newName))
+        {
+            NotifyWarning(Localizer.Get("PropertyAlreadyExists"));
+            return;
+        }
+
+        var oldName = prop.Name;
+
+        prop.Name = newName;
+        foreach (var row in Rows)
+            row.RenameProperty(oldName, newName);
+
+        UndoRedo.Push(new RenamePropertyAction(prop, oldName, newName, Rows, FireColumnsChanged));
+
+        NotifySuccess(Localizer.Get("PropertyRenamed", oldName, newName));
         FireColumnsChanged();
     }
 
@@ -601,14 +651,13 @@ public partial class WorkspaceViewModel : ViewModelBase
                 await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"), msg);
             }
 
-            foreach (var field in mappedFields)
-                Properties.Add(new JsonPropertyDefinition { Name = field.FieldName, FieldType = field.SelectedType });
+            Properties.AddRange(mappedFields.Select(f =>
+                new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType }));
         }
 
         var rows = _jsonService.ParseJsonData(json, Properties);
         Rows.Clear();
-        foreach (var row in rows)
-            Rows.Add(row);
+        Rows.AddRange(rows);
 
         Header = Path.GetFileNameWithoutExtension(path);
         UndoRedo.Clear();   // destructive — clear history
@@ -714,8 +763,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
 
         Properties.Clear();
-        foreach (var prop in parsedProps)
-            Properties.Add(prop);
+        Properties.AddRange(parsedProps);
 
         Rows.Clear();
         Header = className;
@@ -778,20 +826,19 @@ public partial class WorkspaceViewModel : ViewModelBase
             // This covers both the "empty schema" case and the "user added new fields in JSON mode" case.
             var detected = _jsonService.DetectFields(RawJsonText);
             var existingNames = Properties.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
-            foreach (var field in detected)
-            {
-                if (!existingNames.Contains(field.FieldName))
-                    Properties.Add(new JsonPropertyDefinition { Name = field.FieldName, FieldType = field.SelectedType });
-            }
+            var newFields = detected
+                .Where(f => !existingNames.Contains(f.FieldName))
+                .Select(f => new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType });
+            Properties.AddRange(newFields);
 
             var rows = _jsonService.ParseJsonData(RawJsonText, Properties);
             Rows.Clear();
-            foreach (var row in rows)
-                Rows.Add(row);
+            Rows.AddRange(rows);
 
             UndoRedo.Clear();
             JsonEditorError = string.Empty;
             IsJsonEditorErrorVisible = false;
+            JsonEditorErrorLine = -1;
             IsJsonEditorMode = false;
             FireColumnsChanged();
             NotifySuccess(Localizer.Get("JsonAppliedMsg"));
@@ -799,6 +846,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         catch (JsonException ex)
         {
             IsJsonEditorErrorVisible = true;
+            JsonEditorErrorLine = ex.LineNumber ?? -1;
             JsonEditorError = $"{Localizer.Get("InvalidJsonError")}: {ex.Message}";
         }
     }

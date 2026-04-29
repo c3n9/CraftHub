@@ -187,7 +187,7 @@
 											Margin="0,0,20,0"
 											CornerRadius="10"
 											Padding="10">
-										<Grid ColumnDefinitions="*,Auto,Auto" RowDefinitions="Auto,Auto">
+										<Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto">
 											<TextBlock Grid.Column="0"
 													   Grid.Row="0"
 													   Text="{Binding Name}"
@@ -210,6 +210,14 @@
 
 											<Button Grid.Column="2"
 													Grid.Row="0"
+													Classes="edit-tab"
+													Content="{materialIcons:MaterialIconExt Kind=PencilOutline}"
+													ToolTip.Tip="{DynamicResource RenameFieldTip}"
+													Command="{Binding $parent[UserControl].DataContext.RenamePropertyCommand}"
+													CommandParameter="{Binding}" />
+
+											<Button Grid.Column="3"
+													Grid.Row="0"
 													Classes="close-tab"
 													Content="{materialIcons:MaterialIconExt Kind=CloseThick}"
 													ToolTip.Tip="{DynamicResource RemoveFieldTip}"
@@ -218,7 +226,7 @@
 
 											<TextBlock Grid.Column="0"
 													   Grid.Row="1"
-													   Grid.ColumnSpan="3"
+													   Grid.ColumnSpan="4"
 													   Text="{Binding Path=FieldType, StringFormat={}Type: {0}}"
 													   FontSize="11"
 													   Foreground="{DynamicResource TextMuted}"
@@ -319,22 +327,28 @@
 			  RowDefinitions="Auto,*">
 
 			<!-- Error banner -->
-			<Border Grid.Row="0"
-					Classes="json-error-banner"
+			<Button Grid.Row="0"
+					x:Name="JsonErrorButton"
+					Classes="transparentBtn"
+					ToolTip.Tip="{DynamicResource ErrorBtnTip}"
 					IsVisible="{Binding IsJsonEditorErrorVisible}">
-				<Grid ColumnDefinitions="Auto,*">
-					<materialIcons:MaterialIcon Grid.Column="0"
-												Kind="AlertCircleOutline"
-												Width="16"
-												Margin="0,0,8,0"
-												Height="16"
-												Foreground="{DynamicResource DangerColor}" />
+				<Border Classes="json-error-banner">
+					<Grid ColumnDefinitions="Auto,*">
+						<materialIcons:MaterialIcon Grid.Column="0"
+													Kind="AlertCircleOutline"
+													Width="16"
+													Margin="0,0,8,0"
+													Height="16"
+													Foreground="{DynamicResource DangerColor}" />
 
-					<TextBlock Grid.Column="1"
-							   Text="{Binding JsonEditorError}"
-							   TextWrapping="Wrap" />
-				</Grid>
-			</Border>
+						<TextBlock Grid.Column="1"
+						           VerticalAlignment="Center"
+						           Margin="0,2,0,0"
+								   Text="{Binding JsonEditorError}"
+								   TextWrapping="Wrap" />
+					</Grid>
+				</Border>
+			</Button>
 
 			<!-- JSON editor: outer ScrollViewer syncs line numbers and text together -->
 			<Border Grid.Row="1"

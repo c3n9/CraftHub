@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Layout;
@@ -29,7 +30,9 @@ public partial class WorkspaceView : UserControl
 
     private TextBox? _jsonTextBox;
     private ScrollViewer? _lineNumberScroller;
+    private ScrollViewer? _jsonTextBoxScrollViewer;
     private TextBlock? _lineNumbersBlock;
+    private Button? _jsonErrorButton;
     private int _lastLineCount = -1;
 
     public WorkspaceView()
@@ -64,13 +67,17 @@ public partial class WorkspaceView : UserControl
 
     private void InitJsonEditor()
     {
-        _jsonTextBox       = this.FindControl<TextBox>("JsonTextBox");
+        _jsonTextBox        = this.FindControl<TextBox>("JsonTextBox");
         _lineNumberScroller = this.FindControl<ScrollViewer>("LineNumberScroller");
-        _lineNumbersBlock  = this.FindControl<TextBlock>("LineNumbersBlock");
+        _lineNumbersBlock   = this.FindControl<TextBlock>("LineNumbersBlock");
+        _jsonErrorButton    = this.FindControl<Button>("JsonErrorButton");
 
         if (_jsonTextBox == null || _lineNumbersBlock == null) return;
 
         _jsonTextBox.TextChanged += (_, _) => RefreshLineNumbers();
+
+        if (_jsonErrorButton != null)
+            _jsonErrorButton.Click += OnErrorButtonClick;
 
         // After the TextBox template is applied its internal ScrollViewer exists.
         // Post to Background so the visual tree is fully ready before we search it.
@@ -78,11 +85,45 @@ public partial class WorkspaceView : UserControl
             Dispatcher.UIThread.Post(HookScrollSync, DispatcherPriority.Background);
     }
 
+    private void OnErrorButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    {
+        if (DataContext is not WorkspaceViewModel vm) return;
+        if (vm.JsonEditorErrorLine < 0 || _jsonTextBox == null) return;
+        NavigateToLine((int)vm.JsonEditorErrorLine);
+    }
+
+    private void NavigateToLine(int lineIndex)
+    {
+        if (_jsonTextBox == null) return;
+        var text = _jsonTextBox.Text ?? string.Empty;
+
+        int offset = 0;
+        int currentLine = 0;
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (currentLine == lineIndex) { offset = i; break; }
+            if (text[i] == '\n') currentLine++;
+        }
+
+        _jsonTextBox.Focus();
+        _jsonTextBox.CaretIndex = offset;
+
+        if (_jsonTextBoxScrollViewer != null)
+        {
+            // FontSize=13, top padding=12; Avalonia line height ≈ FontSize * 1.5
+            var lineHeight = _jsonTextBox.FontSize * 1.5;
+            var targetY = 12.0 + lineIndex * lineHeight;
+            var viewportHeight = _jsonTextBoxScrollViewer.Viewport.Height;
+            _jsonTextBoxScrollViewer.Offset = new Vector(0, Math.Max(0, targetY - viewportHeight / 2));
+        }
+    }
+
     private void HookScrollSync()
     {
         if (_jsonTextBox == null || _lineNumberScroller == null) return;
         var sv = _jsonTextBox.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
         if (sv == null) return;
+        _jsonTextBoxScrollViewer = sv;
         sv.ScrollChanged += (_, _) =>
             _lineNumberScroller.Offset = new Vector(0, sv.Offset.Y);
     }
