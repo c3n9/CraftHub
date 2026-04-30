@@ -825,6 +825,12 @@ public partial class WorkspaceViewModel : ViewModelBase
             // Always detect fields from JSON and add any that are not yet in the schema.
             // This covers both the "empty schema" case and the "user added new fields in JSON mode" case.
             var detected = _jsonService.DetectFields(RawJsonText);
+            var detectedNames = detected.Select(f => f.FieldName).ToHashSet(StringComparer.Ordinal);
+
+            var toRemove = Properties.Where(p => !detectedNames.Contains(p.Name)).ToList();
+            foreach (var p in toRemove)
+                Properties.Remove(p);
+
             var existingNames = Properties.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
             var newFields = detected
                 .Where(f => !existingNames.Contains(f.FieldName))
