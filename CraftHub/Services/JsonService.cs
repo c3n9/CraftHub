@@ -46,7 +46,7 @@ public class JsonService : IJsonService
         {
             foreach (var prop in element.EnumerateObject())
             {
-                var name = string.IsNullOrEmpty(prefix) ? prop.Name : $"{prefix}_{prop.Name}";
+                var name = string.IsNullOrEmpty(prefix) ? prop.Name : $"{prefix}\x1E{prop.Name}";
                 if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
                 {
                     DetectFieldsRecursive(prop.Value, name, fieldDict, depth + 1);
@@ -62,7 +62,7 @@ public class JsonService : IJsonService
             int i = 0;
             foreach (var item in element.EnumerateArray())
             {
-                var name = string.IsNullOrEmpty(prefix) ? $"<{i}>" : $"{prefix}_<{i}>";
+                var name = string.IsNullOrEmpty(prefix) ? $"<{i}>" : $"{prefix}\x1E<{i}>";
                 if (item.ValueKind == JsonValueKind.Object || item.ValueKind == JsonValueKind.Array)
                 {
                     DetectFieldsRecursive(item, name, fieldDict, depth + 1);
@@ -163,7 +163,7 @@ public class JsonService : IJsonService
 
     private JsonElement? ResolvePath(JsonElement root, string path)
     {
-        var parts = path.Split('_', StringSplitOptions.RemoveEmptyEntries);
+        var parts = path.Split('\x1E', StringSplitOptions.RemoveEmptyEntries);
         JsonElement current = root;
 
         foreach (var p in parts)
@@ -224,7 +224,7 @@ public class JsonService : IJsonService
 
     private static void SetNestedNode(JsonObject root, string path, string val, JsonFieldType type)
     {
-        var parts = path.Split('_', StringSplitOptions.RemoveEmptyEntries);
+        var parts = path.Split('\x1E', StringSplitOptions.RemoveEmptyEntries);
         JsonNode current = root;
 
         for (int i = 0; i < parts.Length - 1; i++)
