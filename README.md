@@ -17,9 +17,6 @@ Features
    - Easily fill in the required data within the application, and CraftHub will generate the corresponding JSON representation.
    - With just a few clicks, you can export the JSON file, ready to be utilized in your projects.
 
-## License
-CraftHub is licensed under the MIT License. Feel free to use, modify, and distribute the application in accordance with the terms of the license.
-
 **Start your coding adventure with CraftHub today, and empower yourself with a seamless, personalized experience!**
 
 ## Screenshots
