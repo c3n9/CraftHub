@@ -1,0 +1,1638 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CraftHub Web — Visual JSON Parser & Class Builder</title>
+<style>
+  /* ---------- Theme & base ---------- */
+  :root{
+    --bg:#0f1419;
+    --bg-2:#161c24;
+    --bg-3:#1d242e;
+    --panel:#1a2029;
+    --line:#283140;
+    --line-2:#374151;
+    --text:#e6edf3;
+    --muted:#8b949e;
+    --accent:#ff8a3d;       /* orange like the CraftHub owl */
+    --accent-2:#ffb27a;
+    --accent-soft:#ff8a3d22;
+    --green:#3fb950;
+    --red:#f85149;
+    --blue:#58a6ff;
+    --purple:#bc8cff;
+    --yellow:#e3b341;
+    --cyan:#39c5cf;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  [data-theme="light"]{
+    --bg:#f6f7f9;
+    --bg-2:#ffffff;
+    --bg-3:#f1f3f6;
+    --panel:#ffffff;
+    --line:#e2e6eb;
+    --line-2:#d0d7de;
+    --text:#1f2328;
+    --muted:#656d76;
+    --accent:#e26b1f;
+    --accent-2:#c8541a;
+    --accent-soft:#e26b1f1f;
+    --green:#1a7f37;
+    --red:#cf222e;
+    --blue:#0969da;
+    --purple:#8250df;
+    --yellow:#9a6700;
+    --cyan:#1f6feb;
+    --shadow:0 6px 18px rgba(140,149,159,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    font-size:14px;
+    overflow:hidden;
+  }
+  button{font-family:inherit}
+  ::selection{background:var(--accent-soft);color:var(--accent-2)}
+  /* Scrollbars */
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--line-2)}
+
+  /* ---------- App layout ---------- */
+  .app{
+    display:grid;
+    grid-template-rows:56px 1fr 28px;
+    height:100vh;
+  }
+  /* Header */
+  header{
+    display:flex; align-items:center; gap:14px;
+    padding:0 18px;
+    background:var(--bg-2);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    display:flex;align-items:center;gap:10px;
+    font-weight:700;font-size:16px;letter-spacing:.2px;
+  }
+  .logo .owl{
+    width:34px;height:34px;border-radius:8px;
+    background:linear-gradient(135deg,var(--accent),#d6541a);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(255,138,61,.35);
+    color:#fff;font-size:18px;
+  }
+  .logo small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:1px}
+  .tabs{display:flex; gap:4px; margin-left:auto; align-items:center}
+  .tab{
+    background:transparent;color:var(--muted);
+    border:1px solid transparent;border-radius:8px;
+    padding:8px 14px;cursor:pointer;font-size:13px;font-weight:500;
+    transition:all .15s ease;
+  }
+  .tab:hover{color:var(--text);background:var(--bg-3)}
+  .tab.active{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+  .header-actions{display:flex;gap:8px;margin-left:14px}
+  .icon-btn{
+    background:transparent;border:1px solid var(--line);border-radius:8px;
+    width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--muted);transition:all .15s;
+  }
+  .icon-btn:hover{color:var(--text);border-color:var(--line-2);background:var(--bg-3)}
+  .icon-btn svg{width:16px;height:16px}
+
+  /* Main area */
+  main{display:flex;min-height:0;background:var(--bg)}
+  .sidebar{
+    width:260px;flex-shrink:0;
+    background:var(--bg-2);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;min-height:0;
+  }
+  .sidebar h3{
+    margin:0;padding:14px 16px 10px;font-size:11px;letter-spacing:.8px;
+    color:var(--muted);text-transform:uppercase;font-weight:600;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .sidebar h3 button{
+    background:transparent;border:none;color:var(--muted);cursor:pointer;
+    font-size:18px;line-height:1;padding:0 4px;
+  }
+  .sidebar h3 button:hover{color:var(--accent)}
+  .class-list{flex:1;overflow-y:auto;padding:0 8px 12px}
+  .class-item{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 10px;margin:2px 0;border-radius:6px;
+    cursor:pointer;color:var(--text);font-size:13px;
+    border:1px solid transparent;
+  }
+  .class-item:hover{background:var(--bg-3)}
+  .class-item.active{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+  .class-item .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .class-item .count{
+    font-size:11px;color:var(--muted);background:var(--bg-3);
+    padding:1px 6px;border-radius:10px;
+  }
+  .class-item.active .count{background:rgba(255,138,61,.15);color:var(--accent)}
+  .class-item .actions{display:none;gap:4px}
+  .class-item:hover .actions{display:flex}
+  .class-item .actions button{
+    background:transparent;border:none;color:var(--muted);cursor:pointer;
+    font-size:13px;padding:0 2px;
+  }
+  .class-item .actions button:hover{color:var(--red)}
+  .empty-list{
+    text-align:center;color:var(--muted);font-size:12px;
+    padding:20px 12px;line-height:1.5;
+  }
+  .sidebar-footer{
+    padding:10px 12px;border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);
+  }
+
+  /* Content */
+  .content{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+  .view{display:none;flex:1;min-height:0;overflow:hidden}
+  .view.active{display:flex;flex-direction:column}
+  .toolbar{
+    display:flex;gap:8px;padding:10px 16px;
+    background:var(--bg-2);border-bottom:1px solid var(--line);
+    align-items:center;flex-wrap:wrap;
+  }
+  .btn{
+    background:var(--accent);color:#fff;border:none;border-radius:6px;
+    padding:7px 14px;cursor:pointer;font-size:13px;font-weight:500;
+    display:inline-flex;align-items:center;gap:6px;transition:all .15s;
+  }
+  .btn:hover{background:var(--accent-2);transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .btn.secondary{background:var(--bg-3);color:var(--text);border:1px solid var(--line)}
+  .btn.secondary:hover{background:var(--line);transform:none}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .btn.ghost:hover{color:var(--text);background:var(--bg-3)}
+  .btn.danger{background:var(--red)}
+  .btn.danger:hover{background:#e0353f}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;transform:none!important}
+  .toolbar .spacer{flex:1}
+  .toolbar input[type=text], .toolbar select{
+    background:var(--bg-3);color:var(--text);border:1px solid var(--line);
+    border-radius:6px;padding:6px 10px;font-size:13px;outline:none;
+  }
+  .toolbar input[type=text]:focus,.toolbar select:focus{border-color:var(--accent)}
+
+  /* ----- Class Builder view ----- */
+  .builder{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);flex:1;min-height:0}
+  .builder-pane{background:var(--bg);overflow:auto;padding:18px 22px}
+  .builder-pane h2{margin:0 0 14px;font-size:15px;font-weight:600;letter-spacing:.2px}
+  .builder-pane h2 small{font-weight:400;font-size:12px;color:var(--muted);margin-left:8px}
+
+  .field-row{
+    display:grid;grid-template-columns:1fr 130px 110px auto;gap:8px;
+    margin-bottom:8px;align-items:center;
+  }
+  .field-row input, .field-row select{
+    background:var(--bg-2);color:var(--text);
+    border:1px solid var(--line);border-radius:6px;
+    padding:8px 10px;font-size:13px;outline:none;width:100%;
+    font-family:inherit;
+  }
+  .field-row input:focus, .field-row select:focus{border-color:var(--accent)}
+  .field-row .remove-btn{
+    width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    background:transparent;border:1px solid var(--line);border-radius:6px;
+    color:var(--muted);cursor:pointer;font-size:14px;
+  }
+  .field-row .remove-btn:hover{color:var(--red);border-color:var(--red)}
+  .nested-class-info{
+    font-size:11px;color:var(--muted);margin-left:6px;font-style:italic;
+  }
+  .field-headers{
+    display:grid;grid-template-columns:1fr 130px 110px 30px;gap:8px;
+    margin-bottom:6px;
+    font-size:11px;letter-spacing:.6px;color:var(--muted);
+    text-transform:uppercase;font-weight:600;
+    padding:0 2px;
+  }
+  .class-name-row{
+    display:flex;gap:8px;margin-bottom:18px;align-items:center;
+  }
+  .class-name-row label{font-size:12px;color:var(--muted);min-width:80px}
+  .class-name-row input{
+    flex:1;background:var(--bg-2);border:1px solid var(--line);
+    border-radius:6px;padding:8px 12px;color:var(--text);font-size:14px;
+    outline:none;font-weight:600;
+  }
+  .class-name-row input:focus{border-color:var(--accent)}
+
+  .add-field-btn{
+    margin-top:8px;width:100%;
+    background:transparent;color:var(--muted);
+    border:1px dashed var(--line-2);border-radius:6px;
+    padding:10px;cursor:pointer;font-size:13px;
+    transition:all .15s;
+  }
+  .add-field-btn:hover{
+    color:var(--accent);border-color:var(--accent);background:var(--accent-soft);
+  }
+
+  .preview-code{
+    background:var(--bg-2);border:1px solid var(--line);border-radius:8px;
+    padding:14px 16px;font-family:"SF Mono","Monaco","Cascadia Code","Consolas",monospace;
+    font-size:12.5px;line-height:1.6;white-space:pre;overflow:auto;
+    color:var(--text);max-height:calc(100vh - 250px);
+  }
+
+  /* ----- Generator view ----- */
+  .gen-layout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);flex:1;min-height:0}
+  .gen-pane{background:var(--bg);overflow:auto;padding:18px 22px}
+  .form-group{margin-bottom:14px}
+  .form-group > label{
+    display:block;font-size:12px;color:var(--muted);
+    margin-bottom:5px;font-weight:500;
+  }
+  .form-group .type-pill{
+    display:inline-block;font-size:10px;
+    padding:1px 6px;border-radius:8px;
+    background:var(--bg-3);color:var(--muted);margin-left:6px;
+    font-family:"SF Mono",monospace;
+  }
+  .form-group input[type=text],
+  .form-group input[type=number],
+  .form-group textarea,
+  .form-group select{
+    width:100%;background:var(--bg-2);border:1px solid var(--line);
+    border-radius:6px;padding:8px 12px;color:var(--text);font-size:13px;
+    outline:none;font-family:inherit;
+  }
+  .form-group textarea{resize:vertical;min-height:60px;font-family:"SF Mono",monospace;font-size:12px}
+  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent)}
+  .form-group input[type=checkbox]{
+    width:18px;height:18px;accent-color:var(--accent);vertical-align:middle;
+  }
+  .form-group.nested-obj{
+    border:1px solid var(--line);border-radius:8px;padding:14px;
+    background:var(--bg-2);
+  }
+  .form-group.nested-obj > label{
+    color:var(--accent);font-weight:600;font-size:13px;
+  }
+  .array-field{
+    border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg-2);
+  }
+  .array-field .array-item{
+    display:flex;gap:6px;margin-bottom:6px;align-items:flex-start;
+  }
+  .array-field .array-item > *:first-child{flex:1}
+  .array-field .add-item{
+    background:transparent;color:var(--accent);border:1px dashed var(--line-2);
+    border-radius:6px;padding:6px;width:100%;cursor:pointer;font-size:12px;
+    margin-top:4px;
+  }
+  .array-field .add-item:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .empty-state{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:var(--muted);text-align:center;padding:40px 20px;height:100%;
+    font-size:13px;line-height:1.6;
+  }
+  .empty-state .big{font-size:48px;margin-bottom:12px;opacity:.4}
+  .empty-state .em{color:var(--accent);font-weight:600}
+
+  /* ----- Visual JSON Parser ----- */
+  .parser{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);flex:1;min-height:0}
+  .parser-pane{background:var(--bg);overflow:auto;padding:0;display:flex;flex-direction:column}
+  .editor-area{flex:1;display:flex;flex-direction:column;min-height:0}
+  .editor-area textarea{
+    flex:1;width:100%;background:var(--bg-2);color:var(--text);
+    border:none;outline:none;padding:14px 16px;
+    font-family:"SF Mono","Monaco","Cascadia Code","Consolas",monospace;
+    font-size:13px;line-height:1.55;resize:none;
+  }
+  .tree-area{padding:14px 18px;font-family:"SF Mono","Monaco","Consolas",monospace;font-size:13px;line-height:1.65}
+  .tree-node{margin-left:18px;position:relative}
+  .tree-node.root{margin-left:0}
+  .tree-key{color:var(--blue);cursor:pointer}
+  .tree-string{color:var(--green)}
+  .tree-number{color:var(--purple)}
+  .tree-boolean{color:var(--yellow);font-weight:500}
+  .tree-null{color:var(--red);font-style:italic}
+  .tree-toggle{
+    display:inline-block;width:14px;color:var(--muted);
+    cursor:pointer;user-select:none;text-align:center;
+    margin-right:2px;font-size:10px;
+  }
+  .tree-toggle:hover{color:var(--accent)}
+  .tree-line{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;padding:1px 4px;border-radius:4px}
+  .tree-line:hover{background:var(--bg-3)}
+  .tree-line:hover .row-actions{display:inline-flex}
+  .row-actions{display:none;gap:4px;margin-left:8px}
+  .row-actions button{
+    background:transparent;border:none;color:var(--muted);cursor:pointer;
+    font-size:11px;padding:1px 5px;border-radius:3px;
+  }
+  .row-actions button:hover{background:var(--bg-3);color:var(--accent)}
+  .tree-bracket{color:var(--muted)}
+  .tree-comma{color:var(--muted)}
+  .collapsed-summary{color:var(--muted);font-style:italic;cursor:pointer;font-size:11px;margin-left:4px}
+  .collapsed-summary:hover{color:var(--accent)}
+  .tree-children.collapsed{display:none}
+  .tree-value-input{
+    background:var(--bg-2);border:1px solid var(--accent);
+    color:var(--text);font-family:inherit;font-size:13px;
+    padding:1px 6px;border-radius:3px;outline:none;width:auto;min-width:80px;
+  }
+  .err-banner{
+    background:#f8514922;color:var(--red);padding:8px 14px;
+    border-bottom:1px solid var(--red);font-size:12px;
+  }
+  .ok-banner{
+    background:#3fb95022;color:var(--green);padding:6px 14px;
+    border-bottom:1px solid var(--green);font-size:12px;
+  }
+  .pane-header{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 14px;border-bottom:1px solid var(--line);
+    background:var(--bg-2);font-size:12px;color:var(--muted);font-weight:600;
+    text-transform:uppercase;letter-spacing:.6px;
+  }
+  .pane-header .pill{
+    background:var(--bg-3);color:var(--muted);padding:2px 8px;
+    border-radius:10px;font-size:10px;font-weight:600;letter-spacing:.4px;
+  }
+  .pane-header .pill.ok{background:#3fb95022;color:var(--green)}
+  .pane-header .pill.err{background:#f8514922;color:var(--red)}
+  .pane-header > .spacer{flex:1}
+  .pane-header button{
+    background:transparent;border:1px solid var(--line);
+    color:var(--muted);padding:4px 10px;border-radius:5px;cursor:pointer;
+    font-size:11px;font-weight:500;letter-spacing:.4px;
+  }
+  .pane-header button:hover{color:var(--accent);border-color:var(--accent)}
+
+  /* Status bar */
+  .statusbar{
+    display:flex;align-items:center;gap:14px;
+    padding:0 16px;background:var(--bg-2);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);
+  }
+  .statusbar .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .statusbar .dot.err{background:var(--red)}
+  .statusbar .spacer{flex:1}
+
+  /* Modal */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;
+    display:none;align-items:center;justify-content:center;
+  }
+  .modal-bg.show{display:flex}
+  .modal{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;box-shadow:var(--shadow);
+    width:480px;max-width:95vw;padding:20px 24px;
+  }
+  .modal h2{margin:0 0 8px;font-size:16px}
+  .modal p{margin:0 0 14px;color:var(--muted);font-size:13px}
+  .modal input{
+    width:100%;background:var(--bg-2);border:1px solid var(--line);
+    border-radius:6px;padding:9px 12px;color:var(--text);font-size:14px;
+    outline:none;font-family:inherit;
+  }
+  .modal input:focus{border-color:var(--accent)}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--panel);border:1px solid var(--line);
+    padding:10px 18px;border-radius:8px;font-size:13px;
+    box-shadow:var(--shadow);opacity:0;pointer-events:none;
+    transition:all .25s ease;z-index:60;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{border-color:var(--red);color:var(--red)}
+  .toast.ok{border-color:var(--green);color:var(--green)}
+
+  /* small helpers */
+  .hint{font-size:11px;color:var(--muted);margin-top:4px}
+  .kbd{
+    background:var(--bg-3);border:1px solid var(--line);border-radius:3px;
+    padding:1px 5px;font-size:10px;font-family:monospace;color:var(--muted);
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="owl">🦉</div>
+      <div>CraftHub Web<small>Visual JSON Parser & Class Builder</small></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-view="builder">🧱 Class Builder</button>
+      <button class="tab" data-view="generator">⚡ Generator</button>
+      <button class="tab" data-view="parser">🔍 Visual Parser</button>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="theme-toggle" title="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="icon-btn" id="export-all" title="Export all classes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+      <button class="icon-btn" id="import-all" title="Import classes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <aside class="sidebar">
+      <h3>My Classes <button id="new-class-btn" title="New class">＋</button></h3>
+      <div class="class-list" id="class-list"></div>
+      <div class="sidebar-footer">
+        Saved locally · <span id="class-count">0</span> classes
+      </div>
+    </aside>
+
+    <div class="content">
+
+      <!-- ============= BUILDER ============= -->
+      <section class="view active" data-view="builder">
+        <div class="toolbar">
+          <button class="btn" id="btn-new-class">＋ New Class</button>
+          <button class="btn secondary" id="btn-clone-class">Clone</button>
+          <button class="btn secondary" id="btn-import-class">Import from JSON…</button>
+          <button class="btn secondary" id="btn-import-py">Parse Python class…</button>
+          <div class="spacer"></div>
+          <button class="btn ghost" id="btn-delete-class">🗑 Delete</button>
+        </div>
+
+        <div class="builder">
+          <div class="builder-pane">
+            <h2>Class Definition <small>Define the structure</small></h2>
+
+            <div class="class-name-row">
+              <label>Name:</label>
+              <input type="text" id="class-name-input" placeholder="MyClass" />
+            </div>
+
+            <div class="field-headers">
+              <div>Field name</div>
+              <div>Type</div>
+              <div>Default</div>
+              <div></div>
+            </div>
+
+            <div id="fields-container"></div>
+
+            <button class="add-field-btn" id="add-field-btn">＋ Add field</button>
+
+            <div style="margin-top:22px">
+              <h2 style="font-size:13px">Tips</h2>
+              <div class="hint" style="line-height:1.7">
+                • Choose <span class="kbd">object</span> + a class name in <em>Default</em> to nest classes.<br>
+                • Choose <span class="kbd">array</span> and pick element type.<br>
+                • Use <span class="kbd">enum</span> with comma‑separated values in <em>Default</em>.<br>
+                • Press <span class="kbd">⚡ Generator</span> to fill instances.
+              </div>
+            </div>
+          </div>
+
+          <div class="builder-pane">
+            <h2>Live Preview <small>Schema as JSON</small></h2>
+            <pre class="preview-code" id="schema-preview"></pre>
+            <div style="height:14px"></div>
+            <h2 style="font-size:13px;margin-top:8px">Sample instance</h2>
+            <pre class="preview-code" id="sample-preview"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= GENERATOR ============= -->
+      <section class="view" data-view="generator">
+        <div class="toolbar">
+          <span style="font-size:12px;color:var(--muted)">Class:</span>
+          <select id="gen-class-select" style="min-width:180px"></select>
+          <button class="btn" id="btn-gen-build">⚡ Generate JSON</button>
+          <div class="spacer"></div>
+          <button class="btn secondary" id="btn-gen-copy">📋 Copy</button>
+          <button class="btn secondary" id="btn-gen-download">⬇ Download .json</button>
+          <button class="btn ghost" id="btn-gen-clear">Reset</button>
+        </div>
+        <div class="gen-layout">
+          <div class="gen-pane">
+            <div id="gen-form"></div>
+          </div>
+          <div class="gen-pane">
+            <div class="pane-header">
+              <span>Generated JSON</span>
+              <span class="pill" id="gen-size">0 bytes</span>
+              <div class="spacer"></div>
+              <span class="pill" id="gen-validity">—</span>
+            </div>
+            <pre class="preview-code" id="gen-output" style="border-radius:0;border:none;flex:1;max-height:none;margin:0"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= PARSER ============= -->
+      <section class="view" data-view="parser">
+        <div class="toolbar">
+          <button class="btn" id="btn-parse">🔍 Parse</button>
+          <button class="btn secondary" id="btn-format">{ } Format</button>
+          <button class="btn secondary" id="btn-minify">↘ Minify</button>
+          <button class="btn secondary" id="btn-load-file">📁 Open file…</button>
+          <button class="btn secondary" id="btn-load-sample">Sample</button>
+          <input type="text" id="search-input" placeholder="Search keys/values…" style="min-width:180px"/>
+          <div class="spacer"></div>
+          <button class="btn secondary" id="btn-tree-expand">⊕ Expand</button>
+          <button class="btn secondary" id="btn-tree-collapse">⊖ Collapse</button>
+          <button class="btn secondary" id="btn-tree-copy">📋 Copy JSON</button>
+        </div>
+        <div class="parser">
+          <div class="parser-pane">
+            <div class="pane-header">
+              <span>Source JSON</span>
+              <div class="spacer"></div>
+              <span class="pill" id="parser-status">empty</span>
+            </div>
+            <div class="editor-area">
+              <textarea id="json-input" placeholder="Paste JSON here, drop a file, or click 'Sample'…&#10;&#10;Example:&#10;{&#10;  &quot;name&quot;: &quot;CraftHub&quot;,&#10;  &quot;stars&quot;: 48,&#10;  &quot;tags&quot;: [&quot;json&quot;, &quot;editor&quot;]&#10;}"></textarea>
+            </div>
+          </div>
+          <div class="parser-pane">
+            <div class="pane-header">
+              <span>Visual Tree</span>
+              <span class="pill" id="tree-stats">—</span>
+              <div class="spacer"></div>
+              <span class="pill" id="tree-path" title="Currently selected path">$</span>
+            </div>
+            <div class="tree-area" id="tree-output">
+              <div class="empty-state">
+                <div class="big">🌳</div>
+                <div>Paste JSON on the left and click <span class="em">Parse</span><br/>to see the visual tree.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="statusbar">
+    <span class="dot" id="status-dot"></span>
+    <span id="status-text">Ready</span>
+    <div class="spacer"></div>
+    <span id="status-version">CraftHub Web v1.0 · single‑file build</span>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h2 id="modal-title">Title</h2>
+    <p id="modal-msg">Message</p>
+    <input id="modal-input" placeholder="" />
+    <div class="modal-actions">
+      <button class="btn ghost" id="modal-cancel">Cancel</button>
+      <button class="btn" id="modal-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file input for imports -->
+<input type="file" id="hidden-file" accept=".json,.py,.txt" style="display:none"/>
+
+<script>
+/* ============================================================
+   CraftHub Web — single-file vanilla-JS application
+   ============================================================ */
+
+/* ----- State ----- */
+const STORAGE_KEY = "crafthub_classes_v1";
+const STORAGE_THEME = "crafthub_theme";
+
+let state = {
+  classes: [],     // [{id, name, fields:[{name,type,defaultVal,itemType,nestedClass,enumVals}]}]
+  activeClassId: null,
+  view: "builder",
+  parsedJson: null,
+  expandedPaths: new Set(),
+  collapsedPaths: new Set()
+};
+
+/* ----- Helpers ----- */
+function uid(){return Math.random().toString(36).slice(2,10)}
+function $(s, root=document){return root.querySelector(s)}
+function $$(s, root=document){return [...root.querySelectorAll(s)]}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>(
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
+}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function fmt(n){return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+
+/* ----- Persistence ----- */
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){state.classes = JSON.parse(raw)}
+  }catch(e){state.classes = []}
+  if(state.classes.length===0){
+    // Seed with examples
+    state.classes = [
+      {
+        id: uid(), name:"User",
+        fields:[
+          {name:"id", type:"integer", defaultVal:"1"},
+          {name:"name", type:"string", defaultVal:"John"},
+          {name:"email", type:"string", defaultVal:""},
+          {name:"isActive", type:"boolean", defaultVal:"true"},
+          {name:"role", type:"enum", defaultVal:"admin,user,guest"}
+        ]
+      },
+      {
+        id: uid(), name:"Product",
+        fields:[
+          {name:"sku", type:"string", defaultVal:""},
+          {name:"price", type:"number", defaultVal:"0"},
+          {name:"inStock", type:"boolean", defaultVal:"true"},
+          {name:"tags", type:"array", itemType:"string", defaultVal:""}
+        ]
+      }
+    ];
+    save();
+  }
+  state.activeClassId = state.classes[0]?.id ?? null;
+  // Theme
+  const t = localStorage.getItem(STORAGE_THEME);
+  if(t==="light") document.body.dataset.theme="light";
+}
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.classes));
+}
+function getActive(){
+  return state.classes.find(c=>c.id===state.activeClassId);
+}
+function findClassByName(name){
+  return state.classes.find(c=>c.name===name);
+}
+
+/* ----- Rendering: sidebar ----- */
+function renderSidebar(){
+  const list = $("#class-list");
+  $("#class-count").textContent = state.classes.length;
+  if(state.classes.length===0){
+    list.innerHTML = `<div class="empty-list">No classes yet.<br/>Click <strong>＋</strong> to create one.</div>`;
+    return;
+  }
+  list.innerHTML = state.classes.map(c=>`
+    <div class="class-item ${c.id===state.activeClassId?'active':''}" data-id="${c.id}">
+      <span>📦</span>
+      <span class="name" title="${escapeHtml(c.name)}">${escapeHtml(c.name||'(unnamed)')}</span>
+      <span class="count">${c.fields.length}</span>
+      <div class="actions">
+        <button data-act="dup" title="Duplicate">⎘</button>
+        <button data-act="del" title="Delete">✕</button>
+      </div>
+    </div>
+  `).join("");
+  $$('.class-item', list).forEach(el=>{
+    const id = el.dataset.id;
+    el.onclick = (e)=>{
+      const act = e.target.closest("button")?.dataset.act;
+      if(act==="dup"){duplicateClass(id);e.stopPropagation();return;}
+      if(act==="del"){deleteClass(id);e.stopPropagation();return;}
+      state.activeClassId = id;
+      renderAll();
+    };
+  });
+}
+
+/* ----- Rendering: builder ----- */
+const FIELD_TYPES = ["string","number","integer","boolean","null","array","object","enum"];
+function renderBuilder(){
+  const c = getActive();
+  const cont = $("#fields-container");
+  if(!c){
+    $("#class-name-input").value = "";
+    cont.innerHTML = `<div class="empty-state" style="padding:20px;font-size:12px">No class selected. Click <span class="em">＋ New Class</span>.</div>`;
+    $("#schema-preview").textContent = "";
+    $("#sample-preview").textContent = "";
+    return;
+  }
+  $("#class-name-input").value = c.name;
+  const objClassOptions = state.classes.filter(cl=>cl.id!==c.id).map(cl=>cl.name).filter(Boolean);
+  cont.innerHTML = c.fields.map((f,i)=>fieldRowHtml(f,i,objClassOptions)).join("");
+  // Listeners
+  $$('.field-row', cont).forEach(row=>{
+    const i = parseInt(row.dataset.idx,10);
+    $('input.f-name',row).oninput = e=>{c.fields[i].name=e.target.value;save();renderPreview();};
+    $('select.f-type',row).onchange = e=>{
+      c.fields[i].type=e.target.value;
+      // reset extras when switching
+      if(e.target.value!=="array")delete c.fields[i].itemType;
+      else c.fields[i].itemType = c.fields[i].itemType||"string";
+      save();renderBuilder();renderPreview();
+    };
+    const def = $('input.f-def, select.f-def',row);
+    if(def){
+      def.oninput = def.onchange = e=>{c.fields[i].defaultVal=e.target.value;save();renderPreview();};
+    }
+    const itype = $('select.f-itemtype',row);
+    if(itype){
+      itype.onchange = e=>{c.fields[i].itemType=e.target.value;save();renderPreview();};
+    }
+    $('button.remove-btn',row).onclick = ()=>{
+      c.fields.splice(i,1);save();renderBuilder();renderPreview();
+    };
+  });
+  renderPreview();
+}
+function fieldRowHtml(f,i,objClassOptions){
+  // Default editor varies by type
+  let defaultEditor = "";
+  if(f.type==="boolean"){
+    defaultEditor = `<select class="f-def">
+      <option value="true" ${f.defaultVal==="true"?"selected":""}>true</option>
+      <option value="false" ${f.defaultVal==="false"?"selected":""}>false</option>
+    </select>`;
+  }else if(f.type==="object"){
+    defaultEditor = `<select class="f-def" title="Pick a saved class">
+      <option value="">— class —</option>
+      ${objClassOptions.map(n=>`<option ${f.defaultVal===n?"selected":""}>${escapeHtml(n)}</option>`).join("")}
+    </select>`;
+  }else if(f.type==="array"){
+    defaultEditor = `<select class="f-itemtype" title="Element type">
+      ${["string","number","integer","boolean","object"].map(t=>
+        `<option ${f.itemType===t?"selected":""}>${t}</option>`).join("")}
+    </select>`;
+  }else if(f.type==="enum"){
+    defaultEditor = `<input type="text" class="f-def" placeholder="a,b,c" value="${escapeHtml(f.defaultVal||"")}"/>`;
+  }else if(f.type==="null"){
+    defaultEditor = `<input type="text" class="f-def" disabled placeholder="null"/>`;
+  }else{
+    defaultEditor = `<input type="text" class="f-def" placeholder="default" value="${escapeHtml(f.defaultVal||"")}"/>`;
+  }
+  return `
+  <div class="field-row" data-idx="${i}">
+    <input class="f-name" type="text" placeholder="fieldName" value="${escapeHtml(f.name||"")}"/>
+    <select class="f-type">
+      ${FIELD_TYPES.map(t=>`<option ${f.type===t?"selected":""}>${t}</option>`).join("")}
+    </select>
+    ${defaultEditor}
+    <button class="remove-btn" title="Remove">✕</button>
+  </div>`;
+}
+function renderPreview(){
+  const c = getActive();
+  if(!c){return}
+  const schema = classToJsonSchema(c);
+  const sample = classToSample(c);
+  $("#schema-preview").innerHTML = highlightJSON(JSON.stringify(schema,null,2));
+  $("#sample-preview").innerHTML = highlightJSON(JSON.stringify(sample,null,2));
+}
+function classToJsonSchema(c){
+  const out = {type:"object", title:c.name||"Unnamed", properties:{}, required:[]};
+  for(const f of c.fields){
+    if(!f.name) continue;
+    out.required.push(f.name);
+    out.properties[f.name] = fieldToSchema(f);
+  }
+  return out;
+}
+function fieldToSchema(f){
+  switch(f.type){
+    case "string":  return {type:"string"};
+    case "number":  return {type:"number"};
+    case "integer": return {type:"integer"};
+    case "boolean": return {type:"boolean"};
+    case "null":    return {type:"null"};
+    case "enum":    return {enum:(f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean)};
+    case "array":   return {type:"array", items: itemSchema(f.itemType||"string")};
+    case "object":{
+      const target = findClassByName(f.defaultVal);
+      if(target) return classToJsonSchema(target);
+      return {type:"object"};
+    }
+  }
+  return {};
+}
+function itemSchema(t){
+  if(t==="object") return {type:"object"};
+  return {type:t};
+}
+function classToSample(c, seen=new Set()){
+  if(!c) return null;
+  if(seen.has(c.id)) return "<circular>";
+  seen = new Set([...seen, c.id]);
+  const o = {};
+  for(const f of c.fields){
+    if(!f.name) continue;
+    o[f.name] = fieldSample(f, seen);
+  }
+  return o;
+}
+function fieldSample(f, seen){
+  switch(f.type){
+    case "string": return f.defaultVal||"";
+    case "number": return parseFloat(f.defaultVal||0)||0;
+    case "integer": return parseInt(f.defaultVal||0,10)||0;
+    case "boolean": return f.defaultVal==="false"?false:true;
+    case "null": return null;
+    case "enum":{
+      const vals = (f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean);
+      return vals[0]||"";
+    }
+    case "array": {
+      const t = f.itemType||"string";
+      if(t==="number"||t==="integer") return [0];
+      if(t==="boolean") return [true];
+      if(t==="object") return [{}];
+      return [""];
+    }
+    case "object": {
+      const target = findClassByName(f.defaultVal);
+      return classToSample(target, seen) ?? {};
+    }
+  }
+  return null;
+}
+
+/* ----- JSON syntax highlight (for preview) ----- */
+function highlightJSON(jsonStr){
+  if(!jsonStr) return "";
+  return jsonStr
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/("(?:\\.|[^"\\])*")(\s*:)/g,'<span style="color:var(--blue)">$1</span>$2')
+    .replace(/:\s*("(?:\\.|[^"\\])*")/g,': <span style="color:var(--green)">$1</span>')
+    .replace(/\b(true|false)\b/g,'<span style="color:var(--yellow)">$1</span>')
+    .replace(/\bnull\b/g,'<span style="color:var(--red);font-style:italic">null</span>')
+    .replace(/(?<![\w"])(-?\d+\.?\d*)(?![\w"])/g,'<span style="color:var(--purple)">$1</span>');
+}
+
+/* ----- Generator view ----- */
+function renderGenerator(){
+  const sel = $("#gen-class-select");
+  sel.innerHTML = state.classes.map(c=>
+    `<option value="${c.id}" ${c.id===state.activeClassId?"selected":""}>${escapeHtml(c.name||'(unnamed)')}</option>`
+  ).join("");
+  buildGenForm();
+  rebuildGenOutput();
+}
+function buildGenForm(){
+  const c = state.classes.find(c=>c.id===$("#gen-class-select").value) || getActive();
+  if(!c){
+    $("#gen-form").innerHTML = `<div class="empty-state"><div class="big">📭</div>No class selected.</div>`;
+    return;
+  }
+  $("#gen-form").innerHTML = `<h2 style="margin:0 0 14px;font-size:15px">${escapeHtml(c.name)} <small style="color:var(--muted);font-weight:400;font-size:12px">— fill the fields</small></h2>`
+    + buildFormFields(c, "root").join("");
+  attachGenListeners();
+}
+function buildFormFields(c, pathPrefix){
+  if(!c) return [];
+  return c.fields.filter(f=>f.name).map(f=>{
+    const path = `${pathPrefix}.${f.name}`;
+    return formFieldHtml(f, path);
+  });
+}
+function formFieldHtml(f, path){
+  const labelPill = `<span class="type-pill">${f.type}${f.type==="array"?`&lt;${f.itemType||"string"}&gt;`:""}</span>`;
+  let inner = "";
+  if(f.type==="string"){
+    inner = `<input type="text" data-path="${path}" data-type="string" value="${escapeHtml(f.defaultVal||"")}"/>`;
+  }else if(f.type==="number"||f.type==="integer"){
+    inner = `<input type="number" data-path="${path}" data-type="${f.type}" value="${escapeHtml(f.defaultVal||"0")}" ${f.type==="integer"?'step="1"':'step="any"'}/>`;
+  }else if(f.type==="boolean"){
+    const checked = f.defaultVal!=="false";
+    inner = `<label style="display:inline-flex;align-items:center;gap:8px"><input type="checkbox" data-path="${path}" data-type="boolean" ${checked?"checked":""}/> <span style="color:var(--muted);font-size:12px">true / false</span></label>`;
+  }else if(f.type==="null"){
+    inner = `<input type="text" disabled value="null"/>`;
+  }else if(f.type==="enum"){
+    const opts = (f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean);
+    inner = `<select data-path="${path}" data-type="enum">
+      ${opts.map(o=>`<option>${escapeHtml(o)}</option>`).join("")}
+    </select>`;
+  }else if(f.type==="array"){
+    const t = f.itemType||"string";
+    inner = `<div class="array-field" data-path="${path}" data-itemtype="${t}">
+      <div class="items"></div>
+      <button class="add-item" type="button">＋ Add ${t}</button>
+    </div>`;
+  }else if(f.type==="object"){
+    const target = findClassByName(f.defaultVal);
+    if(target){
+      inner = buildFormFields(target, path).join("");
+      return `<div class="form-group nested-obj">
+        <label>${escapeHtml(f.name)} ${labelPill} <span style="color:var(--muted);font-weight:400">→ ${escapeHtml(target.name)}</span></label>
+        ${inner}
+      </div>`;
+    }
+    inner = `<textarea data-path="${path}" data-type="object" placeholder='{"key":"value"}'>{}</textarea>`;
+  }
+  return `<div class="form-group">
+    <label>${escapeHtml(f.name)} ${labelPill}</label>
+    ${inner}
+  </div>`;
+}
+function attachGenListeners(){
+  // Inputs
+  $$('#gen-form input, #gen-form select, #gen-form textarea').forEach(el=>{
+    if(el.type==="button") return;
+    el.addEventListener("input", rebuildGenOutput);
+    el.addEventListener("change", rebuildGenOutput);
+  });
+  // Array fields
+  $$('.array-field').forEach(af=>{
+    const itemType = af.dataset.itemtype;
+    const items = $('.items', af);
+    const addBtn = $('.add-item', af);
+    const addItem = (val="")=>{
+      const item = document.createElement("div");
+      item.className="array-item";
+      let editor = "";
+      if(itemType==="number"||itemType==="integer"){
+        editor = `<input type="number" value="${val||0}" ${itemType==="integer"?'step="1"':'step="any"'}/>`;
+      }else if(itemType==="boolean"){
+        editor = `<label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" ${val?"checked":""}/> bool</label>`;
+      }else if(itemType==="object"){
+        editor = `<textarea placeholder='{"key":"value"}'>{}</textarea>`;
+      }else{
+        editor = `<input type="text" value="${escapeHtml(val||"")}"/>`;
+      }
+      item.innerHTML = editor + `<button type="button" class="btn ghost" style="padding:4px 8px">✕</button>`;
+      items.appendChild(item);
+      $('button',item).onclick = ()=>{item.remove();rebuildGenOutput();};
+      $$('input,textarea',item).forEach(i=>{
+        i.addEventListener("input", rebuildGenOutput);
+        i.addEventListener("change", rebuildGenOutput);
+      });
+      rebuildGenOutput();
+    };
+    addBtn.onclick = ()=>addItem();
+    // seed one
+    addItem();
+  });
+}
+function rebuildGenOutput(){
+  const c = state.classes.find(c=>c.id===$("#gen-class-select").value) || getActive();
+  if(!c){return}
+  const obj = collectFormValues(c, "root");
+  const json = JSON.stringify(obj,null,2);
+  $("#gen-output").innerHTML = highlightJSON(json);
+  const bytes = new Blob([json]).size;
+  $("#gen-size").textContent = `${fmt(bytes)} bytes`;
+  $("#gen-validity").textContent = "VALID";
+  $("#gen-validity").className = "pill ok";
+}
+function collectFormValues(c, pathPrefix){
+  const out = {};
+  for(const f of c.fields){
+    if(!f.name) continue;
+    const path = `${pathPrefix}.${f.name}`;
+    out[f.name] = collectField(f, path);
+  }
+  return out;
+}
+function collectField(f, path){
+  if(f.type==="object"){
+    const target = findClassByName(f.defaultVal);
+    if(target){
+      return collectFormValues(target, path);
+    }else{
+      const el = document.querySelector(`#gen-form [data-path="${cssEscape(path)}"]`);
+      try{ return JSON.parse(el?.value||"{}"); }catch{return {};}
+    }
+  }
+  if(f.type==="array"){
+    const af = document.querySelector(`#gen-form .array-field[data-path="${cssEscape(path)}"]`);
+    if(!af) return [];
+    const items = $$('.array-item', af);
+    return items.map(item=>{
+      const inp = $('input,textarea',item);
+      if(!inp) return null;
+      const t = af.dataset.itemtype;
+      if(t==="number") return parseFloat(inp.value)||0;
+      if(t==="integer") return parseInt(inp.value,10)||0;
+      if(t==="boolean") return inp.checked;
+      if(t==="object"){try{return JSON.parse(inp.value||"{}");}catch{return {};}}
+      return inp.value;
+    });
+  }
+  const el = document.querySelector(`#gen-form [data-path="${cssEscape(path)}"]`);
+  if(!el) return null;
+  if(f.type==="boolean") return el.checked;
+  if(f.type==="number") return parseFloat(el.value)||0;
+  if(f.type==="integer") return parseInt(el.value,10)||0;
+  if(f.type==="null") return null;
+  return el.value;
+}
+function cssEscape(s){return s.replace(/"/g,'\\"')}
+
+/* ----- Visual JSON Parser ----- */
+function parseAndRender(){
+  const txt = $("#json-input").value.trim();
+  const out = $("#tree-output");
+  if(!txt){
+    out.innerHTML = `<div class="empty-state"><div class="big">🌳</div>Empty input.</div>`;
+    setParserStatus("empty", false);
+    return;
+  }
+  try{
+    const data = JSON.parse(txt);
+    state.parsedJson = data;
+    out.innerHTML = "";
+    out.appendChild(buildTreeNode("$", data, "$", true));
+    setParserStatus("valid", true);
+    updateTreeStats(data);
+  }catch(e){
+    out.innerHTML = `<div class="err-banner">⚠ Parse error: ${escapeHtml(e.message)}</div>`;
+    setParserStatus("invalid", false);
+  }
+}
+function setParserStatus(text, ok){
+  $("#parser-status").textContent = text;
+  $("#parser-status").className = "pill " + (ok?"ok":(text==="empty"?"":"err"));
+}
+function updateTreeStats(d){
+  const stats = countDeep(d);
+  $("#tree-stats").textContent = `${fmt(stats.total)} nodes · depth ${stats.depth}`;
+}
+function countDeep(d, depth=1){
+  let total=1, maxDepth=depth;
+  if(d && typeof d==="object"){
+    const keys = Array.isArray(d) ? d.map((_,i)=>i) : Object.keys(d);
+    for(const k of keys){
+      const r = countDeep(d[k], depth+1);
+      total += r.total;
+      maxDepth = Math.max(maxDepth, r.depth);
+    }
+  }
+  return {total, depth:maxDepth};
+}
+function buildTreeNode(key, value, path, isRoot=false){
+  const node = document.createElement("div");
+  node.className = "tree-node" + (isRoot?" root":"");
+  const line = document.createElement("div");
+  line.className = "tree-line";
+  node.appendChild(line);
+
+  const isObj = value!==null && typeof value==="object" && !Array.isArray(value);
+  const isArr = Array.isArray(value);
+  const collapsible = isObj || isArr;
+
+  if(collapsible){
+    const tog = document.createElement("span");
+    tog.className = "tree-toggle";
+    tog.textContent = "▼";
+    line.appendChild(tog);
+    tog.onclick = ()=>{
+      const ch = node.querySelector(":scope > .tree-children");
+      const isCollapsed = ch.classList.toggle("collapsed");
+      tog.textContent = isCollapsed?"▶":"▼";
+      const summary = node.querySelector(":scope > .tree-line > .collapsed-summary");
+      if(summary) summary.style.display = isCollapsed?"inline":"none";
+    };
+  }else{
+    const sp = document.createElement("span");
+    sp.className = "tree-toggle";
+    sp.textContent = "·";
+    line.appendChild(sp);
+  }
+
+  // Key
+  if(!isRoot){
+    const keyEl = document.createElement("span");
+    keyEl.className = "tree-key";
+    keyEl.textContent = typeof key==="number" ? `[${key}]` : `"${key}"`;
+    line.appendChild(keyEl);
+    const colon = document.createElement("span");
+    colon.className = "tree-bracket";
+    colon.textContent = ": ";
+    line.appendChild(colon);
+  }
+
+  // Value
+  if(isObj || isArr){
+    const open = document.createElement("span");
+    open.className = "tree-bracket";
+    open.textContent = isArr ? "[" : "{";
+    line.appendChild(open);
+
+    const summary = document.createElement("span");
+    summary.className = "collapsed-summary";
+    const childCount = isArr ? value.length : Object.keys(value).length;
+    summary.textContent = ` ${childCount} ${isArr?"items":"keys"} `;
+    summary.style.display = "none";
+    summary.onclick = ()=>{
+      const ch = node.querySelector(":scope > .tree-children");
+      ch.classList.remove("collapsed");
+      summary.style.display = "none";
+      const tog = node.querySelector(":scope > .tree-line > .tree-toggle");
+      if(tog) tog.textContent = "▼";
+    };
+    line.appendChild(summary);
+
+    const childrenDiv = document.createElement("div");
+    childrenDiv.className = "tree-children";
+    const keys = isArr ? value.map((_,i)=>i) : Object.keys(value);
+    keys.forEach(k=>{
+      const childPath = isArr ? `${path}[${k}]` : `${path}.${k}`;
+      childrenDiv.appendChild(buildTreeNode(k, value[k], childPath));
+    });
+    node.appendChild(childrenDiv);
+
+    const close = document.createElement("div");
+    close.className = "tree-bracket";
+    close.style.marginLeft = "16px";
+    close.textContent = isArr ? "]" : "}";
+    node.appendChild(close);
+
+    // Path display on hover
+    line.onmouseenter = ()=>$("#tree-path").textContent = path;
+  }else{
+    const valEl = document.createElement("span");
+    let cls = "";
+    let text = "";
+    if(typeof value==="string"){cls="tree-string";text=`"${value}"`}
+    else if(typeof value==="number"){cls="tree-number";text=value}
+    else if(typeof value==="boolean"){cls="tree-boolean";text=value}
+    else if(value===null){cls="tree-null";text="null"}
+    valEl.className = cls;
+    valEl.textContent = text;
+    valEl.title = "Click to edit";
+    valEl.style.cursor = "pointer";
+    valEl.onclick = ()=>editLeaf(valEl, path, value);
+    line.appendChild(valEl);
+
+    line.onmouseenter = ()=>$("#tree-path").textContent = path;
+
+    // Row actions (copy path/value)
+    const actions = document.createElement("span");
+    actions.className = "row-actions";
+    actions.innerHTML = `
+      <button title="Copy value" data-act="copy-val">📋val</button>
+      <button title="Copy path" data-act="copy-path">📋path</button>
+    `;
+    line.appendChild(actions);
+    $('[data-act=copy-val]', actions).onclick = (e)=>{
+      e.stopPropagation();
+      copyText(typeof value==="string"?value:JSON.stringify(value));
+      toast("Value copied", "ok");
+    };
+    $('[data-act=copy-path]', actions).onclick = (e)=>{
+      e.stopPropagation();copyText(path);toast("Path copied","ok");
+    };
+  }
+  return node;
+}
+function editLeaf(el, path, value){
+  const oldText = el.textContent;
+  const isStr = typeof value==="string";
+  const inp = document.createElement("input");
+  inp.className = "tree-value-input";
+  inp.value = isStr ? value : (value===null?"null":String(value));
+  el.replaceWith(inp);
+  inp.focus();
+  inp.select();
+  const finish = (commit)=>{
+    let newVal;
+    if(commit){
+      const v = inp.value;
+      if(v==="null") newVal=null;
+      else if(v==="true") newVal=true;
+      else if(v==="false") newVal=false;
+      else if(/^-?\d+\.?\d*$/.test(v)) newVal=parseFloat(v);
+      else newVal=v;
+      try{
+        setByPath(state.parsedJson, path, newVal);
+        $("#json-input").value = JSON.stringify(state.parsedJson,null,2);
+        parseAndRender();
+        toast("Value updated", "ok");
+      }catch(e){
+        toast("Update failed","err");
+      }
+    }else{
+      // restore
+      parseAndRender();
+    }
+  };
+  inp.onblur = ()=>finish(true);
+  inp.onkeydown = (e)=>{
+    if(e.key==="Enter"){e.preventDefault();finish(true);}
+    if(e.key==="Escape"){e.preventDefault();finish(false);}
+  };
+}
+function setByPath(root, path, value){
+  // path like $.a.b[0].c
+  const tokens = tokenizePath(path);
+  let cur = {wrap:root};
+  let parent = cur, lastKey = "wrap";
+  for(const tok of tokens){
+    parent = cur;
+    lastKey = tok;
+    cur = cur[tok];
+    if(cur===undefined) throw new Error("Bad path");
+  }
+  parent[lastKey] = value;
+}
+function tokenizePath(p){
+  // Strip leading $ and $.
+  p = p.replace(/^\$\.?/, "");
+  if(!p) return [];
+  const out = [];
+  let buf = "";
+  let i=0;
+  while(i<p.length){
+    const c = p[i];
+    if(c==="."){
+      if(buf) out.push(buf); buf=""; i++;
+    }else if(c==="["){
+      if(buf){out.push(buf);buf="";}
+      const j = p.indexOf("]", i);
+      out.push(parseInt(p.slice(i+1,j),10));
+      i = j+1;
+      if(p[i]===".") i++;
+    }else{
+      buf += c; i++;
+    }
+  }
+  if(buf) out.push(buf);
+  return out;
+}
+
+/* ----- Search highlighting ----- */
+function searchTree(q){
+  if(!q){
+    $$('.tree-line', $("#tree-output")).forEach(l=>l.style.background="");
+    return;
+  }
+  const lq = q.toLowerCase();
+  let matches=0;
+  $$('.tree-line', $("#tree-output")).forEach(l=>{
+    if(l.textContent.toLowerCase().includes(lq)){
+      l.style.background = "rgba(255,138,61,.18)";
+      matches++;
+      // expand ancestors
+      let p = l.parentElement;
+      while(p){
+        if(p.classList && p.classList.contains("tree-children")){
+          p.classList.remove("collapsed");
+          const tog = p.parentElement.querySelector(":scope > .tree-line > .tree-toggle");
+          if(tog) tog.textContent = "▼";
+        }
+        p = p.parentElement;
+      }
+    }else l.style.background="";
+  });
+  setStatus(`${matches} matches for "${q}"`);
+}
+
+/* ----- View switching ----- */
+function setView(name){
+  state.view = name;
+  $$('.tab').forEach(t=>t.classList.toggle("active", t.dataset.view===name));
+  $$('.view').forEach(v=>v.classList.toggle("active", v.dataset.view===name));
+  if(name==="generator") renderGenerator();
+  if(name==="builder")  renderBuilder();
+}
+
+/* ----- Class CRUD ----- */
+function newClass(){
+  const c = {id:uid(), name:"NewClass"+(state.classes.length+1), fields:[
+    {name:"id", type:"integer", defaultVal:"1"},
+    {name:"name", type:"string", defaultVal:""}
+  ]};
+  state.classes.push(c);
+  state.activeClassId = c.id;
+  save();renderAll();
+  toast("Class created","ok");
+}
+function duplicateClass(id){
+  const orig = state.classes.find(c=>c.id===id);
+  if(!orig) return;
+  const c = clone(orig);
+  c.id = uid();
+  c.name = orig.name + "_copy";
+  state.classes.push(c);
+  state.activeClassId = c.id;
+  save();renderAll();
+  toast("Class duplicated","ok");
+}
+function deleteClass(id){
+  modal({
+    title:"Delete class?",
+    msg:"This cannot be undone.",
+    showInput:false,
+    okText:"Delete"
+  }).then(ok=>{
+    if(!ok) return;
+    state.classes = state.classes.filter(c=>c.id!==id);
+    if(state.activeClassId===id) state.activeClassId = state.classes[0]?.id ?? null;
+    save();renderAll();
+    toast("Deleted","ok");
+  });
+}
+
+/* ----- Python class import (very basic regex parser) ----- */
+function pythonToClass(src){
+  // parse `class Name:` then dataclass-style fields `field: type = default`
+  // also catches `self.x = value` in __init__
+  const out = [];
+  const classRegex = /class\s+([A-Za-z_]\w*)\s*(?:\([^)]*\))?\s*:/g;
+  let m;
+  let classes = [];
+  while((m = classRegex.exec(src))!==null){
+    classes.push({name:m[1], start:m.index});
+  }
+  classes.forEach((c,i)=>{
+    const end = (i+1<classes.length)?classes[i+1].start:src.length;
+    const body = src.slice(c.start, end);
+    const fields = [];
+    // dataclass-style: `name: type [= default]`
+    const fr = /^\s{2,}([A-Za-z_]\w*)\s*:\s*([A-Za-z_][\w\[\], ]*)\s*(?:=\s*(.+?))?\s*$/gm;
+    let f;
+    while((f = fr.exec(body))!==null){
+      fields.push({name:f[1], type: pyType(f[2]), defaultVal:(f[3]||"").replace(/['"]/g,"")});
+    }
+    // self.x = y
+    const sr = /self\.([A-Za-z_]\w*)\s*=\s*(.+)/g;
+    while((f = sr.exec(body))!==null){
+      if(!fields.find(x=>x.name===f[1])){
+        const def = f[2].trim().replace(/[,#].*$/,"").trim();
+        fields.push({name:f[1], type: inferType(def), defaultVal: def.replace(/['"]/g,"")});
+      }
+    }
+    if(fields.length){
+      out.push({id:uid(), name:c.name, fields});
+    }
+  });
+  return out;
+}
+function pyType(t){
+  t = t.trim().toLowerCase();
+  if(t==="str") return "string";
+  if(t==="int") return "integer";
+  if(t==="float") return "number";
+  if(t==="bool") return "boolean";
+  if(t.startsWith("list")||t.startsWith("tuple")) return "array";
+  if(t.startsWith("dict")) return "object";
+  return "string";
+}
+function inferType(v){
+  if(/^-?\d+$/.test(v)) return "integer";
+  if(/^-?\d*\.\d+$/.test(v)) return "number";
+  if(v==="True"||v==="False") return "boolean";
+  if(v==="None") return "null";
+  if(v.startsWith("[")) return "array";
+  if(v.startsWith("{")) return "object";
+  return "string";
+}
+function importPython(){
+  const f = document.createElement("input");
+  f.type="file";f.accept=".py,.txt";
+  f.onchange = e=>{
+    const file = e.target.files[0]; if(!file) return;
+    const r = new FileReader();
+    r.onload = ev=>{
+      const text = ev.target.result;
+      const found = pythonToClass(text);
+      if(found.length===0){toast("No classes found","err");return;}
+      state.classes.push(...found);
+      state.activeClassId = found[0].id;
+      save();renderAll();
+      toast(`Imported ${found.length} class(es)`,"ok");
+    };
+    r.readAsText(file);
+  };
+  f.click();
+}
+
+/* ----- Import/Export of classes ----- */
+function exportAll(){
+  const blob = new Blob([JSON.stringify(state.classes,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "crafthub_classes.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Exported classes","ok");
+}
+function importAll(){
+  const f = document.createElement("input");
+  f.type="file";f.accept=".json";
+  f.onchange = e=>{
+    const file = e.target.files[0];if(!file)return;
+    const r = new FileReader();
+    r.onload = ev=>{
+      try{
+        const data = JSON.parse(ev.target.result);
+        if(!Array.isArray(data)) throw new Error("Invalid file");
+        // Make sure each has id
+        const valid = data.filter(c=>c.name && Array.isArray(c.fields)).map(c=>({...c,id:c.id||uid()}));
+        state.classes = state.classes.concat(valid);
+        state.activeClassId = state.classes[0]?.id ?? null;
+        save();renderAll();
+        toast(`Imported ${valid.length} class(es)`,"ok");
+      }catch(e){
+        toast("Import failed: "+e.message,"err");
+      }
+    };
+    r.readAsText(file);
+  };
+  f.click();
+}
+
+/* ----- Modal & toast ----- */
+function modal({title, msg, showInput=true, defaultVal="", okText="OK"}){
+  return new Promise((resolve)=>{
+    $("#modal-title").textContent=title;
+    $("#modal-msg").textContent=msg||"";
+    $("#modal-input").style.display = showInput?"":"none";
+    $("#modal-input").value = defaultVal;
+    $("#modal-ok").textContent = okText;
+    $("#modal-bg").classList.add("show");
+    if(showInput) setTimeout(()=>$("#modal-input").focus(),50);
+    const close = (val)=>{
+      $("#modal-bg").classList.remove("show");
+      $("#modal-ok").onclick = $("#modal-cancel").onclick = null;
+      resolve(val);
+    };
+    $("#modal-ok").onclick = ()=>close(showInput?$("#modal-input").value:true);
+    $("#modal-cancel").onclick = ()=>close(false);
+  });
+}
+let toastTimer;
+function toast(msg, kind=""){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = "toast show " + kind;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+function setStatus(text, err=false){
+  $("#status-text").textContent = text;
+  $("#status-dot").className = "dot" + (err?" err":"");
+}
+
+/* ----- Copy helper ----- */
+function copyText(t){
+  navigator.clipboard.writeText(t).catch(()=>{
+    const ta = document.createElement("textarea");
+    ta.value=t;document.body.appendChild(ta);ta.select();
+    document.execCommand("copy");ta.remove();
+  });
+}
+
+/* ----- Re-render everything ----- */
+function renderAll(){
+  renderSidebar();
+  renderBuilder();
+  if(state.view==="generator") renderGenerator();
+}
+
+/* ----- Wire up events ----- */
+function init(){
+  load();
+  // Tabs
+  $$('.tab').forEach(t=>t.onclick = ()=>setView(t.dataset.view));
+  // Theme
+  $("#theme-toggle").onclick = ()=>{
+    const cur = document.body.dataset.theme==="light"?"light":"dark";
+    const next = cur==="dark"?"light":"dark";
+    document.body.dataset.theme = next;
+    localStorage.setItem(STORAGE_THEME, next);
+  };
+  // Header actions
+  $("#export-all").onclick = exportAll;
+  $("#import-all").onclick = importAll;
+  // Sidebar
+  $("#new-class-btn").onclick = newClass;
+  // Builder buttons
+  $("#btn-new-class").onclick = newClass;
+  $("#btn-clone-class").onclick = ()=>{ if(getActive()) duplicateClass(getActive().id); };
+  $("#btn-delete-class").onclick = ()=>{ if(getActive()) deleteClass(getActive().id); };
+  $("#btn-import-class").onclick = importAll;
+  $("#btn-import-py").onclick = importPython;
+  $("#class-name-input").addEventListener("input", e=>{
+    const c = getActive(); if(!c) return;
+    c.name = e.target.value;
+    save();renderSidebar();renderPreview();
+  });
+  $("#add-field-btn").onclick = ()=>{
+    const c = getActive(); if(!c) return;
+    c.fields.push({name:"", type:"string", defaultVal:""});
+    save();renderBuilder();
+  };
+  // Generator
+  $("#gen-class-select").onchange = ()=>{buildGenForm();rebuildGenOutput();};
+  $("#btn-gen-build").onclick = rebuildGenOutput;
+  $("#btn-gen-copy").onclick = ()=>{copyText($("#gen-output").innerText);toast("JSON copied","ok");};
+  $("#btn-gen-download").onclick = ()=>{
+    const json = $("#gen-output").innerText;
+    const c = state.classes.find(c=>c.id===$("#gen-class-select").value);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([json],{type:"application/json"}));
+    a.download = (c?.name||"data")+".json";
+    a.click();URL.revokeObjectURL(a.href);
+    toast("Downloaded","ok");
+  };
+  $("#btn-gen-clear").onclick = ()=>buildGenForm();
+
+  // Parser
+  $("#btn-parse").onclick = parseAndRender;
+  $("#btn-format").onclick = ()=>{
+    try{
+      const d = JSON.parse($("#json-input").value);
+      $("#json-input").value = JSON.stringify(d,null,2);
+      parseAndRender();
+      toast("Formatted","ok");
+    }catch(e){toast("Invalid JSON","err");}
+  };
+  $("#btn-minify").onclick = ()=>{
+    try{
+      const d = JSON.parse($("#json-input").value);
+      $("#json-input").value = JSON.stringify(d);
+      parseAndRender();
+      toast("Minified","ok");
+    }catch(e){toast("Invalid JSON","err");}
+  };
+  $("#btn-load-file").onclick = ()=>{
+    const f = document.createElement("input");
+    f.type="file";f.accept=".json,.txt";
+    f.onchange = e=>{
+      const file=e.target.files[0];if(!file)return;
+      const r = new FileReader();
+      r.onload = ev=>{$("#json-input").value=ev.target.result;parseAndRender();};
+      r.readAsText(file);
+    };
+    f.click();
+  };
+  $("#btn-load-sample").onclick = ()=>{
+    $("#json-input").value = JSON.stringify({
+      project:"CraftHub Web",
+      version:"1.0.0",
+      author:{name:"You",email:"you@example.com"},
+      stars:48,
+      tags:["json","editor","schema","parser"],
+      features:[
+        {id:1,name:"Class Builder",enabled:true},
+        {id:2,name:"JSON Generator",enabled:true},
+        {id:3,name:"Visual Parser",enabled:true}
+      ],
+      meta:{license:"MIT",created:"2024-01-01",contributors:2}
+    }, null, 2);
+    parseAndRender();
+  };
+  $("#btn-tree-expand").onclick = ()=>{
+    $$('.tree-children', $("#tree-output")).forEach(c=>c.classList.remove("collapsed"));
+    $$('.tree-toggle', $("#tree-output")).forEach(t=>{if(t.textContent==="▶")t.textContent="▼";});
+  };
+  $("#btn-tree-collapse").onclick = ()=>{
+    $$('.tree-node:not(.root) > .tree-children', $("#tree-output")).forEach(c=>c.classList.add("collapsed"));
+    $$('.tree-node:not(.root) > .tree-line > .tree-toggle', $("#tree-output")).forEach(t=>{if(t.textContent==="▼")t.textContent="▶";});
+  };
+  $("#btn-tree-copy").onclick = ()=>{
+    if(state.parsedJson){
+      copyText(JSON.stringify(state.parsedJson,null,2));
+      toast("JSON copied","ok");
+    }
+  };
+  $("#search-input").addEventListener("input", e=>searchTree(e.target.value));
+  $("#json-input").addEventListener("keydown", e=>{
+    if(e.key==="Tab"){e.preventDefault();
+      const s=e.target.selectionStart, en=e.target.selectionEnd;
+      e.target.value = e.target.value.slice(0,s)+"  "+e.target.value.slice(en);
+      e.target.selectionStart=e.target.selectionEnd=s+2;
+    }
+    if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){parseAndRender();}
+  });
+  // Drop zone for parser
+  const ta = $("#json-input");
+  ta.addEventListener("dragover", e=>{e.preventDefault();ta.style.outline="2px dashed var(--accent)"});
+  ta.addEventListener("dragleave", ()=>ta.style.outline="");
+  ta.addEventListener("drop", e=>{
+    e.preventDefault();ta.style.outline="";
+    const f = e.dataTransfer.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ev=>{ta.value=ev.target.result;parseAndRender();};
+    r.readAsText(f);
+  });
+
+  renderAll();
+  setStatus("Ready");
+}
+init();
+</script>
+</body>
+</html>
