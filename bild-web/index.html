@@ -86,8 +86,13 @@
     background:linear-gradient(135deg,var(--accent),#d6541a);
     display:flex;align-items:center;justify-content:center;
     box-shadow:0 4px 14px rgba(255,138,61,.35);
-    color:#fff;font-size:18px;
+    color:#fff;
   }
+  .tab svg{margin-right:2px}
+  .btn svg{margin-right:2px}
+  .add-field-btn svg{margin-right:6px;vertical-align:middle}
+  .empty-state .big svg{opacity:1;color:var(--accent);opacity:.45}
+  .empty-state .big{display:flex;justify-content:center;margin-bottom:14px}
   .logo small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:1px}
   .tabs{display:flex; gap:4px; margin-left:auto; align-items:center}
   .tab{
@@ -246,6 +251,34 @@
     font-size:12.5px;line-height:1.6;white-space:pre;overflow:auto;
     color:var(--text);max-height:calc(100vh - 250px);
   }
+  .preview-tabs{
+    display:flex;align-items:center;gap:4px;margin-bottom:10px;
+    border-bottom:1px solid var(--line);padding-bottom:8px;
+  }
+  .preview-tabs .spacer{flex:1}
+  .ptab{
+    background:transparent;color:var(--muted);border:none;
+    padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;
+    font-weight:500;transition:all .15s;
+  }
+  .ptab:hover{color:var(--text);background:var(--bg-3)}
+  .ptab.active{color:var(--accent);background:var(--accent-soft)}
+  .lang-picker{
+    background:var(--bg-2);color:var(--text);border:1px solid var(--line);
+    border-radius:6px;padding:5px 8px;font-size:12px;outline:none;
+    font-family:inherit;
+  }
+  .lang-picker:focus{border-color:var(--accent)}
+  .icon-btn.small{width:28px;height:28px}
+  .icon-btn.small svg{width:13px;height:13px}
+  /* Code highlighting */
+  .preview-code .kw{color:var(--purple);font-weight:500}
+  .preview-code .ty{color:var(--cyan)}
+  .preview-code .id{color:var(--blue)}
+  .preview-code .str{color:var(--green)}
+  .preview-code .num{color:var(--purple)}
+  .preview-code .cm{color:var(--muted);font-style:italic}
+  .preview-code .at{color:var(--yellow)}
 
   /* ----- Generator view ----- */
   .gen-layout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);flex:1;min-height:0}
@@ -321,11 +354,14 @@
   .tree-boolean{color:var(--yellow);font-weight:500}
   .tree-null{color:var(--red);font-style:italic}
   .tree-toggle{
-    display:inline-block;width:14px;color:var(--muted);
-    cursor:pointer;user-select:none;text-align:center;
-    margin-right:2px;font-size:10px;
+    display:inline-flex;width:14px;height:14px;color:var(--muted);
+    cursor:pointer;user-select:none;align-items:center;justify-content:center;
+    margin-right:2px;
   }
+  .tree-toggle.leaf{cursor:default;opacity:.4}
+  .tree-toggle.leaf::after{content:"";width:3px;height:3px;border-radius:50%;background:currentColor}
   .tree-toggle:hover{color:var(--accent)}
+  .row-actions .ra-lbl{margin-left:2px;font-size:10px;letter-spacing:.4px}
   .tree-line{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;padding:1px 4px;border-radius:4px}
   .tree-line:hover{background:var(--bg-3)}
   .tree-line:hover .row-actions{display:inline-flex}
@@ -429,13 +465,19 @@
 <div class="app">
   <header>
     <div class="logo">
-      <div class="owl">🦉</div>
+      <div class="owl" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m21 16-9 5-9-5V8l9-5 9 5v8z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+      </div>
       <div>CraftHub Web<small>Visual JSON Parser & Class Builder</small></div>
     </div>
     <div class="tabs">
-      <button class="tab active" data-view="builder">🧱 Class Builder</button>
-      <button class="tab" data-view="generator">⚡ Generator</button>
-      <button class="tab" data-view="parser">🔍 Visual Parser</button>
+      <button class="tab active" data-view="builder"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Class Builder</button>
+      <button class="tab" data-view="generator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Generator</button>
+      <button class="tab" data-view="parser"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Visual Parser</button>
     </div>
     <div class="header-actions">
       <button class="icon-btn" id="theme-toggle" title="Toggle theme">
@@ -452,7 +494,7 @@
 
   <main>
     <aside class="sidebar">
-      <h3>My Classes <button id="new-class-btn" title="New class">＋</button></h3>
+      <h3>My Classes <button id="new-class-btn" title="New class" aria-label="New class"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></h3>
       <div class="class-list" id="class-list"></div>
       <div class="sidebar-footer">
         Saved locally · <span id="class-count">0</span> classes
@@ -464,12 +506,12 @@
       <!-- ============= BUILDER ============= -->
       <section class="view active" data-view="builder">
         <div class="toolbar">
-          <button class="btn" id="btn-new-class">＋ New Class</button>
-          <button class="btn secondary" id="btn-clone-class">Clone</button>
-          <button class="btn secondary" id="btn-import-class">Import from JSON…</button>
-          <button class="btn secondary" id="btn-import-py">Parse Python class…</button>
+          <button class="btn" id="btn-new-class" data-icon="plus" data-label="New Class"></button>
+          <button class="btn secondary" id="btn-clone-class" data-icon="duplicate" data-label="Clone"></button>
+          <button class="btn secondary" id="btn-import-class" data-icon="upload" data-label="Import from JSON…"></button>
+          <button class="btn secondary" id="btn-import-py" data-icon="file" data-label="Parse Python class…"></button>
           <div class="spacer"></div>
-          <button class="btn ghost" id="btn-delete-class">🗑 Delete</button>
+          <button class="btn ghost" id="btn-delete-class" data-icon="trash" data-label="Delete"></button>
         </div>
 
         <div class="builder">
@@ -490,7 +532,7 @@
 
             <div id="fields-container"></div>
 
-            <button class="add-field-btn" id="add-field-btn">＋ Add field</button>
+            <button class="add-field-btn" id="add-field-btn"></button>
 
             <div style="margin-top:22px">
               <h2 style="font-size:13px">Tips</h2>
@@ -498,17 +540,41 @@
                 • Choose <span class="kbd">object</span> + a class name in <em>Default</em> to nest classes.<br>
                 • Choose <span class="kbd">array</span> and pick element type.<br>
                 • Use <span class="kbd">enum</span> with comma‑separated values in <em>Default</em>.<br>
-                • Press <span class="kbd">⚡ Generator</span> to fill instances.
+                • Open the Generator tab to fill instances.
               </div>
             </div>
           </div>
 
           <div class="builder-pane">
-            <h2>Live Preview <small>Schema as JSON</small></h2>
-            <pre class="preview-code" id="schema-preview"></pre>
-            <div style="height:14px"></div>
-            <h2 style="font-size:13px;margin-top:8px">Sample instance</h2>
-            <pre class="preview-code" id="sample-preview"></pre>
+            <div class="preview-tabs">
+              <button class="ptab active" data-ptab="schema">JSON Schema</button>
+              <button class="ptab" data-ptab="sample">Sample</button>
+              <button class="ptab" data-ptab="code">Code</button>
+              <div class="spacer"></div>
+              <select id="lang-select" class="lang-picker" style="display:none">
+                <option value="typescript">TypeScript</option>
+                <option value="python">Python (dataclass)</option>
+                <option value="pydantic">Python (pydantic)</option>
+                <option value="csharp">C#</option>
+                <option value="java">Java</option>
+                <option value="kotlin">Kotlin</option>
+                <option value="go">Go</option>
+                <option value="rust">Rust (serde)</option>
+                <option value="cpp">C++ (struct)</option>
+                <option value="swift">Swift (Codable)</option>
+                <option value="php">PHP</option>
+                <option value="ruby">Ruby</option>
+                <option value="dart">Dart</option>
+                <option value="zod">Zod schema</option>
+              </select>
+              <button class="icon-btn small" id="btn-copy-preview" title="Copy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+              <button class="icon-btn small" id="btn-download-preview" title="Download">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </button>
+            </div>
+            <pre class="preview-code" id="preview-output" style="max-height:calc(100vh - 220px)"></pre>
           </div>
         </div>
       </section>
@@ -518,11 +584,11 @@
         <div class="toolbar">
           <span style="font-size:12px;color:var(--muted)">Class:</span>
           <select id="gen-class-select" style="min-width:180px"></select>
-          <button class="btn" id="btn-gen-build">⚡ Generate JSON</button>
+          <button class="btn" id="btn-gen-build" data-icon="zap" data-label="Generate JSON"></button>
           <div class="spacer"></div>
-          <button class="btn secondary" id="btn-gen-copy">📋 Copy</button>
-          <button class="btn secondary" id="btn-gen-download">⬇ Download .json</button>
-          <button class="btn ghost" id="btn-gen-clear">Reset</button>
+          <button class="btn secondary" id="btn-gen-copy" data-icon="copy" data-label="Copy"></button>
+          <button class="btn secondary" id="btn-gen-download" data-icon="download" data-label="Download .json"></button>
+          <button class="btn ghost" id="btn-gen-clear" data-label="Reset"></button>
         </div>
         <div class="gen-layout">
           <div class="gen-pane">
@@ -543,26 +609,27 @@
       <!-- ============= PARSER ============= -->
       <section class="view" data-view="parser">
         <div class="toolbar">
-          <button class="btn" id="btn-parse">🔍 Parse</button>
-          <button class="btn secondary" id="btn-format">{ } Format</button>
-          <button class="btn secondary" id="btn-minify">↘ Minify</button>
-          <button class="btn secondary" id="btn-load-file">📁 Open file…</button>
-          <button class="btn secondary" id="btn-load-sample">Sample</button>
+          <button class="btn" id="btn-parse" data-icon="search" data-label="Parse"></button>
+          <button class="btn secondary" id="btn-format" data-icon="layers" data-label="Format"></button>
+          <button class="btn secondary" id="btn-minify" data-icon="minus" data-label="Minify"></button>
+          <button class="btn secondary" id="btn-load-file" data-icon="folder" data-label="Open file…"></button>
+          <button class="btn secondary" id="btn-load-sample" data-label="Sample"></button>
           <input type="text" id="search-input" placeholder="Search keys/values…" style="min-width:180px"/>
           <div class="spacer"></div>
-          <button class="btn secondary" id="btn-tree-expand">⊕ Expand</button>
-          <button class="btn secondary" id="btn-tree-collapse">⊖ Collapse</button>
-          <button class="btn secondary" id="btn-tree-copy">📋 Copy JSON</button>
+          <button class="btn secondary" id="btn-tree-expand" data-icon="expand" data-label="Expand"></button>
+          <button class="btn secondary" id="btn-tree-collapse" data-icon="collapse" data-label="Collapse"></button>
+          <button class="btn secondary" id="btn-tree-copy" data-icon="copy" data-label="Copy JSON"></button>
         </div>
         <div class="parser">
           <div class="parser-pane">
             <div class="pane-header">
-              <span>Source JSON</span>
+              <span>Source JSON / JSONC</span>
+              <span class="pill" title="Comments and trailing commas supported">JSONC</span>
               <div class="spacer"></div>
               <span class="pill" id="parser-status">empty</span>
             </div>
             <div class="editor-area">
-              <textarea id="json-input" placeholder="Paste JSON here, drop a file, or click 'Sample'…&#10;&#10;Example:&#10;{&#10;  &quot;name&quot;: &quot;CraftHub&quot;,&#10;  &quot;stars&quot;: 48,&#10;  &quot;tags&quot;: [&quot;json&quot;, &quot;editor&quot;]&#10;}"></textarea>
+              <textarea id="json-input" placeholder="Paste JSON or JSONC (with // comments and trailing commas), drop a file, or click 'Sample'…&#10;&#10;Example:&#10;{&#10;  // comments are allowed&#10;  &quot;name&quot;: &quot;CraftHub&quot;,&#10;  &quot;stars&quot;: 48,&#10;  &quot;tags&quot;: [&quot;json&quot;, &quot;editor&quot;], /* trailing commas OK */&#10;}"></textarea>
             </div>
           </div>
           <div class="parser-pane">
@@ -574,7 +641,12 @@
             </div>
             <div class="tree-area" id="tree-output">
               <div class="empty-state">
-                <div class="big">🌳</div>
+                <div class="big" aria-hidden="true">
+                  <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20"/><path d="M5 8a4 4 0 0 1 4-4"/><path d="M19 8a4 4 0 0 0-4-4"/><path d="M5 16a4 4 0 0 0 4 4"/><path d="M19 16a4 4 0 0 1-4 4"/>
+                    <circle cx="9" cy="4" r="1.5"/><circle cx="15" cy="4" r="1.5"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/>
+                  </svg>
+                </div>
                 <div>Paste JSON on the left and click <span class="em">Parse</span><br/>to see the visual tree.</div>
               </div>
             </div>
@@ -617,6 +689,45 @@
    CraftHub Web — single-file vanilla-JS application
    ============================================================ */
 
+/* ============================================================
+   Icon system — platform-independent inline SVGs (Lucide-style)
+   All paths use stroke="currentColor", so they inherit text color.
+   Use svg(name, size?) wherever you'd write an emoji.
+   ============================================================ */
+const ICON_PATHS = {
+  cube:        '<path d="m21 16-9 5-9-5V8l9-5 9 5v8z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+  box:         '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>',
+  layers:      '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+  zap:         '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  search:      '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  plus:        '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  minus:       '<line x1="5" y1="12" x2="19" y2="12"/>',
+  x:           '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  copy:        '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  duplicate:   '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  download:    '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  upload:      '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  trash:       '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>',
+  folder:      '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+  file:        '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+  fileJson:    '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 13a1 1 0 0 1 1 1v1a1 1 0 0 0 1 1 1 1 0 0 0-1 1v1a1 1 0 0 1-1 1"/>',
+  chevronDown: '<polyline points="6 9 12 15 18 9"/>',
+  chevronRight:'<polyline points="9 18 15 12 9 6"/>',
+  expand:      '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  collapse:    '<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  moon:        '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  inbox:       '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  tree:        '<path d="M12 2v20"/><path d="M5 8a4 4 0 0 1 4-4"/><path d="M19 8a4 4 0 0 0-4-4"/><path d="M5 16a4 4 0 0 0 4 4"/><path d="M19 16a4 4 0 0 1-4 4"/><circle cx="9" cy="4" r="1.5"/><circle cx="15" cy="4" r="1.5"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/>',
+  alert:       '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  list:        '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
+  link:        '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>'
+};
+function svg(name, size){
+  size = size || 16;
+  const path = ICON_PATHS[name] || ICON_PATHS.box;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;flex-shrink:0">${path}</svg>`;
+}
+
 /* ----- State ----- */
 const STORAGE_KEY = "crafthub_classes_v1";
 const STORAGE_THEME = "crafthub_theme";
@@ -625,10 +736,52 @@ let state = {
   classes: [],     // [{id, name, fields:[{name,type,defaultVal,itemType,nestedClass,enumVals}]}]
   activeClassId: null,
   view: "builder",
+  previewTab: "schema",   // schema | sample | code
+  previewLang: "typescript",
   parsedJson: null,
   expandedPaths: new Set(),
   collapsedPaths: new Set()
 };
+
+/* ============================================================
+   JSONC support — strip // line comments, /* block comments,
+   and trailing commas. Preserves them inside strings.
+   ============================================================ */
+function stripJsonc(src){
+  let out = "";
+  let i = 0;
+  const n = src.length;
+  let inString = false;
+  let stringChar = '"';
+  while(i < n){
+    const c = src[i], next = src[i+1];
+    if(inString){
+      if(c === "\\" && i+1 < n){ out += c + next; i+=2; continue; }
+      if(c === stringChar){ inString = false; }
+      out += c; i++; continue;
+    }
+    // outside strings
+    if(c === '"'){ inString = true; stringChar = '"'; out += c; i++; continue; }
+    if(c === "/" && next === "/"){
+      // line comment until \n
+      while(i < n && src[i] !== "\n") i++;
+      continue;
+    }
+    if(c === "/" && next === "*"){
+      i += 2;
+      while(i < n && !(src[i] === "*" && src[i+1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+    out += c; i++;
+  }
+  // remove trailing commas: ", }" or ", ]"
+  out = out.replace(/,(\s*[}\]])/g, "$1");
+  return out;
+}
+function parseJsonc(src){
+  return JSON.parse(stripJsonc(src));
+}
 
 /* ----- Helpers ----- */
 function uid(){return Math.random().toString(36).slice(2,10)}
@@ -692,17 +845,17 @@ function renderSidebar(){
   const list = $("#class-list");
   $("#class-count").textContent = state.classes.length;
   if(state.classes.length===0){
-    list.innerHTML = `<div class="empty-list">No classes yet.<br/>Click <strong>＋</strong> to create one.</div>`;
+    list.innerHTML = `<div class="empty-list">No classes yet.<br/>Click the <span style="display:inline-flex;vertical-align:middle">${svg("plus",12)}</span> button to create one.</div>`;
     return;
   }
   list.innerHTML = state.classes.map(c=>`
     <div class="class-item ${c.id===state.activeClassId?'active':''}" data-id="${c.id}">
-      <span>📦</span>
+      <span class="cls-icon">${svg("box",14)}</span>
       <span class="name" title="${escapeHtml(c.name)}">${escapeHtml(c.name||'(unnamed)')}</span>
       <span class="count">${c.fields.length}</span>
       <div class="actions">
-        <button data-act="dup" title="Duplicate">⎘</button>
-        <button data-act="del" title="Delete">✕</button>
+        <button data-act="dup" title="Duplicate" aria-label="Duplicate">${svg("duplicate",13)}</button>
+        <button data-act="del" title="Delete" aria-label="Delete">${svg("x",13)}</button>
       </div>
     </div>
   `).join("");
@@ -725,7 +878,7 @@ function renderBuilder(){
   const cont = $("#fields-container");
   if(!c){
     $("#class-name-input").value = "";
-    cont.innerHTML = `<div class="empty-state" style="padding:20px;font-size:12px">No class selected. Click <span class="em">＋ New Class</span>.</div>`;
+    cont.innerHTML = `<div class="empty-state" style="padding:20px;font-size:12px">No class selected. Click <span class="em" style="display:inline-flex;align-items:center;gap:4px">${svg("plus",12)}New Class</span>.</div>`;
     $("#schema-preview").textContent = "";
     $("#sample-preview").textContent = "";
     return;
@@ -790,16 +943,584 @@ function fieldRowHtml(f,i,objClassOptions){
       ${FIELD_TYPES.map(t=>`<option ${f.type===t?"selected":""}>${t}</option>`).join("")}
     </select>
     ${defaultEditor}
-    <button class="remove-btn" title="Remove">✕</button>
+    <button class="remove-btn" title="Remove" aria-label="Remove">${svg("x",13)}</button>
   </div>`;
 }
 function renderPreview(){
   const c = getActive();
-  if(!c){return}
-  const schema = classToJsonSchema(c);
-  const sample = classToSample(c);
-  $("#schema-preview").innerHTML = highlightJSON(JSON.stringify(schema,null,2));
-  $("#sample-preview").innerHTML = highlightJSON(JSON.stringify(sample,null,2));
+  const out = $("#preview-output");
+  if(!c){ if(out) out.innerHTML = ""; return; }
+  const tab = state.previewTab;
+  $("#lang-select").style.display = tab === "code" ? "" : "none";
+  if(tab === "schema"){
+    out.innerHTML = highlightJSON(JSON.stringify(classToJsonSchema(c), null, 2));
+  } else if(tab === "sample"){
+    out.innerHTML = highlightJSON(JSON.stringify(classToSample(c), null, 2));
+  } else {
+    const lang = state.previewLang;
+    const code = generateCode(lang, c);
+    out.innerHTML = highlightCode(lang, code);
+  }
+}
+
+/* ============================================================
+   Multi-language class code generation
+   ============================================================ */
+function generateCode(lang, c){
+  const seen = new Set();
+  const order = collectClassesInOrder(c, seen);  // topological-ish
+  switch(lang){
+    case "typescript": return order.map(genTypeScript).join("\n\n");
+    case "python":     return "from dataclasses import dataclass, field\nfrom typing import List, Optional, Any\n\n" + order.map(genPython).join("\n\n");
+    case "pydantic":   return "from pydantic import BaseModel\nfrom typing import List, Optional, Any\n\n" + order.map(genPydantic).join("\n\n");
+    case "csharp":     return "using System;\nusing System.Collections.Generic;\nusing System.Text.Json.Serialization;\n\nnamespace YourNamespace;\n\n" + order.map(genCSharp).join("\n\n");
+    case "java":       return "import java.util.List;\nimport com.fasterxml.jackson.annotation.JsonProperty;\n\n" + order.map(genJava).join("\n\n");
+    case "kotlin":     return "import kotlinx.serialization.SerialName\nimport kotlinx.serialization.Serializable\n\n" + order.map(genKotlin).join("\n\n");
+    case "go":         return "package model\n\n" + order.map(genGo).join("\n\n");
+    case "rust":       return "use serde::{Deserialize, Serialize};\n\n" + order.map(genRust).join("\n\n");
+    case "cpp":        return "#include <string>\n#include <vector>\n\n" + order.map(genCpp).join("\n\n");
+    case "swift":      return "import Foundation\n\n" + order.map(genSwift).join("\n\n");
+    case "php":        return "<?php\n\n" + order.map(genPhp).join("\n\n");
+    case "ruby":       return order.map(genRuby).join("\n\n");
+    case "dart":       return order.map(genDart).join("\n\n");
+    case "zod":        return "import { z } from \"zod\";\n\n" + order.map(genZod).join("\n\n");
+  }
+  return "";
+}
+function collectClassesInOrder(c, seen, order){
+  order = order || [];
+  if(!c || seen.has(c.id)) return order;
+  seen.add(c.id);
+  // First visit dependencies (nested classes / array<object>)
+  for(const f of c.fields){
+    if((f.type==="object") && f.defaultVal){
+      const nested = findClassByName(f.defaultVal);
+      if(nested) collectClassesInOrder(nested, seen, order);
+    }
+    if(f.type==="array" && f.itemType==="object" && f.defaultVal){
+      const nested = findClassByName(f.defaultVal);
+      if(nested) collectClassesInOrder(nested, seen, order);
+    }
+  }
+  order.push(c);
+  return order;
+}
+function pascal(s){return (s||"X").replace(/(^|[\s_-])(\w)/g,(_,$1,$2)=>$2.toUpperCase()).replace(/[\s_-]/g,"");}
+function snake(s){return (s||"x").replace(/([a-z])([A-Z])/g,"$1_$2").toLowerCase();}
+/* Reserved-keyword escapes, used to keep generated code compilable */
+const CSHARP_KW = new Set(["abstract","as","base","bool","break","byte","case","catch","char","checked","class","const","continue","decimal","default","delegate","do","double","else","enum","event","explicit","extern","false","finally","fixed","float","for","foreach","goto","if","implicit","in","int","interface","internal","is","lock","long","namespace","new","null","object","operator","out","override","params","private","protected","public","readonly","ref","return","sbyte","sealed","short","sizeof","stackalloc","static","string","struct","switch","this","throw","true","try","typeof","uint","ulong","unchecked","unsafe","ushort","using","virtual","void","volatile","while"]);
+const JAVA_KW = new Set(["abstract","assert","boolean","break","byte","case","catch","char","class","const","continue","default","do","double","else","enum","extends","final","finally","float","for","goto","if","implements","import","instanceof","int","interface","long","native","new","package","private","protected","public","return","short","static","strictfp","super","switch","synchronized","this","throw","throws","transient","try","void","volatile","while","true","false","null"]);
+const KOTLIN_KW = new Set(["as","break","class","continue","do","else","false","for","fun","if","in","interface","is","null","object","package","return","super","this","throw","true","try","typealias","val","var","when","while","by","get","set","field","it"]);
+const SWIFT_KW = new Set(["associatedtype","class","deinit","enum","extension","fileprivate","func","import","init","inout","internal","let","open","operator","private","protocol","public","static","struct","subscript","typealias","var","break","case","continue","default","defer","do","else","fallthrough","for","guard","if","in","repeat","return","switch","where","while","as","catch","false","is","nil","rethrows","super","self","Self","throw","throws","true","try","Type"]);
+const RUST_KW = new Set(["as","break","const","continue","crate","else","enum","extern","false","fn","for","if","impl","in","let","loop","match","mod","move","mut","pub","ref","return","self","Self","static","struct","super","trait","true","type","unsafe","use","where","while","async","await","dyn","abstract","become","box","do","final","macro","override","priv","typeof","unsized","virtual","yield"]);
+function escapeName(name, kwSet, prefix="@"){
+  return kwSet.has(name) ? prefix+name : name;
+}
+function arrItemClass(f){
+  if(f.type==="array" && f.itemType==="object" && f.defaultVal){
+    const t = findClassByName(f.defaultVal);
+    if(t) return pascal(t.name);
+  }
+  return null;
+}
+function objNestedClass(f){
+  if(f.type==="object" && f.defaultVal){
+    const t = findClassByName(f.defaultVal);
+    if(t) return pascal(t.name);
+  }
+  return null;
+}
+
+/* ----- TypeScript (interfaces) ----- */
+function genTypeScript(c){
+  const lines = [`export interface ${pascal(c.name)} {`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "any";
+    switch(f.type){
+      case "string": t = "string"; break;
+      case "number": case "integer": t = "number"; break;
+      case "boolean": t = "boolean"; break;
+      case "null": t = "null"; break;
+      case "enum": {
+        const vals = (f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean);
+        t = vals.length ? vals.map(v=>`"${v}"`).join(" | ") : "string";
+        break;
+      }
+      case "array": {
+        const cls = arrItemClass(f);
+        if(cls){ t = `${cls}[]`; }
+        else if(f.itemType==="number"||f.itemType==="integer") t="number[]";
+        else if(f.itemType==="boolean") t="boolean[]";
+        else if(f.itemType==="object") t="Record<string, any>[]";
+        else t="string[]";
+        break;
+      }
+      case "object": {
+        const cls = objNestedClass(f);
+        t = cls || "Record<string, any>";
+        break;
+      }
+    }
+    lines.push(`  ${f.name}: ${t};`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Python (dataclass) ----- */
+function genPython(c){
+  const lines = [`@dataclass`, `class ${pascal(c.name)}:`];
+  if(c.fields.length===0) lines.push("    pass");
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "Any", def = null;
+    switch(f.type){
+      case "string": t="str"; def=`"${(f.defaultVal||"").replace(/"/g,'\\"')}"`; break;
+      case "number": t="float"; def=parseFloat(f.defaultVal)||0.0; break;
+      case "integer": t="int"; def=parseInt(f.defaultVal,10)||0; break;
+      case "boolean": t="bool"; def=f.defaultVal==="false"?"False":"True"; break;
+      case "null": t="Optional[Any]"; def="None"; break;
+      case "enum": t="str"; {
+        const v=(f.defaultVal||"").split(",")[0]?.trim()||""; def=`"${v}"`;
+      } break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls || ({number:"float",integer:"int",boolean:"bool",object:"dict",string:"str"}[f.itemType||"string"]);
+        t = `List[${inner}]`; def="field(default_factory=list)";
+        lines.push(`    ${f.name}: ${t} = ${def}`); continue;
+      }
+      case "object": {
+        const cls = objNestedClass(f);
+        if(cls){
+          t=cls; def=`field(default_factory=${cls})`;
+          lines.push(`    ${f.name}: ${t} = ${def}`); continue;
+        }
+        t="dict"; def="field(default_factory=dict)";
+        lines.push(`    ${f.name}: ${t} = ${def}`); continue;
+      }
+    }
+    lines.push(`    ${f.name}: ${t} = ${def}`);
+  }
+  return lines.join("\n");
+}
+
+/* ----- Python (pydantic v2) ----- */
+function genPydantic(c){
+  const lines = [`class ${pascal(c.name)}(BaseModel):`];
+  if(c.fields.length===0) lines.push("    pass");
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "Any";
+    switch(f.type){
+      case "string": t="str"; break;
+      case "number": t="float"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="Optional[Any] = None"; break;
+      case "enum": t="str"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls || ({number:"float",integer:"int",boolean:"bool",object:"dict",string:"str"}[f.itemType||"string"]);
+        t = `List[${inner}]`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "dict"; break;
+    }
+    lines.push(`    ${f.name}: ${t}`);
+  }
+  return lines.join("\n");
+}
+
+/* ----- C# ----- */
+function genCSharp(c){
+  const lines = [`public class ${pascal(c.name)}`,`{`];
+  let first = true;
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "object";
+    switch(f.type){
+      case "string": t="string"; break;
+      case "number": t="double"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="object?"; break;
+      case "enum": t="string"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls || ({number:"double",integer:"int",boolean:"bool",object:"object",string:"string"}[f.itemType||"string"]);
+        t = `List<${inner}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "object"; break;
+    }
+    let propName = pascal(f.name);
+    if(CSHARP_KW.has(propName.toLowerCase())) propName = "@"+propName;
+    // System.Type collides with reflection — same for Object, etc. Add suffix.
+    if(["Type","Object","String","Int","Double","Boolean"].includes(propName)) {
+      // keep PascalCase but the JsonPropertyName attribute makes deserialization work
+    }
+    if(!first) lines.push("");
+    first = false;
+    if(propName !== f.name) {
+      lines.push(`    [JsonPropertyName("${f.name.replace(/"/g,'\\"')}")]`);
+    }
+    lines.push(`    public ${t} ${propName} { get; set; }`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Java ----- */
+function genJava(c){
+  const lines = [`public class ${pascal(c.name)} {`];
+  let first = true;
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "Object";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="double"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="boolean"; break;
+      case "null": t="Object"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls || ({number:"Double",integer:"Integer",boolean:"Boolean",object:"Object",string:"String"}[f.itemType||"string"]);
+        t = `List<${inner}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "Object"; break;
+    }
+    let fieldName = f.name;
+    const isKw = JAVA_KW.has(fieldName);
+    if(isKw) fieldName = fieldName + "_";
+    if(!first) lines.push("");
+    first = false;
+    if(fieldName !== f.name){
+      lines.push(`    @JsonProperty("${f.name.replace(/"/g,'\\"')}")`);
+    }
+    lines.push(`    private ${t} ${fieldName};`);
+  }
+  lines.push("");
+  lines.push("    // generate getters/setters or use Lombok @Data");
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Kotlin ----- */
+function genKotlin(c){
+  const lines = [`@Serializable`, `data class ${pascal(c.name)}(`];
+  const inner = [];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "Any?";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="Double"; break;
+      case "integer": t="Int"; break;
+      case "boolean": t="Boolean"; break;
+      case "null": t="Any?"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"Double",integer:"Int",boolean:"Boolean",object:"Any",string:"String"}[f.itemType||"string"]);
+        t = `List<${i}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "Map<String, Any>"; break;
+    }
+    let propName = f.name;
+    const isKw = KOTLIN_KW.has(propName);
+    if(isKw) propName = "`"+propName+"`";  // backtick-escape keywords in Kotlin
+    const annotation = (isKw || propName !== f.name) ? `    @SerialName("${f.name.replace(/"/g,'\\"')}") ` : "    ";
+    inner.push(`${annotation}val ${propName}: ${t}`);
+  }
+  lines.push(inner.join(",\n"));
+  lines.push(")");
+  return lines.join("\n");
+}
+
+/* ----- Go ----- */
+function genGo(c){
+  const lines = [`type ${pascal(c.name)} struct {`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "interface{}";
+    switch(f.type){
+      case "string": t="string"; break;
+      case "number": t="float64"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="interface{}"; break;
+      case "enum": t="string"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"float64",integer:"int",boolean:"bool",object:"map[string]interface{}",string:"string"}[f.itemType||"string"]);
+        t = `[]${i}`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "map[string]interface{}"; break;
+    }
+    lines.push(`    ${pascal(f.name)} ${t} \`json:"${f.name}"\``);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Rust ----- */
+function genRust(c){
+  const lines = [`#[derive(Debug, Serialize, Deserialize)]`,`pub struct ${pascal(c.name)} {`];
+  let first = true;
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "serde_json::Value";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="f64"; break;
+      case "integer": t="i64"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="Option<serde_json::Value>"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"f64",integer:"i64",boolean:"bool",object:"serde_json::Value",string:"String"}[f.itemType||"string"]);
+        t = `Vec<${i}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "serde_json::Value"; break;
+    }
+    let snakeName = snake(f.name);
+    const isKw = RUST_KW.has(snakeName);
+    if(isKw) snakeName = "r#"+snakeName;  // raw identifier
+    if(!first) lines.push("");
+    first = false;
+    if(snakeName.replace(/^r#/,"") !== f.name){
+      lines.push(`    #[serde(rename = "${f.name.replace(/"/g,'\\"')}")]`);
+    }
+    lines.push(`    pub ${snakeName}: ${t},`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- C++ ----- */
+function genCpp(c){
+  const lines = [`struct ${pascal(c.name)} {`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "std::string";
+    switch(f.type){
+      case "string": t="std::string"; break;
+      case "number": t="double"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="void*"; break;
+      case "enum": t="std::string"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"double",integer:"int",boolean:"bool",object:"void*",string:"std::string"}[f.itemType||"string"]);
+        t = `std::vector<${i}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "void*"; break;
+    }
+    lines.push(`    ${t} ${f.name};`);
+  }
+  lines.push("};");
+  return lines.join("\n");
+}
+
+/* ----- Swift ----- */
+function genSwift(c){
+  const lines = [`struct ${pascal(c.name)}: Codable {`];
+  const fields = c.fields.filter(f=>f.name);
+  // detect if we need CodingKeys (any field name is a Swift keyword)
+  const needCK = fields.some(f => SWIFT_KW.has(f.name));
+  for(const f of fields){
+    let t = "Any";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="Double"; break;
+      case "integer": t="Int"; break;
+      case "boolean": t="Bool"; break;
+      case "null": t="String?"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"Double",integer:"Int",boolean:"Bool",object:"[String:Any]",string:"String"}[f.itemType||"string"]);
+        t = `[${i}]`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "[String: Any]"; break;
+    }
+    let propName = f.name;
+    if(SWIFT_KW.has(propName)) propName = "`"+propName+"`";
+    lines.push(`    let ${propName}: ${t}`);
+  }
+  if(needCK){
+    lines.push("");
+    lines.push("    enum CodingKeys: String, CodingKey {");
+    for(const f of fields){
+      const propName = SWIFT_KW.has(f.name) ? "`"+f.name+"`" : f.name;
+      // Only emit explicit raw value when needed (keyword-escaped names need to map back to the JSON key)
+      if(SWIFT_KW.has(f.name)){
+        lines.push(`        case ${propName} = "${f.name.replace(/"/g,'\\"')}"`);
+      } else {
+        lines.push(`        case ${propName}`);
+      }
+    }
+    lines.push("    }");
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- PHP ----- */
+function genPhp(c){
+  const lines = [`class ${pascal(c.name)}`,`{`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "mixed";
+    switch(f.type){
+      case "string": t="string"; break;
+      case "number": t="float"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="?mixed"; break;
+      case "enum": t="string"; break;
+      case "array": t="array"; break;
+      case "object": t = objNestedClass(f) || "object"; break;
+    }
+    lines.push(`    public ${t} $${f.name};`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Ruby ----- */
+function genRuby(c){
+  const lines = [`class ${pascal(c.name)}`];
+  const attrs = c.fields.filter(f=>f.name).map(f=>`:${f.name}`);
+  if(attrs.length) lines.push(`  attr_accessor ${attrs.join(", ")}`);
+  lines.push("");
+  lines.push(`  def initialize(${c.fields.filter(f=>f.name).map(f=>f.name+":nil").join(", ")})`);
+  for(const f of c.fields){
+    if(!f.name) continue;
+    lines.push(`    @${f.name} = ${f.name}`);
+  }
+  lines.push("  end");
+  lines.push("end");
+  return lines.join("\n");
+}
+
+/* ----- Dart ----- */
+function genDart(c){
+  const lines = [`class ${pascal(c.name)} {`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "dynamic";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="double"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="dynamic"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"double",integer:"int",boolean:"bool",object:"Map<String,dynamic>",string:"String"}[f.itemType||"string"]);
+        t = `List<${i}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "Map<String,dynamic>"; break;
+    }
+    lines.push(`  ${t} ${f.name};`);
+  }
+  // constructor
+  const params = c.fields.filter(f=>f.name).map(f=>`required this.${f.name}`);
+  if(params.length){
+    lines.push("");
+    lines.push(`  ${pascal(c.name)}({${params.join(", ")}});`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Zod (TS validation schema) ----- */
+function genZod(c){
+  const lines = [`export const ${pascal(c.name)}Schema = z.object({`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "z.any()";
+    switch(f.type){
+      case "string": t="z.string()"; break;
+      case "number": t="z.number()"; break;
+      case "integer": t="z.number().int()"; break;
+      case "boolean": t="z.boolean()"; break;
+      case "null": t="z.null()"; break;
+      case "enum": {
+        const vals = (f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean);
+        t = vals.length ? `z.enum([${vals.map(v=>`"${v}"`).join(", ")}])` : "z.string()";
+        break;
+      }
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls ? `${cls}Schema` : ({number:"z.number()",integer:"z.number().int()",boolean:"z.boolean()",object:"z.record(z.any())",string:"z.string()"}[f.itemType||"string"]);
+        t = `z.array(${inner})`;
+        break;
+      }
+      case "object": {
+        const cls = objNestedClass(f);
+        t = cls ? `${cls}Schema` : "z.record(z.any())";
+        break;
+      }
+    }
+    lines.push(`  ${f.name}: ${t},`);
+  }
+  lines.push("});");
+  lines.push(`export type ${pascal(c.name)} = z.infer<typeof ${pascal(c.name)}Schema>;`);
+  return lines.join("\n");
+}
+
+/* ----- Light syntax highlighting for generated code ----- */
+function highlightCode(lang, src){
+  if(!src) return "";
+  let s = src.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  // strings
+  s = s.replace(/("[^"]*"|'[^']*')/g,'<span class="str">$1</span>');
+  // line comments
+  s = s.replace(/(\/\/.*$|#.*$)/gm,'<span class="cm">$1</span>');
+  // block comments /* */
+  s = s.replace(/(\/\*[\s\S]*?\*\/)/g,'<span class="cm">$1</span>');
+  // numbers
+  s = s.replace(/(?<![\w"])(-?\d+(?:\.\d+)?)(?!\w)/g,'<span class="num">$1</span>');
+  // attributes / decorators
+  s = s.replace(/(^|\n)(\s*)(@[\w\[\]\(\)=, "'\.]+|#\[[^\]]+\])/g,'$1$2<span class="at">$3</span>');
+  // keywords by language
+  const kwMap = {
+    typescript:["interface","export","string","number","boolean","null","any","Record","import","from","z","type","const"],
+    python:    ["class","from","import","dataclass","field","Optional","List","Any","str","int","float","bool","dict","None","True","False"],
+    pydantic:  ["class","from","import","BaseModel","Optional","List","Any","str","int","float","bool","dict"],
+    csharp:    ["public","class","get","set","string","int","double","bool","object","List","using","namespace"],
+    java:      ["public","class","private","String","int","double","boolean","Object","List","import"],
+    kotlin:    ["data","class","val","var","Int","Double","Boolean","String","Any","List","Map"],
+    go:        ["package","type","struct","string","int","float64","bool","interface","map"],
+    rust:      ["pub","struct","String","i64","f64","bool","Vec","Option","use","derive","Serialize","Deserialize"],
+    cpp:       ["struct","int","double","bool","void","std","string","vector"],
+    swift:     ["struct","let","var","String","Int","Double","Bool","Codable","import","Foundation","Any"],
+    php:       ["class","public","string","int","float","bool","array","object","mixed"],
+    ruby:      ["class","def","end","attr_accessor","initialize","nil"],
+    dart:      ["class","String","int","double","bool","dynamic","List","Map","required","this"],
+    zod:       ["export","const","import","from","z","string","number","boolean","null","array","object","record","enum","int"]
+  };
+  const kws = kwMap[lang] || [];
+  if(kws.length){
+    const re = new RegExp(`\\b(${kws.join("|")})\\b`, "g");
+    s = s.replace(re, '<span class="kw">$1</span>');
+  }
+  return s;
 }
 function classToJsonSchema(c){
   const out = {type:"object", title:c.name||"Unnamed", properties:{}, required:[]};
@@ -892,7 +1613,7 @@ function renderGenerator(){
 function buildGenForm(){
   const c = state.classes.find(c=>c.id===$("#gen-class-select").value) || getActive();
   if(!c){
-    $("#gen-form").innerHTML = `<div class="empty-state"><div class="big">📭</div>No class selected.</div>`;
+    $("#gen-form").innerHTML = `<div class="empty-state"><div class="big">${svg("inbox",56)}</div>No class selected.</div>`;
     return;
   }
   $("#gen-form").innerHTML = `<h2 style="margin:0 0 14px;font-size:15px">${escapeHtml(c.name)} <small style="color:var(--muted);font-weight:400;font-size:12px">— fill the fields</small></h2>`
@@ -927,7 +1648,7 @@ function formFieldHtml(f, path){
     const t = f.itemType||"string";
     inner = `<div class="array-field" data-path="${path}" data-itemtype="${t}">
       <div class="items"></div>
-      <button class="add-item" type="button">＋ Add ${t}</button>
+      <button class="add-item" type="button">${svg("plus",12)}<span>Add ${escapeHtml(t)}</span></button>
     </div>`;
   }else if(f.type==="object"){
     const target = findClassByName(f.defaultVal);
@@ -970,7 +1691,7 @@ function attachGenListeners(){
       }else{
         editor = `<input type="text" value="${escapeHtml(val||"")}"/>`;
       }
-      item.innerHTML = editor + `<button type="button" class="btn ghost" style="padding:4px 8px">✕</button>`;
+      item.innerHTML = editor + `<button type="button" class="btn ghost" style="padding:4px 8px" title="Remove" aria-label="Remove">${svg("x",13)}</button>`;
       items.appendChild(item);
       $('button',item).onclick = ()=>{item.remove();rebuildGenOutput();};
       $$('input,textarea',item).forEach(i=>{
@@ -1044,19 +1765,21 @@ function parseAndRender(){
   const txt = $("#json-input").value.trim();
   const out = $("#tree-output");
   if(!txt){
-    out.innerHTML = `<div class="empty-state"><div class="big">🌳</div>Empty input.</div>`;
+    out.innerHTML = `<div class="empty-state"><div class="big">${svg("tree",56)}</div>Empty input.</div>`;
     setParserStatus("empty", false);
     return;
   }
   try{
-    const data = JSON.parse(txt);
+    const cleaned = stripJsonc(txt);
+    const data = JSON.parse(cleaned);
     state.parsedJson = data;
     out.innerHTML = "";
     out.appendChild(buildTreeNode("$", data, "$", true));
-    setParserStatus("valid", true);
+    const hadComments = cleaned !== txt;
+    setParserStatus(hadComments ? "JSONC" : "valid", true);
     updateTreeStats(data);
   }catch(e){
-    out.innerHTML = `<div class="err-banner">⚠ Parse error: ${escapeHtml(e.message)}</div>`;
+    out.innerHTML = `<div class="err-banner"><span style="display:inline-flex;vertical-align:middle;margin-right:6px">${svg("alert",14)}</span>Parse error: ${escapeHtml(e.message)}</div>`;
     setParserStatus("invalid", false);
   }
 }
@@ -1094,19 +1817,18 @@ function buildTreeNode(key, value, path, isRoot=false){
   if(collapsible){
     const tog = document.createElement("span");
     tog.className = "tree-toggle";
-    tog.textContent = "▼";
+    tog.innerHTML = svg("chevronDown", 11);
     line.appendChild(tog);
     tog.onclick = ()=>{
       const ch = node.querySelector(":scope > .tree-children");
       const isCollapsed = ch.classList.toggle("collapsed");
-      tog.textContent = isCollapsed?"▶":"▼";
+      tog.innerHTML = svg(isCollapsed ? "chevronRight" : "chevronDown", 11);
       const summary = node.querySelector(":scope > .tree-line > .collapsed-summary");
       if(summary) summary.style.display = isCollapsed?"inline":"none";
     };
   }else{
     const sp = document.createElement("span");
-    sp.className = "tree-toggle";
-    sp.textContent = "·";
+    sp.className = "tree-toggle leaf";
     line.appendChild(sp);
   }
 
@@ -1181,8 +1903,8 @@ function buildTreeNode(key, value, path, isRoot=false){
     const actions = document.createElement("span");
     actions.className = "row-actions";
     actions.innerHTML = `
-      <button title="Copy value" data-act="copy-val">📋val</button>
-      <button title="Copy path" data-act="copy-path">📋path</button>
+      <button title="Copy value" data-act="copy-val" aria-label="Copy value">${svg("copy",11)}<span class="ra-lbl">val</span></button>
+      <button title="Copy path" data-act="copy-path" aria-label="Copy path">${svg("link",11)}<span class="ra-lbl">path</span></button>
     `;
     line.appendChild(actions);
     $('[data-act=copy-val]', actions).onclick = (e)=>{
@@ -1501,9 +2223,21 @@ function renderAll(){
   if(state.view==="generator") renderGenerator();
 }
 
+/* ----- Populate buttons that declared their icon via data-icon ----- */
+function paintButtons(){
+  $$('[data-icon],[data-label]').forEach(btn=>{
+    const icon = btn.dataset.icon, label = btn.dataset.label;
+    btn.innerHTML = (icon ? svg(icon,14) : "") + (label ? `<span>${escapeHtml(label)}</span>` : "");
+  });
+  // Add field button
+  const af = $("#add-field-btn");
+  if(af) af.innerHTML = `${svg("plus",13)}<span>Add field</span>`;
+}
+
 /* ----- Wire up events ----- */
 function init(){
   load();
+  paintButtons();
   // Tabs
   $$('.tab').forEach(t=>t.onclick = ()=>setView(t.dataset.view));
   // Theme
@@ -1534,6 +2268,38 @@ function init(){
     c.fields.push({name:"", type:"string", defaultVal:""});
     save();renderBuilder();
   };
+  // Preview tabs (Schema / Sample / Code)
+  $$('.ptab').forEach(b=>{
+    b.onclick = ()=>{
+      $$('.ptab').forEach(x=>x.classList.toggle('active', x===b));
+      state.previewTab = b.dataset.ptab;
+      renderPreview();
+    };
+  });
+  $("#lang-select").onchange = (e)=>{
+    state.previewLang = e.target.value;
+    renderPreview();
+  };
+  $("#btn-copy-preview").onclick = ()=>{
+    copyText($("#preview-output").innerText);
+    toast("Copied","ok");
+  };
+  $("#btn-download-preview").onclick = ()=>{
+    const c = getActive(); if(!c) return;
+    const txt = $("#preview-output").innerText;
+    const ext = ({
+      schema:"schema.json", sample:"sample.json"
+    })[state.previewTab] || ({
+      typescript:"ts", python:"py", pydantic:"py", csharp:"cs", java:"java",
+      kotlin:"kt", go:"go", rust:"rs", cpp:"cpp", swift:"swift",
+      php:"php", ruby:"rb", dart:"dart", zod:"ts"
+    })[state.previewLang] || "txt";
+    const fname = (state.previewTab==="code" ? `${pascal(c.name)}.${ext}` : `${c.name}.${ext}`);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([txt],{type:"text/plain"}));
+    a.download = fname; a.click(); URL.revokeObjectURL(a.href);
+    toast("Downloaded "+fname,"ok");
+  };
   // Generator
   $("#gen-class-select").onchange = ()=>{buildGenForm();rebuildGenOutput();};
   $("#btn-gen-build").onclick = rebuildGenOutput;
@@ -1553,7 +2319,7 @@ function init(){
   $("#btn-parse").onclick = parseAndRender;
   $("#btn-format").onclick = ()=>{
     try{
-      const d = JSON.parse($("#json-input").value);
+      const d = parseJsonc($("#json-input").value);
       $("#json-input").value = JSON.stringify(d,null,2);
       parseAndRender();
       toast("Formatted","ok");
@@ -1561,7 +2327,7 @@ function init(){
   };
   $("#btn-minify").onclick = ()=>{
     try{
-      const d = JSON.parse($("#json-input").value);
+      const d = parseJsonc($("#json-input").value);
       $("#json-input").value = JSON.stringify(d);
       parseAndRender();
       toast("Minified","ok");
