@@ -1484,21 +1484,43 @@ function genZod(c){
   return lines.join("\n");
 }
 
-/* ----- Light syntax highlighting for generated code ----- */
+/* ----- Light syntax highlighting for generated code -----
+   Tokenize-first: extract strings, comments, numbers, attributes
+   into placeholders BEFORE keyword matching, so a language keyword
+   like "class" cannot accidentally rewrite an already-inserted
+   HTML attribute (e.g. class="str") inside a span.
+   Placeholders use private-use chars \uE000 / \uE001 so they
+   cannot collide with anything in real source code.
+*/
 function highlightCode(lang, src){
   if(!src) return "";
+  // 1. HTML-escape
   let s = src.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
-  // strings
-  s = s.replace(/("[^"]*"|'[^']*')/g,'<span class="str">$1</span>');
-  // line comments
-  s = s.replace(/(\/\/.*$|#.*$)/gm,'<span class="cm">$1</span>');
-  // block comments /* */
-  s = s.replace(/(\/\*[\s\S]*?\*\/)/g,'<span class="cm">$1</span>');
-  // numbers
-  s = s.replace(/(?<![\w"])(-?\d+(?:\.\d+)?)(?!\w)/g,'<span class="num">$1</span>');
-  // attributes / decorators
-  s = s.replace(/(^|\n)(\s*)(@[\w\[\]\(\)=, "'\.]+|#\[[^\]]+\])/g,'$1$2<span class="at">$3</span>');
-  // keywords by language
+
+  // 2. Tokenize -> placeholders
+  const tokens = [];
+  const O = "\uE000", C = "\uE001";
+  const stash = (cls, text) => {
+    const i = tokens.length;
+    tokens.push(`<span class="${cls}">${text}</span>`);
+    return O + i + C;
+  };
+
+  // Strings (escape-aware, double/single/back quotes)
+  s = s.replace(/("(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`(?:\\.|[^`\\])*`)/g, m => stash("str", m));
+  // Block comments
+  s = s.replace(/(\/\*[\s\S]*?\*\/)/g, m => stash("cm", m));
+  // Line comments  // ...   and Python-style # ...
+  s = s.replace(/(\/\/[^\n]*|^[ \t]*#[^\n]*)/gm, m => stash("cm", m));
+  // Numbers — explicitly skip digits already inside a placeholder
+  s = s.replace(/(?<![\w\uE000\uE001])(-?\d+(?:\.\d+)?)(?![\w\uE000\uE001])/g,
+                m => stash("num", m));
+  // Attributes / decorators:
+  //   Python @decorator   Rust #[derive(...)]   C# [JsonPropertyName(...)]
+  s = s.replace(/(^|\n)(\s*)(@\w[\w\.]*|#\[[^\]\n]+\]|\[[A-Z][^\]\n]*\])/g,
+                (_, p1, p2, p3) => p1 + p2 + stash("at", p3));
+
+  // 3. Apply keyword highlighting on the cleaned text
   const kwMap = {
     typescript:["interface","export","string","number","boolean","null","any","Record","import","from","z","type","const"],
     python:    ["class","from","import","dataclass","field","Optional","List","Any","str","int","float","bool","dict","None","True","False"],
@@ -1520,6 +1542,13 @@ function highlightCode(lang, src){
     const re = new RegExp(`\\b(${kws.join("|")})\\b`, "g");
     s = s.replace(re, '<span class="kw">$1</span>');
   }
+
+  // 4. Restore placeholders in their final positions.
+  // Loop because tokens can nest (e.g. an attribute placeholder may
+  // wrap a string placeholder).
+  let prev;
+  do { prev = s; s = s.replace(/\uE000(\d+)\uE001/g, (_, i) => tokens[+i]); }
+  while(s !== prev);
   return s;
 }
 function classToJsonSchema(c){
