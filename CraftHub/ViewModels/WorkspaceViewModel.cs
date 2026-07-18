@@ -106,6 +106,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         CopyRowsToJsonCommand.NotifyCanExecuteChanged();
         CopyRowsToJsonAsObjectsCommand.NotifyCanExecuteChanged();
         CutRowsToDataGridCommand.NotifyCanExecuteChanged();
+        InsertRowAfterCommand.NotifyCanExecuteChanged();
         DuplicateRowsCommand.NotifyCanExecuteChanged();
         DuplicateAfterRowsCommand.NotifyCanExecuteChanged();
         RemoveRowsCommand.NotifyCanExecuteChanged();
@@ -413,6 +414,34 @@ public partial class WorkspaceViewModel : ViewModelBase
         Rows.Add(row);
         UndoRedo.Push(new AddRowAction(Rows, row));
         NotifySuccess(Localizer.Get("RowAdded", Rows.Count));
+    }
+
+    /// <summary>Inserts a new empty row immediately after the selected row (at selectedIndex + 1),
+    /// rather than appending it to the end of the table.</summary>
+    [RelayCommand(CanExecute = nameof(HasSelection))]
+    private void InsertRowAfter(object? parameter)
+    {
+        var source = ResolveSelectedRows(parameter);
+
+        // Insert point = one position after the last selected row; fall back to the end.
+        int insertIdx;
+        if (source == null || source.Count == 0)
+        {
+            insertIdx = Rows.Count;
+        }
+        else
+        {
+            var insertAfter = source.OrderByDescending(r => Rows.IndexOf(r)).First();
+            insertIdx = Rows.IndexOf(insertAfter) + 1;
+        }
+
+        var row = new DynamicDataRow();
+        foreach (var prop in Properties)
+            row.InitializeProperty(prop.Name);
+
+        Rows.Insert(insertIdx, row);
+        UndoRedo.Push(new InsertRowAction(Rows, row, insertIdx));
+        NotifySuccess(Localizer.Get("RowInsertedMsg", insertIdx + 1));
     }
 
     [RelayCommand(CanExecute = nameof(HasSelection))]

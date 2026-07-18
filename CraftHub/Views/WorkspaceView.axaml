@@ -351,6 +351,9 @@
 											  InputGesture="Ctrl+V"
 											  Command="{Binding PasteRowsToDataGridCommand}" />
 									<Separator />
+									<MenuItem Header="{DynamicResource CtxInsertRowAfter}"
+											  Command="{Binding InsertRowAfterCommand}"
+											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
 									<MenuItem Header="{DynamicResource CtxDuplicate}"
 											  Command="{Binding DuplicateRowsCommand}"
 											  CommandParameter="{Binding #DataGrid.SelectedItems}" />
