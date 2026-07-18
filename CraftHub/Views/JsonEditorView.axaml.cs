@@ -45,14 +45,51 @@ public partial class JsonEditorView : Window
 
     private void OnPropertiesChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
-        if (_currentVm != null) RebuildColumns(_currentVm);
+        if (_currentVm == null) return;
+
+        // Update only the affected columns so adding/removing a field does not tear down and
+        // re-create every column (which forces the whole grid to re-render and drops widths).
+        switch (e.Action)
+        {
+            case NotifyCollectionChangedAction.Add
+                when e.NewItems is { Count: 1 } added && added[0] is JsonPropertyDefinition prop:
+                NestedDataGrid.Columns.Insert(
+                    e.NewStartingIndex >= 0 ? e.NewStartingIndex : NestedDataGrid.Columns.Count,
+                    BuildColumn(prop));
+                break;
+
+            case NotifyCollectionChangedAction.Remove
+                when e.OldStartingIndex >= 0 && e.OldStartingIndex < NestedDataGrid.Columns.Count:
+                NestedDataGrid.Columns.RemoveAt(e.OldStartingIndex);
+                break;
+
+            default:
+                // Reset, Replace, Move — structure changed too much to patch.
+                RebuildColumns(_currentVm);
+                break;
+        }
     }
 
     private void RebuildColumns(JsonEditorViewModel vm)
     {
+        // Preserve per-column widths (keyed by property name in Tag) across the rebuild.
+        var savedWidths = new System.Collections.Generic.Dictionary<string, Avalonia.Controls.DataGridLength>();
+        foreach (var col in NestedDataGrid.Columns)
+            if (col.Tag is string tag)
+                savedWidths[tag] = col.Width;
+
         NestedDataGrid.Columns.Clear();
         foreach (var prop in vm.Properties)
         {
+            var column = BuildColumn(prop);
+            if (savedWidths.TryGetValue(prop.Name, out var savedWidth))
+                column.Width = savedWidth;
+            NestedDataGrid.Columns.Add(column);
+        }
+    }
+
+    private Avalonia.Controls.DataGridTemplateColumn BuildColumn(JsonPropertyDefinition prop)
+    {
             var header = $"{prop.Name} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})";
 
             var headerText = new Avalonia.Controls.TextBlock
@@ -67,6 +104,7 @@ public partial class JsonEditorView : Window
 
             var column = new Avalonia.Controls.DataGridTemplateColumn
             {
+                Tag = prop.Name,
                 Header = headerText,
                 Width = Avalonia.Controls.DataGridLength.SizeToCells,
                 MinWidth = 100,
@@ -201,8 +239,7 @@ public partial class JsonEditorView : Window
                 column.IsReadOnly = true;
             }
 
-            NestedDataGrid.Columns.Add(column);
-        }
+            return column;
     }
 
     private bool _isConfirmedClose = false;
