@@ -2,10 +2,12 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CraftHub.ViewModels"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:cl="clr-namespace:Coachlight.Avalonia.Targeting;assembly=Coachlight.Avalonia"
              x:Class="CraftHub.Views.FileExplorerView"
              x:DataType="vm:FileExplorerViewModel">
 
-    <Border Background="{DynamicResource SurfaceBackground}"
+    <Border cl:Coachmark.Id="explorerPanel"
+            Background="{DynamicResource SurfaceBackground}"
             BorderBrush="{DynamicResource BorderColor}"
             BorderThickness="0,0,1,0">
         <Grid RowDefinitions="Auto,Auto,Auto,*">
@@ -38,6 +40,7 @@
                         <materialIcons:MaterialIcon Kind="Refresh" Width="15" Height="15" />
                     </Button>
                     <Button Classes="explorer-btn"
+                            cl:Coachmark.Id="explorerOpenFolder"
                             Command="{Binding OpenFolderCommand}"
                             ToolTip.Tip="{DynamicResource OpenFolderTip}">
                         <materialIcons:MaterialIcon Kind="FolderOpenOutline" Width="15" Height="15" />

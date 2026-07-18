@@ -4,6 +4,7 @@ using Avalonia.Interactivity;
 using Avalonia.Threading;
 using CraftHub.Core;
 using CraftHub.Helpers;
+using CraftHub.Services;
 using CraftHub.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -17,6 +18,9 @@ public partial class MainWindow : Window
     private ScrollViewer? _notificationHistoryScroll;
     private MainWindowViewModel? _vm;
 
+    // Onboarding is shown once per user; the "?" title-bar button replays it on demand.
+    private bool _tourAutoStarted;
+
     public MainWindow()
     {
         InitializeComponent();
@@ -29,7 +33,24 @@ public partial class MainWindow : Window
         // Wire up tab click selection since binding to SelectedWorkspace
         // through ItemsControl item template is non-trivial
         UpdateTabVisuals();
+
+        // Auto-start the app tour the first time (posted to Background so the first layout pass
+        // completes and coachmark targets have on-screen bounds). Once-only is enforced by the
+        // onboarding service's progress store.
+        if (!_tourAutoStarted)
+        {
+            _tourAutoStarted = true;
+            Dispatcher.UIThread.Post(
+                () => App.Current.Services.GetRequiredService<IOnboardingService>().ShowAppTour(this),
+                DispatcherPriority.Background);
+        }
     }
+
+    //  Interface onboarding tour (Coachlight)
+
+    private void OnStartTourClick(object? sender, RoutedEventArgs e)
+        // force: true — always replay, even if already completed once.
+        => App.Current.Services.GetRequiredService<IOnboardingService>().ShowAppTour(this, force: true);
 
     protected override void OnDataContextChanged(EventArgs e)
     {

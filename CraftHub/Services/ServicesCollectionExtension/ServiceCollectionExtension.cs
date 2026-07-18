@@ -18,6 +18,7 @@ namespace CraftHub.Services.ServicesCollectionExtension
             services.AddSingleton<IClassParserService, ClassParserService>();
             services.AddSingleton<IDialogService, DialogService>();
             services.AddSingleton<ThemeService>();
+            services.AddSingleton<IOnboardingService, OnboardingService>();
         }
     }
 }

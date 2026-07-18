@@ -3,6 +3,7 @@
 		xmlns:vm="using:CraftHub.ViewModels"
 		xmlns:views="using:CraftHub.Views"
 		xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+		xmlns:cl="clr-namespace:Coachlight.Avalonia.Targeting;assembly=Coachlight.Avalonia"
 		x:Class="CraftHub.Views.MainWindow"
 		Title="CraftHub"
 		MinWidth="1100" MinHeight="600"
@@ -33,17 +34,26 @@
 							Classes="toolbar-btn"
 							Command="{Binding DownloadAndStartUpdateCommand}"
 							ToolTip.Tip="{DynamicResource UpdateTip}" FontSize="16" />
-					<Button Content="{materialIcons:MaterialIconExt Kind=Github}" Classes="toolbar-btn"
+					<Button x:Name="TourHelpButton"
+							cl:Coachmark.Id="tourHelp"
+							Content="{materialIcons:MaterialIconExt Kind=HelpCircleOutline}" Classes="toolbar-btn"
+							Click="OnStartTourClick"
+							ToolTip.Tip="{DynamicResource TourHelpTip}" FontSize="16" />
+					<Button cl:Coachmark.Id="githubBtn"
+							Content="{materialIcons:MaterialIconExt Kind=Github}" Classes="toolbar-btn"
 							Command="{Binding GoToGitHubRepoCommand}"
 							ToolTip.Tip="{DynamicResource GitHub}" FontSize="16" />
-					<Button Content="{materialIcons:MaterialIconExt Kind=BellNotificationOutline}" Classes="toolbar-btn"
+					<Button cl:Coachmark.Id="notificationsBtn"
+							Content="{materialIcons:MaterialIconExt Kind=BellNotificationOutline}" Classes="toolbar-btn"
 					        Command="{Binding ToggleNotificationManagerCommand}"
 					        ToolTip.Tip="{DynamicResource NotificationsTip}" FontSize="16" />
-					<Button Classes="toolbar-btn"
+					<Button cl:Coachmark.Id="themeBtn"
+							Classes="toolbar-btn"
 							Command="{Binding ToggleThemeCommand}"
 							Content="{materialIcons:MaterialIconExt Kind=ThemeLightDark}"
 							ToolTip.Tip="{DynamicResource ToggleThemeTip}" FontSize="16" />
-					<Button Classes="toolbar-btn"
+					<Button cl:Coachmark.Id="languageBtn"
+							Classes="toolbar-btn"
 							Command="{Binding ToggleLanguageCommand}"
 							ToolTip.Tip="{DynamicResource ToggleLanguageTip}"
 							Content="{Binding CurrentLang}"
@@ -120,6 +130,7 @@
 				BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
 			<Grid ColumnDefinitions="Auto,*,Auto">
 					<Button Grid.Column="0"
+							cl:Coachmark.Id="fileExplorerBtn"
 							Classes="explorer-btn"
 							VerticalAlignment="Center" Margin="0,0,10,0"
 							Command="{Binding FileExplorer.ToggleCommand}"
@@ -177,6 +188,7 @@
 				</ScrollViewer>
 
 				<Button Grid.Column="2"
+						cl:Coachmark.Id="addWorkspaceBtn"
 						Classes="tab-add"
 						VerticalAlignment="Center" Margin="10,0,0,0"
 						Content="{materialIcons:MaterialIconExt Kind=PlusThick}"

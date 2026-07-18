@@ -216,4 +216,47 @@
     <x:String x:Key="PasteFailedMsg">Не удалось вставить: {0}</x:String>
     <x:String x:Key="PasteIntoSelfMsg">Нельзя вставить папку саму в себя.</x:String>
 
+    <!-- Обзор интерфейса (Coachlight) -->
+    <x:String x:Key="TourHelpTip">Обзор интерфейса</x:String>
+    <x:String x:Key="TourSkip">Пропустить</x:String>
+    <x:String x:Key="TourBack">Назад</x:String>
+    <x:String x:Key="TourNext">Далее</x:String>
+    <x:String x:Key="TourDone">Готово</x:String>
+    <x:String x:Key="TourWelcomeTitle">Добро пожаловать в CraftHub!</x:String>
+    <x:String x:Key="TourWelcomeText">Короткий обзор интерфейса. Займёт несколько секунд — пропустить можно в любой момент.</x:String>
+    <x:String x:Key="TourAddWorkspaceTitle">Новое рабочее пространство</x:String>
+    <x:String x:Key="TourAddWorkspaceText">Создайте здесь новую вкладку, чтобы начать работу с данными JSON.</x:String>
+    <x:String x:Key="TourSaveTitle">Сохранение</x:String>
+    <x:String x:Key="TourSaveText">Сохранить текущее рабочее пространство в файл (Ctrl+S).</x:String>
+    <x:String x:Key="TourImportExportTitle">Импорт и экспорт</x:String>
+    <x:String x:Key="TourImportExportText">Загрузите готовый JSON или выгрузите созданный. Импорт/экспорт класса тоже здесь.</x:String>
+    <x:String x:Key="TourAddPropertyTitle">Добавление поля</x:String>
+    <x:String x:Key="TourAddPropertyText">Введите имя поля, выберите тип и добавьте его в схему.</x:String>
+    <x:String x:Key="TourSchemaTitle">Схема</x:String>
+    <x:String x:Key="TourSchemaText">Здесь ваши поля — каждое можно переименовать, сменить тип или удалить.</x:String>
+    <x:String x:Key="TourGridTitle">Таблица данных</x:String>
+    <x:String x:Key="TourGridText">Редактируйте значения по строкам. Правый клик — копирование, вставка, дублирование и удаление.</x:String>
+    <x:String x:Key="TourAddRowTitle">Добавление строки</x:String>
+    <x:String x:Key="TourAddRowText">Добавить новую пустую строку в таблицу.</x:String>
+    <x:String x:Key="TourSearchTitle">Поиск</x:String>
+    <x:String x:Key="TourSearchText">Фильтрация строк по совпадению текста во всех колонках.</x:String>
+    <x:String x:Key="TourSwitchJsonTitle">Таблица / JSON</x:String>
+    <x:String x:Key="TourSwitchJsonText">В любой момент переключайтесь на редактор чистого JSON и обратно.</x:String>
+    <x:String x:Key="TourFileExplorerTitle">Проводник файлов</x:String>
+    <x:String x:Key="TourFileExplorerText">Показать боковую панель для просмотра и открытия файлов с диска. Давайте откроем её.</x:String>
+    <x:String x:Key="TourExplorerPanelTitle">Обзор файлов</x:String>
+    <x:String x:Key="TourExplorerPanelText">Просматривайте папку деревом: открывайте файлы во вкладки, фильтруйте поиском. Правый клик по элементу — создать / переименовать / удалить, а перетаскиванием можно перемещать.</x:String>
+    <x:String x:Key="TourExplorerOpenTitle">Открыть папку</x:String>
+    <x:String x:Key="TourExplorerOpenText">Выберите здесь рабочую папку, чтобы заполнить дерево. Кнопки в шапке также обновляют, сворачивают дерево и создают файлы.</x:String>
+    <x:String x:Key="TourNotificationsTitle">Уведомления</x:String>
+    <x:String x:Key="TourNotificationsText">Откройте центр уведомлений, чтобы посмотреть последние сообщения и события.</x:String>
+    <x:String x:Key="TourThemeTitle">Светлая / тёмная тема</x:String>
+    <x:String x:Key="TourThemeText">Переключение между светлым и тёмным оформлением.</x:String>
+    <x:String x:Key="TourLanguageTitle">Язык</x:String>
+    <x:String x:Key="TourLanguageText">Переключение языка интерфейса между английским и русским.</x:String>
+    <x:String x:Key="TourGithubTitle">Исходный код</x:String>
+    <x:String x:Key="TourGithubText">Открыть репозиторий проекта на GitHub.</x:String>
+    <x:String x:Key="TourHelpStepTitle">Нужно повторить?</x:String>
+    <x:String x:Key="TourHelpStepText">Нажмите эту кнопку помощи в любой момент, чтобы снова запустить обзор интерфейса.</x:String>
+
 </ResourceDictionary>

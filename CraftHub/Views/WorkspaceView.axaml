@@ -4,6 +4,7 @@
 			 xmlns:models="using:CraftHub.Domain.Models"
 			 xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
 			 xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+			 xmlns:cl="clr-namespace:Coachlight.Avalonia.Targeting;assembly=Coachlight.Avalonia"
 			 x:Class="CraftHub.Views.WorkspaceView"
 			 x:DataType="vm:WorkspaceViewModel">
 
@@ -25,6 +26,7 @@
 							ClipToBounds="True">
 
 					<Button Classes="toolbar-btn" Command="{Binding SaveCommand}"
+							cl:Coachmark.Id="wsSave"
 							ToolTip.Tip="{DynamicResource SaveTip}">
 						<StackPanel Orientation="Horizontal" Spacing="6">
 							<materialIcons:MaterialIcon Kind="ContentSaveOutline" Width="16" Height="16" />
@@ -36,6 +38,7 @@
 
 					<!-- Import / export buttons — individually collapse into the … menu when the toolbar is narrow -->
 					<Button x:Name="BtnImportJson" Classes="toolbar-btn" Command="{Binding ImportJsonCommand}"
+							cl:Coachmark.Id="importJson"
 							ToolTip.Tip="{DynamicResource ImportJsonTip}">
 						<StackPanel Orientation="Horizontal" Spacing="6">
 							<materialIcons:MaterialIcon Kind="FileImportOutline" Width="16" Height="16" />
@@ -43,6 +46,7 @@
 						</StackPanel>
 					</Button>
 					<Button x:Name="BtnExportJson" Classes="toolbar-btn" Command="{Binding ExportJsonCommand}"
+							cl:Coachmark.Id="exportJson"
 							ToolTip.Tip="{DynamicResource ExportJsonTip}">
 						<StackPanel Orientation="Horizontal" Spacing="6">
 							<materialIcons:MaterialIcon Kind="FileExportOutline" Width="16" Height="16" />
@@ -68,6 +72,7 @@
 							IsVisible="{Binding IsTableEditorMode}" />
 
 					<Button Classes="toolbar-btn"
+							cl:Coachmark.Id="wsAddRow"
 							Command="{Binding AddRowCommand}"
 							ToolTip.Tip="{DynamicResource AddRowTip}"
 							IsVisible="{Binding IsTableEditorMode}">
@@ -97,12 +102,14 @@
 							IsVisible="{Binding IsTableEditorMode}" />
 
 					<TextBox Text="{Binding SearchQuery}" Watermark="{DynamicResource SearchWatermark}"
+							 cl:Coachmark.Id="wsSearch"
 							 Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13"
 							 IsVisible="{Binding IsTableEditorMode}" />
 
 					<Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 
 					<Button Classes="toolbar-btn" Command="{Binding SwitchToJsonEditorCommand}"
+							cl:Coachmark.Id="wsSwitchJson"
 							IsVisible="{Binding IsTableEditorMode}"
 							ToolTip.Tip="{DynamicResource SwitchToJsonTip}">
 						<StackPanel Orientation="Horizontal" Spacing="6">
@@ -160,6 +167,7 @@
 
 		<!-- Toolbar Row 2: Add Property -->
 		<Border Grid.Row="1" Background="{DynamicResource SurfaceBackground}" Padding="8,6"
+				cl:Coachmark.Id="wsAddProperty"
 				CornerRadius="8" Margin="8,6,8,0"
 				IsVisible="{Binding IsTableEditorMode}">
 			<StackPanel Orientation="Horizontal" Spacing="8">
@@ -195,6 +203,7 @@
 				<ColumnDefinition Width="*" MinWidth="520" />
 			</Grid.ColumnDefinitions>
 			<Border Grid.Column="0"
+					cl:Coachmark.Id="wsSchema"
 					Background="{DynamicResource SurfaceBackground}"
 					BorderBrush="{DynamicResource BorderColor}"
 					BorderThickness="1"
@@ -306,6 +315,7 @@
 						Background="{DynamicResource ElevatedBackground}"
 						ClipToBounds="True">
 						<DataGrid x:Name="DataGrid"
+								  cl:Coachmark.Id="wsGrid"
 								  MinWidth="520"
 								  RowHeaderWidth="48"
 								  ItemsSource="{Binding Rows}"

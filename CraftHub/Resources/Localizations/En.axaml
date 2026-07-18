@@ -217,4 +217,47 @@
 	<x:String x:Key="PasteFailedMsg">Paste failed: {0}</x:String>
 	<x:String x:Key="PasteIntoSelfMsg">Cannot paste a folder into itself.</x:String>
 
+	<!-- Interface tour (Coachlight) -->
+	<x:String x:Key="TourHelpTip">Interface tour</x:String>
+	<x:String x:Key="TourSkip">Skip</x:String>
+	<x:String x:Key="TourBack">Back</x:String>
+	<x:String x:Key="TourNext">Next</x:String>
+	<x:String x:Key="TourDone">Done</x:String>
+	<x:String x:Key="TourWelcomeTitle">Welcome to CraftHub!</x:String>
+	<x:String x:Key="TourWelcomeText">A quick tour of the interface. It takes a few seconds — you can skip it anytime.</x:String>
+	<x:String x:Key="TourAddWorkspaceTitle">New workspace</x:String>
+	<x:String x:Key="TourAddWorkspaceText">Create a new workspace tab here to start building your JSON data.</x:String>
+	<x:String x:Key="TourSaveTitle">Save</x:String>
+	<x:String x:Key="TourSaveText">Save the current workspace to a file (Ctrl+S).</x:String>
+	<x:String x:Key="TourImportExportTitle">Import &amp; export</x:String>
+	<x:String x:Key="TourImportExportText">Bring in existing JSON or export what you build. Class import/export lives here too.</x:String>
+	<x:String x:Key="TourAddPropertyTitle">Add a property</x:String>
+	<x:String x:Key="TourAddPropertyText">Type a field name, pick its type, and add it to the schema.</x:String>
+	<x:String x:Key="TourSchemaTitle">Schema</x:String>
+	<x:String x:Key="TourSchemaText">Your fields live here — rename, retype or remove each one.</x:String>
+	<x:String x:Key="TourGridTitle">Data grid</x:String>
+	<x:String x:Key="TourGridText">Edit values row by row. Right-click for copy, paste, duplicate and delete.</x:String>
+	<x:String x:Key="TourAddRowTitle">Add a row</x:String>
+	<x:String x:Key="TourAddRowText">Append a new empty row to the data grid.</x:String>
+	<x:String x:Key="TourSearchTitle">Search</x:String>
+	<x:String x:Key="TourSearchText">Filter rows by matching text across all columns.</x:String>
+	<x:String x:Key="TourSwitchJsonTitle">Table / JSON view</x:String>
+	<x:String x:Key="TourSwitchJsonText">Switch to the raw JSON editor and back at any time.</x:String>
+	<x:String x:Key="TourFileExplorerTitle">File explorer</x:String>
+	<x:String x:Key="TourFileExplorerText">Toggle the side panel to browse and open files from disk. Let's open it.</x:String>
+	<x:String x:Key="TourExplorerPanelTitle">File browser</x:String>
+	<x:String x:Key="TourExplorerPanelText">Browse a folder as a tree: open files into tabs, and use search to filter them. Right-click any item for new / rename / delete, and drag &amp; drop to move.</x:String>
+	<x:String x:Key="TourExplorerOpenTitle">Open a folder</x:String>
+	<x:String x:Key="TourExplorerOpenText">Pick a working folder here to populate the tree. The header buttons also refresh, collapse and create files.</x:String>
+	<x:String x:Key="TourNotificationsTitle">Notifications</x:String>
+	<x:String x:Key="TourNotificationsText">Open the notification center to review recent messages and events.</x:String>
+	<x:String x:Key="TourThemeTitle">Light / dark theme</x:String>
+	<x:String x:Key="TourThemeText">Switch between light and dark appearance.</x:String>
+	<x:String x:Key="TourLanguageTitle">Language</x:String>
+	<x:String x:Key="TourLanguageText">Switch the interface language between English and Russian.</x:String>
+	<x:String x:Key="TourGithubTitle">Source code</x:String>
+	<x:String x:Key="TourGithubText">Open the project repository on GitHub.</x:String>
+	<x:String x:Key="TourHelpStepTitle">Need this again?</x:String>
+	<x:String x:Key="TourHelpStepText">Click this help button anytime to replay the interface tour.</x:String>
+
 </ResourceDictionary>
