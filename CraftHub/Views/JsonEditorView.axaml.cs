@@ -1,11 +1,14 @@
 using Avalonia.Controls;
 using Avalonia.Data;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 using CraftHub.Core;
 using CraftHub.Domain.Enums;
 using CraftHub.Domain.Models;
 using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.Services;
+using CraftHub.Services.Actions;
 using CraftHub.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -17,11 +20,27 @@ public partial class JsonEditorView : Window
 {
     private JsonEditorViewModel? _currentVm;
 
+    private (DynamicDataRow Row, string PropName, string OldValue)? _pendingEdit;
+
     public JsonEditorView()
     {
         InitializeComponent();
 
         DataContextChanged += OnDataContextChanged;
+        NestedDataGrid.CellEditEnded += OnCellEditEnded;
+    }
+
+    private void OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
+    {
+        if (_pendingEdit == null || _currentVm == null) return;
+
+        var (row, propName, oldValue) = _pendingEdit.Value;
+        _pendingEdit = null;
+
+        var newValue = row[propName];
+        if (newValue == oldValue) return;
+
+        _currentVm.UndoRedo.Push(new EditCellAction(row, propName, oldValue, newValue, NestedDataGrid));
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -177,6 +196,28 @@ public partial class JsonEditorView : Window
                         };
                         cb.Bind(Avalonia.Controls.CheckBox.IsCheckedProperty,
                             DynamicRowCellBinding.ForKey(prop.Name, Avalonia.Data.BindingMode.TwoWay, new CraftHub.Converters.DynamicRowBoolConverter()));
+
+                        // Undo tracking for bool cells: PointerPressed flags a real user click and
+                        // snapshots the old value, so binding-driven changes from Undo/Redo are ignored.
+                        var boolOldValue = row[prop.Name] == "true";
+                        var boolUserInteraction = false;
+
+                        cb.AddHandler(InputElement.PointerPressedEvent, (_, _) =>
+                        {
+                            boolUserInteraction = true;
+                            boolOldValue = row[prop.Name] == "true";
+                        }, RoutingStrategies.Tunnel);
+
+                        cb.IsCheckedChanged += (_, _) =>
+                        {
+                            if (!boolUserInteraction) return;
+                            boolUserInteraction = false;
+
+                            var newVal = cb.IsChecked == true;
+                            if (newVal != boolOldValue && _currentVm != null)
+                                _currentVm.UndoRedo.Push(new EditCheckBoxCellAction(row, prop.Name, boolOldValue, newVal, NestedDataGrid));
+                        };
+
                         border.Child = cb;
                     }
                     else
@@ -206,6 +247,9 @@ public partial class JsonEditorView : Window
             {
                 column.CellEditingTemplate = new Avalonia.Controls.Templates.FuncDataTemplate<DynamicDataRow>((row, ns) =>
                 {
+                    // Snapshot the value as the editor opens; OnCellEditEnded compares against it.
+                    _pendingEdit = (row, prop.Name, row[prop.Name]);
+
                     if (isBoolType)
                     {
                         var cb = new Avalonia.Controls.CheckBox

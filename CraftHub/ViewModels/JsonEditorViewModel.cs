@@ -3,8 +3,10 @@ using CommunityToolkit.Mvvm.Input;
 using CraftHub.Core;
 using CraftHub.Domain.Enums;
 using CraftHub.Domain.Models;
+using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.Services;
+using CraftHub.Services.Actions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -30,6 +32,30 @@ public partial class JsonEditorViewModel : ViewModelBase
 
     public event EventHandler<string>? JsonSubmitted;
     public event EventHandler? Cancelled;
+
+    public UndoRedoService UndoRedo { get; } = new();
+
+    private bool CanUndo => UndoRedo.CanUndo;
+    private bool CanRedo => UndoRedo.CanRedo;
+
+    [ObservableProperty] private string _undoTooltip = string.Empty;
+    [ObservableProperty] private string _redoTooltip = string.Empty;
+
+    [RelayCommand(CanExecute = nameof(CanUndo))]
+    private void Undo() => UndoRedo.Undo();
+
+    [RelayCommand(CanExecute = nameof(CanRedo))]
+    private void Redo() => UndoRedo.Redo();
+
+    private void RefreshUndoRedoState()
+    {
+        UndoCommand.NotifyCanExecuteChanged();
+        RedoCommand.NotifyCanExecuteChanged();
+        UndoTooltip = UndoRedo.UndoDescription is { } u
+            ? $"{Localizer.Get("UndoTip")}: {u}" : Localizer.Get("UndoTip");
+        RedoTooltip = UndoRedo.RedoDescription is { } r
+            ? $"{Localizer.Get("RedoTip")}: {r}" : Localizer.Get("RedoTip");
+    }
 
     public JsonEditorViewModel(string initialJson, JsonFieldType expectedType, IJsonService jsonService, IDialogService dialogService, NotificationService notificationService,
         IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null)
@@ -88,6 +114,9 @@ public partial class JsonEditorViewModel : ViewModelBase
             foreach (var p in Properties) emptyRow.InitializeProperty(p.Name);
             Rows.Add(emptyRow);
         }
+
+        UndoRedo.PropertyChanged += (_, _) => RefreshUndoRedoState();
+        RefreshUndoRedoState();
     }
 
     [RelayCommand]
@@ -104,6 +133,11 @@ public partial class JsonEditorViewModel : ViewModelBase
 
         Properties.Add(prop);
         foreach (var row in Rows) row.InitializeProperty(prop.Name);
+
+        // Columns are patched incrementally off Properties.CollectionChanged, so the action's
+        // "columns changed" callback is a no-op here.
+        UndoRedo.Push(new AddPropertyAction(Properties, Rows, prop, () => { }));
+
         PropertyNameInput = string.Empty;
     }
 
@@ -118,8 +152,14 @@ public partial class JsonEditorViewModel : ViewModelBase
         {
             return;
         }
+
+        var propIndex = Properties.IndexOf(prop);
+        var savedValues = Rows.ToDictionary(r => r, r => r[prop.Name]);
+
         Properties.Remove(prop);
         foreach (var row in Rows) row.RemoveProperty(prop.Name);
+
+        UndoRedo.Push(new RemovePropertyAction(Properties, Rows, prop, propIndex, savedValues, () => { }));
     }
 
     [RelayCommand]
@@ -129,6 +169,7 @@ public partial class JsonEditorViewModel : ViewModelBase
         var row = new DynamicDataRow();
         foreach (var prop in Properties) row.InitializeProperty(prop.Name);
         Rows.Add(row);
+        UndoRedo.Push(new AddRowAction(Rows, row));
     }
 
     [RelayCommand]
@@ -199,6 +240,7 @@ public partial class JsonEditorViewModel : ViewModelBase
             if (idx >= 0)
             {
                 Rows[idx] = newRow;
+                UndoRedo.Push(new EditJsonCellAction(Rows, row, newRow, propertyName));
             }
 
             _notificationService.Publish(NotificationType.Success, $"Updated '{propertyName}'");
