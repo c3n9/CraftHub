@@ -99,6 +99,9 @@
 	<x:String x:Key="RemovePropertyMsg">Remove '{0}' from the schema?</x:String>
 	<x:String x:Key="PropertyAdded">Property '{0}' added</x:String>
 	<x:String x:Key="PropertyRemoved">Property '{0}' removed</x:String>
+	<x:String x:Key="EditorErrorMsg">Editor error: {0}</x:String>
+	<x:String x:Key="EditCellTitle">Edit {0}</x:String>
+	<x:String x:Key="CellUpdatedMsg">Updated '{0}'</x:String>
 	<x:String x:Key="RenamePropertyTitle">Rename property</x:String>
 	<x:String x:Key="RenamePropertyPrompt">Enter a new name for this property.</x:String>
 	<x:String x:Key="PropertyRenamed">Property '{0}' renamed to '{1}'</x:String>

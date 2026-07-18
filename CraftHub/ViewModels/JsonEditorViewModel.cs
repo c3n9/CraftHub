@@ -8,6 +8,7 @@ using CraftHub.Models;
 using CraftHub.Services;
 using CraftHub.Services.Actions;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -25,6 +26,7 @@ public partial class JsonEditorViewModel : ViewModelBase
     [ObservableProperty] private string _propertyNameInput = string.Empty;
     [ObservableProperty] private JsonFieldType _selectedType = JsonFieldType.String;
     [ObservableProperty] private bool _isObjectMode;
+    [ObservableProperty] private DynamicDataRow? _selectedRow;
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
@@ -122,8 +124,16 @@ public partial class JsonEditorViewModel : ViewModelBase
     [RelayCommand]
     private void AddProperty()
     {
-        if (string.IsNullOrWhiteSpace(PropertyNameInput)) return;
-        if (Properties.Any(p => p.Name == PropertyNameInput)) return;
+        if (string.IsNullOrWhiteSpace(PropertyNameInput))
+        {
+            _notificationService.Publish(NotificationType.Warning, Localizer.Get("EnterPropertyName"));
+            return;
+        }
+        if (Properties.Any(p => p.Name == PropertyNameInput))
+        {
+            _notificationService.Publish(NotificationType.Warning, Localizer.Get("PropertyAlreadyExists"));
+            return;
+        }
 
         var prop = new JsonPropertyDefinition
         {
@@ -146,8 +156,8 @@ public partial class JsonEditorViewModel : ViewModelBase
     {
         if (prop == null) return;
         var confirmed = await _dialogService.ShowConfirmAsync(
-            "Remove property",
-            $"Remove '{prop.Name}' from the schema?");
+            Localizer.Get("RemovePropertyTitle"),
+            Localizer.Get("RemovePropertyMsg", prop.Name));
         if (!confirmed)
         {
             return;
@@ -170,6 +180,89 @@ public partial class JsonEditorViewModel : ViewModelBase
         foreach (var prop in Properties) row.InitializeProperty(prop.Name);
         Rows.Add(row);
         UndoRedo.Push(new AddRowAction(Rows, row));
+    }
+
+    // ---- Row operations (context menu) ----
+
+    [RelayCommand]
+    private void DuplicateRows(object? parameter)
+    {
+        var source = ResolveSelectedRows(parameter);
+        if (source == null || source.Count == 0) return;
+
+        var duplicated = source.Select(CreateDuplicateRow).ToList();
+        foreach (var r in duplicated) Rows.Add(r);
+
+        UndoRedo.Push(new DuplicateRowsAction(Rows, duplicated));
+        _notificationService.Publish(NotificationType.Success, Localizer.Get("RowsDuplicatedMsg", source.Count));
+    }
+
+    [RelayCommand]
+    private async Task CopyRowsToJsonAsync(object? parameter)
+    {
+        var rows = ResolveSelectedRows(parameter);
+        if (rows == null || rows.Count == 0) return;
+
+        var json = rows.Count == 1
+            ? _jsonService.SerializeSingleRowToJson(rows[0], Properties)
+            : _jsonService.SerializeToJson(rows, Properties);
+
+        await _dialogService.CopyToClipboardAsync(json);
+        _notificationService.Publish(NotificationType.Success, Localizer.Get("RowsCopiedMsg", rows.Count));
+    }
+
+    [RelayCommand]
+    private async Task CopyRowsToJsonAsObjectsAsync(object? parameter)
+    {
+        var rows = ResolveSelectedRows(parameter);
+        if (rows == null || rows.Count == 0) return;
+
+        var json = rows.Count == 1
+            ? _jsonService.SerializeSingleRowToJson(rows[0], Properties)
+            : string.Join(", ", rows.Select(r => _jsonService.SerializeSingleRowToJson(r, Properties)));
+
+        await _dialogService.CopyToClipboardAsync(json);
+        _notificationService.Publish(NotificationType.Success, Localizer.Get("RowsCopiedMsg", rows.Count));
+    }
+
+    [RelayCommand]
+    private async Task RemoveRowsAsync(object? parameter)
+    {
+        var toRemove = ResolveSelectedRows(parameter);
+        if (toRemove == null || toRemove.Count == 0) return;
+
+        var confirmed = await _dialogService.ShowConfirmAsync(
+            Localizer.Get("RemoveRowsTitle"),
+            Localizer.Get("RemoveRowsMsg", toRemove.Count));
+        if (!confirmed) return;
+
+        // Capture indices before removal so undo can restore positions.
+        var withIndices = toRemove
+            .Select(r => (Index: Rows.IndexOf(r), Row: r))
+            .Where(x => x.Index >= 0)
+            .ToList();
+
+        foreach (var item in withIndices) Rows.Remove(item.Row);
+
+        UndoRedo.Push(new RemoveRowsAction(Rows, withIndices.Select(x => (x.Index, x.Row))));
+        _notificationService.Publish(NotificationType.Success, Localizer.Get("RowsRemovedMsg", withIndices.Count));
+    }
+
+    private List<DynamicDataRow>? ResolveSelectedRows(object? parameter)
+    {
+        if (parameter is IList { Count: > 0 } list)
+            return list.Cast<DynamicDataRow>().ToList();
+        if (SelectedRow != null)
+            return new List<DynamicDataRow> { SelectedRow };
+        return null;
+    }
+
+    private DynamicDataRow CreateDuplicateRow(DynamicDataRow row)
+    {
+        var newRow = new DynamicDataRow();
+        foreach (var prop in Properties)
+            newRow.InitializeProperty(prop.Name, row[prop.Name]);
+        return newRow;
     }
 
     [RelayCommand]
@@ -196,7 +289,7 @@ public partial class JsonEditorViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            _notificationService.Publish(NotificationType.Error, $"Editor error: {ex.Message}");
+            _notificationService.Publish(NotificationType.Error, Localizer.Get("EditorErrorMsg", ex.Message));
         }
     }
 
@@ -226,7 +319,7 @@ public partial class JsonEditorViewModel : ViewModelBase
         }
 
         var newValue = await _dialogService.ShowJsonEditorDialogAsync(
-            $"Edit {propertyName}", currentValue, type, _jsonService, merged.Count > 0 ? merged : null);
+            Localizer.Get("EditCellTitle", propertyName), currentValue, type, _jsonService, merged.Count > 0 ? merged : null);
         if (newValue != null && newValue != currentValue)
         {
             var newRow = new DynamicDataRow();
@@ -243,7 +336,7 @@ public partial class JsonEditorViewModel : ViewModelBase
                 UndoRedo.Push(new EditJsonCellAction(Rows, row, newRow, propertyName));
             }
 
-            _notificationService.Publish(NotificationType.Success, $"Updated '{propertyName}'");
+            _notificationService.Publish(NotificationType.Success, Localizer.Get("CellUpdatedMsg", propertyName));
         }
     }
 }

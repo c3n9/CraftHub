@@ -99,6 +99,9 @@
     <x:String x:Key="RemovePropertyMsg">Удалить '{0}' из схемы?</x:String>
     <x:String x:Key="PropertyAdded">Поле '{0}' добавлено</x:String>
     <x:String x:Key="PropertyRemoved">Поле '{0}' удалено</x:String>
+    <x:String x:Key="EditorErrorMsg">Ошибка редактора: {0}</x:String>
+    <x:String x:Key="EditCellTitle">Редактирование {0}</x:String>
+    <x:String x:Key="CellUpdatedMsg">Поле '{0}' обновлено</x:String>
     <x:String x:Key="RenamePropertyTitle">Переименовать поле</x:String>
     <x:String x:Key="RenamePropertyPrompt">Введите новое имя для поля.</x:String>
     <x:String x:Key="PropertyRenamed">Поле '{0}' переименовано в '{1}'</x:String>

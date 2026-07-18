@@ -187,17 +187,17 @@
 							<ContextMenu>
 								<MenuItem Header="{DynamicResource DuplicateRows}"
 										  Command="{Binding DuplicateRowsCommand}"
-										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+										  CommandParameter="{Binding #NestedDataGrid.SelectedItems}" />
 								<MenuItem Header="{DynamicResource CopyRowsAsArray}"
 										  Command="{Binding CopyRowsToJsonCommand}"
-										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+										  CommandParameter="{Binding #NestedDataGrid.SelectedItems}" />
 								<MenuItem Header="{DynamicResource CopyRowsAsObjects}"
 										  Command="{Binding CopyRowsToJsonAsObjectsCommand}"
-										  CommandParameter="{Binding #DataGrid.SelectedItems}" />
+										  CommandParameter="{Binding #NestedDataGrid.SelectedItems}" />
 								<Separator />
 								<MenuItem Header="{DynamicResource RemoveRows}"
 										  Command="{Binding RemoveRowsCommand}"
-										  CommandParameter="{Binding #DataGrid.SelectedItems}"
+										  CommandParameter="{Binding #NestedDataGrid.SelectedItems}"
 										  Foreground="{DynamicResource DangerColor}" />
 							</ContextMenu>
 						</DataGrid.ContextMenu>

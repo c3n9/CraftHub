@@ -292,6 +292,8 @@ public partial class JsonEditorView : Window
     {
         if (_isConfirmedClose) return;
 
+        if (_currentVm is { UndoRedo.CanUndo: false }) return;
+
         e.Cancel = true;
 
         var dialogService = App.Current.Services.GetRequiredService<IDialogService>();
