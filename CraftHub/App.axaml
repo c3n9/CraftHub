@@ -16,6 +16,7 @@
                 <ResourceInclude Source="/Resources/Themes/ThemeHolder.axaml" />
                 <ResourceInclude Source="/Resources/Styles/DataTempates/DataTemplatesResourceDictionary.axaml" />
                 <ResourceInclude Source="avares://Coachlight.Avalonia/Themes/Coachlight.axaml" />
+                <ResourceInclude Source="/Resources/Styles/CoachlightStyles.axaml" />
             </ResourceDictionary.MergedDictionaries>
             <converters:NotificationTypeToBrushConverter x:Key="NotificationBrush" />
             <converters:NotificationTypeToIconKindConverter x:Key="NotificationIconKind" />

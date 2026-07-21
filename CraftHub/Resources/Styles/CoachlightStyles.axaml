@@ -1,0 +1,128 @@
+<!-- Restyles Coachlight.Avalonia (onboarding tour) to match CraftHub's own palette.
+     Merged into Application.Resources after the package's own theme, so these keys win. -->
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                     xmlns:controls="clr-namespace:Coachlight.Avalonia.Controls;assembly=Coachlight.Avalonia">
+
+    <ResourceDictionary.ThemeDictionaries>
+        <ResourceDictionary x:Key="Light">
+            <SolidColorBrush x:Key="CoachlightDimBrush" Color="#8A0B1220" />
+            <SolidColorBrush x:Key="CoachlightCardBackgroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="CoachlightCardBorderBrush" Color="#D6DCE8" />
+            <SolidColorBrush x:Key="CoachlightForegroundBrush" Color="#0B1220" />
+            <SolidColorBrush x:Key="CoachlightSecondaryForegroundBrush" Color="#334155" />
+            <SolidColorBrush x:Key="CoachlightAccentBrush" Color="#2563EB" />
+            <SolidColorBrush x:Key="CoachlightAccentForegroundBrush" Color="#FFFFFF" />
+        </ResourceDictionary>
+        <ResourceDictionary x:Key="Dark">
+            <SolidColorBrush x:Key="CoachlightDimBrush" Color="#B312121A" />
+            <SolidColorBrush x:Key="CoachlightCardBackgroundBrush" Color="#1E1E28" />
+            <SolidColorBrush x:Key="CoachlightCardBorderBrush" Color="#3F3F4E" />
+            <SolidColorBrush x:Key="CoachlightForegroundBrush" Color="#FFFFFF" />
+            <SolidColorBrush x:Key="CoachlightSecondaryForegroundBrush" Color="#A1A1AA" />
+            <SolidColorBrush x:Key="CoachlightAccentBrush" Color="#4F46E5" />
+            <SolidColorBrush x:Key="CoachlightAccentForegroundBrush" Color="#FFFFFF" />
+        </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+
+    <ControlTheme x:Key="{x:Type controls:CoachmarkCard}" TargetType="controls:CoachmarkCard">
+        <Setter Property="Background" Value="{DynamicResource CoachlightCardBackgroundBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource CoachlightCardBorderBrush}" />
+        <Setter Property="CornerRadius" Value="10" />
+        <Setter Property="Padding" Value="20" />
+        <Setter Property="FontFamily" Value="Inter, Segoe UI, sans-serif" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Canvas.Left" Duration="0:0:0.22" Easing="CubicEaseOut" />
+                <DoubleTransition Property="Canvas.Top" Duration="0:0:0.22" Easing="CubicEaseOut" />
+                <DoubleTransition Property="Opacity" Duration="0:0:0.18" />
+            </Transitions>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate TargetType="controls:CoachmarkCard">
+                <Border Background="{TemplateBinding Background}"
+                        BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="1"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Padding="{TemplateBinding Padding}"
+                        BoxShadow="0 10 30 -6 #59000000">
+                    <StackPanel Spacing="14" MaxWidth="320">
+                        <TextBlock Text="{TemplateBinding Title}"
+                                   FontSize="16"
+                                   FontWeight="Bold"
+                                   Foreground="{DynamicResource CoachlightForegroundBrush}"
+                                   TextWrapping="Wrap" />
+                        <TextBlock Text="{TemplateBinding Content}"
+                                   FontSize="13"
+                                   LineHeight="18"
+                                   Foreground="{DynamicResource CoachlightSecondaryForegroundBrush}"
+                                   TextWrapping="Wrap" />
+                        <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                            <Grid.Styles>
+                                <Style Selector="Button.coachlight-next-btn">
+                                    <Setter Property="Background" Value="{DynamicResource CoachlightAccentBrush}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource CoachlightAccentForegroundBrush}" />
+                                    <Setter Property="CornerRadius" Value="6" />
+                                    <Setter Property="Padding" Value="14,7" />
+                                    <Setter Property="FontSize" Value="13" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Style>
+                                <Style Selector="Button.coachlight-next-btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                                    <Setter Property="Background" Value="{DynamicResource AccentHover}" />
+                                </Style>
+                                <Style Selector="Button.coachlight-back-btn">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Foreground" Value="{DynamicResource CoachlightSecondaryForegroundBrush}" />
+                                    <Setter Property="BorderBrush" Value="{DynamicResource CoachlightCardBorderBrush}" />
+                                    <Setter Property="BorderThickness" Value="1" />
+                                    <Setter Property="CornerRadius" Value="6" />
+                                    <Setter Property="Padding" Value="14,7" />
+                                    <Setter Property="FontSize" Value="13" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Style>
+                                <Style Selector="Button.coachlight-back-btn:pointerover">
+                                    <Setter Property="Background" Value="{DynamicResource ElevatedBackground}" />
+                                    <Setter Property="Foreground" Value="{DynamicResource CoachlightForegroundBrush}" />
+                                </Style>
+                                <Style Selector="Button.coachlight-skip-btn">
+                                    <Setter Property="Background" Value="Transparent" />
+                                    <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                    <Setter Property="Padding" Value="10,7" />
+                                    <Setter Property="FontSize" Value="13" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                </Style>
+                                <Style Selector="Button.coachlight-skip-btn:pointerover">
+                                    <Setter Property="Foreground" Value="{DynamicResource DangerColor}" />
+                                </Style>
+                            </Grid.Styles>
+
+                            <TextBlock Grid.Column="0"
+                                       Text="{TemplateBinding ProgressText}"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource CoachlightSecondaryForegroundBrush}"
+                                       VerticalAlignment="Center" />
+                            <Button Grid.Column="1"
+                                    Classes="coachlight-skip-btn"
+                                    Content="{TemplateBinding SkipText}"
+                                    Command="{TemplateBinding SkipCommand}"
+                                    Margin="0,0,6,0" />
+                            <Button Grid.Column="2"
+                                    Classes="coachlight-back-btn"
+                                    Content="{TemplateBinding BackText}"
+                                    Command="{TemplateBinding PreviousCommand}"
+                                    IsVisible="{Binding !IsFirst, RelativeSource={RelativeSource TemplatedParent}}"
+                                    Margin="0,0,6,0" />
+                            <Button Grid.Column="3"
+                                    Classes="coachlight-next-btn"
+                                    Content="{TemplateBinding NextText}"
+                                    Command="{TemplateBinding NextCommand}" />
+                        </Grid>
+                    </StackPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </ControlTheme>
+
+</ResourceDictionary>
