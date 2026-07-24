@@ -2,6 +2,8 @@
 		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
 		xmlns:vm="using:CraftHub.ViewModels"
 		xmlns:models="using:CraftHub.Domain.Models"
+		xmlns:conv="using:CraftHub.Converters"
+		xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
 		x:Class="CraftHub.Views.JsonFieldMappingView"
 		x:Name="DialogRoot"
 		Title="Import JSON"
@@ -10,6 +12,10 @@
 		WindowStartupLocation="CenterOwner"
 		Background="{DynamicResource AppBackground}"
 		CanResize="False">
+
+	<Window.Resources>
+		<conv:DepthToMarginConverter x:Key="DepthToMargin" />
+	</Window.Resources>
 
 	<Grid RowDefinitions="Auto,*,Auto">
 
@@ -31,6 +37,9 @@
 				</StackPanel>
 				<TextBlock Text="Select the data type for each detected JSON field."
 						   FontSize="13" Foreground="{DynamicResource TextSecondary}" />
+				<TextBlock Text="Nested objects stay in one column — use the arrow to split one into separate columns."
+						   FontSize="12" TextWrapping="Wrap"
+						   Foreground="{DynamicResource TextMuted}" />
 
 			</StackPanel>
 		</Border>
@@ -41,14 +50,35 @@
 				<ItemsControl.ItemTemplate>
 					<DataTemplate DataType="{x:Type models:JsonFieldMapping}">
 						<Border Background="{DynamicResource ElevatedBackground}" CornerRadius="8"
-								Padding="16,12" Margin="0,4,15,4"
+								Padding="16,12"
+								Margin="{Binding Depth, Converter={StaticResource DepthToMargin}}"
 								BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
-							<Grid ColumnDefinitions="*,Auto,Auto">
-								<StackPanel Spacing="2">
-									<TextBlock Text="{Binding FieldName}"
+							<Grid ColumnDefinitions="24,*,Auto,Auto">
+
+								<!-- Expand/collapse: replaces a nested object with one column per child -->
+								<Button Grid.Column="0"
+										Classes="transparentBtn"
+										Padding="0"
+										Width="24" Height="24"
+										IsVisible="{Binding CanExpand}"
+										Command="{Binding DataContext.ToggleExpandCommand, ElementName=DialogRoot}"
+										CommandParameter="{Binding}">
+									<Panel>
+										<materialIcons:MaterialIcon Kind="ChevronRight" Width="18" Height="18"
+																	IsVisible="{Binding !IsExpanded}"
+																	Foreground="{DynamicResource TextSecondary}" />
+										<materialIcons:MaterialIcon Kind="ChevronDown" Width="18" Height="18"
+																	IsVisible="{Binding IsExpanded}"
+																	Foreground="{DynamicResource AccentPrimary}" />
+									</Panel>
+								</Button>
+
+								<StackPanel Grid.Column="1" Spacing="2" Margin="6,0,0,0">
+									<TextBlock Text="{Binding DisplayName}"
 											   FontSize="14" FontWeight="SemiBold"
 											   Foreground="{DynamicResource TextPrimary}" />
-									<TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}">
+									<TextBlock FontSize="12" Foreground="{DynamicResource TextMuted}"
+											   MaxLines="1" TextTrimming="CharacterEllipsis">
 										<TextBlock.Text>
 											<MultiBinding StringFormat="Sample: {0}">
 												<Binding Path="SampleValue" />
@@ -57,7 +87,7 @@
 									</TextBlock>
 								</StackPanel>
 
-								<TextBlock Grid.Column="1"
+								<TextBlock Grid.Column="2"
 										   VerticalAlignment="Center"
 										   Margin="12,0"
 										   FontSize="12" Foreground="{DynamicResource TextSecondary}">
@@ -68,12 +98,23 @@
 									</TextBlock.Text>
 								</TextBlock>
 
-								<ComboBox Grid.Column="2"
+								<ComboBox Grid.Column="3"
 										  ItemsSource="{Binding DataContext.AvailableTypes, ElementName=DialogRoot}"
 										  SelectedItem="{Binding SelectedType, Mode=TwoWay}"
+										  IsVisible="{Binding IsTypeSelectable}"
 										  Width="130" FontSize="13"
 										  CornerRadius="6"
 										  VerticalAlignment="Center" />
+
+								<!-- An expanded object is not a column itself, so it has no type -->
+								<TextBlock Grid.Column="3"
+										   Text="split into columns"
+										   Width="130"
+										   FontSize="12" FontStyle="Italic"
+										   TextAlignment="Center"
+										   VerticalAlignment="Center"
+										   IsVisible="{Binding IsExpanded}"
+										   Foreground="{DynamicResource TextMuted}" />
 							</Grid>
 						</Border>
 					</DataTemplate>

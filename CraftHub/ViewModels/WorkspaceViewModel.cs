@@ -1071,15 +1071,19 @@ public partial class WorkspaceViewModel : ViewModelBase
 
             // Always detect fields from JSON and add any that are not yet in the schema.
             // This covers both the "empty schema" case and the "user added new fields in JSON mode" case.
+            // DetectFields returns a tree, so the nested fields the user expanded during import
+            // have to be recovered from the current schema — otherwise they'd be dropped here.
             var detected = _jsonService.DetectFields(RawJsonText);
-            var detectedNames = detected.Select(f => f.FieldName).ToHashSet(StringComparer.Ordinal);
+            var schemaNames = Properties.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
+            var effective = ResolveDetectedFields(detected, schemaNames);
+            var effectiveNames = effective.Select(f => f.FieldName).ToHashSet(StringComparer.Ordinal);
 
-            var toRemove = Properties.Where(p => !detectedNames.Contains(p.Name)).ToList();
+            var toRemove = Properties.Where(p => !effectiveNames.Contains(p.Name)).ToList();
             foreach (var p in toRemove)
                 Properties.Remove(p);
 
             var existingNames = Properties.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
-            var newFields = detected
+            var newFields = effective
                 .Where(f => !existingNames.Contains(f.FieldName))
                 .Select(f => new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType });
             Properties.AddRange(newFields);
@@ -1103,6 +1107,39 @@ public partial class WorkspaceViewModel : ViewModelBase
             JsonEditorErrorLine = ex.LineNumber ?? -1;
             JsonEditorError = $"{Localizer.Get("InvalidJsonError")}: {ex.Message}";
         }
+    }
+
+    /// <summary>
+    /// Flattens a detected field tree into the fields that should become columns.
+    /// A nested object is used as a single column unless the current schema still refers to
+    /// one of its descendants — that means the user expanded it during import, so we keep it
+    /// expanded and take the descendants instead.
+    /// </summary>
+    private static List<JsonFieldMapping> ResolveDetectedFields(
+        IEnumerable<JsonFieldMapping> roots, HashSet<string> schemaNames)
+    {
+        var result = new List<JsonFieldMapping>();
+        Walk(roots);
+        return result;
+
+        void Walk(IEnumerable<JsonFieldMapping> level)
+        {
+            foreach (var node in level)
+            {
+                if (!schemaNames.Contains(node.FieldName) && HasKnownDescendant(node))
+                {
+                    node.IsExpanded = true;
+                    Walk(node.Children);
+                }
+                else
+                {
+                    result.Add(node);
+                }
+            }
+        }
+
+        bool HasKnownDescendant(JsonFieldMapping node) =>
+            node.Children.Any(c => schemaNames.Contains(c.FieldName) || HasKnownDescendant(c));
     }
 
     //  Other commands

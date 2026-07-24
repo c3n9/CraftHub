@@ -21,9 +21,13 @@
 	<Grid RowDefinitions="Auto, *, Auto" Margin="10">
 
 		<StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="8" Margin="10,0,0,10">
-			<TextBox x:Name="TBPropertyName" Text="{Binding PropertyNameInput}" Watermark="{DynamicResource PropertyNameWatermark}" Width="150" />
-			<ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Width="100" Height="{Binding #TBPropertyName.Bounds.Height}"/>
+			<!-- An array of plain values has a single synthetic column, so there is nothing to add -->
+			<TextBox x:Name="TBPropertyName" Text="{Binding PropertyNameInput}" Watermark="{DynamicResource PropertyNameWatermark}" Width="150"
+					 IsVisible="{Binding !IsPrimitiveArrayMode}" />
+			<ComboBox ItemsSource="{Binding AvailableTypes}" SelectedItem="{Binding SelectedType}" Width="100" Height="{Binding #TBPropertyName.Bounds.Height}"
+					  IsVisible="{Binding !IsPrimitiveArrayMode}" />
 			<Button Command="{Binding AddPropertyCommand}" Classes="toolbar-btn"
+					IsVisible="{Binding !IsPrimitiveArrayMode}"
 					ToolTip.Tip="{DynamicResource AddPropertyTip}">
 				<StackPanel Orientation="Horizontal" Spacing="6">
 					<materialIcons:MaterialIcon Kind="PlusThick" Width="16" Height="16" />

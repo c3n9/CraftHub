@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CraftHub.Domain.Models;
@@ -22,7 +21,9 @@ public partial class JsonFieldMappingView : Window
     {
         if (DataContext is JsonFieldMappingViewModel vm)
         {
-            Close(vm.Fields.ToList());
+            // Not vm.Fields — that is the visible tree; only the leaves of the user's
+            // expansion choice become columns.
+            Close(vm.GetResultFields());
         }
     }
 

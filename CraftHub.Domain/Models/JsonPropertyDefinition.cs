@@ -24,6 +24,12 @@ public partial class JsonPropertyDefinition : ObservableObject
     /// <summary>Child properties for Object type fields.</summary>
     public ObservableCollection<JsonPropertyDefinition> Children { get; } = new();
 
+    /// <summary>
+    /// Human-readable form of a property name. Names of fields the user expanded during import
+    /// are paths joined by an invisible control character — show them with dots instead.
+    /// </summary>
+    public static string GetDisplayPath(string name) => name.Replace(JsonFieldMapping.PathSeparator, '.');
+
     public static string GetTypeDisplayName(JsonFieldType type) => type switch
     {
         JsonFieldType.String  => "string",

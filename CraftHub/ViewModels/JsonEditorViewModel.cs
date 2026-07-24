@@ -12,6 +12,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 
 namespace CraftHub.ViewModels;
@@ -26,7 +28,11 @@ public partial class JsonEditorViewModel : ViewModelBase
     [ObservableProperty] private string _propertyNameInput = string.Empty;
     [ObservableProperty] private JsonFieldType _selectedType = JsonFieldType.String;
     [ObservableProperty] private bool _isObjectMode;
+    [ObservableProperty] private bool _isPrimitiveArrayMode;
     [ObservableProperty] private DynamicDataRow? _selectedRow;
+
+    /// <summary>Synthetic column that holds one element of a non-object array.</summary>
+    private const string PrimitiveArrayColumn = "value";
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
@@ -110,6 +116,12 @@ public partial class JsonEditorViewModel : ViewModelBase
             }
         }
 
+        // An array of plain values ("tags": [1, 2, 3]) has no properties to detect, so the
+        // grid would come up empty and saving would replace the array with []. Show one row
+        // per element instead, using a single synthetic column.
+        if (!IsObjectMode && Properties.Count == 0)
+            SeedPrimitiveArray(initialJson);
+
         if (Rows.Count == 0 && IsObjectMode)
         {
             var emptyRow = new DynamicDataRow();
@@ -120,6 +132,53 @@ public partial class JsonEditorViewModel : ViewModelBase
         UndoRedo.PropertyChanged += (_, _) => RefreshUndoRedoState();
         RefreshUndoRedoState();
     }
+
+    private void SeedPrimitiveArray(string json)
+    {
+        IsPrimitiveArrayMode = true;
+
+        var elementType = JsonFieldType.String;
+        var values = new List<string>();
+
+        try
+        {
+            using var doc = JsonDocument.Parse(json);
+            if (doc.RootElement.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var el in doc.RootElement.EnumerateArray())
+                {
+                    if (values.Count == 0) elementType = InferElementType(el);
+                    values.Add(el.ValueKind switch
+                    {
+                        JsonValueKind.Null => "",
+                        JsonValueKind.Object or JsonValueKind.Array => el.GetRawText(),
+                        _ => el.ToString() ?? ""
+                    });
+                }
+            }
+        }
+        catch
+        {
+            // Empty or unparseable cell — start from a single empty string column.
+        }
+
+        Properties.Add(new JsonPropertyDefinition { Name = PrimitiveArrayColumn, FieldType = elementType });
+        foreach (var value in values)
+        {
+            var row = new DynamicDataRow();
+            row.InitializeProperty(PrimitiveArrayColumn, value);
+            Rows.Add(row);
+        }
+    }
+
+    private static JsonFieldType InferElementType(JsonElement el) => el.ValueKind switch
+    {
+        JsonValueKind.True or JsonValueKind.False => JsonFieldType.Bool,
+        JsonValueKind.Number => el.TryGetInt32(out _) ? JsonFieldType.Int : JsonFieldType.Double,
+        JsonValueKind.Object => JsonFieldType.Object,
+        JsonValueKind.Array => JsonFieldType.Array,
+        _ => JsonFieldType.String
+    };
 
     [RelayCommand]
     private void AddProperty()
@@ -274,8 +333,8 @@ public partial class JsonEditorViewModel : ViewModelBase
 
             if (IsObjectMode)
             {
-                using var doc = System.Text.Json.JsonDocument.Parse(json);
-                if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Array && doc.RootElement.GetArrayLength() > 0)
+                using var doc = JsonDocument.Parse(json);
+                if (doc.RootElement.ValueKind == JsonValueKind.Array && doc.RootElement.GetArrayLength() > 0)
                 {
                     json = doc.RootElement[0].GetRawText();
                 }
@@ -283,6 +342,22 @@ public partial class JsonEditorViewModel : ViewModelBase
                 {
                     json = "{}";
                 }
+            }
+            else if (IsPrimitiveArrayMode)
+            {
+                // Rows are [{"value": 1}, ...] — unwrap them back into a bare array.
+                var unwrapped = new JsonArray();
+                if (JsonNode.Parse(json) is JsonArray rows)
+                {
+                    foreach (var item in rows)
+                        unwrapped.Add(item?[PrimitiveArrayColumn]?.DeepClone());
+                }
+
+                json = unwrapped.ToJsonString(new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                });
             }
 
             JsonSubmitted?.Invoke(this, json);

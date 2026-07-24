@@ -109,7 +109,8 @@ public partial class JsonEditorView : Window
 
     private Avalonia.Controls.DataGridTemplateColumn BuildColumn(JsonPropertyDefinition prop)
     {
-            var header = $"{prop.Name} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})";
+            var header =
+                $"{JsonPropertyDefinition.GetDisplayPath(prop.Name)} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})";
 
             var headerText = new Avalonia.Controls.TextBlock
             {

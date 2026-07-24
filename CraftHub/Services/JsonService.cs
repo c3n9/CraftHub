@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -13,11 +12,19 @@ namespace CraftHub.Services;
 
 public class JsonService : IJsonService
 {
+    private const int MaxDepth = 50;
+
+    /// <summary>
+    /// Detects fields as a TREE: a nested object stays one field and keeps its own
+    /// properties in <see cref="JsonFieldMapping.Children"/>. The import dialog decides
+    /// whether it becomes a single Object column or is expanded into one column per child.
+    /// </summary>
     public List<JsonFieldMapping> DetectFields(string json)
     {
-        // Use an ordered dictionary so fields appear in first-seen order,
-        // but we scan ALL elements to catch fields that only appear in some rows.
-        var fieldDict = new Dictionary<string, JsonFieldMapping>(StringComparer.Ordinal);
+        // Fields keep first-seen order at every level; the by-path lookup exists only so
+        // that fields present in SOME rows are merged into the node they belong to.
+        var byPath = new Dictionary<string, JsonFieldMapping>(StringComparer.Ordinal);
+        var roots = new List<JsonFieldMapping>();
 
         using var doc = JsonDocument.Parse(json);
         var root = doc.RootElement;
@@ -26,84 +33,75 @@ public class JsonService : IJsonService
         {
             foreach (var element in root.EnumerateArray())
                 if (element.ValueKind == JsonValueKind.Object)
-                    DetectFieldsRecursive(element, "", fieldDict);
+                    DetectObjectFields(element, "", null, roots, byPath);
         }
         else if (root.ValueKind == JsonValueKind.Object)
         {
-            DetectFieldsRecursive(root, "", fieldDict);
+            DetectObjectFields(root, "", null, roots, byPath);
         }
 
-        return fieldDict.Values.ToList();
+        return roots;
     }
 
-    private void DetectFieldsRecursive(JsonElement element, string prefix,
-        Dictionary<string, JsonFieldMapping> fieldDict, int depth = 0)
+    private void DetectObjectFields(JsonElement element, string prefix, JsonFieldMapping? parent,
+        List<JsonFieldMapping> roots, Dictionary<string, JsonFieldMapping> byPath, int depth = 0)
     {
-        if (depth > 50) return;
+        if (depth > MaxDepth) return;
 
-        if (element.ValueKind == JsonValueKind.Object)
+        foreach (var prop in element.EnumerateObject())
         {
-            foreach (var prop in element.EnumerateObject())
-            {
-                var name = string.IsNullOrEmpty(prefix) ? prop.Name : $"{prefix}\x1E{prop.Name}";
-                if (prop.Value.ValueKind == JsonValueKind.Object || prop.Value.ValueKind == JsonValueKind.Array)
-                {
-                    DetectFieldsRecursive(prop.Value, name, fieldDict, depth + 1);
-                }
-                else
-                {
-                    MergeFieldMapping(prop.Value, name, fieldDict);
-                }
-            }
-        }
-        else if (element.ValueKind == JsonValueKind.Array)
-        {
-            int i = 0;
-            foreach (var item in element.EnumerateArray())
-            {
-                var name = string.IsNullOrEmpty(prefix) ? $"<{i}>" : $"{prefix}\x1E<{i}>";
-                if (item.ValueKind == JsonValueKind.Object || item.ValueKind == JsonValueKind.Array)
-                {
-                    DetectFieldsRecursive(item, name, fieldDict, depth + 1);
-                }
-                else
-                {
-                    MergeFieldMapping(item, name, fieldDict);
-                }
+            var name = string.IsNullOrEmpty(prefix)
+                ? prop.Name
+                : $"{prefix}{JsonFieldMapping.PathSeparator}{prop.Name}";
 
-                i++;
-            }
+            var mapping = MergeFieldMapping(prop.Value, name, parent, roots, byPath);
+
+            // Objects carry their properties as children so the user can expand them.
+            // Arrays are always a single column: expanding them by index used to produce
+            // <0>, <1>, ... columns and a union of all indices across rows.
+            if (prop.Value.ValueKind == JsonValueKind.Object)
+                DetectObjectFields(prop.Value, name, mapping, roots, byPath, depth + 1);
         }
     }
 
     /// <summary>
-    /// Adds a field to the dictionary on first encounter.
+    /// Adds a field to the tree on first encounter and returns it.
     /// If the field was previously recorded as null/String-from-null and we now see
     /// a concrete value, upgrades the detected type.
     /// </summary>
-    private void MergeFieldMapping(JsonElement el, string name, Dictionary<string, JsonFieldMapping> fieldDict)
+    private JsonFieldMapping MergeFieldMapping(JsonElement el, string name, JsonFieldMapping? parent,
+        List<JsonFieldMapping> roots, Dictionary<string, JsonFieldMapping> byPath)
     {
         var isNull = el.ValueKind == JsonValueKind.Null;
         var detected = InferType(el);
         var sample = isNull ? "" : (el.ToString() ?? "");
 
-        if (!fieldDict.TryGetValue(name, out var existing))
+        if (byPath.TryGetValue(name, out var existing))
         {
-            fieldDict[name] = new JsonFieldMapping
+            if (!isNull && string.IsNullOrEmpty(existing.SampleValue))
             {
-                FieldName = name,
-                DetectedType = detected,
-                SelectedType = detected,
-                SampleValue = sample
-            };
+                // Upgrade from null placeholder to the first concrete value we find.
+                existing.DetectedType = detected;
+                existing.SelectedType = detected;
+                existing.SampleValue = sample;
+            }
+
+            return existing;
         }
-        else if (!isNull && string.IsNullOrEmpty(existing.SampleValue))
+
+        var mapping = new JsonFieldMapping
         {
-            // Upgrade from null placeholder to the first concrete value we find.
-            existing.DetectedType = detected;
-            existing.SelectedType = detected;
-            existing.SampleValue = sample;
-        }
+            FieldName = name,
+            DetectedType = detected,
+            SelectedType = detected,
+            SampleValue = sample
+        };
+
+        byPath[name] = mapping;
+        if (parent == null) roots.Add(mapping);
+        else parent.Children.Add(mapping);
+
+        return mapping;
     }
 
     private static JsonFieldType InferType(JsonElement el) => el.ValueKind switch
@@ -160,9 +158,12 @@ public class JsonService : IJsonService
         return rows;
     }
 
+    // Single-segment paths are the common case now that nesting is preserved; multi-segment
+    // paths come from fields the user expanded in the import dialog (and from schemas saved
+    // before nesting was supported, which could also contain <n> array-index segments).
     private JsonElement? ResolvePath(JsonElement root, string path)
     {
-        var parts = path.Split('\x1E', StringSplitOptions.RemoveEmptyEntries);
+        var parts = path.Split(JsonFieldMapping.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
         JsonElement current = root;
 
         foreach (var p in parts)
@@ -225,7 +226,7 @@ public class JsonService : IJsonService
 
     private static void SetNestedNode(JsonObject root, string path, string val, JsonFieldType type)
     {
-        var parts = path.Split('\x1E', StringSplitOptions.RemoveEmptyEntries);
+        var parts = path.Split(JsonFieldMapping.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
         JsonNode current = root;
 
         for (int i = 0; i < parts.Length - 1; i++)
