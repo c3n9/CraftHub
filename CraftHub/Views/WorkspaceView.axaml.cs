@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Interactivity;
@@ -33,6 +34,7 @@ public partial class WorkspaceView : UserControl
     private TextBox? _jsonTextBox;
     private ScrollViewer? _lineNumberScroller;
     private ScrollViewer? _jsonTextBoxScrollViewer;
+    private ScrollBar? _jsonHScrollBar;
     private TextBlock? _lineNumbersBlock;
     private Button? _jsonErrorButton;
     private int _lastLineCount = -1;
@@ -129,6 +131,24 @@ public partial class WorkspaceView : UserControl
         _jsonTextBoxScrollViewer = sv;
         sv.ScrollChanged += (_, _) =>
             _lineNumberScroller.Offset = new Vector(0, sv.Offset.Y);
+
+        _jsonHScrollBar = sv.GetVisualDescendants().OfType<ScrollBar>()
+            .FirstOrDefault(b => b.Orientation == Orientation.Horizontal);
+        if (_jsonHScrollBar != null)
+            _jsonHScrollBar.PropertyChanged += (_, e) =>
+            {
+                if (e.Property == Visual.BoundsProperty || e.Property == Visual.IsVisibleProperty)
+                    SyncLineNumberInset();
+            };
+        SyncLineNumberInset();
+    }
+
+    private void SyncLineNumberInset()
+    {
+        if (_lineNumberScroller == null) return;
+        var inset = _jsonHScrollBar is { IsVisible: true } bar ? bar.Bounds.Height : 0;
+        if (Math.Abs(_lineNumberScroller.Margin.Bottom - inset) > 0.1)
+            _lineNumberScroller.Margin = new Thickness(0, 0, 0, inset);
     }
 
     private void RefreshLineNumbers()
