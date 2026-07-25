@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
@@ -43,7 +44,8 @@ public partial class MainWindow : Window
 
     private void OnFilesDragOver(object? sender, DragEventArgs e)
     {
-        var canOpen = ExtractOpenablePaths(e).Any();
+        // Ignore drops while a modal dialog (e.g. the import field-mapping window) is open.
+        var canOpen = !IsModalDialogOpen() && ExtractOpenablePaths(e).Any();
         e.DragEffects = canOpen ? DragDropEffects.Copy : DragDropEffects.None;
         SetDragOverlay(canOpen);
         e.Handled = true;
@@ -53,11 +55,24 @@ public partial class MainWindow : Window
 
     private async void OnFilesDrop(object? sender, DragEventArgs e)
     {
+        // Mark handled synchronously so the OS drag operation is released immediately;
+        // the import (which may open dialogs) runs afterwards, off the drag loop.
         e.Handled = true;
         SetDragOverlay(false);
-        var paths = ExtractOpenablePaths(e).ToList();
-        if (paths.Count > 0 && _vm != null)
+        if (IsModalDialogOpen()) return;
+
+        var paths = ExtractOpenablePaths(e);
+        if (paths.Count == 0 || _vm == null) return;
+
+        try
+        {
             await _vm.OpenDroppedFilesAsync(paths);
+        }
+        catch (Exception ex)
+        {
+            // async void — never let a failure escape as an unhandled UI-thread exception.
+            System.Diagnostics.Debug.WriteLine($"Drag-drop import failed: {ex}");
+        }
     }
 
     private void SetDragOverlay(bool visible)
@@ -66,18 +81,45 @@ public partial class MainWindow : Window
             DragDropOverlay.IsVisible = visible;
     }
 
-    // Pulls local file paths with a supported extension out of a drag payload.
-    private static IEnumerable<string> ExtractOpenablePaths(DragEventArgs e)
+    // True when any other window (import mapping, message box, nested editor, …) is open on
+    // top of the main window. Dialogs are shown as separate modal Windows, so they appear in
+    // the desktop lifetime's window list alongside this one.
+    private bool IsModalDialogOpen()
     {
-        if (!e.Data.Contains(DataFormats.Files) || e.Data.GetFiles() is not { } items)
-            return Enumerable.Empty<string>();
+        if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+        {
+            foreach (var window in desktop.Windows)
+                if (!ReferenceEquals(window, this) && window.IsVisible)
+                    return true;
+        }
+        return false;
+    }
 
-        return items
-            .Select(item => item.TryGetLocalPath())
-            .Where(path => !string.IsNullOrEmpty(path)
-                           && File.Exists(path)
-                           && OpenableExtensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
-            .Select(path => path!);
+    // Pulls local file paths with a supported extension out of a drag payload.
+    // The storage items are IDisposable, so each is released once its path is read.
+    private static List<string> ExtractOpenablePaths(DragEventArgs e)
+    {
+        var paths = new List<string>();
+        if (!e.Data.Contains(DataFormats.Files) || e.Data.GetFiles() is not { } items)
+            return paths;
+
+        foreach (var item in items)
+        {
+            try
+            {
+                var path = item.TryGetLocalPath();
+                if (!string.IsNullOrEmpty(path)
+                    && File.Exists(path)
+                    && OpenableExtensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
+                    paths.Add(path);
+            }
+            finally
+            {
+                item.Dispose();
+            }
+        }
+
+        return paths;
     }
 
     protected override void OnLoaded(RoutedEventArgs e)
