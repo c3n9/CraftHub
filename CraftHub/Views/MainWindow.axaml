@@ -39,6 +39,9 @@
 							Content="{materialIcons:MaterialIconExt Kind=HelpCircleOutline}" Classes="toolbar-btn"
 							Click="OnStartTourClick"
 							ToolTip.Tip="{DynamicResource TourHelpTip}" FontSize="16" />
+					<Button Content="{materialIcons:MaterialIconExt Kind=TagMultipleOutline}" Classes="toolbar-btn"
+							Command="{Binding ShowReleasesCommand}"
+							ToolTip.Tip="{DynamicResource ReleasesTip}" FontSize="16" />
 					<Button cl:Coachmark.Id="githubBtn"
 							Content="{materialIcons:MaterialIconExt Kind=Github}" Classes="toolbar-btn"
 							Command="{Binding GoToGitHubRepoCommand}"

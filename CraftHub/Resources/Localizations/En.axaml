@@ -230,6 +230,15 @@
 	<!-- Interface tour (Coachlight) -->
 	<x:String x:Key="TourHelpTip">Interface tour</x:String>
 	<x:String x:Key="DropToOpenText">Drop files to open them in new tabs</x:String>
+	<x:String x:Key="ReleasesTip">Versions &amp; what's new</x:String>
+	<x:String x:Key="ReleasesTitle">Releases</x:String>
+	<x:String x:Key="ReleasesSubtitle">All CraftHub releases and what changed in them</x:String>
+	<x:String x:Key="ReleasesLoading">Loading releases…</x:String>
+	<x:String x:Key="ReleasesLoadError">Could not load releases. Check your internet connection.</x:String>
+	<x:String x:Key="ReleasesEmpty">No releases found</x:String>
+	<x:String x:Key="ReleasesCurrentBadge">CURRENT</x:String>
+	<x:String x:Key="ReleasesPrereleaseBadge">PRE-RELEASE</x:String>
+	<x:String x:Key="ReleasesOpenOnGitHub">Open on GitHub</x:String>
 	<x:String x:Key="TourSkip">Skip</x:String>
 	<x:String x:Key="TourBack">Back</x:String>
 	<x:String x:Key="TourNext">Next</x:String>

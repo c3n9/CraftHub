@@ -1,0 +1,152 @@
+<Window xmlns="https://github.com/avaloniaui"
+		xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+		xmlns:vm="using:CraftHub.ViewModels"
+		xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+		x:Class="CraftHub.Views.ReleasesView"
+		x:Name="DialogRoot"
+		x:DataType="vm:ReleasesViewModel"
+		Title="{DynamicResource ReleasesTitle}"
+		Width="620" Height="680"
+		MinWidth="480" MinHeight="400"
+		WindowStartupLocation="CenterOwner"
+		Background="{DynamicResource AppBackground}">
+
+	<Grid RowDefinitions="Auto,*,Auto">
+
+		<!-- Header -->
+		<Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="20,16">
+			<StackPanel Spacing="4">
+				<StackPanel Orientation="Horizontal" Spacing="8">
+					<materialIcons:MaterialIcon Kind="TagMultipleOutline" Width="20" Height="20"
+												VerticalAlignment="Center"
+												Foreground="{DynamicResource AccentPrimary}" />
+					<TextBlock Text="{DynamicResource ReleasesTitle}"
+							   FontSize="18" FontWeight="SemiBold"
+							   Foreground="{DynamicResource TextPrimary}" />
+				</StackPanel>
+				<TextBlock Text="{DynamicResource ReleasesSubtitle}"
+						   FontSize="13" Foreground="{DynamicResource TextSecondary}" />
+			</StackPanel>
+		</Border>
+
+		<!-- Body -->
+		<Panel Grid.Row="1" Margin="10">
+
+			<!-- Loading -->
+			<StackPanel IsVisible="{Binding IsLoading}"
+						HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+				<ProgressBar IsIndeterminate="True" Width="200" />
+				<TextBlock Text="{DynamicResource ReleasesLoading}"
+						   HorizontalAlignment="Center"
+						   Foreground="{DynamicResource TextSecondary}" />
+			</StackPanel>
+
+			<!-- Error -->
+			<StackPanel IsVisible="{Binding HasError}"
+						HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="10">
+				<materialIcons:MaterialIcon Kind="CloudAlertOutline" Width="40" Height="40"
+											HorizontalAlignment="Center"
+											Foreground="{DynamicResource DangerColor}" />
+				<TextBlock Text="{Binding ErrorMessage}"
+						   HorizontalAlignment="Center" TextAlignment="Center" MaxWidth="360"
+						   TextWrapping="Wrap"
+						   Foreground="{DynamicResource TextSecondary}" />
+			</StackPanel>
+
+			<!-- Empty -->
+			<TextBlock IsVisible="{Binding IsEmpty}"
+					   Text="{DynamicResource ReleasesEmpty}"
+					   HorizontalAlignment="Center" VerticalAlignment="Center"
+					   Foreground="{DynamicResource TextMuted}" />
+
+			<!-- Releases list -->
+			<ScrollViewer IsVisible="{Binding HasReleases}" VerticalScrollBarVisibility="Auto">
+				<ItemsControl ItemsSource="{Binding Releases}" Margin="0,4,10,4">
+					<ItemsControl.ItemTemplate>
+						<DataTemplate DataType="{x:Type vm:ReleaseItemViewModel}">
+							<Border Background="{DynamicResource ElevatedBackground}" CornerRadius="10"
+									Padding="16,12" Margin="0,4"
+									BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+								<StackPanel Spacing="8">
+
+									<!-- Title row: version badge + title + date -->
+									<Grid ColumnDefinitions="Auto,*,Auto">
+										<Border Grid.Column="0"
+												Background="{DynamicResource AccentPrimary}"
+												CornerRadius="6" Padding="10,4"
+												VerticalAlignment="Center">
+											<TextBlock Text="{Binding Version}"
+													   FontWeight="SemiBold" FontSize="12"
+													   VerticalAlignment="Center"
+													   Foreground="White" />
+										</Border>
+
+										<StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6"
+													Margin="10,0,0,0" VerticalAlignment="Center">
+											<TextBlock Text="{Binding Title}"
+													   FontWeight="SemiBold" FontSize="14"
+													   TextTrimming="CharacterEllipsis"
+													   VerticalAlignment="Center"
+													   Foreground="{DynamicResource TextPrimary}" />
+											<Border Background="{DynamicResource SuccessColor}"
+													CornerRadius="4" Padding="8,3"
+													IsVisible="{Binding IsCurrent}"
+													VerticalAlignment="Center">
+												<TextBlock Text="{DynamicResource ReleasesCurrentBadge}"
+														   FontSize="10" FontWeight="SemiBold"
+														   VerticalAlignment="Center" Foreground="White" />
+											</Border>
+											<Border Background="{DynamicResource WarningColor}"
+													CornerRadius="4" Padding="8,3"
+													IsVisible="{Binding IsPrerelease}"
+													VerticalAlignment="Center">
+												<TextBlock Text="{DynamicResource ReleasesPrereleaseBadge}"
+														   FontSize="10" FontWeight="SemiBold"
+														   VerticalAlignment="Center" Foreground="White" />
+											</Border>
+										</StackPanel>
+
+										<TextBlock Grid.Column="2"
+												   Text="{Binding Date}"
+												   FontSize="12" VerticalAlignment="Center"
+												   Foreground="{DynamicResource TextMuted}" />
+									</Grid>
+
+									<!-- Release notes -->
+									<SelectableTextBlock Text="{Binding Notes}"
+														 IsVisible="{Binding HasNotes}"
+														 TextWrapping="Wrap"
+														 FontSize="13"
+														 Foreground="{DynamicResource TextSecondary}" />
+
+									<!-- Open on GitHub -->
+									<Button Classes="tab-btn"
+											HorizontalAlignment="Left"
+											Height="30"
+											Command="{Binding OpenOnGitHubCommand}">
+										<StackPanel Orientation="Horizontal" Spacing="6">
+											<materialIcons:MaterialIcon Kind="Github" Width="15" Height="15" />
+											<TextBlock Text="{DynamicResource ReleasesOpenOnGitHub}" VerticalAlignment="Center" />
+										</StackPanel>
+									</Button>
+								</StackPanel>
+							</Border>
+						</DataTemplate>
+					</ItemsControl.ItemTemplate>
+				</ItemsControl>
+			</ScrollViewer>
+		</Panel>
+
+		<!-- Footer -->
+		<Border Grid.Row="2" Background="{DynamicResource SurfaceBackground}" Padding="16,12"
+				BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
+			<StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+				<Button Content="{DynamicResource CloseTab}" Classes="accent-btn"
+						VerticalContentAlignment="Center"
+						HorizontalContentAlignment="Center"
+						Height="34"
+						x:Name="CloseButton" MinWidth="90" />
+			</StackPanel>
+		</Border>
+	</Grid>
+</Window>

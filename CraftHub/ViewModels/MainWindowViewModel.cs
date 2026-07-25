@@ -202,6 +202,9 @@ public partial class MainWindowViewModel : ViewModelBase
     }
     
     [RelayCommand]
+    private Task ShowReleases() => _dialogService.ShowReleasesDialogAsync(CurrentVersion);
+
+    [RelayCommand]
     private async void GoToGitHubRepo()
     {
         var ls = Services.LanguageService.Instance;

@@ -36,4 +36,7 @@ public interface IDialogService
 
     Task<ProgressResult> ShowProgressDialogAsync(string title, Func<IProgress<UpdateProgress>, CancellationToken, Task> task);
     Task<string?> GetFromClipboardAsync();
+
+    /// <summary>Show the releases (changelog) window listing all GitHub releases.</summary>
+    Task ShowReleasesDialogAsync(string? currentVersion);
 }

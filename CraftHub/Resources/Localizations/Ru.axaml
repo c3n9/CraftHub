@@ -229,6 +229,15 @@
     <!-- Обзор интерфейса (Coachlight) -->
     <x:String x:Key="TourHelpTip">Обзор интерфейса</x:String>
     <x:String x:Key="DropToOpenText">Отпустите, чтобы открыть файлы в новых вкладках</x:String>
+    <x:String x:Key="ReleasesTip">Версии и что нового</x:String>
+    <x:String x:Key="ReleasesTitle">Версии</x:String>
+    <x:String x:Key="ReleasesSubtitle">Все выпуски CraftHub и что в них изменилось</x:String>
+    <x:String x:Key="ReleasesLoading">Загрузка релизов…</x:String>
+    <x:String x:Key="ReleasesLoadError">Не удалось загрузить релизы. Проверьте подключение к интернету.</x:String>
+    <x:String x:Key="ReleasesEmpty">Релизы не найдены</x:String>
+    <x:String x:Key="ReleasesCurrentBadge">ТЕКУЩАЯ</x:String>
+    <x:String x:Key="ReleasesPrereleaseBadge">ПРЕДВАРИТЕЛЬНАЯ</x:String>
+    <x:String x:Key="ReleasesOpenOnGitHub">Открыть на GitHub</x:String>
     <x:String x:Key="TourSkip">Пропустить</x:String>
     <x:String x:Key="TourBack">Назад</x:String>
     <x:String x:Key="TourNext">Далее</x:String>

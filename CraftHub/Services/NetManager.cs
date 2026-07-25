@@ -1,5 +1,6 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace CraftHub.Services
@@ -11,10 +12,10 @@ namespace CraftHub.Services
         {
             _httpClient.DefaultRequestHeaders.Add("User-Agent", "CraftHub-Updater");
         }
-        
-        public static async Task<HttpResponseMessage> Get(string url)
+
+        public static async Task<HttpResponseMessage> Get(string url, CancellationToken cancellationToken = default)
         {
-            var response = await _httpClient.GetAsync(url);
+            var response = await _httpClient.GetAsync(url, cancellationToken);
             return response;
         }
 

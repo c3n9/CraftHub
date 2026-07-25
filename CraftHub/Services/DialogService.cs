@@ -55,6 +55,15 @@ public class DialogService : IDialogService
         return result;
     }
 
+    public async Task ShowReleasesDialogAsync(string? currentVersion)
+    {
+        var window = GetMainWindow();
+        if (window == null) return;
+
+        var dialog = new ReleasesView { DataContext = new ReleasesViewModel(currentVersion) };
+        await dialog.ShowDialog(window);
+    }
+
     public async Task ShowMessageAsync(string title, string message)
     {
         var window = GetActiveWindow();
