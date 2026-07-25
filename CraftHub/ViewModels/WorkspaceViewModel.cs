@@ -1056,6 +1056,37 @@ public partial class WorkspaceViewModel : ViewModelBase
         IsJsonEditorMode = true;
     }
 
+    /// <summary>Reformats the raw JSON with indentation (readable form).</summary>
+    [RelayCommand]
+    private void PrettifyJson() => ReformatJson(indented: true);
+
+    /// <summary>Collapses the raw JSON to a single line (compact form).</summary>
+    [RelayCommand]
+    private void MinifyJson() => ReformatJson(indented: false);
+
+    private void ReformatJson(bool indented)
+    {
+        if (string.IsNullOrWhiteSpace(RawJsonText)) return;
+        try
+        {
+            using var doc = JsonDocument.Parse(RawJsonText);
+            RawJsonText = JsonSerializer.Serialize(doc.RootElement, new JsonSerializerOptions
+            {
+                WriteIndented = indented,
+                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            });
+            JsonEditorError = string.Empty;
+            IsJsonEditorErrorVisible = false;
+            JsonEditorErrorLine = -1;
+        }
+        catch (JsonException ex)
+        {
+            IsJsonEditorErrorVisible = true;
+            JsonEditorErrorLine = ex.LineNumber ?? -1;
+            JsonEditorError = $"{Localizer.Get("InvalidJsonError")}: {ex.Message}";
+        }
+    }
+
     [RelayCommand]
     private void SwitchToTableEditor()
     {
