@@ -8,6 +8,7 @@ using Material.Icons;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
@@ -33,7 +34,15 @@ public partial class FileExplorerViewModel : ViewModelBase
     /// <summary>Raised when a new empty file was created and should be opened in a fresh tab.</summary>
     public event Action<string>? NewFileRequested;
 
+    /// <summary>Raised after a recent folder is picked, so the view can close the dropdown.</summary>
+    public event Action? RecentFolderOpened;
+
     public ObservableCollection<FileSystemItemViewModel> RootItems { get; } = new();
+
+    /// <summary>Most-recently-opened folders (newest first), VS Code-style quick pick.</summary>
+    public ObservableCollection<RecentFolderViewModel> RecentFolders { get; } = new();
+    public bool HasRecentFolders => RecentFolders.Count > 0;
+    private const int MaxRecentFolders = 5;
 
     [ObservableProperty] private string? _rootPath;
     [ObservableProperty] private FileSystemItemViewModel? _selectedItem;
@@ -66,9 +75,72 @@ public partial class FileExplorerViewModel : ViewModelBase
         _isVisible = Properties.Settings.Default.FileExplorerVisible;
         _panelWidth = Properties.Settings.Default.FileExplorerWidth is > 0 and var w ? w : 300;
 
+        LoadRecentFolders();
+
         var savedRoot = Properties.Settings.Default.ProjectRootFolder;
         if (!string.IsNullOrWhiteSpace(savedRoot) && Directory.Exists(savedRoot))
+        {
             SetRoot(savedRoot, persist: false);
+            AddRecentFolder(savedRoot); // ensure the restored folder shows up in the recent list
+        }
+    }
+
+    //  Recent folders
+
+    private void LoadRecentFolders()
+    {
+        RecentFolders.Clear();
+        var saved = Properties.Settings.Default.RecentFolders;
+        if (saved != null)
+            foreach (var path in saved)
+                if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path))
+                    RecentFolders.Add(new RecentFolderViewModel(path, OpenRecentFolder));
+        OnPropertyChanged(nameof(HasRecentFolders));
+    }
+
+    /// <summary>Moves <paramref name="path"/> to the front of the recent list, capped at 5, and persists.</summary>
+    private void AddRecentFolder(string path)
+    {
+        var stored = Properties.Settings.Default.RecentFolders ?? new StringCollection();
+        for (var i = stored.Count - 1; i >= 0; i--)
+            if (string.Equals(stored[i], path, StringComparison.OrdinalIgnoreCase))
+                stored.RemoveAt(i);
+        stored.Insert(0, path);
+        while (stored.Count > MaxRecentFolders)
+            stored.RemoveAt(stored.Count - 1);
+
+        Properties.Settings.Default.RecentFolders = stored;
+        Properties.Settings.Default.Save();
+        LoadRecentFolders();
+    }
+
+    private void RemoveRecentFolder(string path)
+    {
+        var stored = Properties.Settings.Default.RecentFolders;
+        if (stored == null) return;
+        for (var i = stored.Count - 1; i >= 0; i--)
+            if (string.Equals(stored[i], path, StringComparison.OrdinalIgnoreCase))
+                stored.RemoveAt(i);
+
+        Properties.Settings.Default.RecentFolders = stored;
+        Properties.Settings.Default.Save();
+        LoadRecentFolders();
+    }
+
+    private void OpenRecentFolder(string path)
+    {
+        if (Directory.Exists(path))
+        {
+            SetRoot(path, persist: true); // re-promotes it to the front of the recent list
+            IsVisible = true;
+        }
+        else
+        {
+            _notificationService.Publish(NotificationType.Error, Localizer.Get("RecentFolderMissingMsg", path));
+            RemoveRecentFolder(path);
+        }
+
+        RecentFolderOpened?.Invoke(); // close the dropdown after the pick
     }
 
     //  Persistence
@@ -497,6 +569,7 @@ public partial class FileExplorerViewModel : ViewModelBase
         {
             Properties.Settings.Default.ProjectRootFolder = path;
             Properties.Settings.Default.Save();
+            AddRecentFolder(path);
         }
     }
 

@@ -40,6 +40,41 @@
                         <materialIcons:MaterialIcon Kind="Refresh" Width="15" Height="15" />
                     </Button>
                     <Button Classes="explorer-btn"
+                            x:Name="RecentFoldersButton"
+                            IsEnabled="{Binding HasRecentFolders}"
+                            ToolTip.Tip="{DynamicResource RecentFoldersTip}">
+                        <materialIcons:MaterialIcon Kind="History" Width="15" Height="15" />
+                        <Button.Flyout>
+                            <MenuFlyout ItemsSource="{Binding RecentFolders}">
+                                <MenuFlyout.ItemContainerTheme>
+                                    <ControlTheme TargetType="MenuItem" x:DataType="vm:RecentFolderViewModel"
+                                                  BasedOn="{StaticResource {x:Type MenuItem}}">
+                                        <Setter Property="Command" Value="{Binding OpenCommand}" />
+                                        <Setter Property="ToolTip.Tip" Value="{Binding Path}" />
+                                        <Setter Property="Header" Value="{Binding}" />
+                                        <Setter Property="HeaderTemplate">
+                                            <DataTemplate x:DataType="vm:RecentFolderViewModel">
+                                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,1">
+                                                    <materialIcons:MaterialIcon Kind="FolderOutline"
+                                                                                Width="14" Height="14"
+                                                                                VerticalAlignment="Center"
+                                                                                Foreground="{DynamicResource AccentPrimary}" />
+                                                    <TextBlock Text="{Binding DisplayName}"
+                                                               VerticalAlignment="Center"
+                                                               Foreground="{DynamicResource TextPrimary}" />
+                                                    <TextBlock Text="{Binding ShortPath}"
+                                                               VerticalAlignment="Center"
+                                                               FontSize="11"
+                                                               Foreground="{DynamicResource TextMuted}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </Setter>
+                                    </ControlTheme>
+                                </MenuFlyout.ItemContainerTheme>
+                            </MenuFlyout>
+                        </Button.Flyout>
+                    </Button>
+                    <Button Classes="explorer-btn"
                             cl:Coachmark.Id="explorerOpenFolder"
                             Command="{Binding OpenFolderCommand}"
                             ToolTip.Tip="{DynamicResource OpenFolderTip}">

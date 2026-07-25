@@ -14,13 +14,30 @@ public partial class FileExplorerView : UserControl
     private FileSystemItemViewModel? _dragCandidate;
     private Point _dragStart;
 
+    private FileExplorerViewModel? _wiredVm;
+
     public FileExplorerView()
     {
         InitializeComponent();
         FileTree.KeyDown += OnTreeKeyDown;
         FileTree.AddHandler(DragDrop.DragOverEvent, OnTreeDragOver);
         FileTree.AddHandler(DragDrop.DropEvent, OnTreeDrop);
+        DataContextChanged += OnDataContextChanged;
     }
+
+    private void OnDataContextChanged(object? sender, EventArgs e)
+    {
+        if (_wiredVm != null)
+            _wiredVm.RecentFolderOpened -= CloseRecentFoldersFlyout;
+
+        _wiredVm = DataContext as FileExplorerViewModel;
+
+        if (_wiredVm != null)
+            _wiredVm.RecentFolderOpened += CloseRecentFoldersFlyout;
+    }
+
+    // Close the recent-folders dropdown as soon as a folder is picked.
+    private void CloseRecentFoldersFlyout() => RecentFoldersButton.Flyout?.Hide();
 
     private void OnItemDoubleTapped(object? sender, TappedEventArgs e)
     {

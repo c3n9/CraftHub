@@ -168,6 +168,8 @@
     <x:String x:Key="ToggleFileExplorerTip">Показать/скрыть проводник</x:String>
     <x:String x:Key="OpenFolderTitle">Открыть папку</x:String>
     <x:String x:Key="OpenFolderTip">Открыть папку…</x:String>
+    <x:String x:Key="RecentFoldersTip">Недавние папки</x:String>
+    <x:String x:Key="RecentFolderMissingMsg">Папка больше не существует: {0}</x:String>
     <x:String x:Key="OpenFolderBtn">Открыть папку</x:String>
     <x:String x:Key="CloseFolderTip">Закрыть папку</x:String>
     <x:String x:Key="RefreshTreeTip">Обновить</x:String>

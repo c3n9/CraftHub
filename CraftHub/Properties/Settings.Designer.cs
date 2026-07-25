@@ -61,6 +61,17 @@ namespace CraftHub.Properties {
 
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Collections.Specialized.StringCollection RecentFolders {
+            get {
+                return ((global::System.Collections.Specialized.StringCollection)(this["RecentFolders"]));
+            }
+            set {
+                this["RecentFolders"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("False")]
         public bool FileExplorerVisible {
             get {

@@ -169,6 +169,8 @@
 	<x:String x:Key="ToggleFileExplorerTip">Toggle file explorer</x:String>
 	<x:String x:Key="OpenFolderTitle">Open folder</x:String>
 	<x:String x:Key="OpenFolderTip">Open folder…</x:String>
+	<x:String x:Key="RecentFoldersTip">Recent folders</x:String>
+	<x:String x:Key="RecentFolderMissingMsg">Folder no longer exists: {0}</x:String>
 	<x:String x:Key="OpenFolderBtn">Open folder</x:String>
 	<x:String x:Key="CloseFolderTip">Close folder</x:String>
 	<x:String x:Key="RefreshTreeTip">Refresh</x:String>
