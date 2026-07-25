@@ -228,6 +228,7 @@
 
     <!-- Обзор интерфейса (Coachlight) -->
     <x:String x:Key="TourHelpTip">Обзор интерфейса</x:String>
+    <x:String x:Key="DropToOpenText">Отпустите, чтобы открыть файлы в новых вкладках</x:String>
     <x:String x:Key="TourSkip">Пропустить</x:String>
     <x:String x:Key="TourBack">Назад</x:String>
     <x:String x:Key="TourNext">Далее</x:String>

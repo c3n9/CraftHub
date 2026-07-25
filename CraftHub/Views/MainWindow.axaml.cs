@@ -1,6 +1,8 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CraftHub.Core;
 using CraftHub.Helpers;
@@ -8,8 +10,11 @@ using CraftHub.Services;
 using CraftHub.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.IO;
+using System.Linq;
 
 namespace CraftHub.Views;
 
@@ -21,10 +26,58 @@ public partial class MainWindow : Window
     // Onboarding is shown once per user; the "?" title-bar button replays it on demand.
     private bool _tourAutoStarted;
 
+    // File types that can be opened by dropping them onto the window.
+    private static readonly string[] OpenableExtensions = { ".json", ".txt", ".cs" };
+
     public MainWindow()
     {
         InitializeComponent();
         _notificationHistoryScroll = this.FindControl<ScrollViewer>("NotificationHistoryScroll");
+
+        // Drag a .json/.txt/.cs file onto the window to open it in a tab.
+        DragDrop.SetAllowDrop(this, true);
+        AddHandler(DragDrop.DragOverEvent, OnFilesDragOver);
+        AddHandler(DragDrop.DragLeaveEvent, OnFilesDragLeave);
+        AddHandler(DragDrop.DropEvent, OnFilesDrop);
+    }
+
+    private void OnFilesDragOver(object? sender, DragEventArgs e)
+    {
+        var canOpen = ExtractOpenablePaths(e).Any();
+        e.DragEffects = canOpen ? DragDropEffects.Copy : DragDropEffects.None;
+        SetDragOverlay(canOpen);
+        e.Handled = true;
+    }
+
+    private void OnFilesDragLeave(object? sender, DragEventArgs e) => SetDragOverlay(false);
+
+    private async void OnFilesDrop(object? sender, DragEventArgs e)
+    {
+        e.Handled = true;
+        SetDragOverlay(false);
+        var paths = ExtractOpenablePaths(e).ToList();
+        if (paths.Count > 0 && _vm != null)
+            await _vm.OpenDroppedFilesAsync(paths);
+    }
+
+    private void SetDragOverlay(bool visible)
+    {
+        if (DragDropOverlay != null)
+            DragDropOverlay.IsVisible = visible;
+    }
+
+    // Pulls local file paths with a supported extension out of a drag payload.
+    private static IEnumerable<string> ExtractOpenablePaths(DragEventArgs e)
+    {
+        if (!e.Data.Contains(DataFormats.Files) || e.Data.GetFiles() is not { } items)
+            return Enumerable.Empty<string>();
+
+        return items
+            .Select(item => item.TryGetLocalPath())
+            .Where(path => !string.IsNullOrEmpty(path)
+                           && File.Exists(path)
+                           && OpenableExtensions.Contains(Path.GetExtension(path).ToLowerInvariant()))
+            .Select(path => path!);
     }
 
     protected override void OnLoaded(RoutedEventArgs e)

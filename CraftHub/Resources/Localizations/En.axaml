@@ -229,6 +229,7 @@
 
 	<!-- Interface tour (Coachlight) -->
 	<x:String x:Key="TourHelpTip">Interface tour</x:String>
+	<x:String x:Key="DropToOpenText">Drop files to open them in new tabs</x:String>
 	<x:String x:Key="TourSkip">Skip</x:String>
 	<x:String x:Key="TourBack">Back</x:String>
 	<x:String x:Key="TourNext">Next</x:String>

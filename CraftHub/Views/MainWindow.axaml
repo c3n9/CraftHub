@@ -273,5 +273,31 @@
 				</ScrollViewer>
 			</StackPanel>
 		</Border>
+
+		<!-- Drag & drop overlay: dims the window while droppable files hover over it.
+		     IsHitTestVisible=False so it never intercepts the drag/drop events. -->
+		<Border x:Name="DragDropOverlay"
+				Grid.Row="0" Grid.RowSpan="3"
+				IsVisible="False"
+				IsHitTestVisible="False"
+				Background="#B0000000">
+			<Border HorizontalAlignment="Center" VerticalAlignment="Center"
+					Background="{DynamicResource ElevatedBackground}"
+					BorderBrush="{DynamicResource AccentPrimary}"
+					BorderThickness="2"
+					CornerRadius="14"
+					Padding="44,34">
+				<StackPanel Orientation="Vertical" Spacing="14" HorizontalAlignment="Center">
+					<materialIcons:MaterialIcon Kind="TrayArrowDown"
+												Width="56" Height="56"
+												HorizontalAlignment="Center"
+												Foreground="{DynamicResource AccentPrimary}" />
+					<TextBlock Text="{DynamicResource DropToOpenText}"
+							   FontSize="16" FontWeight="SemiBold"
+							   HorizontalAlignment="Center"
+							   Foreground="{DynamicResource TextPrimary}" />
+				</StackPanel>
+			</Border>
+		</Border>
 	</Grid>
 </Window>

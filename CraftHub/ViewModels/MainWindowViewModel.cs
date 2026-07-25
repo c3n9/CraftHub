@@ -71,7 +71,14 @@ public partial class MainWindowViewModel : ViewModelBase
     /// when it is empty, otherwise creates a new one. C# files load the class schema,
     /// everything else is imported as JSON.
     /// </summary>
-    private async void OnFileOpenRequested(string path)
+    private async void OnFileOpenRequested(string path) => await OpenFileIntoWorkspaceAsync(path);
+
+    /// <summary>
+    /// Opens a single file into a workspace tab: reuses the current tab if it is empty,
+    /// otherwise creates a new one. Routes .cs files to the class importer, everything else
+    /// to the JSON importer.
+    /// </summary>
+    private async Task OpenFileIntoWorkspaceAsync(string path)
     {
         try
         {
@@ -97,6 +104,19 @@ public partial class MainWindowViewModel : ViewModelBase
         catch (Exception ex)
         {
             _notificationService.Publish(NotificationType.Error, ex.Message);
+        }
+    }
+
+    /// <summary>
+    /// Opens files dropped onto the window — each in its own tab (the first reuses an empty tab).
+    /// Awaited sequentially so the empty-tab reuse and tab-limit checks stay consistent.
+    /// </summary>
+    public async Task OpenDroppedFilesAsync(IEnumerable<string> paths)
+    {
+        foreach (var path in paths)
+        {
+            if (File.Exists(path))
+                await OpenFileIntoWorkspaceAsync(path);
         }
     }
     private GitHubRelease? _latestRelease;
