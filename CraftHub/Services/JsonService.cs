@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -282,13 +283,13 @@ public class JsonService : IJsonService
 
         switch (type)
         {
-            case JsonFieldType.Int when int.TryParse(val, out var i): return i;
-            case JsonFieldType.Float when float.TryParse(val, out var f): return f;
-            case JsonFieldType.Double when double.TryParse(val, out var d): return d;
-            case JsonFieldType.Decimal when decimal.TryParse(val, out var m): return m;
+            case JsonFieldType.Int when TryInt(val, out var i): return i;
+            case JsonFieldType.Float when TryFloat(val, out var f): return f;
+            case JsonFieldType.Double when TryDouble(val, out var d): return d;
+            case JsonFieldType.Decimal when TryDecimal(val, out var m): return m;
             case JsonFieldType.Bool when bool.TryParse(val, out var b): return b;
-            case JsonFieldType.Byte when byte.TryParse(val, out var by): return by;
-            case JsonFieldType.Short when short.TryParse(val, out var s): return s;
+            case JsonFieldType.Byte when TryByte(val, out var by): return by;
+            case JsonFieldType.Short when TryShort(val, out var s): return s;
             case JsonFieldType.Object or JsonFieldType.Array:
                 try
                 {
@@ -302,6 +303,30 @@ public class JsonService : IJsonService
                 return val;
         }
     }
+
+    private static bool TryInt(string s, out int v) =>
+        int.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out v) ||
+        int.TryParse(s, NumberStyles.Integer, CultureInfo.CurrentCulture, out v);
+
+    private static bool TryShort(string s, out short v) =>
+        short.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out v) ||
+        short.TryParse(s, NumberStyles.Integer, CultureInfo.CurrentCulture, out v);
+
+    private static bool TryByte(string s, out byte v) =>
+        byte.TryParse(s, NumberStyles.Integer, CultureInfo.InvariantCulture, out v) ||
+        byte.TryParse(s, NumberStyles.Integer, CultureInfo.CurrentCulture, out v);
+
+    private static bool TryFloat(string s, out float v) =>
+        float.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out v) ||
+        float.TryParse(s, NumberStyles.Float, CultureInfo.CurrentCulture, out v);
+
+    private static bool TryDouble(string s, out double v) =>
+        double.TryParse(s, NumberStyles.Float, CultureInfo.InvariantCulture, out v) ||
+        double.TryParse(s, NumberStyles.Float, CultureInfo.CurrentCulture, out v);
+
+    private static bool TryDecimal(string s, out decimal v) =>
+        decimal.TryParse(s, NumberStyles.Number, CultureInfo.InvariantCulture, out v) ||
+        decimal.TryParse(s, NumberStyles.Number, CultureInfo.CurrentCulture, out v);
 
     public string SanitizeJson(string json) => SanitizeRawNewlinesInStrings(json);
 
