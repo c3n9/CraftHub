@@ -33,6 +33,7 @@
         </FluentTheme>
         <materialIcons:MaterialIconStyles />
         <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml" />
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
         <StyleInclude Source="/Resources/Styles/ControlStyles.axaml" />
         <StyleInclude Source="/Resources/Styles/ButtonStyles.axaml" />
         <StyleInclude Source="/Resources/Styles/TextBoxStyles.axaml" />

@@ -3,17 +3,21 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
-using Avalonia.Controls.Primitives;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
+using Avalonia.Platform;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
+using AvaloniaEdit;
+using AvaloniaEdit.Highlighting;
+using AvaloniaEdit.Highlighting.Xshd;
 using CraftHub.Converters;
 using CraftHub.Helpers;
 using CraftHub.Models;
@@ -31,13 +35,15 @@ public partial class WorkspaceView : UserControl
     // Used by CellEditEnded to push an undo action only when the value actually changed.
     private (DynamicDataRow Row, string PropName, string OldValue)? _pendingEdit;
 
-    private TextBox? _jsonTextBox;
-    private ScrollViewer? _lineNumberScroller;
-    private ScrollViewer? _jsonTextBoxScrollViewer;
-    private ScrollBar? _jsonHScrollBar;
-    private TextBlock? _lineNumbersBlock;
+    private TextEditor? _jsonEditor;
     private Button? _jsonErrorButton;
-    private int _lastLineCount = -1;
+
+    // Guards the two-way sync between the editor and WorkspaceViewModel.RawJsonText
+    // so an echo from one side does not bounce back and re-trigger the other.
+    private bool _suppressEditorSync;
+
+    // JSON highlighting is loaded once from the bundled .xshd and shared by every tab.
+    private static IHighlightingDefinition? _jsonHighlighting;
 
     public WorkspaceView()
     {
@@ -68,99 +74,73 @@ public partial class WorkspaceView : UserControl
             };
     }
 
-    //  JSON editor — line numbers + scroll sync
+    //  JSON editor (AvaloniaEdit)
 
     private void InitJsonEditor()
     {
-        _jsonTextBox        = this.FindControl<TextBox>("JsonTextBox");
-        _lineNumberScroller = this.FindControl<ScrollViewer>("LineNumberScroller");
-        _lineNumbersBlock   = this.FindControl<TextBlock>("LineNumbersBlock");
-        _jsonErrorButton    = this.FindControl<Button>("JsonErrorButton");
+        _jsonEditor      = this.FindControl<TextEditor>("JsonEditor");
+        _jsonErrorButton = this.FindControl<Button>("JsonErrorButton");
 
-        if (_jsonTextBox == null || _lineNumbersBlock == null) return;
-
-        _jsonTextBox.TextChanged += (_, _) => RefreshLineNumbers();
+        if (_jsonEditor != null)
+        {
+            _jsonEditor.SyntaxHighlighting = GetJsonHighlighting();
+            _jsonEditor.Options.IndentationSize = 2;
+            _jsonEditor.TextChanged += OnEditorTextChanged;
+        }
 
         if (_jsonErrorButton != null)
             _jsonErrorButton.Click += OnErrorButtonClick;
-
-        // After the TextBox template is applied its internal ScrollViewer exists.
-        // Post to Background so the visual tree is fully ready before we search it.
-        _jsonTextBox.TemplateApplied += (_, _) =>
-            Dispatcher.UIThread.Post(HookScrollSync, DispatcherPriority.Background);
     }
 
-    private void OnErrorButtonClick(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
+    private static IHighlightingDefinition? GetJsonHighlighting()
     {
-        if (DataContext is not WorkspaceViewModel vm) return;
-        if (vm.JsonEditorErrorLine < 0 || _jsonTextBox == null) return;
+        if (_jsonHighlighting != null) return _jsonHighlighting;
+        try
+        {
+            using var stream = AssetLoader.Open(new Uri("avares://CraftHub/Resources/JsonHighlighting.xshd"));
+            using var reader = XmlReader.Create(stream);
+            _jsonHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+        }
+        catch
+        {
+            // Fall back to AvaloniaEdit's built-in JSON definition if the bundled one fails to load.
+            _jsonHighlighting = HighlightingManager.Instance.GetDefinition("Json");
+        }
+        return _jsonHighlighting;
+    }
+
+    // Editor -> view-model
+    private void OnEditorTextChanged(object? sender, EventArgs e)
+    {
+        if (_suppressEditorSync || _currentVm == null || _jsonEditor == null) return;
+        _suppressEditorSync = true;
+        _currentVm.RawJsonText = _jsonEditor.Text;
+        _suppressEditorSync = false;
+    }
+
+    // View-model -> editor
+    private void PushTextToEditor(string text)
+    {
+        if (_jsonEditor == null || _suppressEditorSync || _jsonEditor.Text == text) return;
+        _suppressEditorSync = true;
+        _jsonEditor.Text = text ?? string.Empty;
+        _suppressEditorSync = false;
+    }
+
+    private void OnErrorButtonClick(object? sender, RoutedEventArgs e)
+    {
+        if (DataContext is not WorkspaceViewModel vm || vm.JsonEditorErrorLine < 0) return;
         NavigateToLine((int)vm.JsonEditorErrorLine);
     }
 
+    // JsonException.LineNumber is 0-based; AvaloniaEdit lines are 1-based.
     private void NavigateToLine(int lineIndex)
     {
-        if (_jsonTextBox == null) return;
-        var text = _jsonTextBox.Text ?? string.Empty;
-
-        int offset = 0;
-        int currentLine = 0;
-        for (int i = 0; i < text.Length; i++)
-        {
-            if (currentLine == lineIndex) { offset = i; break; }
-            if (text[i] == '\n') currentLine++;
-        }
-
-        _jsonTextBox.Focus();
-        _jsonTextBox.CaretIndex = offset;
-
-        if (_jsonTextBoxScrollViewer != null)
-        {
-            // FontSize=13, top padding=12; Avalonia line height ≈ FontSize * 1.5
-            var lineHeight = _jsonTextBox.FontSize * 1.5;
-            var targetY = 12.0 + lineIndex * lineHeight;
-            var viewportHeight = _jsonTextBoxScrollViewer.Viewport.Height;
-            _jsonTextBoxScrollViewer.Offset = new Vector(0, Math.Max(0, targetY - viewportHeight / 2));
-        }
-    }
-
-    private void HookScrollSync()
-    {
-        if (_jsonTextBox == null || _lineNumberScroller == null) return;
-        var sv = _jsonTextBox.GetVisualDescendants().OfType<ScrollViewer>().FirstOrDefault();
-        if (sv == null) return;
-        _jsonTextBoxScrollViewer = sv;
-        sv.ScrollChanged += (_, _) =>
-            _lineNumberScroller.Offset = new Vector(0, sv.Offset.Y);
-
-        _jsonHScrollBar = sv.GetVisualDescendants().OfType<ScrollBar>()
-            .FirstOrDefault(b => b.Orientation == Orientation.Horizontal);
-        if (_jsonHScrollBar != null)
-            _jsonHScrollBar.PropertyChanged += (_, e) =>
-            {
-                if (e.Property == Visual.BoundsProperty || e.Property == Visual.IsVisibleProperty)
-                    SyncLineNumberInset();
-            };
-        SyncLineNumberInset();
-    }
-
-    private void SyncLineNumberInset()
-    {
-        if (_lineNumberScroller == null) return;
-        var inset = _jsonHScrollBar is { IsVisible: true } bar ? bar.Bounds.Height : 0;
-        if (Math.Abs(_lineNumberScroller.Margin.Bottom - inset) > 0.1)
-            _lineNumberScroller.Margin = new Thickness(0, 0, 0, inset);
-    }
-
-    private void RefreshLineNumbers()
-    {
-        if (_lineNumbersBlock == null || _jsonTextBox == null) return;
-        var text = _jsonTextBox.Text ?? string.Empty;
-        var count = 1;
-        foreach (var c in text)
-            if (c == '\n') count++;
-        if (count == _lastLineCount) return;
-        _lastLineCount = count;
-        _lineNumbersBlock.Text = string.Join("\n", Enumerable.Range(1, count));
+        if (_jsonEditor?.Document is not { } doc) return;
+        var line = Math.Clamp(lineIndex + 1, 1, doc.LineCount);
+        _jsonEditor.ScrollToLine(line);
+        _jsonEditor.CaretOffset = doc.GetLineByNumber(line).Offset;
+        _jsonEditor.TextArea.Focus();
     }
 
     //  Row-number header
@@ -221,12 +201,18 @@ public partial class WorkspaceView : UserControl
             vm.Properties.CollectionChanged += OnPropertiesChanged;
             vm.PropertyChanged += OnVmPropertyChanged;
             RebuildColumns(vm);
+            PushTextToEditor(vm.RawJsonText); // seed the editor for this tab
             ScheduleOverflowUpdate();
         }
     }
 
     private void OnVmPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
+        // Keep the editor in sync when the raw JSON is changed by the view-model
+        // (entering JSON mode, prettify/minify, import).
+        if (e.PropertyName == nameof(WorkspaceViewModel.RawJsonText))
+            PushTextToEditor(_currentVm?.RawJsonText ?? string.Empty);
+
         // Switching between table / JSON mode changes which buttons are shown,
         // so the overflow split must be recomputed.
         if (e.PropertyName is nameof(WorkspaceViewModel.IsJsonEditorMode)

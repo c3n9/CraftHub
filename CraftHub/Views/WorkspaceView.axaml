@@ -5,6 +5,7 @@
 			 xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
 			 xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
 			 xmlns:cl="clr-namespace:Coachlight.Avalonia.Targeting;assembly=Coachlight.Avalonia"
+			 xmlns:ae="using:AvaloniaEdit"
 			 x:Class="CraftHub.Views.WorkspaceView"
 			 x:DataType="vm:WorkspaceViewModel">
 
@@ -426,7 +427,7 @@
 				</Border>
 			</Button>
 
-			<!-- JSON editor: outer ScrollViewer syncs line numbers and text together -->
+			<!-- JSON editor: AvaloniaEdit with JSON syntax highlighting and built-in line numbers -->
 			<Border Grid.Row="1"
 					CornerRadius="10"
 					Background="{DynamicResource BorderColor}"
@@ -434,41 +435,17 @@
 				<Border CornerRadius="9"
 						Background="{DynamicResource ElevatedBackground}"
 						ClipToBounds="True">
-					<Grid ColumnDefinitions="Auto,*">
-
-						<!-- Line numbers -->
-						<Border Grid.Column="0"
-								Background="{DynamicResource SurfaceBackground}"
-								BorderBrush="{DynamicResource BorderLight}"
-								BorderThickness="0,0,1,0">
-							<ScrollViewer x:Name="LineNumberScroller"
-										  HorizontalScrollBarVisibility="Disabled"
-										  VerticalScrollBarVisibility="Hidden"
-										  IsHitTestVisible="False">
-								<TextBlock x:Name="LineNumbersBlock"
-										   FontFamily="Cascadia Code,Cascadia Mono,Consolas,Courier New,monospace"
-										   FontSize="13"
-										   Padding="12,12,12,12"
-										   Foreground="{DynamicResource TextMuted}"
-										   TextAlignment="Right"
-										   Text="1" />
-							</ScrollViewer>
-						</Border>
-
-						<!-- Text editor -->
-						<TextBox Grid.Column="1"
-								 x:Name="JsonTextBox"
-								 Classes="json-editor"
-								 Text="{Binding RawJsonText, Mode=TwoWay}"
-								 AcceptsReturn="True"
-								 AcceptsTab="True"
-								 ScrollViewer.AllowAutoHide="False"
-								 FontFamily="Cascadia Code,Cascadia Mono,Consolas,Courier New,monospace"
-								 FontSize="13"
-								 TextWrapping="NoWrap"
-								 Padding="14,12"
-								 VerticalContentAlignment="Top" />
-					</Grid>
+					<ae:TextEditor x:Name="JsonEditor"
+					               ShowLineNumbers="True"
+					               WordWrap="False"
+					               FontFamily="Cascadia Code,Cascadia Mono,Consolas,Courier New,monospace"
+					               FontSize="13"
+					               Background="Transparent"
+					               Foreground="{DynamicResource TextPrimary}"
+					               LineNumbersForeground="{DynamicResource TextMuted}"
+					               Padding="10,10"
+					               HorizontalScrollBarVisibility="Auto"
+					               VerticalScrollBarVisibility="Auto" />
 				</Border>
 			</Border>
 		</Grid>
