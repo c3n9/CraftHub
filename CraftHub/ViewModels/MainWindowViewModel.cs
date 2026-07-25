@@ -82,6 +82,15 @@ public partial class MainWindowViewModel : ViewModelBase
     {
         try
         {
+            var already = Workspaces.FirstOrDefault(w =>
+                !string.IsNullOrEmpty(w.FilePath) &&
+                string.Equals(Path.GetFullPath(w.FilePath!), Path.GetFullPath(path), StringComparison.OrdinalIgnoreCase));
+            if (already != null)
+            {
+                SelectWorkspace(already);
+                return;
+            }
+
             var target = SelectedWorkspace;
             var reuseEmpty = target is { Properties.Count: 0, Rows.Count: 0 };
 
