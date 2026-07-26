@@ -28,7 +28,8 @@ public interface IOnboardingService
 public sealed class OnboardingService : IOnboardingService
 {
     // Bumping this id re-shows the tour to everyone (e.g. after a major UI change).
-    private const string AppTourId = "app-overview-v1";
+    // v2 adds the JSON editor, recent folders and releases steps.
+    private const string AppTourId = "app-overview-v2";
 
     // JsonProgressStore persists completion to a JSON file under the OS application-data folder.
     private readonly IProgressStore _store = new JsonProgressStore();
@@ -41,15 +42,31 @@ public sealed class OnboardingService : IOnboardingService
         anchor.StartTour(BuildAppTour(vm), _store, force);
     }
 
-    // A single long tour over the whole app: welcome → workspace editor → file explorer →
-    // window chrome → help. Every target is present on startup (the app always opens with one
-    // table-mode workspace), so all coachmarks resolve. Strings are pulled live so the tour
-    // follows the current language.
+    // A single long tour over the whole app: welcome → workspace editor → JSON editor →
+    // file explorer → window chrome → help. Every target is present on startup (the app always
+    // opens with one table-mode workspace), so all coachmarks resolve. Strings are pulled live
+    // so the tour follows the current language.
     private static Tour BuildAppTour(MainWindowViewModel? vm)
     {
         // Remembers whether the explorer panel was open before the tour so we can restore it
         // when the user navigates past the explorer steps.
         var explorerWasVisible = false;
+
+        // The JSON-mode steps' targets only exist while the workspace is in JSON mode (and vice
+        // versa for the table-mode steps around them). Each step that needs a particular mode
+        // asserts it on entry — a no-op if already correct — so the right target is guaranteed
+        // to be there however the step is reached (first pass, or Back from a later step).
+        void EnsureJsonMode()
+        {
+            if (vm?.SelectedWorkspace is { IsJsonEditorMode: false } ws)
+                ws.SwitchToJsonEditorCommand.Execute(null);
+        }
+
+        void EnsureTableMode()
+        {
+            if (vm?.SelectedWorkspace is { IsJsonEditorMode: true } ws)
+                ws.SwitchToTableEditorCommand.Execute(null);
+        }
 
         return
         TourBuilder.Create(AppTourId)
@@ -82,6 +99,9 @@ public sealed class OnboardingService : IOnboardingService
                 .Interactive(false)
                 .Title(Localizer.Get("TourImportExportTitle"))
                 .Text(Localizer.Get("TourImportExportText")))
+            .Modal(s => s
+                .Title(Localizer.Get("TourDragDropTitle"))
+                .Text(Localizer.Get("TourDragDropText")))
             .Coachmark("wsAddProperty", s => s
                 .Placement(Side.Bottom)
                 .Interactive(false)
@@ -111,7 +131,36 @@ public sealed class OnboardingService : IOnboardingService
                 .Placement(Side.Bottom)
                 .Interactive(false)
                 .Title(Localizer.Get("TourSwitchJsonTitle"))
-                .Text(Localizer.Get("TourSwitchJsonText")))
+                .Text(Localizer.Get("TourSwitchJsonText"))
+                // Guarantees this step's own target (table-mode-only button) is there,
+                // whether it's reached going forward or by backing up out of the JSON steps.
+                .OnEnter(EnsureTableMode))
+
+            // ---- JSON editor (JSON Mode) ----
+            .Coachmark("wsJsonEditorArea", s => s
+                .Placement(Side.Top)
+                .Interactive(false)
+                .Title(Localizer.Get("TourJsonEditorTitle"))
+                .Text(Localizer.Get("TourJsonEditorText"))
+                .OnEnter(EnsureJsonMode))
+            .Coachmark(new[] { "wsJsonPrettify", "wsJsonMinify" }, s => s
+                .Placement(Side.Bottom)
+                .Interactive(false)
+                .Title(Localizer.Get("TourJsonFormatTitle"))
+                .Text(Localizer.Get("TourJsonFormatText"))
+                .OnEnter(EnsureJsonMode))
+            .Coachmark("wsJsonFind", s => s
+                .Placement(Side.Bottom)
+                .Interactive(false)
+                .Title(Localizer.Get("TourJsonFindTitle"))
+                .Text(Localizer.Get("TourJsonFindText"))
+                .OnEnter(EnsureJsonMode))
+            .Coachmark("wsSwitchTable", s => s
+                .Placement(Side.Bottom)
+                .Interactive(false)
+                .Title(Localizer.Get("TourSwitchTableTitle"))
+                .Text(Localizer.Get("TourSwitchTableText"))
+                .OnEnter(EnsureJsonMode))
 
             // ---- File explorer: reveal the panel, then walk its contents ----
             .Coachmark("fileExplorerBtn", s => s
@@ -119,9 +168,11 @@ public sealed class OnboardingService : IOnboardingService
                 .Interactive(false)
                 .Title(Localizer.Get("TourFileExplorerTitle"))
                 .Text(Localizer.Get("TourFileExplorerText"))
-                // Open the side panel so the next steps have something to spotlight.
+                // Leaving the JSON steps: back to table mode. Open the side panel so the
+                // next steps have something to spotlight.
                 .OnEnter(() =>
                 {
+                    EnsureTableMode();
                     if (vm != null)
                     {
                         explorerWasVisible = vm.FileExplorer.IsVisible;
@@ -133,6 +184,11 @@ public sealed class OnboardingService : IOnboardingService
                 .Interactive(false)
                 .Title(Localizer.Get("TourExplorerPanelTitle"))
                 .Text(Localizer.Get("TourExplorerPanelText")))
+            .Coachmark("explorerRecentFolders", s => s
+                .Placement(Side.Right)
+                .Interactive(false)
+                .Title(Localizer.Get("TourRecentFoldersTitle"))
+                .Text(Localizer.Get("TourRecentFoldersText")))
             .Coachmark("explorerOpenFolder", s => s
                 .Placement(Side.Right)
                 .Interactive(false)
@@ -161,6 +217,11 @@ public sealed class OnboardingService : IOnboardingService
                 .Interactive(false)
                 .Title(Localizer.Get("TourLanguageTitle"))
                 .Text(Localizer.Get("TourLanguageText")))
+            .Coachmark("releasesBtn", s => s
+                .Placement(Side.Bottom)
+                .Interactive(false)
+                .Title(Localizer.Get("TourReleasesTitle"))
+                .Text(Localizer.Get("TourReleasesText")))
             .Coachmark("githubBtn", s => s
                 .Placement(Side.Bottom)
                 .Interactive(false)

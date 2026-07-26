@@ -41,6 +41,7 @@
                     </Button>
                     <Button Classes="explorer-btn"
                             x:Name="RecentFoldersButton"
+                            cl:Coachmark.Id="explorerRecentFolders"
                             IsEnabled="{Binding HasRecentFolders}"
                             ToolTip.Tip="{DynamicResource RecentFoldersTip}">
                         <materialIcons:MaterialIcon Kind="History" Width="15" Height="15" />

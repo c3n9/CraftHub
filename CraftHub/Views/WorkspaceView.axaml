@@ -120,6 +120,7 @@
 					</Button>
 
 					<Button Classes="toolbar-btn" Command="{Binding SwitchToTableEditorCommand}"
+							cl:Coachmark.Id="wsSwitchTable"
 							IsVisible="{Binding IsJsonEditorMode}"
 							ToolTip.Tip="{DynamicResource SwitchToTableTip}">
 						<StackPanel Orientation="Horizontal" Spacing="6">
@@ -132,16 +133,19 @@
 							IsVisible="{Binding IsJsonEditorMode}" />
 
 					<Button Classes="toolbar-btn" Command="{Binding PrettifyJsonCommand}"
+							cl:Coachmark.Id="wsJsonPrettify"
 							IsVisible="{Binding IsJsonEditorMode}"
 							ToolTip.Tip="{DynamicResource PrettifyJsonTip}">
 						<materialIcons:MaterialIcon Kind="FormatIndentIncrease" Width="16" Height="16" />
 					</Button>
 					<Button Classes="toolbar-btn" Command="{Binding MinifyJsonCommand}"
+							cl:Coachmark.Id="wsJsonMinify"
 							IsVisible="{Binding IsJsonEditorMode}"
 							ToolTip.Tip="{DynamicResource MinifyJsonTip}">
 						<materialIcons:MaterialIcon Kind="FormatIndentDecrease" Width="16" Height="16" />
 					</Button>
 					<Button x:Name="JsonFindButton" Classes="toolbar-btn"
+							cl:Coachmark.Id="wsJsonFind"
 							IsVisible="{Binding IsJsonEditorMode}"
 							ToolTip.Tip="{DynamicResource JsonFindTip}">
 						<materialIcons:MaterialIcon Kind="Magnify" Width="16" Height="16" />
@@ -434,6 +438,7 @@
 
 			<!-- JSON editor: AvaloniaEdit with JSON syntax highlighting and built-in line numbers -->
 			<Border Grid.Row="1"
+					cl:Coachmark.Id="wsJsonEditorArea"
 					CornerRadius="10"
 					Background="{DynamicResource BorderColor}"
 					Padding="1">
