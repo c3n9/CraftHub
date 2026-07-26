@@ -141,6 +141,11 @@
 							ToolTip.Tip="{DynamicResource MinifyJsonTip}">
 						<materialIcons:MaterialIcon Kind="FormatIndentDecrease" Width="16" Height="16" />
 					</Button>
+					<Button x:Name="JsonFindButton" Classes="toolbar-btn"
+							IsVisible="{Binding IsJsonEditorMode}"
+							ToolTip.Tip="{DynamicResource JsonFindTip}">
+						<materialIcons:MaterialIcon Kind="Magnify" Width="16" Height="16" />
+					</Button>
 					
 					<!-- Overflow menu — only shown when one or more buttons do not fit -->
 					<Button x:Name="OverflowButton" Classes="toolbar-btn"

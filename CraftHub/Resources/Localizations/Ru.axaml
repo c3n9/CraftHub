@@ -56,6 +56,7 @@
     <x:String x:Key="SwitchToTableTip">Применить изменения и вернуться к таблице</x:String>
     <x:String x:Key="PrettifyJsonTip">Форматировать JSON (с отступами)</x:String>
     <x:String x:Key="MinifyJsonTip">Свернуть JSON в одну строку</x:String>
+    <x:String x:Key="JsonFindTip">Поиск и замена (Ctrl+F / Ctrl+H)</x:String>
     <x:String x:Key="JsonAppliedMsg">JSON применён успешно</x:String>
     <x:String x:Key="InvalidJsonError">Некорректный JSON</x:String>
     <x:String x:Key="PasteRowsFromClipboard">Добавить строки из буфера</x:String>

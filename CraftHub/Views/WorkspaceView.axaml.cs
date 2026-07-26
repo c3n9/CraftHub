@@ -18,6 +18,7 @@ using Avalonia.VisualTree;
 using AvaloniaEdit;
 using AvaloniaEdit.Highlighting;
 using AvaloniaEdit.Highlighting.Xshd;
+using AvaloniaEdit.Search;
 using CraftHub.Converters;
 using CraftHub.Helpers;
 using CraftHub.Models;
@@ -37,6 +38,7 @@ public partial class WorkspaceView : UserControl
 
     private TextEditor? _jsonEditor;
     private Button? _jsonErrorButton;
+    private Button? _jsonFindButton;
 
     // Guards the two-way sync between the editor and WorkspaceViewModel.RawJsonText
     // so an echo from one side does not bounce back and re-trigger the other.
@@ -80,16 +82,56 @@ public partial class WorkspaceView : UserControl
     {
         _jsonEditor      = this.FindControl<TextEditor>("JsonEditor");
         _jsonErrorButton = this.FindControl<Button>("JsonErrorButton");
+        _jsonFindButton  = this.FindControl<Button>("JsonFindButton");
 
         if (_jsonEditor != null)
         {
             _jsonEditor.SyntaxHighlighting = GetJsonHighlighting();
             _jsonEditor.Options.IndentationSize = 2;
             _jsonEditor.TextChanged += OnEditorTextChanged;
+            // Handle Ctrl+F / Ctrl+H ourselves (Tunnel, so before AvaloniaEdit's built-in) to make
+            // them toggle the search panel — pressing the same combo again closes it.
+            _jsonEditor.AddHandler(KeyDownEvent, OnEditorKeyDown, RoutingStrategies.Tunnel);
         }
 
         if (_jsonErrorButton != null)
             _jsonErrorButton.Click += OnErrorButtonClick;
+
+        if (_jsonFindButton != null)
+            _jsonFindButton.Click += (_, _) => ToggleSearchPanel(replace: false);
+    }
+
+    private void OnEditorKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyModifiers != KeyModifiers.Control) return;
+
+        if (e.Key == Key.F)
+        {
+            ToggleSearchPanel(replace: false);
+            e.Handled = true;
+        }
+        else if (e.Key == Key.H)
+        {
+            ToggleSearchPanel(replace: true);
+            e.Handled = true;
+        }
+    }
+
+    // Opens the search panel in the requested mode, switches mode if already open in the other one,
+    // or closes it when the same combo is pressed again.
+    private void ToggleSearchPanel(bool replace)
+    {
+        if (_jsonEditor?.SearchPanel is not { } panel) return;
+
+        if (panel.IsOpened && panel.IsReplaceMode == replace)
+        {
+            panel.Close();
+        }
+        else
+        {
+            panel.Open();
+            panel.IsReplaceMode = replace;
+        }
     }
 
     private static IHighlightingDefinition? GetJsonHighlighting()
