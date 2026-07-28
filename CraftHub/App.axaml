@@ -41,6 +41,7 @@
         <StyleInclude Source="/Resources/Styles/DataGridStyles.axaml" />
         <StyleInclude Source="/Resources/Styles/ScrollViewerStyles.axaml" />
         <StyleInclude Source="/Resources/Styles/NotificationStyles.axaml" />
+        <StyleInclude Source="avares://Markdown.Avalonia/StyleCollections/MarkdownStyleGithubLike.axaml" />
 
     </Application.Styles>
 </Application>
