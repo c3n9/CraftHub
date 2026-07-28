@@ -61,7 +61,7 @@
 
 			<!-- Releases list -->
 			<ScrollViewer IsVisible="{Binding HasReleases}" VerticalScrollBarVisibility="Auto">
-				<ItemsControl ItemsSource="{Binding Releases}" Margin="0,4,10,4">
+				<ItemsControl ItemsSource="{Binding Releases}" Margin="0,4,24,4">
 					<ItemsControl.ItemTemplate>
 						<DataTemplate DataType="{x:Type vm:ReleaseItemViewModel}">
 							<Border Background="{DynamicResource ElevatedBackground}" CornerRadius="10"
