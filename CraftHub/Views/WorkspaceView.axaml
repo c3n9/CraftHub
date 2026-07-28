@@ -140,10 +140,11 @@
                     <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4"
                             IsVisible="{Binding IsTableEditorMode}" />
 
-                    <TextBox Text="{Binding SearchQuery}" Watermark="{DynamicResource SearchWatermark}"
+                    <TextBox x:Name="SearchBox" Text="{Binding SearchQuery}" Watermark="{DynamicResource SearchWatermark}"
                              cl:Coachmark.Id="wsSearch"
                              Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13"
-                             IsVisible="{Binding IsTableEditorMode}" />
+                             IsVisible="{Binding IsTableEditorMode}"
+                             KeyDown="OnSearchKeyDown" />
 
                     <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 

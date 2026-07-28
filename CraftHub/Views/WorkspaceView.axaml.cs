@@ -185,6 +185,38 @@ public partial class WorkspaceView : UserControl
         _jsonEditor.TextArea.Focus();
     }
 
+    private void OnSearchKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter) return;
+        e.Handled = true;
+        FindNextMatch();
+    }
+
+    private void FindNextMatch()
+    {
+        if (_currentVm is not { } vm || string.IsNullOrWhiteSpace(vm.SearchQuery)) return;
+
+        var rows = vm.Rows;
+        var props = vm.Properties;
+        if (rows.Count == 0 || props.Count == 0) return;
+
+        var query = vm.SearchQuery;
+        var startIndex = vm.SelectedRow != null ? rows.IndexOf(vm.SelectedRow) : -1;
+
+        bool RowMatches(DynamicDataRow row) =>
+            props.Any(p => (row[p.Name] ?? string.Empty).Contains(query, StringComparison.OrdinalIgnoreCase));
+
+        for (var offset = 1; offset <= rows.Count; offset++)
+        {
+            var idx = (startIndex + offset) % rows.Count;
+            if (!RowMatches(rows[idx])) continue;
+
+            vm.SelectedRow = rows[idx];
+            DataGrid.ScrollIntoView(rows[idx], null);
+            return;
+        }
+    }
+
     //  Row-number header
 
     private void OnDataGridLoadingRow(object? sender, DataGridRowEventArgs e)

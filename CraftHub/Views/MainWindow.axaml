@@ -87,7 +87,7 @@
 						  IsVisible="{Binding FileExplorer.IsVisible}" />
 
 			<!-- Workspace content -->
-			<Border Grid.Column="2" Background="{DynamicResource SurfaceBackground}" Margin="0">
+			<Border Grid.Column="2" Background="{DynamicResource SurfaceBackground}" Margin="0" ClipToBounds="True">
 				<Panel>
 					<ItemsControl ItemsSource="{Binding Workspaces}"
 								  IsVisible="{Binding HasWorkspaces}">
@@ -142,7 +142,7 @@
 						<materialIcons:MaterialIcon Kind="{Binding FileExplorer.ToggleIconKind}" Width="16" Height="16" />
 					</Button>
 				<ScrollViewer Grid.Column="1"
-							  HorizontalScrollBarVisibility="Auto"
+							  HorizontalScrollBarVisibility="Hidden"
 							  VerticalScrollBarVisibility="Disabled"
 							  VerticalAlignment="Center">
 					<ItemsControl ItemsSource="{Binding Workspaces}">

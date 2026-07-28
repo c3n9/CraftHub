@@ -18,8 +18,8 @@
                            Text="{DynamicResource FileExplorerTitle}"
                            FontSize="12"
                            FontWeight="SemiBold"
-                           Width="80"
-                           HorizontalAlignment="Left"
+                           TextTrimming="CharacterEllipsis"
+                           HorizontalAlignment="Stretch"
                            Foreground="{DynamicResource TextSecondary}"
                            VerticalAlignment="Center" />
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="2">
