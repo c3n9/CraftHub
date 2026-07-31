@@ -7,6 +7,8 @@ using CraftHub.ViewModels;
 using CraftHub.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.IO;
+using System.Linq;
 
 namespace CraftHub;
 
@@ -39,6 +41,14 @@ public class App : Application
             var mainWindow = Services.GetRequiredService<MainWindow>();
             mainWindow.DataContext = mainVm;
             desktop.MainWindow = mainWindow;
+
+
+            if (desktop.Args is { Length: > 0 })
+            {
+                var paths = desktop.Args.Where(File.Exists).ToList();
+                if (paths.Count > 0)
+                    _ = mainVm.OpenDroppedFilesAsync(paths);
+            }
         }
 
         base.OnFrameworkInitializationCompleted();
