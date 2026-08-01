@@ -61,7 +61,13 @@ public partial class WorkspaceViewModel : ViewModelBase
         if (!_isLoading) IsModified = true;
     }
 
-    private void OnRowValueChanged(object? sender, PropertyChangedEventArgs e) => MarkDirty();
+    private void OnRowValueChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        MarkDirty();
+        // A cell edit can move a row in or out of the filtered set (e.g. it now/no-longer
+        // contains SearchQuery), so keep the filtered view honest.
+        if (IsFilterActive) RefreshFilter();
+    }
 
     /// <summary>Binds this (empty) tab to a newly created file without importing anything.</summary>
     public void BindToNewFile(string path)
@@ -82,6 +88,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private JsonFieldType _selectedType = JsonFieldType.String;
     [ObservableProperty] private DynamicDataRow? _selectedRow;
     [ObservableProperty] private string _searchQuery = string.Empty;
+    [ObservableProperty] private bool _isFilterActive;
     [ObservableProperty] private bool _isActive;
     [ObservableProperty] private int _selectedRowsCount = 0;
     [ObservableProperty] private bool _isJsonEditorMode = false;
@@ -141,6 +148,31 @@ public partial class WorkspaceViewModel : ViewModelBase
     public BulkObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public BulkObservableCollection<DynamicDataRow> Rows { get; } = new();
     public Array AvailableTypes => Enum.GetValues(typeof(JsonFieldType));
+
+    /// <summary>Subset of <see cref="Rows"/> whose values contain <see cref="SearchQuery"/> —
+    /// kept up to date whenever the query, the filter toggle, or the row data itself changes.</summary>
+    public ObservableCollection<DynamicDataRow> FilteredRows { get; } = new();
+
+    /// <summary>What the DataGrid actually shows: the live-filtered subset while the filter
+    /// toggle is on and there's something to filter by, otherwise every row.</summary>
+    public IEnumerable<DynamicDataRow> DisplayedRows =>
+        IsFilterActive && !string.IsNullOrWhiteSpace(SearchQuery) ? FilteredRows : Rows;
+
+    partial void OnSearchQueryChanged(string value) => RefreshFilter();
+
+    partial void OnIsFilterActiveChanged(bool value) => OnPropertyChanged(nameof(DisplayedRows));
+
+    private void RefreshFilter()
+    {
+        FilteredRows.Clear();
+        if (!string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            foreach (var row in Rows)
+                if (Properties.Any(p => (row[p.Name] ?? string.Empty).Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)))
+                    FilteredRows.Add(row);
+        }
+        OnPropertyChanged(nameof(DisplayedRows));
+    }
     public event EventHandler? CloseRequested;
     public event EventHandler? ColumnsChanged;
 
@@ -252,6 +284,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(TotalRows));
         UpdateDataSize();
+        if (IsFilterActive) RefreshFilter();
 
         if (e.OldItems != null)
             foreach (DynamicDataRow row in e.OldItems)

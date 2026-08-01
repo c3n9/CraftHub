@@ -142,9 +142,19 @@
 
                     <TextBox x:Name="SearchBox" Text="{Binding SearchQuery}" Watermark="{DynamicResource SearchWatermark}"
                              cl:Coachmark.Id="wsSearch"
-                             Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13"
+                             Width="190" VerticalAlignment="Center" CornerRadius="6" FontSize="13"
                              IsVisible="{Binding IsTableEditorMode}"
-                             KeyDown="OnSearchKeyDown" />
+                             KeyDown="OnSearchKeyDown">
+                        <TextBox.InnerRightContent>
+                            <ToggleButton Classes="explorer-toggle"
+                                          IsChecked="{Binding IsFilterActive}"
+                                          Padding="2" MinWidth="20" MinHeight="20"
+                                          Margin="0,0,5,0"
+                                          ToolTip.Tip="{DynamicResource FilterToggleTip}">
+                                <materialIcons:MaterialIcon Kind="FilterOutline" Width="13" Height="13" />
+                            </ToggleButton>
+                        </TextBox.InnerRightContent>
+                    </TextBox>
 
                     <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 
@@ -346,7 +356,7 @@
                               cl:Coachmark.Id="wsGrid"
                               MinWidth="520"
                               RowHeaderWidth="48"
-                              ItemsSource="{Binding Rows}"
+                              ItemsSource="{Binding DisplayedRows}"
                               SelectedItem="{Binding SelectedRow}"
                               AutoGenerateColumns="False"
                               CanUserReorderColumns="True"
