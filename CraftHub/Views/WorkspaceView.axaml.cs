@@ -11,6 +11,7 @@ using Avalonia.Controls.Templates;
 using Avalonia.Data;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
+using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Threading;
@@ -47,6 +48,10 @@ public partial class WorkspaceView : UserControl
     // JSON highlighting is loaded once from the bundled .xshd and shared by every tab.
     private static IHighlightingDefinition? _jsonHighlighting;
 
+    // Column pin icon + header background, keyed by column, so their visual (pinned/unpinned)
+    // state can be refreshed after a toggle or a reorder without rebuilding the whole header.
+    private readonly System.Collections.Generic.Dictionary<DataGridColumn, (Material.Icons.Avalonia.MaterialIcon Icon, Border Header)> _pinIcons = new();
+
     public WorkspaceView()
     {
         InitializeComponent();
@@ -55,6 +60,7 @@ public partial class WorkspaceView : UserControl
         DataGrid.SelectionChanged  += OnDataGridSelectionChanged;
         DataGrid.BeginningEdit     += (_, _) => SetCellEditing(true);
         DataGrid.CellEditEnded     += OnDataGridCellEditEnded;
+        DataGrid.ColumnReordered   += (_, _) => UpdatePinIconStates();
         DataGrid.GotFocus          += async (_, _) =>
         {
             if (DataContext is WorkspaceViewModel vm)
@@ -401,6 +407,7 @@ public partial class WorkspaceView : UserControl
 
             case NotifyCollectionChangedAction.Remove
                 when e.OldStartingIndex >= 0 && e.OldStartingIndex < DataGrid.Columns.Count:
+                _pinIcons.Remove(DataGrid.Columns[e.OldStartingIndex]);
                 DataGrid.Columns.RemoveAt(e.OldStartingIndex);
                 break;
 
@@ -438,6 +445,7 @@ public partial class WorkspaceView : UserControl
                 savedWidths[tag] = col.Width;
 
         DataGrid.Columns.Clear();
+        _pinIcons.Clear();
 
         foreach (var prop in vm.Properties)
         {
@@ -447,6 +455,58 @@ public partial class WorkspaceView : UserControl
                 column.Width = savedWidth;
 
             DataGrid.Columns.Add(column);
+        }
+
+        UpdatePinIconStates();
+    }
+
+    // The DataGrid only supports freezing a contiguous block from the left (FrozenColumnCount),
+    // not arbitrary individual columns. So pinning a column that isn't already adjacent to the
+    // pinned block moves it there (DisplayIndex = right after the last pinned column) instead of
+    // just widening the frozen block to include everything in between — otherwise pinning e.g.
+    // column 5 with nothing else pinned would freeze columns 0-5 as one block, and if that block
+    // is wider than the viewport the grid renders empty (frozen-columns rendering bug).
+    private void ToggleColumnPin(DataGridColumn column)
+    {
+        var pinnedCount = DataGrid.FrozenColumnCount;
+        var idx = column.DisplayIndex;
+        if (idx < 0) return;
+
+        if (idx < pinnedCount)
+        {
+            // Unpin just this column: move it to the end of the pinned block first so the
+            // remaining pinned columns shift left and stay pinned, instead of the whole block
+            // collapsing (previously unpinning the first pinned column unpinned everything).
+            if (idx != pinnedCount - 1)
+                column.DisplayIndex = pinnedCount - 1;
+            DataGrid.FrozenColumnCount = pinnedCount - 1;
+        }
+        else
+        {
+            if (idx != pinnedCount)
+                column.DisplayIndex = pinnedCount;
+            DataGrid.FrozenColumnCount = pinnedCount + 1;
+        }
+
+        UpdatePinIconStates();
+    }
+
+    private void UpdatePinIconStates()
+    {
+        foreach (var (col, entry) in _pinIcons)
+        {
+            var pinned = col.DisplayIndex >= 0 && col.DisplayIndex < DataGrid.FrozenColumnCount;
+            entry.Icon.Kind = pinned ? Material.Icons.MaterialIconKind.PinOutline : Material.Icons.MaterialIconKind.PinOffOutline;
+            entry.Icon.Opacity = 1.0;
+
+            // Resolved against the header Border itself (already attached to the visual tree),
+            // not Application.Current — that's what makes it track the actually-rendered theme.
+            var accentColor = entry.Header.TryFindResource("AccentPrimary", out var res) && res is ISolidColorBrush accent
+                ? accent.Color
+                : Colors.Gray;
+
+            entry.Icon.Foreground = pinned ? new SolidColorBrush(accentColor) : Brushes.Gray;
+            entry.Header.Background = pinned ? new SolidColorBrush(accentColor, 0x4A / 255.0) : Brushes.Transparent;
         }
     }
 
@@ -459,14 +519,6 @@ public partial class WorkspaceView : UserControl
                 // Tag = property name so CellEditEnded can identify which field changed
                 Tag = prop.Name,
                 Header = header,
-                HeaderTemplate = new FuncDataTemplate<object>((_, _) => new TextBlock
-                {
-                    Text = header,
-                    TextTrimming = TextTrimming.CharacterEllipsis,
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Stretch,
-                    [!ToolTip.TipProperty] = new Binding { Source = header }
-                }),
                 // Все колонки (включая последнюю) подгоняются под содержимое (SizeToCells):
                 // ширина фиксируется по самой широкой ячейке и не меняется при скролле.
                 // '*' (Star) НЕ используется — иначе последняя колонка «прилипает» к правому
@@ -483,6 +535,56 @@ public partial class WorkspaceView : UserControl
                 CanUserResize = true
             };
 
+            column.HeaderTemplate = new FuncDataTemplate<object>((_, _) =>
+            {
+                var headerBorder = new Border();
+                // Pin button goes first (left) — frozen columns anchor to the viewport's left
+                // edge, so the left side stays reachable regardless of column width/scroll,
+                // unlike the right edge which can end up off-screen on a wide pinned column.
+                var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("Auto,*") };
+                headerBorder.Child = grid;
+
+                var text = new TextBlock
+                {
+                    Text = header,
+                    TextTrimming = TextTrimming.CharacterEllipsis,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Stretch,
+                    [!ToolTip.TipProperty] = new Binding { Source = header }
+                };
+
+                var pinIcon = new Material.Icons.Avalonia.MaterialIcon
+                {
+                    Kind = Material.Icons.MaterialIconKind.PinOffOutline,
+                    Width = 13,
+                    Height = 13,
+                    Opacity = 0.45,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+                var pinBtn = new Button
+                {
+                    Content = pinIcon,
+                    Padding = new Avalonia.Thickness(4, 2),
+                    Margin = new Avalonia.Thickness(0, 0, 2, 0),
+                    Background = Brushes.Transparent,
+                    Cursor = Avalonia.Input.Cursor.Parse("Hand"),
+                    [!ToolTip.TipProperty] = new Binding { Source = Localizer.Get("PinColumnTip") }
+                };
+                pinBtn.Click += (_, e) =>
+                {
+                    e.Handled = true; // don't let the click bubble into the header's own sort gesture
+                    ToggleColumnPin(column);
+                };
+
+                _pinIcons[column] = (pinIcon, headerBorder);
+
+                Grid.SetColumn(pinBtn, 0);
+                Grid.SetColumn(text, 1);
+                grid.Children.Add(pinBtn);
+                grid.Children.Add(text);
+                return headerBorder;
+            });
+
             var isComplexType = prop.FieldType == JsonFieldType.Object || prop.FieldType == JsonFieldType.Array;
             var isBoolType    = prop.FieldType == JsonFieldType.Bool;
 
@@ -490,7 +592,7 @@ public partial class WorkspaceView : UserControl
             column.CellTemplate = new FuncDataTemplate<DynamicDataRow>((row, _) =>
             {
                 var border = new Border();
-                var mb = new MultiBinding { Converter = new SearchHighlightConverter() };
+                var mb = new MultiBinding { Converter = new SearchHighlightConverter(column) };
                 // Compiled binding (not "[{name}]" string path) — tolerates any key; see issue #11.
                 mb.Bindings.Add(DynamicRowCellBinding.ForKey(prop.Name));
                 mb.Bindings.Add(new Binding("DataContext.SearchQuery")
@@ -498,6 +600,16 @@ public partial class WorkspaceView : UserControl
                     RelativeSource = new RelativeSource
                         { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) }
                 });
+                // Re-evaluates the pin tint whenever pinning changes, since FrozenColumnCount
+                // is a bindable AvaloniaProperty on DataGrid.
+                mb.Bindings.Add(new Binding(nameof(DataGrid.FrozenColumnCount))
+                {
+                    RelativeSource = new RelativeSource
+                        { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) }
+                });
+                // Resolved against this Border itself (not Application.Current), so it always
+                // matches the theme actually rendered — see SearchHighlightConverter for why.
+                mb.Bindings.Add(new DynamicResourceExtension("AccentPrimary"));
                 border.Bind(Border.BackgroundProperty, mb);
 
                 if (isComplexType)

@@ -22,6 +22,7 @@
 	<!-- Watermarks -->
 	<x:String x:Key="SearchWatermark">Search by value...</x:String>
 	<x:String x:Key="FilterToggleTip">Show only matching rows</x:String>
+	<x:String x:Key="PinColumnTip">Pin columns up to here</x:String>
 	<x:String x:Key="PropertyNameWatermark">Property name</x:String>
 
 	<!-- Status bar -->

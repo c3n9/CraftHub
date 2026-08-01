@@ -22,6 +22,7 @@
     <!-- Watermarks -->
     <x:String x:Key="SearchWatermark">Поиск по значению...</x:String>
     <x:String x:Key="FilterToggleTip">Показывать только совпадения</x:String>
+    <x:String x:Key="PinColumnTip">Закрепить колонки до этой</x:String>
     <x:String x:Key="PropertyNameWatermark">Имя поля</x:String>
 
     <!-- Status bar -->
