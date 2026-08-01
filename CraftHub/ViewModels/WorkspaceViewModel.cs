@@ -771,11 +771,11 @@ public partial class WorkspaceViewModel : ViewModelBase
             }
 
             var json = await File.ReadAllTextAsync(path);
-            json = _jsonService.SanitizeJson(json);
+            json = await Task.Run(() => _jsonService.SanitizeJson(json));
 
             if (Properties.Count == 0)
             {
-                var detectedFields = _jsonService.DetectFields(json);
+                var detectedFields = await Task.Run(() => _jsonService.DetectFields(json));
                 if (detectedFields.Count == 0)
                 {
                     await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"),
@@ -830,7 +830,7 @@ public partial class WorkspaceViewModel : ViewModelBase
                     new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType }));
             }
 
-            var rows = _jsonService.ParseJsonData(json, Properties);
+            var rows = await Task.Run(() => _jsonService.ParseJsonData(json, Properties));
             Rows.Clear();
             Rows.AddRange(rows);
 
@@ -840,7 +840,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             FireColumnsChanged();
 
             if (IsJsonEditorMode)
-                RawJsonText = _jsonService.SerializeToJson(Rows, Properties);
+                RawJsonText = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
 
             // Bind this tab to the source file so Ctrl+S writes back to it.
             FilePath = path;
@@ -877,7 +877,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         var path = await _fileDialogService.SaveFileAsync("Export JSON", filters, Header);
         if (path == null) return;
 
-        var json = _jsonService.SerializeToJson(Rows, Properties);
+        var json = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
         await File.WriteAllTextAsync(path, json, Encoding.UTF8);
         NotifySuccess(Localizer.Get("ExportedMsg", Path.GetFileName(path)));
     }
@@ -894,7 +894,8 @@ public partial class WorkspaceViewModel : ViewModelBase
             return;
         }
 
-        if (!TryBuildSaveContent(out var content)) return;
+        var (success, content) = await TryBuildSaveContentAsync();
+        if (!success) return;
 
         // Warn if the file was changed on disk since we last loaded or saved it.
         var current = SafeGetWriteTime(FilePath);
@@ -914,7 +915,8 @@ public partial class WorkspaceViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveAsAsync()
     {
-        if (!TryBuildSaveContent(out var content)) return;
+        var (success, content) = await TryBuildSaveContentAsync();
+        if (!success) return;
 
         var filters = new List<FileFilter> { new("JSON and TXT files", new[] { "*.json", "*.txt" }) };
         var suggestedName = FilePath != null
@@ -947,33 +949,30 @@ public partial class WorkspaceViewModel : ViewModelBase
     }
 
     /// <summary>Builds the JSON text to persist, validating raw text when in JSON-editor mode.</summary>
-    private bool TryBuildSaveContent(out string content)
+    private async Task<(bool Success, string Content)> TryBuildSaveContentAsync()
     {
-        content = string.Empty;
-
         if (IsJsonEditorMode)
         {
             try
             {
-                JsonDocument.Parse(RawJsonText);
+                await Task.Run(() => JsonDocument.Parse(RawJsonText).Dispose());
             }
             catch (JsonException ex)
             {
                 NotifyError($"{Localizer.Get("InvalidJsonError")}: {ex.Message}");
-                return false;
+                return (false, string.Empty);
             }
-            content = RawJsonText;
-            return true;
+            return (true, RawJsonText);
         }
 
         if (Properties.Count == 0)
         {
             NotifyWarning(Localizer.Get("NothingToSaveMsg"));
-            return false;
+            return (false, string.Empty);
         }
 
-        content = _jsonService.SerializeToJson(Rows, Properties);
-        return true;
+        var content = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
+        return (true, content);
     }
 
     [RelayCommand]
@@ -1096,10 +1095,10 @@ public partial class WorkspaceViewModel : ViewModelBase
     // -----------------------------------------------------------------------
 
     [RelayCommand]
-    private void SwitchToJsonEditor()
+    private async Task SwitchToJsonEditorAsync()
     {
         RawJsonText = Rows.Count > 0 && Properties.Count > 0
-            ? _jsonService.SerializeToJson(Rows, Properties)
+            ? await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties))
             : Properties.Count > 0
                 ? "[]"
                 : "{}";
@@ -1110,23 +1109,48 @@ public partial class WorkspaceViewModel : ViewModelBase
 
     /// <summary>Reformats the raw JSON with indentation (readable form).</summary>
     [RelayCommand]
-    private void PrettifyJson() => ReformatJson(indented: true);
+    private Task PrettifyJsonAsync() => ReformatJsonAsync(indented: true);
 
     /// <summary>Collapses the raw JSON to a single line (compact form).</summary>
     [RelayCommand]
-    private void MinifyJson() => ReformatJson(indented: false);
+    private Task MinifyJsonAsync() => ReformatJsonAsync(indented: false);
 
-    private void ReformatJson(bool indented)
+    private async Task ReformatJsonAsync(bool indented)
     {
         if (string.IsNullOrWhiteSpace(RawJsonText)) return;
         try
         {
-            using var doc = JsonDocument.Parse(RawJsonText);
-            RawJsonText = JsonSerializer.Serialize(doc.RootElement, new JsonSerializerOptions
+            var formatted = await Task.Run(() =>
             {
-                WriteIndented = indented,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                using var doc = JsonDocument.Parse(RawJsonText);
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = indented,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+
+                // A fully-minified top-level array collapses into a single multi-million-character
+                // line for large datasets, which crashes the editor's text shaping/highlighting.
+                // Keep one compact element per line instead so "minify" stays safe at any size.
+                if (!indented && doc.RootElement.ValueKind == JsonValueKind.Array &&
+                    doc.RootElement.GetArrayLength() > 1)
+                {
+                    var sb = new StringBuilder();
+                    sb.Append('[');
+                    var first = true;
+                    foreach (var element in doc.RootElement.EnumerateArray())
+                    {
+                        if (!first) sb.Append(',');
+                        sb.Append('\n').Append(JsonSerializer.Serialize(element, options));
+                        first = false;
+                    }
+                    sb.Append('\n').Append(']');
+                    return sb.ToString();
+                }
+
+                return JsonSerializer.Serialize(doc.RootElement, options);
             });
+            RawJsonText = formatted;
             JsonEditorError = string.Empty;
             IsJsonEditorErrorVisible = false;
             JsonEditorErrorLine = -1;
@@ -1140,7 +1164,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void SwitchToTableEditor()
+    private async Task SwitchToTableEditorAsync()
     {
         if (string.IsNullOrWhiteSpace(RawJsonText))
         {
@@ -1150,13 +1174,17 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         try
         {
-            JsonDocument.Parse(RawJsonText);
+            var rawJson = RawJsonText;
 
             // Always detect fields from JSON and add any that are not yet in the schema.
             // This covers both the "empty schema" case and the "user added new fields in JSON mode" case.
             // DetectFields returns a tree, so the nested fields the user expanded during import
             // have to be recovered from the current schema — otherwise they'd be dropped here.
-            var detected = _jsonService.DetectFields(RawJsonText);
+            var detected = await Task.Run(() =>
+            {
+                JsonDocument.Parse(rawJson).Dispose();
+                return _jsonService.DetectFields(rawJson);
+            });
             var schemaNames = Properties.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
             var effective = ResolveDetectedFields(detected, schemaNames);
             var effectiveNames = effective.Select(f => f.FieldName).ToHashSet(StringComparer.Ordinal);
@@ -1171,7 +1199,7 @@ public partial class WorkspaceViewModel : ViewModelBase
                 .Select(f => new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType });
             Properties.AddRange(newFields);
 
-            var rows = _jsonService.ParseJsonData(RawJsonText, Properties);
+            var rows = await Task.Run(() => _jsonService.ParseJsonData(rawJson, Properties));
             Rows.Clear();
             Rows.AddRange(rows);
 
