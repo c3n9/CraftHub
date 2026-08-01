@@ -392,6 +392,10 @@
                                           InputGesture="Ctrl+V"
                                           Command="{Binding PasteRowsToDataGridCommand}" />
                                 <Separator />
+                                <MenuItem Header="{DynamicResource CtxExportSelected}"
+                                          Command="{Binding ExportSelectedRowsCommand}"
+                                          CommandParameter="{Binding #DataGrid.SelectedItems}" />
+                                <Separator />
                                 <MenuItem Header="{DynamicResource CtxInsertRowAfter}"
                                           Command="{Binding InsertRowAfterCommand}"
                                           CommandParameter="{Binding #DataGrid.SelectedItems}" />

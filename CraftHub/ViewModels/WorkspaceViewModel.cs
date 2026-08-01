@@ -661,6 +661,25 @@ public partial class WorkspaceViewModel : ViewModelBase
         NotifySuccess(Localizer.Get("RowsCopiedMsg", selectedRows.Count));
     }
 
+    /// <summary>Writes just the selected rows to a JSON file — a partial dump for a bug report or
+    /// a test fixture, without exporting (or clobbering) the whole table. Always an array, even
+    /// for a single row, so the file re-imports the same way a full export does.</summary>
+    [RelayCommand(CanExecute = nameof(CanCopyOrCut))]
+    private async Task ExportSelectedRowsAsync(object? parameter)
+    {
+        var selectedRows = ResolveSelectedRows(parameter);
+        if (selectedRows == null) return;
+
+        var filters = new List<FileFilter> { new("JSON and TXT files", new[] { "*.json", "*.txt" }) };
+        var suggestedName = $"{Header}_selected";
+        var path = await _fileDialogService.SaveFileAsync(Localizer.Get("ExportSelectedTitle"), filters, suggestedName);
+        if (path == null) return;
+
+        var json = _jsonService.SerializeToJson(selectedRows, Properties);
+        await File.WriteAllTextAsync(path, json, Encoding.UTF8);
+        NotifySuccess(Localizer.Get("ExportedSelectedMsg", selectedRows.Count, Path.GetFileName(path)));
+    }
+
     private List<DynamicDataRow>? ResolveSelectedRows(object? parameter)
     {
         if (parameter is IList { Count: > 0 } list)

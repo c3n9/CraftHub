@@ -64,6 +64,7 @@
     <x:String x:Key="CtxCut">Вырезать</x:String>
     <x:String x:Key="CtxCopyArray">Копировать как массив</x:String>
     <x:String x:Key="CtxCopyObjects">Копировать как объекты</x:String>
+    <x:String x:Key="CtxExportSelected">Экспорт выбранных строк…</x:String>
     <x:String x:Key="CtxPaste">Вставить</x:String>
     <x:String x:Key="CtxInsertRowAfter">Вставить строку после</x:String>
     <x:String x:Key="CtxDuplicate">Дублировать в конец</x:String>
@@ -123,6 +124,8 @@
     <x:String x:Key="ImportTypeMismatchMsg">Невозможно импортировать: одно или несколько полей имеют несовместимый тип. Измените тип или исправьте данные и попробуйте снова.</x:String>
     <x:String x:Key="TabLimitReachedMsg">Достигнут лимит вкладок ({0}). Остальные файлы не были импортированы.</x:String>
     <x:String x:Key="ExportedMsg">Экспортировано в {0}</x:String>
+    <x:String x:Key="ExportSelectedTitle">Экспорт выбранных строк</x:String>
+    <x:String x:Key="ExportedSelectedMsg">Экспортировано {0} выбранных строк(и) в {1}</x:String>
     <x:String x:Key="NoPropsFoundMsg">Свойства не найдены в файле класса.</x:String>
     <x:String x:Key="SelectClassTitle">Выбор класса</x:String>
     <x:String x:Key="SelectClassMsg">Найдено несколько классов. Выберите один для импорта:</x:String>
