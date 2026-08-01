@@ -23,6 +23,12 @@
 	<x:String x:Key="SearchWatermark">Search by value...</x:String>
 	<x:String x:Key="FilterToggleTip">Show only matching rows</x:String>
 	<x:String x:Key="PinColumnTip">Pin columns up to here</x:String>
+	<x:String x:Key="ReplaceTip">Find &amp; Replace</x:String>
+	<x:String x:Key="ReplaceWatermark">Replace with...</x:String>
+	<x:String x:Key="ReplaceBtn">Replace</x:String>
+	<x:String x:Key="ReplaceAllBtn">Replace All</x:String>
+	<x:String x:Key="NoMatchesMsg">No matches found</x:String>
+	<x:String x:Key="ReplacedAllMsg">Replaced {0} value(s)</x:String>
 	<x:String x:Key="PropertyNameWatermark">Property name</x:String>
 
 	<!-- Status bar -->
@@ -39,6 +45,7 @@
 	<x:String x:Key="UndoDescDuplicateRows">Duplicate {0} row(s)</x:String>
 	<x:String x:Key="UndoDescPasteRows">Paste {0} row(s)</x:String>
 	<x:String x:Key="UndoDescEditCell">Edit '{0}'</x:String>
+	<x:String x:Key="UndoDescReplaceAll">Replace {0} value(s)</x:String>
 	<x:String x:Key="UndoDescAddProperty">Add property '{0}'</x:String>
 	<x:String x:Key="UndoDescRemoveProperty">Remove property '{0}'</x:String>
 	<x:String x:Key="UndoDescRenameProperty">Rename '{0}' → '{1}'</x:String>

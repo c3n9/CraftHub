@@ -89,6 +89,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private DynamicDataRow? _selectedRow;
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private bool _isFilterActive;
+    [ObservableProperty] private string _replaceQuery = string.Empty;
     [ObservableProperty] private bool _isActive;
     [ObservableProperty] private int _selectedRowsCount = 0;
     [ObservableProperty] private bool _isJsonEditorMode = false;
@@ -173,8 +174,74 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
         OnPropertyChanged(nameof(DisplayedRows));
     }
+
+    /// <summary>Replaces every occurrence of <see cref="SearchQuery"/> with <see cref="ReplaceQuery"/>
+    /// in every column of the given row. Returns the individual cell changes made (empty if none).</summary>
+    private List<ReplaceAllAction.Change> ReplaceInRow(DynamicDataRow row)
+    {
+        var changes = new List<ReplaceAllAction.Change>();
+        foreach (var prop in Properties)
+        {
+            var oldValue = row[prop.Name] ?? string.Empty;
+            if (!oldValue.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) continue;
+
+            var newValue = oldValue.Replace(SearchQuery, ReplaceQuery, StringComparison.OrdinalIgnoreCase);
+            if (newValue == oldValue) continue;
+
+            row[prop.Name] = newValue;
+            changes.Add(new ReplaceAllAction.Change(row, prop.Name, oldValue, newValue));
+        }
+        return changes;
+    }
+
+    /// <summary>Replace-current: applies to whichever row is selected. Called from the View,
+    /// which then advances the selection to the next match (same "row is a match" granularity
+    /// the search/highlight already uses).</summary>
+    public void ReplaceInSelectedRow()
+    {
+        if (string.IsNullOrEmpty(SearchQuery) || SelectedRow is not { } row) return;
+
+        var changes = ReplaceInRow(row);
+        if (changes.Count == 0) return;
+
+        UndoRedo.Push(new ReplaceAllAction(changes));
+        MarkDirty();
+        if (IsFilterActive) RefreshFilter();
+    }
+
+    [RelayCommand]
+    private void ReplaceAll()
+    {
+        if (string.IsNullOrEmpty(SearchQuery)) return;
+
+        var changes = new List<ReplaceAllAction.Change>();
+        foreach (var row in Rows)
+            changes.AddRange(ReplaceInRow(row));
+
+        if (changes.Count == 0)
+        {
+            NotifyWarning(Localizer.Get("NoMatchesMsg"));
+            return;
+        }
+
+        UndoRedo.Push(new ReplaceAllAction(changes));
+        MarkDirty();
+        if (IsFilterActive) RefreshFilter();
+        NotifySuccess(Localizer.Get("ReplacedAllMsg", changes.Count));
+    }
+
     public event EventHandler? CloseRequested;
     public event EventHandler? ColumnsChanged;
+
+    // Ctrl+F / Ctrl+H are declared as UserControl.KeyBindings (same mechanism as Ctrl+S/Ctrl+Z)
+    // so they fire reliably no matter where focus currently is, including inside the replace
+    // flyout's own popup content — but focusing/opening a specific control is a View concern,
+    // so the actual work happens in WorkspaceView via these events.
+    public event EventHandler? FocusSearchRequested;
+    public event EventHandler? ToggleReplaceRequested;
+
+    [RelayCommand] private void FocusSearch() => FocusSearchRequested?.Invoke(this, EventArgs.Empty);
+    [RelayCommand] private void ToggleReplace() => ToggleReplaceRequested?.Invoke(this, EventArgs.Empty);
 
     /// <summary>
     /// Set by MainWindowViewModel. Called when ImportJsonAsync needs a fresh workspace

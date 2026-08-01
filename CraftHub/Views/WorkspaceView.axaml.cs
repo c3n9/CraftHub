@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Controls.Templates;
 using Avalonia.Data;
@@ -198,6 +200,69 @@ public partial class WorkspaceView : UserControl
         FindNextMatch();
     }
 
+    private void OnFocusSearchRequested(object? sender, EventArgs e)
+    {
+        if (_currentVm is not { IsTableEditorMode: true }) return;
+
+        // While the replace flyout is open it visually covers SearchBox, so focus its own
+        // find box instead of the one hidden underneath.
+        var isReplaceOpen = FlyoutBase.GetAttachedFlyout(SearchBox) is { IsOpen: true };
+        var target = isReplaceOpen ? FlyoutFindBox : SearchBox;
+        target.Focus();
+        target.SelectAll();
+    }
+
+    private void OnToggleReplaceRequested(object? sender, EventArgs e)
+    {
+        if (_currentVm is not { IsTableEditorMode: true }) return;
+        ToggleReplaceFlyout();
+    }
+
+    private void OnReplaceButtonClick(object? sender, RoutedEventArgs e) => ToggleReplaceFlyout();
+
+    private void OnReplaceFlyoutKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.Escape || (e.KeyModifiers == KeyModifiers.Control && e.Key == Key.H))
+        {
+            ToggleReplaceFlyout();
+            e.Handled = true;
+        }
+    }
+
+    // Anchored to SearchBox (see FlyoutBase.AttachedFlyout in the XAML) so it visually unfolds
+    // from the search field itself rather than the small trigger button next to it.
+    private void ToggleReplaceFlyout()
+    {
+        // Flyout isn't a Control, so x:Name on it doesn't generate a field — fetch the instance
+        // via the same attached property it was declared with instead.
+        if (FlyoutBase.GetAttachedFlyout(SearchBox) is { IsOpen: true } flyout)
+        {
+            flyout.Hide();
+            // Move focus off the (now hidden) replace box instead of leaving it stranded there.
+            SearchBox.Focus();
+            return;
+        }
+
+        FlyoutBase.ShowAttachedFlyout(SearchBox);
+        // The flyout's content isn't in the visual tree yet on this same tick, so focusing the
+        // box has to wait one dispatcher pass for the popup to actually open.
+        Dispatcher.UIThread.Post(() =>
+        {
+            ReplaceBox.Focus();
+            ReplaceBox.SelectAll();
+        }, DispatcherPriority.Loaded);
+    }
+
+    private void OnReplaceBoxKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Enter) return;
+        e.Handled = true;
+        OnReplaceCurrentClick(sender, e);
+    }
+
+    private static bool RowMatchesQuery(DynamicDataRow row, IEnumerable<JsonPropertyDefinition> props, string query) =>
+        props.Any(p => (row[p.Name] ?? string.Empty).Contains(query, StringComparison.OrdinalIgnoreCase));
+
     private void FindNextMatch()
     {
         if (_currentVm is not { } vm || string.IsNullOrWhiteSpace(vm.SearchQuery)) return;
@@ -209,18 +274,28 @@ public partial class WorkspaceView : UserControl
         var query = vm.SearchQuery;
         var startIndex = vm.SelectedRow != null ? rows.IndexOf(vm.SelectedRow) : -1;
 
-        bool RowMatches(DynamicDataRow row) =>
-            props.Any(p => (row[p.Name] ?? string.Empty).Contains(query, StringComparison.OrdinalIgnoreCase));
-
         for (var offset = 1; offset <= rows.Count; offset++)
         {
             var idx = (startIndex + offset) % rows.Count;
-            if (!RowMatches(rows[idx])) continue;
+            if (!RowMatchesQuery(rows[idx], props, query)) continue;
 
             vm.SelectedRow = rows[idx];
             DataGrid.ScrollIntoView(rows[idx], null);
             return;
         }
+    }
+
+    // Replaces in the currently matched row, then advances to the next match — same "row is a
+    // match" granularity as search/highlight. If nothing is currently on a match, jump to one first.
+    private void OnReplaceCurrentClick(object? sender, RoutedEventArgs e)
+    {
+        if (_currentVm is not { } vm || string.IsNullOrWhiteSpace(vm.SearchQuery)) return;
+
+        if (vm.SelectedRow == null || !RowMatchesQuery(vm.SelectedRow, vm.Properties, vm.SearchQuery))
+            FindNextMatch();
+
+        vm.ReplaceInSelectedRow();
+        FindNextMatch();
     }
 
     //  Row-number header
@@ -272,6 +347,8 @@ public partial class WorkspaceView : UserControl
             _currentVm.ColumnsChanged -= OnColumnsChanged;
             _currentVm.Properties.CollectionChanged -= OnPropertiesChanged;
             _currentVm.PropertyChanged -= OnVmPropertyChanged;
+            _currentVm.FocusSearchRequested -= OnFocusSearchRequested;
+            _currentVm.ToggleReplaceRequested -= OnToggleReplaceRequested;
         }
 
         if (DataContext is WorkspaceViewModel vm)
@@ -280,6 +357,8 @@ public partial class WorkspaceView : UserControl
             vm.ColumnsChanged += OnColumnsChanged;
             vm.Properties.CollectionChanged += OnPropertiesChanged;
             vm.PropertyChanged += OnVmPropertyChanged;
+            vm.FocusSearchRequested += OnFocusSearchRequested;
+            vm.ToggleReplaceRequested += OnToggleReplaceRequested;
             RebuildColumns(vm);
             PushTextToEditor(vm.RawJsonText); // seed the editor for this tab
             ScheduleOverflowUpdate();

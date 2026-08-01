@@ -15,6 +15,8 @@
         <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoCommand}" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveAsCommand}" />
+        <KeyBinding Gesture="Ctrl+F" Command="{Binding FocusSearchCommand}" />
+        <KeyBinding Gesture="Ctrl+H" Command="{Binding ToggleReplaceCommand}" />
     </UserControl.KeyBindings>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto">
@@ -154,7 +156,42 @@
                                 <materialIcons:MaterialIcon Kind="FilterOutline" Width="13" Height="13" />
                             </ToggleButton>
                         </TextBox.InnerRightContent>
+                        <!-- Anchored to sit exactly ON TOP of the search box (same top-left corner,
+                             growing down) instead of below it, so it reads as this exact field
+                             expanding in place — its own "find" row covers/replaces the visible
+                             search box for as long as it's open. -->
+                        <FlyoutBase.AttachedFlyout>
+                            <Flyout Placement="AnchorAndGravity" PlacementAnchor="TopLeft" PlacementGravity="BottomRight"
+                                    HorizontalOffset="0" VerticalOffset="0">
+                                <!-- KeyBindings on WorkspaceView don't see key presses made while focus
+                                     is inside this popup (separate overlay layer, not a visual
+                                     descendant of WorkspaceView) — Ctrl+H-to-close needs its own
+                                     handler here, Escape closes too as a bonus. -->
+                                <StackPanel Spacing="8" KeyDown="OnReplaceFlyoutKeyDown">
+                                    <TextBox x:Name="FlyoutFindBox" Text="{Binding SearchQuery}" Width="230"
+                                             Watermark="{DynamicResource SearchWatermark}"
+                                             FontSize="13" CornerRadius="6" KeyDown="OnSearchKeyDown" />
+                                    <TextBox x:Name="ReplaceBox" Text="{Binding ReplaceQuery}" Width="230"
+                                             Watermark="{DynamicResource ReplaceWatermark}"
+                                             FontSize="13" CornerRadius="6" KeyDown="OnReplaceBoxKeyDown" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                        <Button Content="{DynamicResource ReplaceBtn}"
+                                                Click="OnReplaceCurrentClick"
+                                                Padding="12,6" CornerRadius="6" Cursor="Hand" />
+                                        <Button Classes="accent-btn" Content="{DynamicResource ReplaceAllBtn}"
+                                                Command="{Binding ReplaceAllCommand}"
+                                                Padding="12,6" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Flyout>
+                        </FlyoutBase.AttachedFlyout>
                     </TextBox>
+
+                    <Button x:Name="ReplaceButton" Classes="toolbar-btn" IsVisible="{Binding IsTableEditorMode}"
+                            ToolTip.Tip="{DynamicResource ReplaceTip}"
+                            Click="OnReplaceButtonClick">
+                        <materialIcons:MaterialIcon Kind="FindReplace" Width="16" Height="16" />
+                    </Button>
 
                     <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 
