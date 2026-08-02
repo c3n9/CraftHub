@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CraftHub.ViewModels"
              xmlns:models="using:CraftHub.Domain.Models"
+             xmlns:services="using:CraftHub.Services"
              xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:cl="clr-namespace:Coachlight.Avalonia.Targeting;assembly=Coachlight.Avalonia"
@@ -137,6 +138,32 @@
                             ToolTip.Tip="{Binding RedoTooltip}"
                             IsVisible="{Binding IsTableEditorMode}">
                         <materialIcons:MaterialIcon Kind="Redo" Width="16" Height="16" />
+                    </Button>
+                    <Button Classes="toolbar-btn"
+                            ToolTip.Tip="{DynamicResource HistoryTip}"
+                            IsVisible="{Binding IsTableEditorMode}">
+                        <materialIcons:MaterialIcon Kind="TimelineClockOutline" Width="16" Height="16" />
+                        <Button.Flyout>
+                            <Flyout Placement="BottomEdgeAlignedLeft">
+                                <StackPanel Spacing="6" Width="240">
+                                    <TextBlock Text="{DynamicResource HistoryTitle}" FontSize="12"
+                                               FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}" />
+                                    <ScrollViewer MaxHeight="280" x:Name="HistoryScrollViewer">
+                                        <ItemsControl ItemsSource="{Binding UndoRedo.HistoryEntries}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="services:HistoryEntry">
+                                                    <Button Classes="history-item" Classes.current="{Binding IsCurrent}"
+                                                            Content="{Binding Description}"
+                                                            HorizontalAlignment="Stretch"
+                                                            HorizontalContentAlignment="Left"
+                                                            Click="OnHistoryEntryClick" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
                     </Button>
 
                     <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4"

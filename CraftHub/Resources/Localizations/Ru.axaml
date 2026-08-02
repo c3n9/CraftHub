@@ -24,6 +24,9 @@
     <x:String x:Key="FilterToggleTip">Показывать только совпадения</x:String>
     <x:String x:Key="PinColumnTip">Закрепить колонки до этой</x:String>
     <x:String x:Key="ReplaceTip">Найти и заменить</x:String>
+    <x:String x:Key="HistoryTip">История изменений</x:String>
+    <x:String x:Key="HistoryTitle">История</x:String>
+    <x:String x:Key="HistoryInitialState">Исходное состояние</x:String>
     <x:String x:Key="ReplaceWatermark">Заменить на...</x:String>
     <x:String x:Key="ReplaceBtn">Заменить</x:String>
     <x:String x:Key="ReplaceAllBtn">Заменить всё</x:String>

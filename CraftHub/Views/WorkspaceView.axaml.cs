@@ -260,6 +260,13 @@ public partial class WorkspaceView : UserControl
         OnReplaceCurrentClick(sender, e);
     }
 
+    private void OnHistoryEntryClick(object? sender, RoutedEventArgs e)
+    {
+        if (_currentVm is not { } vm) return;
+        if (sender is not Button { DataContext: HistoryEntry entry }) return;
+        vm.UndoRedo.JumpTo(entry.Index);
+    }
+
     private static bool RowMatchesQuery(DynamicDataRow row, IEnumerable<JsonPropertyDefinition> props, string query) =>
         props.Any(p => (row[p.Name] ?? string.Empty).Contains(query, StringComparison.OrdinalIgnoreCase));
 

@@ -24,6 +24,9 @@
 	<x:String x:Key="FilterToggleTip">Show only matching rows</x:String>
 	<x:String x:Key="PinColumnTip">Pin columns up to here</x:String>
 	<x:String x:Key="ReplaceTip">Find &amp; Replace</x:String>
+	<x:String x:Key="HistoryTip">Undo history</x:String>
+	<x:String x:Key="HistoryTitle">History</x:String>
+	<x:String x:Key="HistoryInitialState">Initial state</x:String>
 	<x:String x:Key="ReplaceWatermark">Replace with...</x:String>
 	<x:String x:Key="ReplaceBtn">Replace</x:String>
 	<x:String x:Key="ReplaceAllBtn">Replace All</x:String>
