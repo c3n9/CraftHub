@@ -140,6 +140,7 @@
                         <materialIcons:MaterialIcon Kind="Redo" Width="16" Height="16" />
                     </Button>
                     <Button Classes="toolbar-btn"
+                            cl:Coachmark.Id="wsHistory"
                             ToolTip.Tip="{DynamicResource HistoryTip}"
                             IsVisible="{Binding IsTableEditorMode}">
                         <materialIcons:MaterialIcon Kind="TimelineClockOutline" Width="16" Height="16" />
@@ -176,6 +177,7 @@
                              KeyDown="OnSearchKeyDown">
                         <TextBox.InnerRightContent>
                             <ToggleButton Classes="explorer-toggle"
+                                          cl:Coachmark.Id="wsFilterToggle"
                                           IsChecked="{Binding IsFilterActive}"
                                           Padding="2" MinWidth="20" MinHeight="20"
                                           Margin="0,0,5,0"
@@ -215,6 +217,7 @@
                     </TextBox>
 
                     <Button x:Name="ReplaceButton" Classes="toolbar-btn" IsVisible="{Binding IsTableEditorMode}"
+                            cl:Coachmark.Id="wsReplace"
                             ToolTip.Tip="{DynamicResource ReplaceTip}"
                             Click="OnReplaceButtonClick">
                         <materialIcons:MaterialIcon Kind="FindReplace" Width="16" Height="16" />

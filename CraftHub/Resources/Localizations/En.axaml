@@ -277,8 +277,14 @@
 	<x:String x:Key="TourGridText">Edit values row by row. Right-click for copy, paste, duplicate and delete.</x:String>
 	<x:String x:Key="TourAddRowTitle">Add a row</x:String>
 	<x:String x:Key="TourAddRowText">Append a new empty row to the data grid.</x:String>
+	<x:String x:Key="TourHistoryTitle">Undo history</x:String>
+	<x:String x:Key="TourHistoryText">See every past edit as a timeline and jump straight back to any point, not just one step at a time.</x:String>
 	<x:String x:Key="TourSearchTitle">Search</x:String>
-	<x:String x:Key="TourSearchText">Filter rows by matching text across all columns.</x:String>
+	<x:String x:Key="TourSearchText">Highlights matching text across all columns as you type.</x:String>
+	<x:String x:Key="TourFilterTitle">Filter</x:String>
+	<x:String x:Key="TourFilterText">Toggle this to hide every row that doesn't match your search instead of just highlighting them.</x:String>
+	<x:String x:Key="TourReplaceTitle">Find &amp; Replace</x:String>
+	<x:String x:Key="TourReplaceText">Replace matching values across the whole table, one at a time or all at once.</x:String>
 	<x:String x:Key="TourSwitchJsonTitle">Table / JSON view</x:String>
 	<x:String x:Key="TourSwitchJsonText">Switch to the raw JSON editor and back at any time.</x:String>
 	<x:String x:Key="TourJsonEditorTitle">Raw JSON editor</x:String>
