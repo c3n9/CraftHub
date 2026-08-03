@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CraftHub.ViewModels"
              xmlns:models="using:CraftHub.Domain.Models"
+             xmlns:services="using:CraftHub.Services"
              xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:cl="clr-namespace:Coachlight.Avalonia.Targeting;assembly=Coachlight.Avalonia"
@@ -15,6 +16,8 @@
         <KeyBinding Gesture="Ctrl+Shift+Z" Command="{Binding RedoCommand}" />
         <KeyBinding Gesture="Ctrl+S" Command="{Binding SaveCommand}" />
         <KeyBinding Gesture="Ctrl+Shift+S" Command="{Binding SaveAsCommand}" />
+        <KeyBinding Gesture="Ctrl+F" Command="{Binding FocusSearchCommand}" />
+        <KeyBinding Gesture="Ctrl+H" Command="{Binding ToggleReplaceCommand}" />
     </UserControl.KeyBindings>
 
     <Grid RowDefinitions="Auto,Auto,*,Auto">
@@ -136,15 +139,89 @@
                             IsVisible="{Binding IsTableEditorMode}">
                         <materialIcons:MaterialIcon Kind="Redo" Width="16" Height="16" />
                     </Button>
+                    <Button Classes="toolbar-btn"
+                            cl:Coachmark.Id="wsHistory"
+                            ToolTip.Tip="{DynamicResource HistoryTip}"
+                            IsVisible="{Binding IsTableEditorMode}">
+                        <materialIcons:MaterialIcon Kind="TimelineClockOutline" Width="16" Height="16" />
+                        <Button.Flyout>
+                            <Flyout Placement="BottomEdgeAlignedLeft">
+                                <StackPanel Spacing="6" Width="240">
+                                    <TextBlock Text="{DynamicResource HistoryTitle}" FontSize="12"
+                                               FontWeight="SemiBold" Foreground="{DynamicResource TextMuted}" />
+                                    <ScrollViewer MaxHeight="280" x:Name="HistoryScrollViewer">
+                                        <ItemsControl ItemsSource="{Binding UndoRedo.HistoryEntries}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate x:DataType="services:HistoryEntry">
+                                                    <Button Classes="history-item" Classes.current="{Binding IsCurrent}"
+                                                            Content="{Binding Description}"
+                                                            HorizontalAlignment="Stretch"
+                                                            HorizontalContentAlignment="Left"
+                                                            Click="OnHistoryEntryClick" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </ScrollViewer>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
 
                     <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4"
                             IsVisible="{Binding IsTableEditorMode}" />
 
                     <TextBox x:Name="SearchBox" Text="{Binding SearchQuery}" Watermark="{DynamicResource SearchWatermark}"
                              cl:Coachmark.Id="wsSearch"
-                             Width="170" VerticalAlignment="Center" CornerRadius="6" FontSize="13"
+                             Width="190" VerticalAlignment="Center" CornerRadius="6" FontSize="13"
                              IsVisible="{Binding IsTableEditorMode}"
-                             KeyDown="OnSearchKeyDown" />
+                             KeyDown="OnSearchKeyDown">
+                        <TextBox.InnerRightContent>
+                            <ToggleButton Classes="explorer-toggle"
+                                          cl:Coachmark.Id="wsFilterToggle"
+                                          IsChecked="{Binding IsFilterActive}"
+                                          Padding="2" MinWidth="20" MinHeight="20"
+                                          Margin="0,0,5,0"
+                                          ToolTip.Tip="{DynamicResource FilterToggleTip}">
+                                <materialIcons:MaterialIcon Kind="FilterOutline" Width="13" Height="13" />
+                            </ToggleButton>
+                        </TextBox.InnerRightContent>
+                        <!-- Anchored to sit exactly ON TOP of the search box (same top-left corner,
+                             growing down) instead of below it, so it reads as this exact field
+                             expanding in place — its own "find" row covers/replaces the visible
+                             search box for as long as it's open. -->
+                        <FlyoutBase.AttachedFlyout>
+                            <Flyout Placement="AnchorAndGravity" PlacementAnchor="TopLeft" PlacementGravity="BottomRight"
+                                    HorizontalOffset="0" VerticalOffset="0">
+                                <!-- KeyBindings on WorkspaceView don't see key presses made while focus
+                                     is inside this popup (separate overlay layer, not a visual
+                                     descendant of WorkspaceView) — Ctrl+H-to-close needs its own
+                                     handler here, Escape closes too as a bonus. -->
+                                <StackPanel Spacing="8" KeyDown="OnReplaceFlyoutKeyDown">
+                                    <TextBox x:Name="FlyoutFindBox" Text="{Binding SearchQuery}" Width="230"
+                                             Watermark="{DynamicResource SearchWatermark}"
+                                             FontSize="13" CornerRadius="6" KeyDown="OnSearchKeyDown" />
+                                    <TextBox x:Name="ReplaceBox" Text="{Binding ReplaceQuery}" Width="230"
+                                             Watermark="{DynamicResource ReplaceWatermark}"
+                                             FontSize="13" CornerRadius="6" KeyDown="OnReplaceBoxKeyDown" />
+                                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                                        <Button Content="{DynamicResource ReplaceBtn}"
+                                                Click="OnReplaceCurrentClick"
+                                                Padding="12,6" CornerRadius="6" Cursor="Hand" />
+                                        <Button Classes="accent-btn" Content="{DynamicResource ReplaceAllBtn}"
+                                                Command="{Binding ReplaceAllCommand}"
+                                                Padding="12,6" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Flyout>
+                        </FlyoutBase.AttachedFlyout>
+                    </TextBox>
+
+                    <Button x:Name="ReplaceButton" Classes="toolbar-btn" IsVisible="{Binding IsTableEditorMode}"
+                            cl:Coachmark.Id="wsReplace"
+                            ToolTip.Tip="{DynamicResource ReplaceTip}"
+                            Click="OnReplaceButtonClick">
+                        <materialIcons:MaterialIcon Kind="FindReplace" Width="16" Height="16" />
+                    </Button>
 
                     <Border Width="1" Background="{DynamicResource BorderLight}" Margin="6,4" />
 
@@ -346,7 +423,7 @@
                               cl:Coachmark.Id="wsGrid"
                               MinWidth="520"
                               RowHeaderWidth="48"
-                              ItemsSource="{Binding Rows}"
+                              ItemsSource="{Binding DisplayedRows}"
                               SelectedItem="{Binding SelectedRow}"
                               AutoGenerateColumns="False"
                               CanUserReorderColumns="True"
@@ -391,6 +468,10 @@
                                 <MenuItem Header="{DynamicResource CtxPaste}"
                                           InputGesture="Ctrl+V"
                                           Command="{Binding PasteRowsToDataGridCommand}" />
+                                <Separator />
+                                <MenuItem Header="{DynamicResource CtxExportSelected}"
+                                          Command="{Binding ExportSelectedRowsCommand}"
+                                          CommandParameter="{Binding #DataGrid.SelectedItems}" />
                                 <Separator />
                                 <MenuItem Header="{DynamicResource CtxInsertRowAfter}"
                                           Command="{Binding InsertRowAfterCommand}"

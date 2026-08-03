@@ -21,6 +21,17 @@
 
     <!-- Watermarks -->
     <x:String x:Key="SearchWatermark">Поиск по значению...</x:String>
+    <x:String x:Key="FilterToggleTip">Показывать только совпадения</x:String>
+    <x:String x:Key="PinColumnTip">Закрепить колонки до этой</x:String>
+    <x:String x:Key="ReplaceTip">Найти и заменить</x:String>
+    <x:String x:Key="HistoryTip">История изменений</x:String>
+    <x:String x:Key="HistoryTitle">История</x:String>
+    <x:String x:Key="HistoryInitialState">Исходное состояние</x:String>
+    <x:String x:Key="ReplaceWatermark">Заменить на...</x:String>
+    <x:String x:Key="ReplaceBtn">Заменить</x:String>
+    <x:String x:Key="ReplaceAllBtn">Заменить всё</x:String>
+    <x:String x:Key="NoMatchesMsg">Совпадений не найдено</x:String>
+    <x:String x:Key="ReplacedAllMsg">Заменено значений: {0}</x:String>
     <x:String x:Key="PropertyNameWatermark">Имя поля</x:String>
 
     <!-- Status bar -->
@@ -37,6 +48,7 @@
     <x:String x:Key="UndoDescDuplicateRows">Дублирование {0} строк(и)</x:String>
     <x:String x:Key="UndoDescPasteRows">Вставка {0} строк(и)</x:String>
     <x:String x:Key="UndoDescEditCell">Редактирование '{0}'</x:String>
+    <x:String x:Key="UndoDescReplaceAll">Замена значений: {0}</x:String>
     <x:String x:Key="UndoDescAddProperty">Добавление поля '{0}'</x:String>
     <x:String x:Key="UndoDescRemoveProperty">Удаление поля '{0}'</x:String>
     <x:String x:Key="UndoDescRenameProperty">Переименование '{0}' → '{1}'</x:String>
@@ -64,6 +76,7 @@
     <x:String x:Key="CtxCut">Вырезать</x:String>
     <x:String x:Key="CtxCopyArray">Копировать как массив</x:String>
     <x:String x:Key="CtxCopyObjects">Копировать как объекты</x:String>
+    <x:String x:Key="CtxExportSelected">Экспорт выбранных строк…</x:String>
     <x:String x:Key="CtxPaste">Вставить</x:String>
     <x:String x:Key="CtxInsertRowAfter">Вставить строку после</x:String>
     <x:String x:Key="CtxDuplicate">Дублировать в конец</x:String>
@@ -123,6 +136,8 @@
     <x:String x:Key="ImportTypeMismatchMsg">Невозможно импортировать: одно или несколько полей имеют несовместимый тип. Измените тип или исправьте данные и попробуйте снова.</x:String>
     <x:String x:Key="TabLimitReachedMsg">Достигнут лимит вкладок ({0}). Остальные файлы не были импортированы.</x:String>
     <x:String x:Key="ExportedMsg">Экспортировано в {0}</x:String>
+    <x:String x:Key="ExportSelectedTitle">Экспорт выбранных строк</x:String>
+    <x:String x:Key="ExportedSelectedMsg">Экспортировано {0} выбранных строк(и) в {1}</x:String>
     <x:String x:Key="NoPropsFoundMsg">Свойства не найдены в файле класса.</x:String>
     <x:String x:Key="SelectClassTitle">Выбор класса</x:String>
     <x:String x:Key="SelectClassMsg">Найдено несколько классов. Выберите один для импорта:</x:String>
@@ -261,8 +276,14 @@
     <x:String x:Key="TourGridText">Редактируйте значения по строкам. Правый клик — копирование, вставка, дублирование и удаление.</x:String>
     <x:String x:Key="TourAddRowTitle">Добавление строки</x:String>
     <x:String x:Key="TourAddRowText">Добавить новую пустую строку в таблицу.</x:String>
+    <x:String x:Key="TourHistoryTitle">История изменений</x:String>
+    <x:String x:Key="TourHistoryText">Видно все прошлые изменения в виде ленты — можно перепрыгнуть сразу к любому шагу, а не только назад-вперёд по одному.</x:String>
     <x:String x:Key="TourSearchTitle">Поиск</x:String>
-    <x:String x:Key="TourSearchText">Фильтрация строк по совпадению текста во всех колонках.</x:String>
+    <x:String x:Key="TourSearchText">Подсвечивает совпадения текста во всех колонках по мере ввода.</x:String>
+    <x:String x:Key="TourFilterTitle">Фильтр</x:String>
+    <x:String x:Key="TourFilterText">Включи, чтобы скрывать все несовпадающие строки, а не просто подсвечивать их.</x:String>
+    <x:String x:Key="TourReplaceTitle">Найти и заменить</x:String>
+    <x:String x:Key="TourReplaceText">Замена значений по всей таблице — по одному совпадению или сразу все.</x:String>
     <x:String x:Key="TourSwitchJsonTitle">Таблица / JSON</x:String>
     <x:String x:Key="TourSwitchJsonText">В любой момент переключайтесь на редактор чистого JSON и обратно.</x:String>
     <x:String x:Key="TourJsonEditorTitle">Редактор чистого JSON</x:String>

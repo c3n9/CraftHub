@@ -21,6 +21,17 @@
 
 	<!-- Watermarks -->
 	<x:String x:Key="SearchWatermark">Search by value...</x:String>
+	<x:String x:Key="FilterToggleTip">Show only matching rows</x:String>
+	<x:String x:Key="PinColumnTip">Pin columns up to here</x:String>
+	<x:String x:Key="ReplaceTip">Find &amp; Replace</x:String>
+	<x:String x:Key="HistoryTip">Undo history</x:String>
+	<x:String x:Key="HistoryTitle">History</x:String>
+	<x:String x:Key="HistoryInitialState">Initial state</x:String>
+	<x:String x:Key="ReplaceWatermark">Replace with...</x:String>
+	<x:String x:Key="ReplaceBtn">Replace</x:String>
+	<x:String x:Key="ReplaceAllBtn">Replace All</x:String>
+	<x:String x:Key="NoMatchesMsg">No matches found</x:String>
+	<x:String x:Key="ReplacedAllMsg">Replaced {0} value(s)</x:String>
 	<x:String x:Key="PropertyNameWatermark">Property name</x:String>
 
 	<!-- Status bar -->
@@ -37,6 +48,7 @@
 	<x:String x:Key="UndoDescDuplicateRows">Duplicate {0} row(s)</x:String>
 	<x:String x:Key="UndoDescPasteRows">Paste {0} row(s)</x:String>
 	<x:String x:Key="UndoDescEditCell">Edit '{0}'</x:String>
+	<x:String x:Key="UndoDescReplaceAll">Replace {0} value(s)</x:String>
 	<x:String x:Key="UndoDescAddProperty">Add property '{0}'</x:String>
 	<x:String x:Key="UndoDescRemoveProperty">Remove property '{0}'</x:String>
 	<x:String x:Key="UndoDescRenameProperty">Rename '{0}' → '{1}'</x:String>
@@ -64,6 +76,7 @@
 	<x:String x:Key="CtxCut">Cut</x:String>
 	<x:String x:Key="CtxCopyArray">Copy as Array</x:String>
 	<x:String x:Key="CtxCopyObjects">Copy as Objects</x:String>
+	<x:String x:Key="CtxExportSelected">Export Selected Rows…</x:String>
 	<x:String x:Key="CtxPaste">Paste</x:String>
 	<x:String x:Key="CtxInsertRowAfter">Insert row after</x:String>
 	<x:String x:Key="CtxDuplicate">Duplicate to end</x:String>
@@ -123,6 +136,8 @@
 	<x:String x:Key="ImportTypeMismatchMsg">Cannot import: one or more fields have an incompatible type. Change the type or fix the data and try again.</x:String>
 	<x:String x:Key="TabLimitReachedMsg">Tab limit ({0}) reached. Remaining files were not imported.</x:String>
 	<x:String x:Key="ExportedMsg">Exported to {0}</x:String>
+	<x:String x:Key="ExportSelectedTitle">Export Selected Rows</x:String>
+	<x:String x:Key="ExportedSelectedMsg">Exported {0} selected row(s) to {1}</x:String>
 	<x:String x:Key="NoPropsFoundMsg">No properties found in the class file.</x:String>
 	<x:String x:Key="SelectClassTitle">Select Class</x:String>
 	<x:String x:Key="SelectClassMsg">Multiple classes found. Select one to import:</x:String>
@@ -262,8 +277,14 @@
 	<x:String x:Key="TourGridText">Edit values row by row. Right-click for copy, paste, duplicate and delete.</x:String>
 	<x:String x:Key="TourAddRowTitle">Add a row</x:String>
 	<x:String x:Key="TourAddRowText">Append a new empty row to the data grid.</x:String>
+	<x:String x:Key="TourHistoryTitle">Undo history</x:String>
+	<x:String x:Key="TourHistoryText">See every past edit as a timeline and jump straight back to any point, not just one step at a time.</x:String>
 	<x:String x:Key="TourSearchTitle">Search</x:String>
-	<x:String x:Key="TourSearchText">Filter rows by matching text across all columns.</x:String>
+	<x:String x:Key="TourSearchText">Highlights matching text across all columns as you type.</x:String>
+	<x:String x:Key="TourFilterTitle">Filter</x:String>
+	<x:String x:Key="TourFilterText">Toggle this to hide every row that doesn't match your search instead of just highlighting them.</x:String>
+	<x:String x:Key="TourReplaceTitle">Find &amp; Replace</x:String>
+	<x:String x:Key="TourReplaceText">Replace matching values across the whole table, one at a time or all at once.</x:String>
 	<x:String x:Key="TourSwitchJsonTitle">Table / JSON view</x:String>
 	<x:String x:Key="TourSwitchJsonText">Switch to the raw JSON editor and back at any time.</x:String>
 	<x:String x:Key="TourJsonEditorTitle">Raw JSON editor</x:String>

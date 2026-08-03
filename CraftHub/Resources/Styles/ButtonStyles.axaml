@@ -26,6 +26,25 @@
         <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
     </Style>
 
+    <Style Selector="Button.history-item">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="8,6" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="FontSize" Value="12" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.history-item:pointerover">
+        <Setter Property="Background" Value="{DynamicResource AccentHover}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+    </Style>
+    <Style Selector="Button.history-item.current">
+        <Setter Property="Background" Value="{DynamicResource AccentPrimary}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+        <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+
     <Style Selector="Button.danger-btn">
         <Setter Property="Background" Value="{DynamicResource DangerColor}" />
         <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />

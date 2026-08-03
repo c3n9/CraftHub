@@ -32,7 +32,8 @@ public sealed class OnboardingService : IOnboardingService
 {
     // Bumping this id re-shows the tour to everyone (e.g. after a major UI change).
     // v2 adds the JSON editor, recent folders and releases steps.
-    private const string AppTourId = "app-overview-v2";
+    // v3 adds undo history, the search filter toggle, and Find & Replace.
+    private const string AppTourId = "app-overview-v3";
 
     // JsonProgressStore persists completion to a JSON file under the OS application-data folder.
     private readonly IProgressStore _store = new JsonProgressStore();
@@ -132,11 +133,26 @@ public sealed class OnboardingService : IOnboardingService
                     .Interactive(false)
                     .Title(Localizer.Get("TourAddRowTitle"))
                     .Text(Localizer.Get("TourAddRowText")))
+                .Coachmark(() => Mark("wsHistory"), s => s
+                    .Placement(Side.Bottom)
+                    .Interactive(false)
+                    .Title(Localizer.Get("TourHistoryTitle"))
+                    .Text(Localizer.Get("TourHistoryText")))
                 .Coachmark(() => Mark("wsSearch"), s => s
                     .Placement(Side.Bottom)
                     .Interactive(false)
                     .Title(Localizer.Get("TourSearchTitle"))
                     .Text(Localizer.Get("TourSearchText")))
+                .Coachmark(() => Mark("wsFilterToggle"), s => s
+                    .Placement(Side.Bottom)
+                    .Interactive(false)
+                    .Title(Localizer.Get("TourFilterTitle"))
+                    .Text(Localizer.Get("TourFilterText")))
+                .Coachmark(() => Mark("wsReplace"), s => s
+                    .Placement(Side.Bottom)
+                    .Interactive(false)
+                    .Title(Localizer.Get("TourReplaceTitle"))
+                    .Text(Localizer.Get("TourReplaceText")))
                 .Coachmark(() => Mark("wsSwitchJson"), s => s
                     .Placement(Side.Bottom)
                     .Interactive(false)

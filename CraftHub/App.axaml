@@ -27,7 +27,11 @@
     <Application.Styles>
         <FluentTheme>
             <FluentTheme.Palettes>
-                <ColorPaletteResources x:Key="Light" Accent="#4F46E5" RegionColor="#F3F4F6" ErrorText="#EF4444" />
+                <!-- Light Accent/ErrorText previously reused the dark theme's values (#4F46E5 /
+                     #EF4444) — any stock Fluent control not re-skinned by our own styles picked
+                     up the wrong colors in light mode. Matches LightTheme.axaml's own
+                     AccentPrimary/DangerColor. -->
+                <ColorPaletteResources x:Key="Light" Accent="#2563EB" RegionColor="#F3F4F6" ErrorText="#DC2626" />
                 <ColorPaletteResources x:Key="Dark" Accent="#4F46E5" RegionColor="#12121A" ErrorText="#EF4444" />
             </FluentTheme.Palettes>
         </FluentTheme>

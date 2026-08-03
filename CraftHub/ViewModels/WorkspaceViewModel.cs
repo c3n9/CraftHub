@@ -61,7 +61,13 @@ public partial class WorkspaceViewModel : ViewModelBase
         if (!_isLoading) IsModified = true;
     }
 
-    private void OnRowValueChanged(object? sender, PropertyChangedEventArgs e) => MarkDirty();
+    private void OnRowValueChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        MarkDirty();
+        // A cell edit can move a row in or out of the filtered set (e.g. it now/no-longer
+        // contains SearchQuery), so keep the filtered view honest.
+        if (IsFilterActive) RefreshFilter();
+    }
 
     /// <summary>Binds this (empty) tab to a newly created file without importing anything.</summary>
     public void BindToNewFile(string path)
@@ -82,6 +88,8 @@ public partial class WorkspaceViewModel : ViewModelBase
     [ObservableProperty] private JsonFieldType _selectedType = JsonFieldType.String;
     [ObservableProperty] private DynamicDataRow? _selectedRow;
     [ObservableProperty] private string _searchQuery = string.Empty;
+    [ObservableProperty] private bool _isFilterActive;
+    [ObservableProperty] private string _replaceQuery = string.Empty;
     [ObservableProperty] private bool _isActive;
     [ObservableProperty] private int _selectedRowsCount = 0;
     [ObservableProperty] private bool _isJsonEditorMode = false;
@@ -141,8 +149,99 @@ public partial class WorkspaceViewModel : ViewModelBase
     public BulkObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public BulkObservableCollection<DynamicDataRow> Rows { get; } = new();
     public Array AvailableTypes => Enum.GetValues(typeof(JsonFieldType));
+
+    /// <summary>Subset of <see cref="Rows"/> whose values contain <see cref="SearchQuery"/> —
+    /// kept up to date whenever the query, the filter toggle, or the row data itself changes.</summary>
+    public ObservableCollection<DynamicDataRow> FilteredRows { get; } = new();
+
+    /// <summary>What the DataGrid actually shows: the live-filtered subset while the filter
+    /// toggle is on and there's something to filter by, otherwise every row.</summary>
+    public IEnumerable<DynamicDataRow> DisplayedRows =>
+        IsFilterActive && !string.IsNullOrWhiteSpace(SearchQuery) ? FilteredRows : Rows;
+
+    partial void OnSearchQueryChanged(string value) => RefreshFilter();
+
+    partial void OnIsFilterActiveChanged(bool value) => OnPropertyChanged(nameof(DisplayedRows));
+
+    private void RefreshFilter()
+    {
+        FilteredRows.Clear();
+        if (!string.IsNullOrWhiteSpace(SearchQuery))
+        {
+            foreach (var row in Rows)
+                if (Properties.Any(p => (row[p.Name] ?? string.Empty).Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)))
+                    FilteredRows.Add(row);
+        }
+        OnPropertyChanged(nameof(DisplayedRows));
+    }
+
+    /// <summary>Replaces every occurrence of <see cref="SearchQuery"/> with <see cref="ReplaceQuery"/>
+    /// in every column of the given row. Returns the individual cell changes made (empty if none).</summary>
+    private List<ReplaceAllAction.Change> ReplaceInRow(DynamicDataRow row)
+    {
+        var changes = new List<ReplaceAllAction.Change>();
+        foreach (var prop in Properties)
+        {
+            var oldValue = row[prop.Name] ?? string.Empty;
+            if (!oldValue.Contains(SearchQuery, StringComparison.OrdinalIgnoreCase)) continue;
+
+            var newValue = oldValue.Replace(SearchQuery, ReplaceQuery, StringComparison.OrdinalIgnoreCase);
+            if (newValue == oldValue) continue;
+
+            row[prop.Name] = newValue;
+            changes.Add(new ReplaceAllAction.Change(row, prop.Name, oldValue, newValue));
+        }
+        return changes;
+    }
+
+    /// <summary>Replace-current: applies to whichever row is selected. Called from the View,
+    /// which then advances the selection to the next match (same "row is a match" granularity
+    /// the search/highlight already uses).</summary>
+    public void ReplaceInSelectedRow()
+    {
+        if (string.IsNullOrEmpty(SearchQuery) || SelectedRow is not { } row) return;
+
+        var changes = ReplaceInRow(row);
+        if (changes.Count == 0) return;
+
+        UndoRedo.Push(new ReplaceAllAction(changes));
+        MarkDirty();
+        if (IsFilterActive) RefreshFilter();
+    }
+
+    [RelayCommand]
+    private void ReplaceAll()
+    {
+        if (string.IsNullOrEmpty(SearchQuery)) return;
+
+        var changes = new List<ReplaceAllAction.Change>();
+        foreach (var row in Rows)
+            changes.AddRange(ReplaceInRow(row));
+
+        if (changes.Count == 0)
+        {
+            NotifyWarning(Localizer.Get("NoMatchesMsg"));
+            return;
+        }
+
+        UndoRedo.Push(new ReplaceAllAction(changes));
+        MarkDirty();
+        if (IsFilterActive) RefreshFilter();
+        NotifySuccess(Localizer.Get("ReplacedAllMsg", changes.Count));
+    }
+
     public event EventHandler? CloseRequested;
     public event EventHandler? ColumnsChanged;
+
+    // Ctrl+F / Ctrl+H are declared as UserControl.KeyBindings (same mechanism as Ctrl+S/Ctrl+Z)
+    // so they fire reliably no matter where focus currently is, including inside the replace
+    // flyout's own popup content — but focusing/opening a specific control is a View concern,
+    // so the actual work happens in WorkspaceView via these events.
+    public event EventHandler? FocusSearchRequested;
+    public event EventHandler? ToggleReplaceRequested;
+
+    [RelayCommand] private void FocusSearch() => FocusSearchRequested?.Invoke(this, EventArgs.Empty);
+    [RelayCommand] private void ToggleReplace() => ToggleReplaceRequested?.Invoke(this, EventArgs.Empty);
 
     /// <summary>
     /// Set by MainWindowViewModel. Called when ImportJsonAsync needs a fresh workspace
@@ -252,6 +351,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         OnPropertyChanged(nameof(TotalRows));
         UpdateDataSize();
+        if (IsFilterActive) RefreshFilter();
 
         if (e.OldItems != null)
             foreach (DynamicDataRow row in e.OldItems)
@@ -661,6 +761,25 @@ public partial class WorkspaceViewModel : ViewModelBase
         NotifySuccess(Localizer.Get("RowsCopiedMsg", selectedRows.Count));
     }
 
+    /// <summary>Writes just the selected rows to a JSON file — a partial dump for a bug report or
+    /// a test fixture, without exporting (or clobbering) the whole table. Always an array, even
+    /// for a single row, so the file re-imports the same way a full export does.</summary>
+    [RelayCommand(CanExecute = nameof(CanCopyOrCut))]
+    private async Task ExportSelectedRowsAsync(object? parameter)
+    {
+        var selectedRows = ResolveSelectedRows(parameter);
+        if (selectedRows == null) return;
+
+        var filters = new List<FileFilter> { new("JSON and TXT files", new[] { "*.json", "*.txt" }) };
+        var suggestedName = $"{Header}_selected";
+        var path = await _fileDialogService.SaveFileAsync(Localizer.Get("ExportSelectedTitle"), filters, suggestedName);
+        if (path == null) return;
+
+        var json = _jsonService.SerializeToJson(selectedRows, Properties);
+        await File.WriteAllTextAsync(path, json, Encoding.UTF8);
+        NotifySuccess(Localizer.Get("ExportedSelectedMsg", selectedRows.Count, Path.GetFileName(path)));
+    }
+
     private List<DynamicDataRow>? ResolveSelectedRows(object? parameter)
     {
         if (parameter is IList { Count: > 0 } list)
@@ -719,11 +838,11 @@ public partial class WorkspaceViewModel : ViewModelBase
             }
 
             var json = await File.ReadAllTextAsync(path);
-            json = _jsonService.SanitizeJson(json);
+            json = await Task.Run(() => _jsonService.SanitizeJson(json));
 
             if (Properties.Count == 0)
             {
-                var detectedFields = _jsonService.DetectFields(json);
+                var detectedFields = await Task.Run(() => _jsonService.DetectFields(json));
                 if (detectedFields.Count == 0)
                 {
                     await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"),
@@ -778,7 +897,7 @@ public partial class WorkspaceViewModel : ViewModelBase
                     new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType }));
             }
 
-            var rows = _jsonService.ParseJsonData(json, Properties);
+            var rows = await Task.Run(() => _jsonService.ParseJsonData(json, Properties));
             Rows.Clear();
             Rows.AddRange(rows);
 
@@ -788,7 +907,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             FireColumnsChanged();
 
             if (IsJsonEditorMode)
-                RawJsonText = _jsonService.SerializeToJson(Rows, Properties);
+                RawJsonText = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
 
             // Bind this tab to the source file so Ctrl+S writes back to it.
             FilePath = path;
@@ -825,7 +944,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         var path = await _fileDialogService.SaveFileAsync("Export JSON", filters, Header);
         if (path == null) return;
 
-        var json = _jsonService.SerializeToJson(Rows, Properties);
+        var json = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
         await File.WriteAllTextAsync(path, json, Encoding.UTF8);
         NotifySuccess(Localizer.Get("ExportedMsg", Path.GetFileName(path)));
     }
@@ -842,7 +961,8 @@ public partial class WorkspaceViewModel : ViewModelBase
             return;
         }
 
-        if (!TryBuildSaveContent(out var content)) return;
+        var (success, content) = await TryBuildSaveContentAsync();
+        if (!success) return;
 
         // Warn if the file was changed on disk since we last loaded or saved it.
         var current = SafeGetWriteTime(FilePath);
@@ -862,7 +982,8 @@ public partial class WorkspaceViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveAsAsync()
     {
-        if (!TryBuildSaveContent(out var content)) return;
+        var (success, content) = await TryBuildSaveContentAsync();
+        if (!success) return;
 
         var filters = new List<FileFilter> { new("JSON and TXT files", new[] { "*.json", "*.txt" }) };
         var suggestedName = FilePath != null
@@ -895,33 +1016,30 @@ public partial class WorkspaceViewModel : ViewModelBase
     }
 
     /// <summary>Builds the JSON text to persist, validating raw text when in JSON-editor mode.</summary>
-    private bool TryBuildSaveContent(out string content)
+    private async Task<(bool Success, string Content)> TryBuildSaveContentAsync()
     {
-        content = string.Empty;
-
         if (IsJsonEditorMode)
         {
             try
             {
-                JsonDocument.Parse(RawJsonText);
+                await Task.Run(() => JsonDocument.Parse(RawJsonText).Dispose());
             }
             catch (JsonException ex)
             {
                 NotifyError($"{Localizer.Get("InvalidJsonError")}: {ex.Message}");
-                return false;
+                return (false, string.Empty);
             }
-            content = RawJsonText;
-            return true;
+            return (true, RawJsonText);
         }
 
         if (Properties.Count == 0)
         {
             NotifyWarning(Localizer.Get("NothingToSaveMsg"));
-            return false;
+            return (false, string.Empty);
         }
 
-        content = _jsonService.SerializeToJson(Rows, Properties);
-        return true;
+        var content = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
+        return (true, content);
     }
 
     [RelayCommand]
@@ -1044,10 +1162,10 @@ public partial class WorkspaceViewModel : ViewModelBase
     // -----------------------------------------------------------------------
 
     [RelayCommand]
-    private void SwitchToJsonEditor()
+    private async Task SwitchToJsonEditorAsync()
     {
         RawJsonText = Rows.Count > 0 && Properties.Count > 0
-            ? _jsonService.SerializeToJson(Rows, Properties)
+            ? await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties))
             : Properties.Count > 0
                 ? "[]"
                 : "{}";
@@ -1058,23 +1176,48 @@ public partial class WorkspaceViewModel : ViewModelBase
 
     /// <summary>Reformats the raw JSON with indentation (readable form).</summary>
     [RelayCommand]
-    private void PrettifyJson() => ReformatJson(indented: true);
+    private Task PrettifyJsonAsync() => ReformatJsonAsync(indented: true);
 
     /// <summary>Collapses the raw JSON to a single line (compact form).</summary>
     [RelayCommand]
-    private void MinifyJson() => ReformatJson(indented: false);
+    private Task MinifyJsonAsync() => ReformatJsonAsync(indented: false);
 
-    private void ReformatJson(bool indented)
+    private async Task ReformatJsonAsync(bool indented)
     {
         if (string.IsNullOrWhiteSpace(RawJsonText)) return;
         try
         {
-            using var doc = JsonDocument.Parse(RawJsonText);
-            RawJsonText = JsonSerializer.Serialize(doc.RootElement, new JsonSerializerOptions
+            var formatted = await Task.Run(() =>
             {
-                WriteIndented = indented,
-                Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                using var doc = JsonDocument.Parse(RawJsonText);
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = indented,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+
+                // A fully-minified top-level array collapses into a single multi-million-character
+                // line for large datasets, which crashes the editor's text shaping/highlighting.
+                // Keep one compact element per line instead so "minify" stays safe at any size.
+                if (!indented && doc.RootElement.ValueKind == JsonValueKind.Array &&
+                    doc.RootElement.GetArrayLength() > 1)
+                {
+                    var sb = new StringBuilder();
+                    sb.Append('[');
+                    var first = true;
+                    foreach (var element in doc.RootElement.EnumerateArray())
+                    {
+                        if (!first) sb.Append(',');
+                        sb.Append('\n').Append(JsonSerializer.Serialize(element, options));
+                        first = false;
+                    }
+                    sb.Append('\n').Append(']');
+                    return sb.ToString();
+                }
+
+                return JsonSerializer.Serialize(doc.RootElement, options);
             });
+            RawJsonText = formatted;
             JsonEditorError = string.Empty;
             IsJsonEditorErrorVisible = false;
             JsonEditorErrorLine = -1;
@@ -1088,7 +1231,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void SwitchToTableEditor()
+    private async Task SwitchToTableEditorAsync()
     {
         if (string.IsNullOrWhiteSpace(RawJsonText))
         {
@@ -1098,13 +1241,17 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         try
         {
-            JsonDocument.Parse(RawJsonText);
+            var rawJson = RawJsonText;
 
             // Always detect fields from JSON and add any that are not yet in the schema.
             // This covers both the "empty schema" case and the "user added new fields in JSON mode" case.
             // DetectFields returns a tree, so the nested fields the user expanded during import
             // have to be recovered from the current schema — otherwise they'd be dropped here.
-            var detected = _jsonService.DetectFields(RawJsonText);
+            var detected = await Task.Run(() =>
+            {
+                JsonDocument.Parse(rawJson).Dispose();
+                return _jsonService.DetectFields(rawJson);
+            });
             var schemaNames = Properties.Select(p => p.Name).ToHashSet(StringComparer.Ordinal);
             var effective = ResolveDetectedFields(detected, schemaNames);
             var effectiveNames = effective.Select(f => f.FieldName).ToHashSet(StringComparer.Ordinal);
@@ -1119,7 +1266,7 @@ public partial class WorkspaceViewModel : ViewModelBase
                 .Select(f => new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType });
             Properties.AddRange(newFields);
 
-            var rows = _jsonService.ParseJsonData(RawJsonText, Properties);
+            var rows = await Task.Run(() => _jsonService.ParseJsonData(rawJson, Properties));
             Rows.Clear();
             Rows.AddRange(rows);
 
