@@ -53,6 +53,8 @@ InstallDir "${INSTALL_DIR}"
 ######################################################################
 
 !include "MUI2.nsh"
+!include "LogicLib.nsh"
+!include "Sections.nsh"
 
 ; --- Предупреждения о прерывании установки ---
 !define MUI_ABORTWARNING
@@ -65,6 +67,8 @@ InstallDir "${INSTALL_DIR}"
 !ifdef LICENSE_TXT
     !insertmacro MUI_PAGE_LICENSE "${LICENSE_TXT}"
 !endif
+
+!insertmacro MUI_PAGE_COMPONENTS
 
 ; --- Выбор папки установки ---
 !insertmacro MUI_PAGE_DIRECTORY
@@ -94,11 +98,27 @@ InstallDir "${INSTALL_DIR}"
 ; --- Язык интерфейса ---
 !insertmacro MUI_LANGUAGE "English"
 
+LangString DESC_SecContextMenu ${LANG_ENGLISH} \
+    "Add an 'Open with ${APP_NAME}' entry to the right-click context menu for .json and .cs files."
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+!insertmacro MUI_DESCRIPTION_TEXT ${SecContextMenu} $(DESC_SecContextMenu)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
 ######################################################################
 
 ; Функция для запуска программы (используется в silent режиме)
 Function LaunchApplication
     Exec '"$INSTDIR\${MAIN_APP_EXE}"'
+FunctionEnd
+
+Function .onInit
+    ReadRegDWORD $0 ${REG_ROOT} "${UNINSTALL_PATH}" "ContextMenuEnabled"
+    ${If} $0 == 0
+        !insertmacro UnselectSection ${SecContextMenu}
+    ${Else}
+        !insertmacro SelectSection ${SecContextMenu}
+    ${EndIf}
 FunctionEnd
 
 ######################################################################
@@ -160,6 +180,10 @@ Section -Icons_Reg
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "URLInfoAbout" "${WEB_SITE}"
     !endif
 
+    ${IfNot} ${SectionIsSelected} ${SecContextMenu}
+        WriteRegDWORD ${REG_ROOT} "${UNINSTALL_PATH}" "ContextMenuEnabled" 0
+    ${EndIf}
+
     ; --- Silent режим: автоматический запуск после установки ---
     ${If} ${Silent}
         Call LaunchApplication
@@ -168,8 +192,30 @@ SectionEnd
 
 ######################################################################
 
+Section "Open with ${APP_NAME} (context menu)" SecContextMenu
+    ${INSTALL_TYPE}
+
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}" "" "Open with ${APP_NAME}"
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}" "Icon" "$INSTDIR\${MAIN_APP_EXE}"
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}\command" "" '"$INSTDIR\${MAIN_APP_EXE}" "%1"'
+
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}" "" "Open with ${APP_NAME}"
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}" "Icon" "$INSTDIR\${MAIN_APP_EXE}"
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}\command" "" '"$INSTDIR\${MAIN_APP_EXE}" "%1"'
+
+    WriteRegDWORD ${REG_ROOT} "${UNINSTALL_PATH}" "ContextMenuEnabled" 1
+
+    System::Call 'shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
+SectionEnd
+
+######################################################################
+
 Section Uninstall
     ${INSTALL_TYPE}
+
+    DeleteRegKey HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}"
+    DeleteRegKey HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}"
+    System::Call 'shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
 
     RmDir /r "$INSTDIR"
 
