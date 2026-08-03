@@ -98,26 +98,10 @@ InstallDir "${INSTALL_DIR}"
 ; --- Язык интерфейса ---
 !insertmacro MUI_LANGUAGE "English"
 
-LangString DESC_SecContextMenu ${LANG_ENGLISH} \
-    "Add an 'Open with ${APP_NAME}' entry to the right-click context menu for .json and .cs files."
-
-!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-!insertmacro MUI_DESCRIPTION_TEXT ${SecContextMenu} $(DESC_SecContextMenu)
-!insertmacro MUI_FUNCTION_DESCRIPTION_END
-
 ######################################################################
 
 Function LaunchApplication
     Exec '"$INSTDIR\${MAIN_APP_EXE}"'
-FunctionEnd
-
-Function .onInit
-    ReadRegDWORD $0 ${REG_ROOT} "${UNINSTALL_PATH}" "ContextMenuEnabled"
-    ${If} $0 == 0
-        !insertmacro UnselectSection ${SecContextMenu}
-    ${Else}
-        !insertmacro SelectSection ${SecContextMenu}
-    ${EndIf}
 FunctionEnd
 
 ######################################################################
@@ -133,6 +117,46 @@ Section -MainProgram
 
     ExecWait 'icacls "$INSTDIR" /grant *S-1-1-0:(OI)(CI)F /T'
 SectionEnd
+
+######################################################################
+
+Section "Open with ${APP_NAME} (context menu)" SecContextMenu
+    ${INSTALL_TYPE}
+
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}" "" "Open with ${APP_NAME}"
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}" "Icon" "$INSTDIR\${MAIN_APP_EXE}"
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}\command" "" '"$INSTDIR\${MAIN_APP_EXE}" "%1"'
+
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}" "" "Open with ${APP_NAME}"
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}" "Icon" "$INSTDIR\${MAIN_APP_EXE}"
+    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}\command" "" '"$INSTDIR\${MAIN_APP_EXE}" "%1"'
+
+    ; Запоминаем выбор, чтобы обновление/переустановка подставили ту же галочку.
+    WriteRegDWORD ${REG_ROOT} "${UNINSTALL_PATH}" "ContextMenuEnabled" 1
+
+    System::Call 'shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
+SectionEnd
+
+######################################################################
+
+; --- Описание компонента "контекстное меню" на странице выбора компонентов ---
+LangString DESC_SecContextMenu ${LANG_ENGLISH} \
+    "Add an 'Open with ${APP_NAME}' entry to the right-click context menu for .json and .cs files."
+
+!insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
+!insertmacro MUI_DESCRIPTION_TEXT ${SecContextMenu} $(DESC_SecContextMenu)
+!insertmacro MUI_FUNCTION_DESCRIPTION_END
+
+; При повторной установке/обновлении подставляем предыдущий выбор пользователя,
+; чтобы галочку не приходилось ставить заново. При первой установке — включена.
+Function .onInit
+    ReadRegDWORD $0 ${REG_ROOT} "${UNINSTALL_PATH}" "ContextMenuEnabled"
+    ${If} $0 == 0
+        !insertmacro UnselectSection ${SecContextMenu}
+    ${Else}
+        !insertmacro SelectSection ${SecContextMenu}
+    ${EndIf}
+FunctionEnd
 
 ######################################################################
 
@@ -179,6 +203,8 @@ Section -Icons_Reg
     WriteRegStr ${REG_ROOT} "${UNINSTALL_PATH}"  "URLInfoAbout" "${WEB_SITE}"
     !endif
 
+    ; Запоминаем состояние галочки контекстного меню независимо от того, отмечена
+    ; она или нет — чтобы переустановка/обновление подставили тот же выбор.
     ${IfNot} ${SectionIsSelected} ${SecContextMenu}
         WriteRegDWORD ${REG_ROOT} "${UNINSTALL_PATH}" "ContextMenuEnabled" 0
     ${EndIf}
@@ -187,24 +213,6 @@ Section -Icons_Reg
     ${If} ${Silent}
         Call LaunchApplication
     ${EndIf}
-SectionEnd
-
-######################################################################
-
-Section "Open with ${APP_NAME} (context menu)" SecContextMenu
-    ${INSTALL_TYPE}
-
-    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}" "" "Open with ${APP_NAME}"
-    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}" "Icon" "$INSTDIR\${MAIN_APP_EXE}"
-    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}\command" "" '"$INSTDIR\${MAIN_APP_EXE}" "%1"'
-
-    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}" "" "Open with ${APP_NAME}"
-    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}" "Icon" "$INSTDIR\${MAIN_APP_EXE}"
-    WriteRegStr HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}\command" "" '"$INSTDIR\${MAIN_APP_EXE}" "%1"'
-
-    WriteRegDWORD ${REG_ROOT} "${UNINSTALL_PATH}" "ContextMenuEnabled" 1
-
-    System::Call 'shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
 SectionEnd
 
 ######################################################################
