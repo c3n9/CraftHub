@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- JSON highlighting for CraftHub, light theme. Editor background is near-white
+     (ElevatedBackground #F1F5FA), so colors are saturated/deep enough for contrast.
+
+     IMPORTANT: <Rule> regex text must stay on a single line with no surrounding whitespace —
+     AvaloniaEdit does not trim it, so an indented/multi-line pattern picks up a literal leading
+     newline/spaces and then never matches anything.
+
+     Property keys are a <Span>, not a <Rule> with a colon lookahead — a Rule competing with the
+     generic string Span for the same opening quote lost every time regardless of declaration
+     order, so keys never got their own color. Using a Span for both (Begin includes the
+     lookahead so it only claims quotes that are actually followed by ':') matches the engine's
+     own precedence and reliably wins. -->
+<SyntaxDefinition name="Json" extensions=".json"
+                  xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+
+    <!-- Deliberately a different hue set from JsonHighlighting.Dark.xshd's blue/green/amber/red/
+         purple/gray, not just a darkened version of the same colors — amber/teal/fuchsia/rose/
+         slate/stone instead. -->
+    <Color name="FieldName"   foreground="#B45309" />
+    <Color name="String"      foreground="#0F766E" />
+    <Color name="Number"      foreground="#A21CAF" />
+    <Color name="Bool"        foreground="#9F1239" />
+    <Color name="Null"        foreground="#475569" />
+    <Color name="Punctuation" foreground="#78716C" />
+
+    <RuleSet>
+        <Keywords color="Bool">
+            <Word>true</Word>
+            <Word>false</Word>
+        </Keywords>
+        <Keywords color="Null">
+            <Word>null</Word>
+        </Keywords>
+
+        <!-- Property key: a quoted string immediately followed by ':'. Must come before the
+             generic string span so keys colour differently from values. -->
+        <Span color="FieldName" multiline="false">
+            <Begin>"(?=[^"\\]*(?:\\.[^"\\]*)*"\s*:)</Begin>
+            <End>"</End>
+            <RuleSet>
+                <Span begin="\\" end="." />
+            </RuleSet>
+        </Span>
+
+        <!-- String value -->
+        <Span color="String" multiline="false">
+            <Begin>"</Begin>
+            <End>"</End>
+            <RuleSet>
+                <!-- keep escape sequences inside the string -->
+                <Span begin="\\" end="." />
+            </RuleSet>
+        </Span>
+
+        <!-- Numbers -->
+        <Rule color="Number">\-?\b\d+(\.\d+)?([eE][+\-]?\d+)?\b</Rule>
+
+        <!-- Structural punctuation -->
+        <Rule color="Punctuation">[{}\[\],:]</Rule>
+    </RuleSet>
+</SyntaxDefinition>

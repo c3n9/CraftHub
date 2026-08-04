@@ -42,7 +42,8 @@
 
 	<ItemGroup>
 		<AvaloniaResource Include="Fonts\**" />
-		<AvaloniaResource Include="Resources\JsonHighlighting.xshd" />
+		<AvaloniaResource Include="Resources\JsonHighlighting.Light.xshd" />
+		<AvaloniaResource Include="Resources\JsonHighlighting.Dark.xshd" />
 	</ItemGroup>
 
 	<ItemGroup>

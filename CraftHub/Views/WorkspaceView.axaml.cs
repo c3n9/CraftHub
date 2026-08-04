@@ -16,6 +16,7 @@ using Avalonia.Layout;
 using Avalonia.Markup.Xaml.MarkupExtensions;
 using Avalonia.Media;
 using Avalonia.Platform;
+using Avalonia.Styling;
 using Avalonia.Threading;
 using Avalonia.VisualTree;
 using AvaloniaEdit;
@@ -47,8 +48,10 @@ public partial class WorkspaceView : UserControl
     // so an echo from one side does not bounce back and re-trigger the other.
     private bool _suppressEditorSync;
 
-    // JSON highlighting is loaded once from the bundled .xshd and shared by every tab.
-    private static IHighlightingDefinition? _jsonHighlighting;
+    // JSON highlighting: one definition per theme (each tuned for that theme's editor
+    // background), loaded once and shared by every tab.
+    private static IHighlightingDefinition? _jsonHighlightingLight;
+    private static IHighlightingDefinition? _jsonHighlightingDark;
 
     // Column pin icon + header background, keyed by column, so their visual (pinned/unpinned)
     // state can be refreshed after a toggle or a reorder without rebuilding the whole header.
@@ -94,12 +97,23 @@ public partial class WorkspaceView : UserControl
 
         if (_jsonEditor != null)
         {
-            _jsonEditor.SyntaxHighlighting = GetJsonHighlighting();
             _jsonEditor.Options.IndentationSize = 2;
             _jsonEditor.TextChanged += OnEditorTextChanged;
             // Handle Ctrl+F / Ctrl+H ourselves (Tunnel, so before AvaloniaEdit's built-in) to make
             // them toggle the search panel — pressing the same combo again closes it.
             _jsonEditor.AddHandler(KeyDownEvent, OnEditorKeyDown, RoutingStrategies.Tunnel);
+            ApplyJsonSyntaxTheme();
+            _jsonEditor.AttachedToVisualTree += (_, _) =>
+            {
+                ApplyJsonSyntaxTheme();
+                if (Application.Current != null)
+                    Application.Current.ActualThemeVariantChanged += OnAppThemeVariantChanged;
+            };
+            _jsonEditor.DetachedFromVisualTree += (_, _) =>
+            {
+                if (Application.Current != null)
+                    Application.Current.ActualThemeVariantChanged -= OnAppThemeVariantChanged;
+            };
         }
 
         if (_jsonErrorButton != null)
@@ -142,21 +156,45 @@ public partial class WorkspaceView : UserControl
         }
     }
 
-    private static IHighlightingDefinition? GetJsonHighlighting()
+    private void OnAppThemeVariantChanged(object? sender, EventArgs e) => ApplyJsonSyntaxTheme();
+
+    // ActualThemeVariant on Application.Current is what ThemeService itself drives
+    // (app.RequestedThemeVariant), and is reliable to read directly — unlike resolving a *keyed
+    // resource* via Application.Current.TryFindResource, which can pick the wrong theme
+    // dictionary (see SearchHighlightConverter). _jsonEditor.ActualThemeVariant was tried first
+    // but returned a stale/wrong value even after the control was attached.
+    private void ApplyJsonSyntaxTheme()
     {
-        if (_jsonHighlighting != null) return _jsonHighlighting;
+        if (_jsonEditor == null) return;
+        var isDark = Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
+        _jsonEditor.SyntaxHighlighting = GetJsonHighlighting(isDark);
+    }
+
+    private static IHighlightingDefinition? GetJsonHighlighting(bool dark)
+    {
+        if (dark)
+        {
+            _jsonHighlightingDark ??= LoadJsonHighlighting("JsonHighlighting.Dark.xshd");
+            return _jsonHighlightingDark;
+        }
+
+        _jsonHighlightingLight ??= LoadJsonHighlighting("JsonHighlighting.Light.xshd");
+        return _jsonHighlightingLight;
+    }
+
+    private static IHighlightingDefinition? LoadJsonHighlighting(string fileName)
+    {
         try
         {
-            using var stream = AssetLoader.Open(new Uri("avares://CraftHub/Resources/JsonHighlighting.xshd"));
+            using var stream = AssetLoader.Open(new Uri($"avares://CraftHub/Resources/{fileName}"));
             using var reader = XmlReader.Create(stream);
-            _jsonHighlighting = HighlightingLoader.Load(reader, HighlightingManager.Instance);
+            return HighlightingLoader.Load(reader, HighlightingManager.Instance);
         }
         catch
         {
             // Fall back to AvaloniaEdit's built-in JSON definition if the bundled one fails to load.
-            _jsonHighlighting = HighlightingManager.Instance.GetDefinition("Json");
+            return HighlightingManager.Instance.GetDefinition("Json");
         }
-        return _jsonHighlighting;
     }
 
     // Editor -> view-model

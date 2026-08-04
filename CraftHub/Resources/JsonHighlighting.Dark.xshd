@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- JSON highlighting for CraftHub, dark theme. Editor background is dark navy
+     (ElevatedBackground #2A2A3E), so colors are light/pastel for contrast.
+
+     IMPORTANT: <Rule> regex text must stay on a single line with no surrounding whitespace —
+     AvaloniaEdit does not trim it, so an indented/multi-line pattern picks up a literal leading
+     newline/spaces and then never matches anything.
+
+     Property keys are a <Span>, not a <Rule> with a colon lookahead — see JsonHighlighting.Light.xshd
+     for why. -->
+<SyntaxDefinition name="Json" extensions=".json"
+                  xmlns="http://icsharpcode.net/sharpdevelop/syntaxdefinition/2008">
+
+    <Color name="FieldName"   foreground="#60A5FA" />
+    <Color name="String"      foreground="#4ADE80" />
+    <Color name="Number"      foreground="#FBBF24" />
+    <Color name="Bool"        foreground="#F87171" />
+    <Color name="Null"        foreground="#C084FC" />
+    <Color name="Punctuation" foreground="#9CA3AF" />
+
+    <RuleSet>
+        <Keywords color="Bool">
+            <Word>true</Word>
+            <Word>false</Word>
+        </Keywords>
+        <Keywords color="Null">
+            <Word>null</Word>
+        </Keywords>
+
+        <!-- Property key: a quoted string immediately followed by ':'. Must come before the
+             generic string span so keys colour differently from values. -->
+        <Span color="FieldName" multiline="false">
+            <Begin>"(?=[^"\\]*(?:\\.[^"\\]*)*"\s*:)</Begin>
+            <End>"</End>
+            <RuleSet>
+                <Span begin="\\" end="." />
+            </RuleSet>
+        </Span>
+
+        <!-- String value -->
+        <Span color="String" multiline="false">
+            <Begin>"</Begin>
+            <End>"</End>
+            <RuleSet>
+                <!-- keep escape sequences inside the string -->
+                <Span begin="\\" end="." />
+            </RuleSet>
+        </Span>
+
+        <!-- Numbers -->
+        <Rule color="Number">\-?\b\d+(\.\d+)?([eE][+\-]?\d+)?\b</Rule>
+
+        <!-- Structural punctuation -->
+        <Rule color="Punctuation">[{}\[\],:]</Rule>
+    </RuleSet>
+</SyntaxDefinition>
