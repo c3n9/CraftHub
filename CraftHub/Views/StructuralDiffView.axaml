@@ -1,0 +1,116 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftHub.ViewModels"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="CraftHub.Views.StructuralDiffView"
+             x:DataType="vm:StructuralDiffViewModel">
+
+    <UserControl.Styles>
+        <Style Selector="TextBlock.change-label.added">
+            <Setter Property="Foreground" Value="{DynamicResource DiffGutterAdded}" />
+        </Style>
+        <Style Selector="TextBlock.change-label.removed">
+            <Setter Property="Foreground" Value="{DynamicResource DiffGutterRemoved}" />
+        </Style>
+        <Style Selector="TextBlock.change-label.changed">
+            <Setter Property="Foreground" Value="{DynamicResource DiffGutterChanged}" />
+        </Style>
+
+        <Style Selector="Button.tree-chevron">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="2" />
+            <Setter Property="Width" Value="18" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Panel>
+        <!-- The tree is flattened into rows carrying their own depth, so a plain DataGrid gives
+             both the hierarchy (indent + chevron) and aligned columns. -->
+        <DataGrid ItemsSource="{Binding Rows}"
+                  AutoGenerateColumns="False"
+                  IsReadOnly="True"
+                  CanUserSortColumns="False"
+                  CanUserResizeColumns="True"
+                  GridLinesVisibility="Horizontal"
+                  Background="Transparent"
+                  BorderThickness="0"
+                  HeadersVisibility="Column"
+                  FontSize="13">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="{DynamicResource StructColPath}" Width="240">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:StructuralDiffRowViewModel">
+                            <StackPanel Orientation="Horizontal" Margin="{Binding Indent}"
+                                        VerticalAlignment="Center">
+                                <Button Classes="tree-chevron"
+                                        IsVisible="{Binding HasChildren}"
+                                        Command="{Binding $parent[DataGrid].DataContext.ToggleExpandCommand}"
+                                        CommandParameter="{Binding}">
+                                    <Panel>
+                                        <materialIcons:MaterialIcon Kind="ChevronDown" Width="13" Height="13"
+                                                                    IsVisible="{Binding IsExpanded}" />
+                                        <materialIcons:MaterialIcon Kind="ChevronRight" Width="13" Height="13"
+                                                                    IsVisible="{Binding !IsExpanded}" />
+                                    </Panel>
+                                </Button>
+                                <!-- Keeps leaf names aligned with their expandable siblings -->
+                                <Border Width="18" IsVisible="{Binding !HasChildren}" />
+                                <TextBlock Text="{Binding Name}" VerticalAlignment="Center"
+                                           Foreground="{DynamicResource TextPrimary}" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="{DynamicResource StructColChange}" Width="130">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate x:DataType="vm:StructuralDiffRowViewModel">
+                            <TextBlock Text="{Binding ChangeLabel}" Classes="change-label"
+                                       Classes.added="{Binding IsAdded}"
+                                       Classes.removed="{Binding IsRemoved}"
+                                       Classes.changed="{Binding IsChanged}"
+                                       Margin="8,0" VerticalAlignment="Center" FontWeight="SemiBold" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTextColumn Header="{DynamicResource StructColOld}" Binding="{Binding OldValue}"
+                                    Width="*" IsReadOnly="True" />
+                <DataGridTextColumn Header="{DynamicResource StructColNew}" Binding="{Binding NewValue}"
+                                    Width="*" IsReadOnly="True" />
+                <DataGridTextColumn Header="{DynamicResource StructColFullPath}" Binding="{Binding Path}"
+                                    Width="*" IsReadOnly="True" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <!-- Identical: nothing to show in the tree at all -->
+        <Border IsVisible="{Binding IsIdentical}" Background="{DynamicResource AppBackground}">
+            <StackPanel Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <materialIcons:MaterialIcon Kind="CheckCircleOutline" Width="34" Height="34"
+                                            HorizontalAlignment="Center"
+                                            Foreground="{DynamicResource SuccessColor}" />
+                <TextBlock Text="{DynamicResource DiffNoChanges}" FontSize="14"
+                           HorizontalAlignment="Center" Foreground="{DynamicResource TextSecondary}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Invalid JSON: the text diff still works, this comparison can't run -->
+        <Border IsVisible="{Binding IsUnavailable}" Background="{DynamicResource AppBackground}">
+            <StackPanel Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center"
+                        MaxWidth="420">
+                <materialIcons:MaterialIcon Kind="AlertCircleOutline" Width="34" Height="34"
+                                            HorizontalAlignment="Center"
+                                            Foreground="{DynamicResource WarningColor}" />
+                <TextBlock Text="{DynamicResource StructUnavailable}" FontSize="14"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondary}" />
+                <TextBlock Text="{Binding UnavailableReason}" FontSize="12"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextMuted}" />
+            </StackPanel>
+        </Border>
+    </Panel>
+</UserControl>
