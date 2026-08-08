@@ -17,7 +17,7 @@
         <KeyBinding Gesture="F8" Command="{Binding Diff.NextChangeCommand}" />
     </Window.KeyBindings>
 
-    <Grid RowDefinitions="Auto,*">
+    <Grid RowDefinitions="Auto,*,Auto">
 
         <Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="16,12"
                 BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
@@ -58,5 +58,25 @@
                 <views:StructuralDiffView DataContext="{Binding Structural}" />
             </TabItem>
         </TabControl>
+
+        <!-- Save gate: only present when the window was opened to confirm a write to disk. -->
+        <Border Grid.Row="2" IsVisible="{Binding IsConfirmMode}"
+                Background="{DynamicResource SurfaceBackground}" Padding="16,12"
+                BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,1,0,0">
+            <Grid ColumnDefinitions="*,Auto">
+                <CheckBox Grid.Column="0" Content="{DynamicResource DiffDontShowAgain}"
+                          IsChecked="{Binding DontShowAgain}" VerticalAlignment="Center" />
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Classes="tab-btn" Content="{DynamicResource BtnCancel}"
+                            Height="34" Width="110"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Command="{Binding CancelCommand}" />
+                    <Button Classes="accent-btn" Content="{DynamicResource BtnSave}"
+                            Height="34" Width="110"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Command="{Binding ProceedCommand}" />
+                </StackPanel>
+            </Grid>
+        </Border>
     </Grid>
 </Window>
