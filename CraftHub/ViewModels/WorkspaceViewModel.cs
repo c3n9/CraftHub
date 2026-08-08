@@ -42,6 +42,10 @@ public partial class WorkspaceViewModel : ViewModelBase
     /// <summary>Last known on-disk modification time, used to detect external changes.</summary>
     private DateTime? _fileWriteTimeUtc;
 
+    /// <summary>Canonical (pretty-printed) JSON of the last-saved-on-disk state — or the
+    /// originally imported state if never saved yet. The "old" side of the diff view.</summary>
+    private string? _baselineJsonText;
+
     /// <summary>Suppresses dirty-tracking while data is being (re)loaded from disk.</summary>
     private bool _isLoading;
 
@@ -913,6 +917,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             FilePath = path;
             _fileWriteTimeUtc = SafeGetWriteTime(path);
             IsModified = false;
+            _baselineJsonText = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
 
             return true;
         }
@@ -975,6 +980,8 @@ public partial class WorkspaceViewModel : ViewModelBase
             if (!overwrite) return;
         }
 
+        if (!await ConfirmSaveDiffAsync(content)) return;
+
         await WriteToFileAsync(FilePath, content);
     }
 
@@ -984,6 +991,8 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         var (success, content) = await TryBuildSaveContentAsync();
         if (!success) return;
+
+        if (!await ConfirmSaveDiffAsync(content)) return;
 
         var filters = new List<FileFilter> { new("JSON and TXT files", new[] { "*.json", "*.txt" }) };
         var suggestedName = FilePath != null
@@ -1006,6 +1015,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             Header = Path.GetFileNameWithoutExtension(path);
             _fileWriteTimeUtc = SafeGetWriteTime(path);
             IsModified = false;
+            _baselineJsonText = await Task.Run(() => JsonDiffHelper.CanonicalizeForDiff(content));
             NotifySuccess(Localizer.Get("SavedMsg", Path.GetFileName(path)));
             FileSaved?.Invoke(path);
         }
@@ -1040,6 +1050,61 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         var content = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
         return (true, content);
+    }
+
+    /// <summary>Canonical JSON for the data currently in memory (table or JSON mode), used as the
+    /// "new" side of a diff.</summary>
+    private async Task<string> GetCurrentCanonicalJsonAsync()
+    {
+        if (IsJsonEditorMode)
+            return await Task.Run(() => JsonDiffHelper.CanonicalizeForDiff(RawJsonText));
+
+        return await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
+    }
+
+    /// <summary>Canonical JSON of the last state written to disk (or of the originally imported
+    /// file, if this tab has never been saved) — the "before" side of any diff against this tab.</summary>
+    internal string? BaselineJsonSnapshot => _baselineJsonText;
+
+    // CanExecute has to be synchronous, so it uses the cheap dirty flag. The command body then
+    // does the real canonical comparison; if the edits happen to net out to no change, the window
+    // simply opens on its "no changes" empty state rather than the button going stale.
+    private bool CanShowChanges() => IsModified;
+
+    /// <summary>Opens the non-modal "show changes" window: last saved on disk vs. what's in memory now.</summary>
+    [RelayCommand(CanExecute = nameof(CanShowChanges))]
+    private async Task ShowChangesAsync()
+    {
+        var current = await GetCurrentCanonicalJsonAsync();
+        var baseline = _baselineJsonText ?? string.Empty;
+
+        await _dialogService.ShowJsonChangesWindowAsync(
+            Localizer.Get("ShowChangesTitle", Header),
+            Localizer.Get("DiffLabelSaved"),
+            Localizer.Get("DiffLabelCurrent"),
+            baseline,
+            current);
+    }
+
+    partial void OnIsModifiedChanged(bool value) => ShowChangesCommand.NotifyCanExecuteChanged();
+
+    /// <summary>Gate shown right before writing to disk, unless the user previously opted out.
+    /// Returns false if the user cancels the save from the diff view.</summary>
+    private async Task<bool> ConfirmSaveDiffAsync(string content)
+    {
+        if (!global::CraftHub.Properties.Settings.Default.ShowDiffOnSave) return true;
+
+        var current = await Task.Run(() => JsonDiffHelper.CanonicalizeForDiff(content));
+        var baseline = _baselineJsonText ?? string.Empty;
+        if (baseline == current) return true; // nothing actually changed, nothing to confirm
+
+        var result = await _dialogService.ShowJsonDiffAsync(Localizer.Get("SaveDiffTitle"), baseline, current, isConfirm: true);
+        if (result.DontShowAgain)
+        {
+            global::CraftHub.Properties.Settings.Default.ShowDiffOnSave = false;
+            global::CraftHub.Properties.Settings.Default.Save();
+        }
+        return result.Proceed;
     }
 
     [RelayCommand]
