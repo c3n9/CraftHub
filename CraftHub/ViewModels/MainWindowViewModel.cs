@@ -213,6 +213,12 @@ public partial class MainWindowViewModel : ViewModelBase
     [RelayCommand]
     private Task ShowReleases() => _dialogService.ShowReleasesDialogAsync(CurrentVersion);
 
+    // Opens the standalone JSON Comparer window. Wired up in a later step; the toolbar button
+    // stays bound to this command so it doesn't need re-pointing then.
+    [RelayCommand]
+    private void ShowJsonComparer()
+        => _notificationService.Publish(NotificationType.Info, Localizer.Get("ComingSoonMsg"));
+
     [RelayCommand]
     private async void GoToGitHubRepo()
     {
