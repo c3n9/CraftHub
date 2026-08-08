@@ -19,6 +19,7 @@
 		<PackageReference Include="Coachlight.Avalonia" Version="11.0.4" />
 		<PackageReference Include="Avalonia.Diagnostics" Version="11.2.1" Condition="'$(Configuration)' == 'Debug'" />
 		<PackageReference Include="CommunityToolkit.Mvvm" Version="8.3.2" />
+		<PackageReference Include="DiffPlex" Version="1.9.0" />
 		<PackageReference Include="Markdown.Avalonia" Version="11.0.3" />
 		<PackageReference Include="Material.Icons" Version="2.4.1" />
 		<PackageReference Include="Material.Icons.Avalonia" Version="2.4.1" />
