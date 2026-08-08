@@ -1,0 +1,290 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftHub.ViewModels"
+             xmlns:helpers="using:CraftHub.Helpers"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="CraftHub.Views.DiffView"
+             x:DataType="vm:DiffViewModel">
+
+    <UserControl.Resources>
+        <!-- One place to change the diff font/metrics; every row references these so the two
+             columns stay character-aligned. -->
+        <FontFamily x:Key="DiffFontFamily">Cascadia Code,Cascadia Mono,Consolas,Menlo,Courier New,monospace</FontFamily>
+
+        <!-- Side-by-side row half: fixed-width gutter columns, then the wrapping text in a star
+             column. The text is one TextBlock (segments become inline runs via DiffInlineBuilder)
+             so a long line wraps instead of scrolling the column out of view. -->
+        <DataTemplate x:Key="DiffLineTemplate" x:DataType="vm:DiffLineRowViewModel">
+            <Border Classes="diff-line"
+                    Classes.added="{Binding IsAdded}"
+                    Classes.removed="{Binding IsRemoved}"
+                    Classes.changed="{Binding IsChanged}">
+                <Grid ColumnDefinitions="Auto,Auto,*">
+                    <TextBlock Grid.Column="0" Classes="diff-lineno" Text="{Binding LineNumber}" />
+                    <TextBlock Grid.Column="1" Classes="diff-marker"
+                               Classes.added="{Binding IsAdded}"
+                               Classes.removed="{Binding IsRemoved}"
+                               Classes.changed="{Binding IsChanged}"
+                               Text="{Binding Marker}" />
+                    <TextBlock Grid.Column="2" Classes="diff-text" TextWrapping="Wrap"
+                               helpers:DiffInlineBuilder.Segments="{Binding Segments}" />
+                </Grid>
+            </Border>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <!-- Line-level tint -->
+        <Style Selector="Border.diff-line">
+            <Setter Property="Padding" Value="0,1" />
+        </Style>
+        <Style Selector="Border.diff-line.added">
+            <Setter Property="Background" Value="{DynamicResource DiffAddedBackground}" />
+        </Style>
+        <Style Selector="Border.diff-line.removed">
+            <Setter Property="Background" Value="{DynamicResource DiffRemovedBackground}" />
+        </Style>
+        <Style Selector="Border.diff-line.changed">
+            <Setter Property="Background" Value="{DynamicResource DiffChangedBackground}" />
+        </Style>
+
+        <Style Selector="TextBlock.diff-marker">
+            <Setter Property="FontFamily" Value="{StaticResource DiffFontFamily}" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="Width" Value="16" />
+            <Setter Property="TextAlignment" Value="Center" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="TextBlock.diff-marker.added">
+            <Setter Property="Foreground" Value="{DynamicResource DiffGutterAdded}" />
+        </Style>
+        <Style Selector="TextBlock.diff-marker.removed">
+            <Setter Property="Foreground" Value="{DynamicResource DiffGutterRemoved}" />
+        </Style>
+        <Style Selector="TextBlock.diff-marker.changed">
+            <Setter Property="Foreground" Value="{DynamicResource DiffGutterChanged}" />
+        </Style>
+
+        <Style Selector="TextBlock.diff-lineno">
+            <Setter Property="FontFamily" Value="{StaticResource DiffFontFamily}" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Width" Value="44" />
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+
+        <Style Selector="TextBlock.diff-text">
+            <Setter Property="FontFamily" Value="{StaticResource DiffFontFamily}" />
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+
+        <!-- Folded-region placeholder -->
+        <Style Selector="Button.collapsed-region">
+            <Setter Property="Background" Value="{DynamicResource ElevatedBackground}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Padding" Value="10,3" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="FontSize" Value="11.5" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="Button.collapsed-region:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentHover}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+        </Style>
+
+        <!-- ListBox is used purely as a virtualizing scroller — strip its selection chrome so the
+             diff tints are the only backgrounds visible. -->
+        <Style Selector="ListBox.diff-list">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ListBox.diff-list ListBoxItem">
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+        <Style Selector="ListBox.diff-list ListBoxItem /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+        <Style Selector="ListBox.diff-list ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.diff-list ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+
+        <Style Selector="ToggleButton.diff-mode">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+        </Style>
+        <Style Selector="ToggleButton.diff-mode:checked /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentPrimary}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+
+        <!-- Header: change counters, navigation, view toggles -->
+        <Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="12,8"
+                BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="14" VerticalAlignment="Center">
+                    <TextBlock FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource DiffGutterAdded}"
+                               Text="{Binding AddedCount, StringFormat='+{0}'}" />
+                    <TextBlock FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource DiffGutterRemoved}"
+                               Text="{Binding RemovedCount, StringFormat='−{0}'}" />
+                    <TextBlock FontSize="13" FontWeight="SemiBold"
+                               Foreground="{DynamicResource DiffGutterChanged}"
+                               Text="{Binding ChangedCount, StringFormat='~{0}'}" />
+                </StackPanel>
+
+                <!-- Change navigation (also bound to F7/F8 at the window level) -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            IsVisible="{Binding HasChanges}">
+                    <Button Classes="toolbar-btn" Padding="6,4"
+                            Command="{Binding PreviousChangeCommand}"
+                            ToolTip.Tip="{DynamicResource DiffPrevChange}">
+                        <materialIcons:MaterialIcon Kind="ChevronUp" Width="16" Height="16" />
+                    </Button>
+                    <TextBlock VerticalAlignment="Center" FontSize="12" MinWidth="58"
+                               TextAlignment="Center"
+                               Foreground="{DynamicResource TextSecondary}">
+                        <TextBlock.Text>
+                            <MultiBinding StringFormat="{}{0} / {1}">
+                                <Binding Path="CurrentChangeNumber" />
+                                <Binding Path="TotalChangeCount" />
+                            </MultiBinding>
+                        </TextBlock.Text>
+                    </TextBlock>
+                    <Button Classes="toolbar-btn" Padding="6,4"
+                            Command="{Binding NextChangeCommand}"
+                            ToolTip.Tip="{DynamicResource DiffNextChange}">
+                        <materialIcons:MaterialIcon Kind="ChevronDown" Width="16" Height="16" />
+                    </Button>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <CheckBox Content="{DynamicResource DiffIgnoreKeyOrder}"
+                              IsChecked="{Binding IgnoreKeyOrder}" FontSize="12"
+                              VerticalAlignment="Center" />
+                    <Border Width="1" Background="{DynamicResource BorderLight}" Margin="4,2" />
+                    <ToggleButton Classes="diff-mode" IsChecked="{Binding IsSideBySide}"
+                                  ToolTip.Tip="{DynamicResource DiffSideBySide}" Padding="8,5" CornerRadius="6">
+                        <materialIcons:MaterialIcon Kind="ViewSplitVertical" Width="16" Height="16" />
+                    </ToggleButton>
+                    <ToggleButton Classes="diff-mode" IsChecked="{Binding IsUnified}"
+                                  ToolTip.Tip="{DynamicResource DiffUnified}" Padding="8,5" CornerRadius="6">
+                        <materialIcons:MaterialIcon Kind="ViewSequentialOutline" Width="16" Height="16" />
+                    </ToggleButton>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Invalid-JSON warning -->
+        <Border Grid.Row="1" IsVisible="{Binding HasInvalidJson}"
+                Background="{DynamicResource DiffChangedBackground}" Padding="12,7">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <materialIcons:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16"
+                                            Foreground="{DynamicResource WarningColor}" VerticalAlignment="Center" />
+                <TextBlock Text="{DynamicResource DiffInvalidJsonWarning}" FontSize="12"
+                           TextWrapping="Wrap" VerticalAlignment="Center"
+                           Foreground="{DynamicResource TextPrimary}" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto">
+            <Panel Grid.Column="0">
+
+                <!-- Side-by-side: both columns are items of ONE list. DiffPlex pads the panes to
+                     equal length, so row i is the same line on both sides and the single scroller
+                     keeps them in sync by construction — no scroll-sync code needed. -->
+                <ListBox x:Name="SideBySideList" Classes="diff-list" IsVisible="{Binding IsSideBySide}"
+                         ItemsSource="{Binding SideBySideRows}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.DataTemplates>
+                        <DataTemplate DataType="vm:SideBySideRowViewModel">
+                            <Grid ColumnDefinitions="*,1,*">
+                                <ContentControl Grid.Column="0" Content="{Binding Old}"
+                                                ContentTemplate="{StaticResource DiffLineTemplate}" />
+                                <Border Grid.Column="1" Background="{DynamicResource BorderColor}" />
+                                <ContentControl Grid.Column="2" Content="{Binding New}"
+                                                ContentTemplate="{StaticResource DiffLineTemplate}" />
+                            </Grid>
+                        </DataTemplate>
+                        <DataTemplate DataType="vm:CollapsedRegionViewModel">
+                            <Button Classes="collapsed-region" Content="{Binding Label}"
+                                    Command="{Binding $parent[ListBox].DataContext.ExpandRegionCommand}"
+                                    CommandParameter="{Binding}" />
+                        </DataTemplate>
+                    </ListBox.DataTemplates>
+                </ListBox>
+
+                <!-- Unified -->
+                <ListBox x:Name="UnifiedList" Classes="diff-list" IsVisible="{Binding IsUnified}"
+                         ItemsSource="{Binding UnifiedRows}"
+                         ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.DataTemplates>
+                        <DataTemplate DataType="vm:DiffLineRowViewModel">
+                            <Border Classes="diff-line"
+                                    Classes.added="{Binding IsAdded}"
+                                    Classes.removed="{Binding IsRemoved}"
+                                    Classes.changed="{Binding IsChanged}">
+                                <Grid ColumnDefinitions="Auto,Auto,Auto,*">
+                                    <TextBlock Grid.Column="0" Classes="diff-lineno" Text="{Binding OldLineNumber}" />
+                                    <TextBlock Grid.Column="1" Classes="diff-lineno" Text="{Binding NewLineNumber}" />
+                                    <TextBlock Grid.Column="2" Classes="diff-marker"
+                                               Classes.added="{Binding IsAdded}"
+                                               Classes.removed="{Binding IsRemoved}"
+                                               Classes.changed="{Binding IsChanged}"
+                                               Text="{Binding Marker}" />
+                                    <TextBlock Grid.Column="3" Classes="diff-text" TextWrapping="Wrap"
+                                               helpers:DiffInlineBuilder.Segments="{Binding Segments}" />
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                        <DataTemplate DataType="vm:CollapsedRegionViewModel">
+                            <Button Classes="collapsed-region" Content="{Binding Label}"
+                                    Command="{Binding $parent[ListBox].DataContext.ExpandRegionCommand}"
+                                    CommandParameter="{Binding}" />
+                        </DataTemplate>
+                    </ListBox.DataTemplates>
+                </ListBox>
+
+                <!-- Empty state sits on top so it covers whichever list is active -->
+                <Border IsVisible="{Binding IsIdentical}" Background="{DynamicResource AppBackground}">
+                    <StackPanel Spacing="10" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <materialIcons:MaterialIcon Kind="CheckCircleOutline" Width="34" Height="34"
+                                                    HorizontalAlignment="Center"
+                                                    Foreground="{DynamicResource SuccessColor}" />
+                        <TextBlock Text="{DynamicResource DiffNoChanges}" FontSize="14"
+                                   HorizontalAlignment="Center" Foreground="{DynamicResource TextSecondary}" />
+                    </StackPanel>
+                </Border>
+            </Panel>
+
+            <!-- Minimap: change markers down the full height of the document; drawn in code-behind
+                 because marker offsets depend on the control's rendered height. -->
+            <Border Grid.Column="1" Width="14" IsVisible="{Binding HasChanges}"
+                    Background="{DynamicResource ElevatedBackground}"
+                    BorderBrush="{DynamicResource BorderColor}" BorderThickness="1,0,0,0"
+                    ToolTip.Tip="{DynamicResource DiffMinimapTip}">
+                <Canvas x:Name="Minimap" Background="Transparent" ClipToBounds="True" />
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
