@@ -39,6 +39,9 @@
 							Content="{materialIcons:MaterialIconExt Kind=HelpCircleOutline}" Classes="toolbar-btn"
 							Click="OnStartTourClick"
 							ToolTip.Tip="{DynamicResource TourHelpTip}" FontSize="16" />
+					<Button Content="{materialIcons:MaterialIconExt Kind=FileCompare}" Classes="toolbar-btn"
+							Command="{Binding ShowJsonComparerCommand}"
+							ToolTip.Tip="{DynamicResource ComparerTip}" FontSize="16" />
 					<Button cl:Coachmark.Id="releasesBtn"
 							Content="{materialIcons:MaterialIconExt Kind=TagMultipleOutline}" Classes="toolbar-btn"
 							Command="{Binding ShowReleasesCommand}"
