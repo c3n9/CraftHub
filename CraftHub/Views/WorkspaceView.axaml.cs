@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 using Avalonia;
@@ -44,14 +45,10 @@ public partial class WorkspaceView : UserControl
     private Button? _jsonErrorButton;
     private Button? _jsonFindButton;
 
+
     // Guards the two-way sync between the editor and WorkspaceViewModel.RawJsonText
     // so an echo from one side does not bounce back and re-trigger the other.
     private bool _suppressEditorSync;
-
-    // JSON highlighting: one definition per theme (each tuned for that theme's editor
-    // background), loaded once and shared by every tab.
-    private static IHighlightingDefinition? _jsonHighlightingLight;
-    private static IHighlightingDefinition? _jsonHighlightingDark;
 
     // Column pin icon + header background, keyed by column, so their visual (pinned/unpinned)
     // state can be refreshed after a toggle or a reorder without rebuilding the whole header.
@@ -171,35 +168,7 @@ public partial class WorkspaceView : UserControl
     private void ApplyJsonSyntaxTheme()
     {
         if (_jsonEditor == null) return;
-        var isDark = Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
-        _jsonEditor.SyntaxHighlighting = GetJsonHighlighting(isDark);
-    }
-
-    private static IHighlightingDefinition? GetJsonHighlighting(bool dark)
-    {
-        if (dark)
-        {
-            _jsonHighlightingDark ??= LoadJsonHighlighting("JsonHighlighting.Dark.xshd");
-            return _jsonHighlightingDark;
-        }
-
-        _jsonHighlightingLight ??= LoadJsonHighlighting("JsonHighlighting.Light.xshd");
-        return _jsonHighlightingLight;
-    }
-
-    private static IHighlightingDefinition? LoadJsonHighlighting(string fileName)
-    {
-        try
-        {
-            using var stream = AssetLoader.Open(new Uri($"avares://CraftHub/Resources/{fileName}"));
-            using var reader = XmlReader.Create(stream);
-            return HighlightingLoader.Load(reader, HighlightingManager.Instance);
-        }
-        catch
-        {
-            // Fall back to AvaloniaEdit's built-in JSON definition if the bundled one fails to load.
-            return HighlightingManager.Instance.GetDefinition("Json");
-        }
+        _jsonEditor.SyntaxHighlighting = JsonHighlightingHelper.ForCurrentTheme();
     }
 
     // Editor -> view-model
