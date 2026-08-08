@@ -1,0 +1,107 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftHub.ViewModels"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="CraftHub.Views.JsonDiffView"
+        x:DataType="vm:JsonDiffViewModel"
+        Title="{Binding Title}"
+        Width="820" Height="640"
+        MinWidth="560" MinHeight="360"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackground}">
+
+    <Window.Styles>
+        <Style Selector="Border.diff-line">
+            <Setter Property="Padding" Value="6,1" />
+        </Style>
+        <Style Selector="Border.diff-line.added">
+            <Setter Property="Background" Value="{DynamicResource DiffAddedBackground}" />
+        </Style>
+        <Style Selector="Border.diff-line.removed">
+            <Setter Property="Background" Value="{DynamicResource DiffRemovedBackground}" />
+        </Style>
+        <Style Selector="TextBlock.diff-marker.added">
+            <Setter Property="Foreground" Value="{DynamicResource SuccessColor}" />
+        </Style>
+        <Style Selector="TextBlock.diff-marker.removed">
+            <Setter Property="Foreground" Value="{DynamicResource DangerColor}" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="20,16">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+                <materialIcons:MaterialIcon Kind="FileCompare" Width="20" Height="20"
+                                             VerticalAlignment="Center"
+                                             Foreground="{DynamicResource AccentPrimary}" />
+                <TextBlock Text="{Binding Title}" FontSize="16" FontWeight="SemiBold"
+                           Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+
+        <!-- Diff body -->
+        <Border Grid.Row="1" Background="{DynamicResource ElevatedBackground}" Margin="10" CornerRadius="8"
+                ClipToBounds="True">
+            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Lines}" Margin="0,6">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="vm:DiffLineViewModel">
+                            <Border Classes="diff-line" Classes.added="{Binding IsAdded}"
+                                    Classes.removed="{Binding IsRemoved}">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <TextBlock Text="{Binding Marker}" Classes="diff-marker"
+                                               Classes.added="{Binding IsAdded}"
+                                               Classes.removed="{Binding IsRemoved}"
+                                               FontFamily="Cascadia Code,Cascadia Mono,Consolas,Courier New,monospace"
+                                               FontWeight="Bold" Width="14" />
+                                    <TextBlock Text="{Binding Text}"
+                                               FontFamily="Cascadia Code,Cascadia Mono,Consolas,Courier New,monospace"
+                                               FontSize="13"
+                                               Foreground="{DynamicResource TextPrimary}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="{DynamicResource SurfaceBackground}" Padding="20,14">
+            <Grid ColumnDefinitions="*,Auto">
+                <CheckBox Grid.Column="0" Content="{DynamicResource DiffDontShowAgain}"
+                           IsChecked="{Binding DontShowAgain}"
+                           IsVisible="{Binding IsConfirmMode}"
+                           VerticalAlignment="Center" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                    <Button Classes="tab-btn"
+                            Content="{DynamicResource BtnCancel}"
+                            Height="34" Width="110"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Command="{Binding CancelCommand}"
+                            IsVisible="{Binding IsConfirmMode}" />
+                    <Button Classes="accent-btn"
+                            Content="{DynamicResource BtnSave}"
+                            Height="34" Width="110"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Command="{Binding ProceedCommand}"
+                            IsVisible="{Binding IsConfirmMode}" />
+                    <Button Classes="accent-btn"
+                            Content="{DynamicResource BtnClose}"
+                            Height="34" Width="110"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Command="{Binding ProceedCommand}"
+                            IsVisible="{Binding !IsConfirmMode}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
