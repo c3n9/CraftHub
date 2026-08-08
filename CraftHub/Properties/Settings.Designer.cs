@@ -105,5 +105,77 @@ namespace CraftHub.Properties {
                 this["FileExplorerJsonOnly"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool ShowDiffOnSave {
+            get {
+                return ((bool)(this["ShowDiffOnSave"]));
+            }
+            set {
+                this["ShowDiffOnSave"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double JsonChangesWindowWidth {
+            get {
+                return ((double)(this["JsonChangesWindowWidth"]));
+            }
+            set {
+                this["JsonChangesWindowWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double JsonChangesWindowHeight {
+            get {
+                return ((double)(this["JsonChangesWindowHeight"]));
+            }
+            set {
+                this["JsonChangesWindowHeight"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int JsonChangesWindowX {
+            get {
+                return ((int)(this["JsonChangesWindowX"]));
+            }
+            set {
+                this["JsonChangesWindowX"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int JsonChangesWindowY {
+            get {
+                return ((int)(this["JsonChangesWindowY"]));
+            }
+            set {
+                this["JsonChangesWindowY"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool JsonChangesWindowMaximized {
+            get {
+                return ((bool)(this["JsonChangesWindowMaximized"]));
+            }
+            set {
+                this["JsonChangesWindowMaximized"] = value;
+            }
+        }
     }
 }
