@@ -27,6 +27,18 @@
     <SolidColorBrush x:Key="DangerColor" Color="#EF4444" />
     <SolidColorBrush x:Key="DangerHover" Color="#F87171" />
 
+    <!-- Diff view (git-desktop style line tints; the *Word brushes are the denser within-line
+         highlight that has to stay legible on top of the line-level tint) -->
+    <SolidColorBrush x:Key="DiffAddedBackground" Color="#10B981" Opacity="0.18" />
+    <SolidColorBrush x:Key="DiffRemovedBackground" Color="#EF4444" Opacity="0.18" />
+    <SolidColorBrush x:Key="DiffChangedBackground" Color="#F59E0B" Opacity="0.18" />
+    <SolidColorBrush x:Key="DiffAddedWordBackground" Color="#10B981" Opacity="0.40" />
+    <SolidColorBrush x:Key="DiffRemovedWordBackground" Color="#EF4444" Opacity="0.40" />
+    <SolidColorBrush x:Key="DiffChangedWordBackground" Color="#F59E0B" Opacity="0.42" />
+    <SolidColorBrush x:Key="DiffGutterAdded" Color="#10B981" />
+    <SolidColorBrush x:Key="DiffGutterRemoved" Color="#EF4444" />
+    <SolidColorBrush x:Key="DiffGutterChanged" Color="#F59E0B" />
+
     <!-- Borders -->
     <SolidColorBrush x:Key="BorderColor" Color="#3F3F4E" />
     <SolidColorBrush x:Key="BorderLight" Color="#282838" />
