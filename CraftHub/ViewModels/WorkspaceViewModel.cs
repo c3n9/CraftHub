@@ -1098,7 +1098,12 @@ public partial class WorkspaceViewModel : ViewModelBase
         var baseline = _baselineJsonText ?? string.Empty;
         if (baseline == current) return true; // nothing actually changed, nothing to confirm
 
-        var result = await _dialogService.ShowJsonDiffAsync(Localizer.Get("SaveDiffTitle"), baseline, current, isConfirm: true);
+        var result = await _dialogService.ShowJsonDiffAsync(
+            Localizer.Get("SaveDiffTitle"),
+            Localizer.Get("DiffLabelSaved"),
+            Localizer.Get("DiffLabelCurrent"),
+            baseline,
+            current);
         if (result.DontShowAgain)
         {
             global::CraftHub.Properties.Settings.Default.ShowDiffOnSave = false;
