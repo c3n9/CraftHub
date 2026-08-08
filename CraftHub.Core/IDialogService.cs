@@ -46,7 +46,12 @@ public interface IDialogService
     /// Save/Cancel + a "don't show again" checkbox (used as a gate before writing to disk);
     /// otherwise it's a single Close button and the result is informational only.
     /// </summary>
-    Task<JsonDiffResult> ShowJsonDiffAsync(string title, string oldText, string newText, bool isConfirm);
+    /// <summary>
+    /// Shows the diff window as a modal gate before writing to disk: the same side-by-side/unified
+    /// and structural views as <see cref="ShowJsonChangesWindowAsync"/>, plus Save/Cancel and a
+    /// "don't show again" opt-out. Cancelling (or closing the window) reports Proceed = false.
+    /// </summary>
+    Task<JsonDiffResult> ShowJsonDiffAsync(string title, string oldLabel, string newLabel, string oldText, string newText);
 
     /// <summary>
     /// Opens the full "show changes" window comparing <paramref name="oldText"/> (last saved) with
