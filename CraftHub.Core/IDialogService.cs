@@ -39,4 +39,19 @@ public interface IDialogService
 
     /// <summary>Show the releases (changelog) window listing all GitHub releases.</summary>
     Task ShowReleasesDialogAsync(string? currentVersion);
+
+    /// <summary>
+    /// Shows a git-desktop-style line diff between <paramref name="oldText"/> and
+    /// <paramref name="newText"/>. When <paramref name="isConfirm"/> is true the window shows
+    /// Save/Cancel + a "don't show again" checkbox (used as a gate before writing to disk);
+    /// otherwise it's a single Close button and the result is informational only.
+    /// </summary>
+    Task<JsonDiffResult> ShowJsonDiffAsync(string title, string oldText, string newText, bool isConfirm);
+
+    /// <summary>
+    /// Opens the full "show changes" window comparing <paramref name="oldText"/> (last saved) with
+    /// <paramref name="newText"/> (current). Non-modal: the caller keeps working while it's open,
+    /// so this returns as soon as the window is shown, not when it closes.
+    /// </summary>
+    Task ShowJsonChangesWindowAsync(string title, string oldLabel, string newLabel, string oldText, string newText);
 }
