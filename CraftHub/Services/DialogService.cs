@@ -18,10 +18,12 @@ namespace CraftHub.Services;
 public class DialogService : IDialogService
 {
     private readonly NotificationService _notificationService;
+    private readonly IFileDialogService _fileDialogService;
 
-    public DialogService(NotificationService notificationService)
+    public DialogService(NotificationService notificationService, IFileDialogService fileDialogService)
     {
         _notificationService = notificationService;
+        _fileDialogService = fileDialogService;
     }
     private static Window? GetMainWindow()
     {
@@ -62,6 +64,37 @@ public class DialogService : IDialogService
 
         var dialog = new ReleasesView { DataContext = new ReleasesViewModel(currentVersion) };
         await dialog.ShowDialog(window);
+    }
+
+    public async Task<JsonDiffResult> ShowJsonDiffAsync(string title, string oldText, string newText, bool isConfirm)
+    {
+        var window = GetActiveWindow();
+        if (window == null) return new JsonDiffResult(true, false);
+
+        // Myers-diff over a huge file is real work — keep it off the UI thread.
+        var diff = await Task.Run(() =>
+            DiffPlex.DiffBuilder.InlineDiffBuilder.Diff(oldText ?? string.Empty, newText ?? string.Empty));
+
+        var vm = new JsonDiffViewModel(title, diff, isConfirm);
+        var dialog = new JsonDiffView { DataContext = vm };
+
+        var result = await dialog.ShowDialog<JsonDiffResult?>(window);
+        return result ?? new JsonDiffResult(!isConfirm, false);
+    }
+
+    public async Task ShowJsonChangesWindowAsync(
+        string title, string oldLabel, string newLabel, string oldText, string newText)
+    {
+        var owner = GetActiveWindow();
+        if (owner == null) return;
+
+        var vm = new JsonChangesWindowViewModel(title, oldLabel, newLabel, this, _fileDialogService);
+        var window = new JsonChangesWindow { DataContext = vm };
+
+        // Compute the diff before showing so the window never flashes empty, then Show (not
+        // ShowDialog) so the editor stays usable alongside it.
+        await vm.LoadAsync(oldText, newText);
+        window.Show(owner);
     }
 
     public async Task ShowMessageAsync(string title, string message)
