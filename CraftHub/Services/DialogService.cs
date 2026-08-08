@@ -66,20 +66,21 @@ public class DialogService : IDialogService
         await dialog.ShowDialog(window);
     }
 
-    public async Task<JsonDiffResult> ShowJsonDiffAsync(string title, string oldText, string newText, bool isConfirm)
+    public async Task<JsonDiffResult> ShowJsonDiffAsync(
+        string title, string oldLabel, string newLabel, string oldText, string newText)
     {
-        var window = GetActiveWindow();
-        if (window == null) return new JsonDiffResult(true, false);
+        var owner = GetActiveWindow();
+        if (owner == null) return new JsonDiffResult(true, false);
 
-        // Myers-diff over a huge file is real work — keep it off the UI thread.
-        var diff = await Task.Run(() =>
-            DiffPlex.DiffBuilder.InlineDiffBuilder.Diff(oldText ?? string.Empty, newText ?? string.Empty));
+        var vm = new JsonChangesWindowViewModel(
+            title, oldLabel, newLabel, this, _fileDialogService, isConfirmMode: true);
+        var dialog = new JsonChangesWindow { DataContext = vm };
 
-        var vm = new JsonDiffViewModel(title, diff, isConfirm);
-        var dialog = new JsonDiffView { DataContext = vm };
+        await vm.LoadAsync(oldText, newText);
 
-        var result = await dialog.ShowDialog<JsonDiffResult?>(window);
-        return result ?? new JsonDiffResult(!isConfirm, false);
+        // Closing via the window chrome (no explicit choice) must not silently save.
+        var result = await dialog.ShowDialog<JsonDiffResult?>(owner);
+        return result ?? new JsonDiffResult(false, false);
     }
 
     public async Task ShowJsonChangesWindowAsync(
