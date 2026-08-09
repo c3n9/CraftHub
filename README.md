@@ -1,7 +1,3 @@
-<img width="1582" height="971" alt="Снимок экрана — 2026-08-09 в 14 42 22" src="https://github.com/user-attachments/assets/5b60d42a-4f4b-492a-9ece-18bf4dd23f25" /><p align="center">
-    <img width="1012" height="540" alt="Frame 47983" src="https://github.com/user-attachments/assets/7b1186b4-3be1-45a6-906f-d2fef00751d9" alt="CraftHub banner" />
-</p>
-
 **CraftHub provides an intuitive platform for uploading existing programming language classes or creating new ones from scratch. With the ability to save and manage your custom classes, as well as effortlessly generate and export JSON files.**
 
 [**→ Install from VS Code Marketplace**](https://marketplace.visualstudio.com/items?itemName=c3n9.crafthub)
