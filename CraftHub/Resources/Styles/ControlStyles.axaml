@@ -6,6 +6,23 @@
         <Setter Property="FontSize" Value="14" />
     </Style>
 
+    <!-- Fluent's default TabItem is sized for a page-level nav (~24px headers), which is far too
+         heavy for the in-window tabs used by the diff and comparer windows. -->
+    <Style Selector="TabItem">
+        <Setter Property="FontSize" Value="13" />
+        <Setter Property="FontWeight" Value="Normal" />
+        <!-- Fluent's template pins the selected-tab indicator to the bottom edge; squeezing the
+             item below this leaves the indicator striking through the label. -->
+        <Setter Property="MinHeight" Value="36" />
+        <Setter Property="Padding" Value="14,6" />
+        <Setter Property="Margin" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+    </Style>
+    <Style Selector="TabItem:selected">
+        <Setter Property="FontWeight" Value="SemiBold" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+    </Style>
+
     <!-- JSON editor error banner — style-based to avoid DynamicResource init issues -->
     <Style Selector="Border.json-error-banner">
         <Setter Property="Background" Value="{DynamicResource ElevatedBackground}" />
