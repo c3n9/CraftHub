@@ -18,6 +18,13 @@ namespace CraftHub.Domain.Models
     {
         public required string Path { get; init; }
 
+        /// <summary>
+        /// RFC 6901 JSON Pointer for this node (<c>/users/0/name</c>), carried alongside the display
+        /// <see cref="Path"/> because deriving one from the other is lossy — a key containing
+        /// <c>.</c> or <c>[</c> is ambiguous in the display form. Required for JSON Patch export.
+        /// </summary>
+        public string Pointer { get; init; } = string.Empty;
+
         /// <summary>Last path segment (property name or <c>[i]</c>) — what a tree view shows per row.</summary>
         public required string Name { get; init; }
 
