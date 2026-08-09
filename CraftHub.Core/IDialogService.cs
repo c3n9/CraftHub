@@ -59,4 +59,11 @@ public interface IDialogService
     /// so this returns as soon as the window is shown, not when it closes.
     /// </summary>
     Task ShowJsonChangesWindowAsync(string title, string oldLabel, string newLabel, string oldText, string newText);
+
+    /// <summary>
+    /// Opens the standalone JSON comparer. Non-modal, like the changes window. The two delegates
+    /// let its quick-fill buttons pull the active editor tab's current and last-saved text without
+    /// this service knowing about workspaces.
+    /// </summary>
+    Task ShowJsonComparerAsync(Func<Task<string?>>? getCurrentDocument, Func<Task<string?>>? getBaselineDocument);
 }
