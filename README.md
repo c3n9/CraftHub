@@ -23,6 +23,12 @@
    - CraftHub simplifies the process of working with JSON files.
    - Easily fill in the required data within the application, and CraftHub will generate the corresponding JSON representation.
    - With just a few clicks, you can export the JSON file, ready to be utilized in your projects.
+4. **JSON Comparison**
+   - **Changes** shows what you edited in the current document against its last saved version — available in both table and JSON mode, and offered for confirmation right before saving.
+   - The standalone **JSON Comparer** compares 2 to 6 documents at once: paste text, open files or drop them in. Every panel is compared against the first one, and each pair gets its own result tab.
+   - Diffs are shown side by side or unified, with word-level highlighting, change navigation (F7 / F8), a minimap and collapsed runs of unchanged lines — plus a structural tab listing exactly which JSON paths were added, removed or changed.
+   - Tune what counts as a difference: ignore key order, array element order, letter case, null and empty values, or specific paths such as `$.updatedAt`.
+   - Export any comparison as a unified `.patch`, a JSON Patch (RFC 6902), or a Markdown / HTML report.
 
 **Start your coding adventure with CraftHub today, and empower yourself with a seamless, personalized experience!**
 
