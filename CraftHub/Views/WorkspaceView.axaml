@@ -172,6 +172,7 @@
                     <!-- Available in both table and JSON mode: the diff is taken from the document,
                          not from whichever editor happens to be showing it. -->
                     <Button Classes="toolbar-btn"
+                            cl:Coachmark.Id="wsShowChanges"
                             Command="{Binding ShowChangesCommand}"
                             ToolTip.Tip="{DynamicResource ShowChangesTip}">
                         <StackPanel Orientation="Horizontal" Spacing="6">

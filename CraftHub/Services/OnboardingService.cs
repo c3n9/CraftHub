@@ -1,6 +1,9 @@
+using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Threading;
 using Avalonia.VisualTree;
 using Coachlight.Avalonia;
 using Coachlight.Avalonia.Building;
@@ -33,7 +36,12 @@ public sealed class OnboardingService : IOnboardingService
     // Bumping this id re-shows the tour to everyone (e.g. after a major UI change).
     // v2 adds the JSON editor, recent folders and releases steps.
     // v3 adds undo history, the search filter toggle, and Find & Replace.
-    private const string AppTourId = "app-overview-v3";
+    // v4 adds the "show changes" button and the JSON comparer, which the tour opens and closes
+    // for the user so the window isn't just described in the abstract.
+    private const string AppTourId = "app-overview-v4";
+
+    /// <summary>Separate id: this run is a hand-off from the main tour, not a step inside it.</summary>
+    private const string ComparerTourId = "comparer-overview-v1";
 
     // JsonProgressStore persists completion to a JSON file under the OS application-data folder.
     private readonly IProgressStore _store = new JsonProgressStore();
@@ -43,14 +51,69 @@ public sealed class OnboardingService : IOnboardingService
         // The anchor is the main window; its DataContext drives the file-explorer step's
         // reveal/restore. A null vm just means those steps skip the toggle (still shown).
         var vm = (anchor as Control)?.DataContext as MainWindowViewModel;
-        anchor.StartTour(BuildAppTour(vm, anchor), _store, force);
+        // The comparer is a separate window and Coachlight's overlay is per-window, so a step in
+        // this tour cannot point inside it. Instead the tour hands off at the end: it opens the
+        // comparer, walks through it with its own tour, and closes it again. Only on Done — a user
+        // who skips the tour shouldn't get a window opened at them.
+        var tour = BuildAppTour(vm, anchor, onCompleted: () => ShowComparerTour(vm));
+
+        anchor.StartTour(tour, _store, force);
     }
+
+    /// <summary>
+    /// Opens the comparer, runs a short tour anchored to that window, then closes it — so the
+    /// feature is demonstrated rather than just described, and the user is left where they started.
+    /// </summary>
+    private void ShowComparerTour(MainWindowViewModel? vm)
+    {
+        if (vm == null) return;
+        vm.ShowJsonComparerCommand.Execute(null);
+
+        // The window exists immediately but its visual tree isn't built until it has been laid out,
+        // so the coachmark targets can only resolve a dispatcher pass later.
+        Dispatcher.UIThread.Post(() =>
+        {
+            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+                return;
+
+            var window = desktop.Windows.OfType<JsonCompareWindow>().LastOrDefault();
+            if (window == null) return;
+
+            var tour = BuildComparerTour(window.Close);
+
+            // force: this tour is reached only by finishing the main one, which already gates itself.
+            window.StartTour(tour, _store, force: true);
+        }, DispatcherPriority.Loaded);
+    }
+
+    private static Tour BuildComparerTour(Action onFinished) =>
+        TourBuilder.Create(ComparerTourId)
+            .OnCompleted(onFinished)
+            .OnSkipped(onFinished)
+            .Labels(new TourLabels
+            {
+                Skip = Localizer.Get("TourSkip"),
+                Back = Localizer.Get("TourBack"),
+                Next = Localizer.Get("TourNext"),
+                Done = Localizer.Get("TourDone"),
+            })
+            .Coachmark("cmpPanels", s => s
+                .Placement(Side.Bottom)
+                .Interactive(false)
+                .Title(Localizer.Get("TourCmpPanelsTitle"))
+                .Text(Localizer.Get("TourCmpPanelsText")))
+            .Coachmark("cmpCompare", s => s
+                .Placement(Side.Bottom)
+                .Interactive(false)
+                .Title(Localizer.Get("TourCmpCompareTitle"))
+                .Text(Localizer.Get("TourCmpCompareText")))
+            .Build();
 
     // A single long tour over the whole app: welcome → workspace editor → JSON editor →
     // file explorer → window chrome → help. Every target is present on startup (the app always
     // opens with one table-mode workspace), so all coachmarks resolve. Strings are pulled live
     // so the tour follows the current language.
-    private static Tour BuildAppTour(MainWindowViewModel? vm, Visual anchor)
+    private static Tour BuildAppTour(MainWindowViewModel? vm, Visual anchor, Action onCompleted)
     {
         Control? ActiveWs() =>
             anchor.GetVisualDescendants()
@@ -81,6 +144,7 @@ public sealed class OnboardingService : IOnboardingService
 
         return
             TourBuilder.Create(AppTourId)
+                .OnCompleted(onCompleted)
                 .Labels(new TourLabels
                 {
                     Skip = Localizer.Get("TourSkip"),
@@ -153,6 +217,11 @@ public sealed class OnboardingService : IOnboardingService
                     .Interactive(false)
                     .Title(Localizer.Get("TourReplaceTitle"))
                     .Text(Localizer.Get("TourReplaceText")))
+                .Coachmark(() => Mark("wsShowChanges"), s => s
+                    .Placement(Side.Bottom)
+                    .Interactive(false)
+                    .Title(Localizer.Get("TourShowChangesTitle"))
+                    .Text(Localizer.Get("TourShowChangesText")))
                 .Coachmark(() => Mark("wsSwitchJson"), s => s
                     .Placement(Side.Bottom)
                     .Interactive(false)
@@ -243,6 +312,11 @@ public sealed class OnboardingService : IOnboardingService
                     .Interactive(false)
                     .Title(Localizer.Get("TourLanguageTitle"))
                     .Text(Localizer.Get("TourLanguageText")))
+                .Coachmark("comparerBtn", s => s
+                    .Placement(Side.Bottom)
+                    .Interactive(false)
+                    .Title(Localizer.Get("TourComparerTitle"))
+                    .Text(Localizer.Get("TourComparerText")))
                 .Coachmark("releasesBtn", s => s
                     .Placement(Side.Bottom)
                     .Interactive(false)

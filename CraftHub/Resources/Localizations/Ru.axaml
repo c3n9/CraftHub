@@ -355,6 +355,14 @@
     <x:String x:Key="TourFilterText">Включи, чтобы скрывать все несовпадающие строки, а не просто подсвечивать их.</x:String>
     <x:String x:Key="TourReplaceTitle">Найти и заменить</x:String>
     <x:String x:Key="TourReplaceText">Замена значений по всей таблице — по одному совпадению или сразу все.</x:String>
+    <x:String x:Key="TourShowChangesTitle">Просмотр своих правок</x:String>
+    <x:String x:Key="TourShowChangesText">Открывает сравнение документа с последней сохранённой версией: две колонки, подсветка изменённых фрагментов, переход по изменениям и экспорт в патч или отчёт.</x:String>
+    <x:String x:Key="TourCmpPanelsTitle">Панели ввода</x:String>
+    <x:String x:Key="TourCmpPanelsText">Вставьте JSON в панель, откройте файл или перетащите его. Начинается с двух панелей, можно добавить до шести — самая левая является эталоном, она помечена бейджем.</x:String>
+    <x:String x:Key="TourCmpCompareTitle">Запуск сравнения</x:String>
+    <x:String x:Key="TourCmpCompareText">Становится доступной, когда хотя бы в двух панелях валидный JSON. Каждая панель сравнивается с первой, и на каждый результат появляется своя вкладка ниже. Закрыв это окно, вы вернётесь в редактор.</x:String>
+    <x:String x:Key="TourComparerTitle">Сравнение JSON</x:String>
+    <x:String x:Key="TourComparerText">Сравнивает от двух до шести JSON-документов между собой, независимо от редактора: можно вставить текст, открыть файлы или перетащить их. Каждая панель сравнивается с первой.</x:String>
     <x:String x:Key="TourSwitchJsonTitle">Таблица / JSON</x:String>
     <x:String x:Key="TourSwitchJsonText">В любой момент переключайтесь на редактор чистого JSON и обратно.</x:String>
     <x:String x:Key="TourJsonEditorTitle">Редактор чистого JSON</x:String>

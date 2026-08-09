@@ -356,6 +356,14 @@
 	<x:String x:Key="TourFilterText">Toggle this to hide every row that doesn't match your search instead of just highlighting them.</x:String>
 	<x:String x:Key="TourReplaceTitle">Find &amp; Replace</x:String>
 	<x:String x:Key="TourReplaceText">Replace matching values across the whole table, one at a time or all at once.</x:String>
+	<x:String x:Key="TourShowChangesTitle">Review your edits</x:String>
+	<x:String x:Key="TourShowChangesText">Opens a side-by-side diff of the document against its last saved version — with word-level highlighting, change navigation and export to patch or a report.</x:String>
+	<x:String x:Key="TourCmpPanelsTitle">Input panels</x:String>
+	<x:String x:Key="TourCmpPanelsText">Paste JSON into a panel, open a file, or drop one in. Start with two panels and add up to six — the leftmost is the baseline, marked with a badge.</x:String>
+	<x:String x:Key="TourCmpCompareTitle">Run the comparison</x:String>
+	<x:String x:Key="TourCmpCompareText">Becomes available once at least two panels hold valid JSON. Every panel is compared against the first one, and each result gets its own tab below. Closing this window brings you back to the editor.</x:String>
+	<x:String x:Key="TourComparerTitle">JSON comparer</x:String>
+	<x:String x:Key="TourComparerText">Compares two to six JSON documents side by side, independently of the editor: paste text, open files or drop them in. Every panel is compared against the first one.</x:String>
 	<x:String x:Key="TourSwitchJsonTitle">Table / JSON view</x:String>
 	<x:String x:Key="TourSwitchJsonText">Switch to the raw JSON editor and back at any time.</x:String>
 	<x:String x:Key="TourJsonEditorTitle">Raw JSON editor</x:String>
