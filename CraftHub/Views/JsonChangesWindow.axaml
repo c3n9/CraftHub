@@ -39,12 +39,44 @@
                             <TextBlock Text="{DynamicResource DiffCopyBtn}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button Classes="toolbar-btn" Command="{Binding SaveAsPatchCommand}"
-                            ToolTip.Tip="{DynamicResource DiffSavePatchTip}">
+
+                    <!-- Four export formats is too many for the toolbar; a menu keeps the header
+                         readable and groups them by what they're for. -->
+                    <Button Classes="toolbar-btn" ToolTip.Tip="{DynamicResource DiffExportTip}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <materialIcons:MaterialIcon Kind="FileDocumentOutline" Width="16" Height="16" />
-                            <TextBlock Text="{DynamicResource DiffSavePatchBtn}" VerticalAlignment="Center" />
+                            <materialIcons:MaterialIcon Kind="Export" Width="16" Height="16" />
+                            <TextBlock Text="{DynamicResource DiffExportBtn}" VerticalAlignment="Center" />
+                            <materialIcons:MaterialIcon Kind="ChevronDown" Width="14" Height="14" />
                         </StackPanel>
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="{DynamicResource DiffSavePatchBtn}"
+                                          Command="{Binding SaveAsPatchCommand}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="FileDocumentOutline" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{DynamicResource DiffSaveJsonPatchBtn}"
+                                          Command="{Binding SaveJsonPatchCommand}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="CodeJson" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
+                                <MenuItem Header="{DynamicResource DiffSaveMarkdownBtn}"
+                                          Command="{Binding SaveMarkdownReportCommand}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="LanguageMarkdownOutline" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{DynamicResource DiffSaveHtmlBtn}"
+                                          Command="{Binding SaveHtmlReportCommand}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="LanguageHtml5" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </MenuFlyout>
+                        </Button.Flyout>
                     </Button>
                 </StackPanel>
             </Grid>
