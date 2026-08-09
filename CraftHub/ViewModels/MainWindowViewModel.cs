@@ -216,8 +216,13 @@ public partial class MainWindowViewModel : ViewModelBase
     // Opens the standalone JSON Comparer window. Wired up in a later step; the toolbar button
     // stays bound to this command so it doesn't need re-pointing then.
     [RelayCommand]
-    private void ShowJsonComparer()
-        => _notificationService.Publish(NotificationType.Info, Localizer.Get("ComingSoonMsg"));
+    private Task ShowJsonComparer()
+        => _dialogService.ShowJsonComparerAsync(
+            // Resolved at click time, so the buttons always target whichever tab is active then.
+            getCurrentDocument: async () => SelectedWorkspace == null
+                ? null
+                : await SelectedWorkspace.GetCurrentCanonicalJsonAsync(),
+            getBaselineDocument: () => Task.FromResult(SelectedWorkspace?.BaselineJsonSnapshot));
 
     [RelayCommand]
     private async void GoToGitHubRepo()
