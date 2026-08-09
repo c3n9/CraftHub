@@ -1,0 +1,149 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:CraftHub.ViewModels"
+             xmlns:ae="using:AvaloniaEdit"
+             xmlns:views="using:CraftHub.Views"
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="CraftHub.Views.JsonComparePanelView"
+             x:DataType="vm:ComparePanelViewModel"
+             DragDrop.AllowDrop="True">
+
+    <UserControl.Styles>
+        <Style Selector="Button.panel-icon">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource TextMuted}" />
+        </Style>
+        <Style Selector="Button.panel-icon:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentHover}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+        </Style>
+    </UserControl.Styles>
+
+    <Border CornerRadius="10" Background="{DynamicResource BorderColor}" Padding="1" Margin="2">
+        <Border x:Name="PanelSurface" CornerRadius="9"
+                Background="{DynamicResource ElevatedBackground}" ClipToBounds="True">
+            <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+                <!-- Label + reorder/close -->
+                <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="8,8,8,4">
+                    <!-- Marks the pane every other one is measured against; follows reordering. -->
+                    <Border Grid.Column="0" IsVisible="{Binding IsBaseline}"
+                            Background="{DynamicResource DiffAddedBackground}"
+                            CornerRadius="4" Padding="6,2" Margin="0,0,6,0"
+                            VerticalAlignment="Center"
+                            ToolTip.Tip="{DynamicResource ComparerBaselineTip}">
+                        <TextBlock Text="{DynamicResource ComparerBaselineBadge}" FontSize="10.5"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource SuccessColor}" />
+                    </Border>
+
+                    <TextBox Grid.Column="1" Classes="panel-label"
+                             Text="{Binding Label}" FontSize="12" FontWeight="SemiBold"
+                             ToolTip.Tip="{DynamicResource ComparerRenameTip}" />
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" Margin="8,0,0,0">
+                        <Button Classes="panel-icon" Command="{Binding MoveLeftCommand}"
+                                IsEnabled="{Binding CanMoveLeft}"
+                                ToolTip.Tip="{DynamicResource ComparerMoveLeft}">
+                            <materialIcons:MaterialIcon Kind="ChevronLeft" Width="15" Height="15" />
+                        </Button>
+                        <Button Classes="panel-icon" Command="{Binding MoveRightCommand}"
+                                IsEnabled="{Binding CanMoveRight}"
+                                ToolTip.Tip="{DynamicResource ComparerMoveRight}">
+                            <materialIcons:MaterialIcon Kind="ChevronRight" Width="15" Height="15" />
+                        </Button>
+                        <Button Classes="panel-icon" Command="{Binding CloseCommand}"
+                                IsVisible="{Binding CanClose}"
+                                ToolTip.Tip="{DynamicResource ComparerClosePanel}">
+                            <materialIcons:MaterialIcon Kind="Close" Width="15" Height="15" />
+                        </Button>
+                    </StackPanel>
+                </Grid>
+
+                <!-- Input actions -->
+                <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="4" Margin="8,0,8,6">
+                    <Button Classes="panel-icon" Command="{Binding OpenFileCommand}"
+                            ToolTip.Tip="{DynamicResource ComparerLoadFile}">
+                        <materialIcons:MaterialIcon Kind="FileImportOutline" Width="15" Height="15" />
+                    </Button>
+                    <Button Classes="panel-icon" Command="{Binding PasteCommand}"
+                            ToolTip.Tip="{DynamicResource ComparerPaste}">
+                        <materialIcons:MaterialIcon Kind="ContentPaste" Width="15" Height="15" />
+                    </Button>
+                    <Button Classes="panel-icon" Command="{Binding FormatCommand}"
+                            ToolTip.Tip="{DynamicResource ComparerFormat}">
+                        <materialIcons:MaterialIcon Kind="CodeBraces" Width="15" Height="15" />
+                    </Button>
+                </StackPanel>
+
+                <Panel Grid.Row="2">
+                    <ae:TextEditor x:Name="Editor"
+                                   ShowLineNumbers="True"
+                                   WordWrap="False"
+                                   FontFamily="Cascadia Code,Cascadia Mono,Consolas,Menlo,Courier New,monospace"
+                                   FontSize="12.5"
+                                   Background="Transparent"
+                                   Foreground="{DynamicResource TextPrimary}"
+                                   LineNumbersForeground="{DynamicResource TextMuted}"
+                                   Padding="8,4"
+                                   HorizontalScrollBarVisibility="Auto"
+                                   VerticalScrollBarVisibility="Auto" />
+
+                    <!-- Watermark: AvaloniaEdit has no built-in one, so it's an overlay that hides
+                         as soon as anything is typed. IsHitTestVisible=False keeps clicks going
+                         through to the editor underneath. -->
+                    <TextBlock Text="{DynamicResource ComparePasteWatermark}"
+                               IsVisible="{Binding IsEmpty}"
+                               IsHitTestVisible="False"
+                               Margin="46,6,0,0" FontSize="12.5"
+                               Foreground="{DynamicResource TextMuted}" />
+
+                    <!-- Drop-zone highlight, toggled from the drag handlers -->
+                    <Border x:Name="DropOverlay" IsVisible="False"
+                            Background="{DynamicResource DiffAddedBackground}"
+                            BorderBrush="{DynamicResource AccentPrimary}" BorderThickness="2"
+                            CornerRadius="8" Margin="4">
+                        <StackPanel Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <materialIcons:MaterialIcon Kind="FileImportOutline" Width="26" Height="26"
+                                                        HorizontalAlignment="Center"
+                                                        Foreground="{DynamicResource AccentPrimary}" />
+                            <TextBlock Text="{DynamicResource ComparerDropHere}" FontSize="12"
+                                       HorizontalAlignment="Center"
+                                       Foreground="{DynamicResource TextPrimary}" />
+                        </StackPanel>
+                    </Border>
+
+                    <views:BusyOverlay IsActive="{Binding IsBusy}"
+                                       Message="{DynamicResource BusyLoadingFile}" />
+                </Panel>
+
+                <!-- Validity badge -->
+                <Border Grid.Row="3" Padding="8,6" Background="{DynamicResource SurfaceBackground}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <materialIcons:MaterialIcon Width="14" Height="14" VerticalAlignment="Center"
+                                                    Kind="CheckCircleOutline"
+                                                    IsVisible="{Binding IsValid}"
+                                                    Foreground="{DynamicResource SuccessColor}" />
+                        <materialIcons:MaterialIcon Width="14" Height="14" VerticalAlignment="Center"
+                                                    Kind="AlertCircleOutline"
+                                                    IsVisible="{Binding HasError}"
+                                                    Foreground="{DynamicResource DangerColor}" />
+                        <TextBlock Text="{DynamicResource ComparerValid}" FontSize="11.5"
+                                   VerticalAlignment="Center" IsVisible="{Binding IsValid}"
+                                   Foreground="{DynamicResource SuccessColor}" />
+                        <TextBlock Text="{Binding ErrorMessage}" FontSize="11.5"
+                                   VerticalAlignment="Center" IsVisible="{Binding HasError}"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip.Tip="{Binding ErrorMessage}"
+                                   Foreground="{DynamicResource DangerColor}" />
+                        <TextBlock Text="{DynamicResource ComparerEmpty}" FontSize="11.5"
+                                   VerticalAlignment="Center" IsVisible="{Binding IsEmpty}"
+                                   Foreground="{DynamicResource TextMuted}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Border>
+</UserControl>
