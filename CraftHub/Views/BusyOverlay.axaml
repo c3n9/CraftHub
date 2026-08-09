@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="CraftHub.Views.BusyOverlay"
+             x:Name="Root"
+             IsHitTestVisible="{Binding #Root.IsActive}">
+
+    <!-- Scrim dims whatever is underneath and, while active, swallows clicks so a second heavy
+         operation can't be kicked off on top of the running one. -->
+    <Border IsVisible="{Binding #Root.IsActive}"
+            Background="{DynamicResource AppBackground}" Opacity="0.75">
+        <Border Background="{DynamicResource SurfaceBackground}"
+                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1"
+                CornerRadius="10" Padding="22,18"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Spacing="12" MinWidth="180">
+                <ProgressBar IsIndeterminate="True" Width="180" Height="4" />
+                <TextBlock Text="{Binding #Root.Message}" FontSize="12.5"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondary}" />
+            </StackPanel>
+        </Border>
+    </Border>
+</UserControl>
