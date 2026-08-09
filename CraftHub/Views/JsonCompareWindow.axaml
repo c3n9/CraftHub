@@ -1,0 +1,261 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftHub.ViewModels"
+        xmlns:views="using:CraftHub.Views"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="CraftHub.Views.JsonCompareWindow"
+        x:DataType="vm:JsonCompareWindowViewModel"
+        Title="{DynamicResource ComparerTitle}"
+        Width="1100" Height="760"
+        MinWidth="720" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackground}">
+
+    <Window.Styles>
+        <!-- Selection reads as a tab: bottom accent line only, no box around the item. -->
+        <Style Selector="ListBox.pair-strip">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+            <Setter Property="Padding" Value="4,0,4,0" />
+        </Style>
+        <Style Selector="ListBox.pair-strip ListBoxItem">
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="0" />
+            <Setter Property="MinHeight" Value="0" />
+            <Setter Property="FontSize" Value="13" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="BorderThickness" Value="0,0,0,2" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.pair-strip ListBoxItem /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="CornerRadius" Value="0" />
+        </Style>
+        <Style Selector="ListBox.pair-strip ListBoxItem:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.pair-strip ListBoxItem:selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="ListBox.pair-strip ListBoxItem:selected">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}" />
+        </Style>
+    </Window.Styles>
+
+    <Panel>
+    <!-- MinHeight sits on the rows, not on their content: without it the splitter can squash the
+         panes past the point where anything is usable. -->
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="230" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" MinHeight="220" />
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="{DynamicResource SurfaceBackground}" Padding="16,12"
+                BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <materialIcons:MaterialIcon Kind="FileCompare" Width="20" Height="20"
+                                                VerticalAlignment="Center"
+                                                Foreground="{DynamicResource AccentPrimary}" />
+                    <TextBlock Text="{DynamicResource ComparerTitle}" FontSize="15" FontWeight="SemiBold"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource TextPrimary}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                    <Button Classes="toolbar-btn" Command="{Binding UseCurrentDocumentCommand}"
+                            ToolTip.Tip="{DynamicResource ComparerUseCurrentTip}"
+                            Content="{DynamicResource ComparerUseCurrent}" />
+                    <Button Classes="toolbar-btn" Command="{Binding UseSavedDocumentCommand}"
+                            ToolTip.Tip="{DynamicResource ComparerUseSavedTip}"
+                            Content="{DynamicResource ComparerUseSaved}" />
+                    <Border Width="1" Background="{DynamicResource BorderLight}" Margin="4,2" />
+                    <Button Classes="toolbar-btn" Command="{Binding AddPanelCommand}"
+                            IsEnabled="{Binding CanAddPanel}"
+                            ToolTip.Tip="{DynamicResource ComparerAddPanelTip}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <materialIcons:MaterialIcon Kind="Plus" Width="16" Height="16" />
+                            <TextBlock Text="{DynamicResource ComparerAddPanel}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding PanelCountText}" VerticalAlignment="Center"
+                                       FontSize="11.5" Foreground="{DynamicResource TextMuted}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="accent-btn" Command="{Binding CompareCommand}"
+                            IsEnabled="{Binding CanCompare}"
+                            Height="32" Padding="16,0"
+                            HorizontalContentAlignment="Center" VerticalContentAlignment="Center"
+                            Content="{DynamicResource ComparerCompareBtn}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Input panes. The grid is rebuilt in code-behind because both the number of panes and
+             the splitters between them are dynamic; its MinWidth is set there too, which is what
+             makes this scroll once the panes stop fitting instead of running off-screen. -->
+        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto"
+                      VerticalScrollBarVisibility="Disabled">
+            <Grid x:Name="PanelsGrid" Margin="6" />
+        </ScrollViewer>
+
+        <GridSplitter Grid.Row="2" Height="6" Background="Transparent"
+                      HorizontalAlignment="Stretch" ResizeDirection="Rows"
+                      ResizeBehavior="PreviousAndNext"
+                      IsVisible="{Binding HasResult}" />
+
+        <!-- Before the first comparison this row would just be blank, so it explains the flow -->
+        <Border Grid.Row="3" IsVisible="{Binding !HasResult}" Margin="6,0,6,6">
+            <StackPanel Spacing="8" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460">
+                <materialIcons:MaterialIcon Kind="FileCompare" Width="30" Height="30"
+                                            HorizontalAlignment="Center"
+                                            Foreground="{DynamicResource TextMuted}" />
+                <TextBlock Text="{DynamicResource ComparerHintTitle}" FontSize="14" FontWeight="SemiBold"
+                           HorizontalAlignment="Center" TextAlignment="Center"
+                           Foreground="{DynamicResource TextSecondary}" />
+                <TextBlock Text="{DynamicResource ComparerHintBody}" FontSize="12.5"
+                           HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextMuted}" />
+            </StackPanel>
+        </Border>
+
+        <!-- Results -->
+        <Border Grid.Row="3" IsVisible="{Binding HasResult}" Margin="6,0,6,6"
+                Background="{DynamicResource SurfaceBackground}" CornerRadius="10"
+                BorderBrush="{DynamicResource BorderColor}" BorderThickness="1">
+            <Grid RowDefinitions="Auto,*">
+
+                <!-- Overall summary -->
+                <Border Grid.Row="0" Padding="12,8"
+                        BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,0,1">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Grid.Column="0" Text="{Binding Summary}" FontSize="13" FontWeight="SemiBold"
+                                   VerticalAlignment="Center" Margin="0,0,12,0"
+                                   TextTrimming="CharacterEllipsis"
+                                   ToolTip.Tip="{Binding Summary}"
+                                   Foreground="{DynamicResource TextPrimary}" />
+
+                        <!-- Exports act on the pair that's currently open, not on all of them. -->
+                        <!-- The enclosing results panel is already gated on HasResult, so this only
+                             needs the selected pair as its context. -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8"
+                                    DataContext="{Binding SelectedPair}">
+                            <Button Classes="toolbar-btn" Command="{Binding CopyDiffCommand}"
+                                    ToolTip.Tip="{DynamicResource DiffCopyTip}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <materialIcons:MaterialIcon Kind="ContentCopy" Width="15" Height="15" />
+                                    <TextBlock Text="{DynamicResource DiffCopyBtn}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Classes="toolbar-btn" ToolTip.Tip="{DynamicResource DiffExportTip}">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <materialIcons:MaterialIcon Kind="Export" Width="15" Height="15" />
+                                    <TextBlock Text="{DynamicResource DiffExportBtn}" VerticalAlignment="Center" />
+                                    <materialIcons:MaterialIcon Kind="ChevronDown" Width="13" Height="13" />
+                                </StackPanel>
+                                <Button.Flyout>
+                                    <MenuFlyout>
+                                        <MenuItem Header="{DynamicResource DiffSavePatchBtn}"
+                                                  Command="{Binding SaveAsPatchCommand}">
+                                            <MenuItem.Icon>
+                                                <materialIcons:MaterialIcon Kind="FileDocumentOutline" Width="16" Height="16" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="{DynamicResource DiffSaveJsonPatchBtn}"
+                                                  Command="{Binding SaveJsonPatchCommand}">
+                                            <MenuItem.Icon>
+                                                <materialIcons:MaterialIcon Kind="CodeJson" Width="16" Height="16" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <Separator />
+                                        <MenuItem Header="{DynamicResource DiffSaveMarkdownBtn}"
+                                                  Command="{Binding SaveMarkdownReportCommand}">
+                                            <MenuItem.Icon>
+                                                <materialIcons:MaterialIcon Kind="LanguageMarkdownOutline" Width="16" Height="16" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                        <MenuItem Header="{DynamicResource DiffSaveHtmlBtn}"
+                                                  Command="{Binding SaveHtmlReportCommand}">
+                                            <MenuItem.Icon>
+                                                <materialIcons:MaterialIcon Kind="LanguageHtml5" Width="16" Height="16" />
+                                            </MenuItem.Icon>
+                                        </MenuItem>
+                                    </MenuFlyout>
+                                </Button.Flyout>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- One tab per pair; each carries the same text/structural views as the editor's
+                     "show changes" window. The per-pair verdict lives in the tab header itself —
+                     a separate summary strip would repeat the tabs verbatim. -->
+                <!-- A ListBox rather than a TabControl: the default tab panel wraps onto extra
+                     rows once the headers get long, which makes the strip jump around as pairs are
+                     added. This keeps one row that scrolls horizontally instead. -->
+                <Grid Grid.Row="1" RowDefinitions="Auto,*">
+                    <ListBox Grid.Row="0" Classes="pair-strip"
+                             ItemsSource="{Binding Pairs}"
+                             SelectedItem="{Binding SelectedPair}"
+                             IsVisible="{Binding IsMultiPair}"
+                             ScrollViewer.HorizontalScrollBarVisibility="Hidden"
+                             ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                        <ListBox.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ListBox.ItemsPanel>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="vm:ComparePairViewModel">
+                                <StackPanel Orientation="Horizontal" Spacing="7">
+                                    <materialIcons:MaterialIcon Width="13" Height="13" VerticalAlignment="Center"
+                                                                Kind="CheckCircleOutline"
+                                                                IsVisible="{Binding IsIdentical}"
+                                                                Foreground="{DynamicResource SuccessColor}" />
+                                    <materialIcons:MaterialIcon Width="13" Height="13" VerticalAlignment="Center"
+                                                                Kind="AlertCircleOutline"
+                                                                IsVisible="{Binding !IsIdentical}"
+                                                                Foreground="{DynamicResource WarningColor}" />
+                                    <!-- A pasted or file-derived name can be arbitrarily long; cap
+                                         it so one tab can't push the rest off the strip. -->
+                                    <TextBlock Text="{Binding TabLabel}" VerticalAlignment="Center"
+                                               MaxWidth="220" TextTrimming="CharacterEllipsis"
+                                               ToolTip.Tip="{Binding Header}" />
+                                    <TextBlock Text="{Binding Summary}" VerticalAlignment="Center" FontSize="11.5"
+                                               Foreground="{DynamicResource TextMuted}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+
+                    <ContentControl Grid.Row="1" Content="{Binding SelectedPair}">
+                        <ContentControl.ContentTemplate>
+                            <DataTemplate x:DataType="vm:ComparePairViewModel">
+                                <TabControl Padding="0">
+                                    <TabItem Header="{DynamicResource DiffTabText}">
+                                        <views:DiffView DataContext="{Binding Diff}" />
+                                    </TabItem>
+                                    <TabItem Header="{DynamicResource DiffTabStructural}">
+                                        <views:StructuralDiffView DataContext="{Binding Structural}" />
+                                    </TabItem>
+                                </TabControl>
+                            </DataTemplate>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+
+    <!-- Covers the whole window: comparing rebuilds every pair, so no part of it is usable until
+         that finishes. -->
+    <views:BusyOverlay IsActive="{Binding IsBusy}"
+                       Message="{DynamicResource BusyComparing}" />
+    </Panel>
+</Window>
