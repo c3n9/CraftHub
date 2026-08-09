@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CraftHub.ViewModels"
+             xmlns:views="using:CraftHub.Views"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="CraftHub.Views.StructuralDiffView"
              x:DataType="vm:StructuralDiffViewModel">
@@ -112,5 +113,8 @@
                            Foreground="{DynamicResource TextMuted}" />
             </StackPanel>
         </Border>
+
+        <views:BusyOverlay IsActive="{Binding IsBusy}"
+                           Message="{DynamicResource BusyStructural}" />
     </Panel>
 </UserControl>
