@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CraftHub.ViewModels"
+             xmlns:views="using:CraftHub.Views"
              xmlns:models="using:CraftHub.Domain.Models"
              xmlns:services="using:CraftHub.Services"
              xmlns:dg="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.DataGrid"
@@ -20,6 +21,7 @@
         <KeyBinding Gesture="Ctrl+H" Command="{Binding ToggleReplaceCommand}" />
     </UserControl.KeyBindings>
 
+    <Panel>
     <Grid RowDefinitions="Auto,Auto,*,Auto">
 
         <!-- Toolbar Row 1: Actions -->
@@ -612,4 +614,10 @@
         </Border>
 
     </Grid>
+
+    <!-- Import / mode switch / reformat all chew on the whole document off-thread;
+         without this the window just looks frozen. -->
+    <views:BusyOverlay IsActive="{Binding IsBusy}"
+                       Message="{DynamicResource BusyProcessing}" />
+    </Panel>
 </UserControl>
