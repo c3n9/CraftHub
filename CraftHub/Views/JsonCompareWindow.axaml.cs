@@ -33,15 +33,18 @@ public partial class JsonCompareWindow : Window
     private void OnPanelsChanged(object? sender, NotifyCollectionChangedEventArgs e) => RebuildPanels();
 
     /// <summary>
+    /// Floor for a pane's width. Set just above what the header actually needs (baseline badge,
+    /// name, three buttons) so panes can be squeezed well down before the scroller kicks in.
+    /// </summary>
+    private const double MinPanelWidth = 170;
+
+    private const double SplitterWidth = 6;
+
+    /// <summary>
     /// Lays the panes out as star-sized grid columns with a splitter between each pair. Built here
     /// rather than with an ItemsControl because an items panel can't produce the interleaved
     /// splitter columns that make the panes resizable.
     /// </summary>
-    /// <summary>Width a pane needs before its toolbar and validity badge start to crowd.</summary>
-    private const double MinPanelWidth = 260;
-
-    private const double SplitterWidth = 6;
-
     private void RebuildPanels()
     {
         PanelsGrid.Children.Clear();

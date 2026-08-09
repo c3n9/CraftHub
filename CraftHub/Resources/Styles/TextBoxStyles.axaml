@@ -66,6 +66,8 @@
         <!-- Fluent gives TextBox a ~32px minimum; the underline is pinned to the bottom of that, so
              leaving it in place shows a large gap under the text. -->
         <Setter Property="MinHeight" Value="0" />
+        <!-- Otherwise the field's own minimum sets the floor for how narrow a pane can get. -->
+        <Setter Property="MinWidth" Value="0" />
         <Setter Property="TextAlignment" Value="Center" />
         <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="VerticalContentAlignment" Value="Center" />

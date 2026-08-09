@@ -100,9 +100,16 @@
         <!-- Input panes. The grid is rebuilt in code-behind because both the number of panes and
              the splitters between them are dynamic; its MinWidth is set there too, which is what
              makes this scroll once the panes stop fitting instead of running off-screen. -->
-        <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto"
+        <ScrollViewer Grid.Row="1" x:Name="PanelsScroller" Margin="6"
+                      HorizontalScrollBarVisibility="Auto"
                       VerticalScrollBarVisibility="Disabled">
-            <Grid x:Name="PanelsGrid" Margin="6" />
+            <!-- Width is pinned to the viewport on purpose. A ScrollViewer measures its content with
+                 infinite width, and star columns can't divide infinity — they fall back to sizing by
+                 content, so pasting a long line would inflate the panes and stop them shrinking.
+                 With an explicit width the star columns work again, and MinWidth (set in code from
+                 the pane count) clamps it back up to produce a scrollbar only when they truly
+                 don't fit. -->
+            <Grid x:Name="PanelsGrid" Width="{Binding #PanelsScroller.Bounds.Width}" />
         </ScrollViewer>
 
         <GridSplitter Grid.Row="2" Height="6" Background="Transparent"
