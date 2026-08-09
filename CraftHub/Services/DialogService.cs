@@ -83,6 +83,22 @@ public class DialogService : IDialogService
         return result ?? new JsonDiffResult(false, false);
     }
 
+    public Task ShowJsonComparerAsync(
+        Func<Task<string?>>? getCurrentDocument, Func<Task<string?>>? getBaselineDocument)
+    {
+        var owner = GetActiveWindow();
+        if (owner == null) return Task.CompletedTask;
+
+        var vm = new JsonCompareWindowViewModel(this, _fileDialogService)
+        {
+            GetCurrentDocument = getCurrentDocument,
+            GetBaselineDocument = getBaselineDocument
+        };
+
+        new JsonCompareWindow { DataContext = vm }.Show(owner);
+        return Task.CompletedTask;
+    }
+
     public async Task ShowJsonChangesWindowAsync(
         string title, string oldLabel, string newLabel, string oldText, string newText)
     {
