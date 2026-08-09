@@ -177,5 +177,124 @@ namespace CraftHub.Properties {
                 this["JsonChangesWindowMaximized"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double JsonCompareWindowWidth {
+            get {
+                return ((double)(this["JsonCompareWindowWidth"]));
+            }
+            set {
+                this["JsonCompareWindowWidth"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double JsonCompareWindowHeight {
+            get {
+                return ((double)(this["JsonCompareWindowHeight"]));
+            }
+            set {
+                this["JsonCompareWindowHeight"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int JsonCompareWindowX {
+            get {
+                return ((int)(this["JsonCompareWindowX"]));
+            }
+            set {
+                this["JsonCompareWindowX"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public int JsonCompareWindowY {
+            get {
+                return ((int)(this["JsonCompareWindowY"]));
+            }
+            set {
+                this["JsonCompareWindowY"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool JsonCompareWindowMaximized {
+            get {
+                return ((bool)(this["JsonCompareWindowMaximized"]));
+            }
+            set {
+                this["JsonCompareWindowMaximized"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CompareIgnoreKeyOrder {
+            get {
+                return ((bool)(this["CompareIgnoreKeyOrder"]));
+            }
+            set {
+                this["CompareIgnoreKeyOrder"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CompareIgnoreArrayOrder {
+            get {
+                return ((bool)(this["CompareIgnoreArrayOrder"]));
+            }
+            set {
+                this["CompareIgnoreArrayOrder"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CompareCaseInsensitive {
+            get {
+                return ((bool)(this["CompareCaseInsensitive"]));
+            }
+            set {
+                this["CompareCaseInsensitive"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CompareIgnoreNullAndEmpty {
+            get {
+                return ((bool)(this["CompareIgnoreNullAndEmpty"]));
+            }
+            set {
+                this["CompareIgnoreNullAndEmpty"] = value;
+            }
+        }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public string CompareIgnoredPaths {
+            get {
+                return ((string)(this["CompareIgnoredPaths"]));
+            }
+            set {
+                this["CompareIgnoredPaths"] = value;
+            }
+        }
     }
 }
