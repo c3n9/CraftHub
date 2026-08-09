@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:CraftHub.ViewModels"
              xmlns:helpers="using:CraftHub.Helpers"
+             xmlns:views="using:CraftHub.Views"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              x:Class="CraftHub.Views.DiffView"
              x:DataType="vm:DiffViewModel">
@@ -179,9 +180,45 @@
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                    <CheckBox Content="{DynamicResource DiffIgnoreKeyOrder}"
-                              IsChecked="{Binding IgnoreKeyOrder}" FontSize="12"
-                              VerticalAlignment="Center" />
+                    <!-- Options live behind a button: five of them inline would crowd out the
+                         counters and view toggles. -->
+                    <Button Classes="toolbar-btn" Padding="8,5"
+                            ToolTip.Tip="{DynamicResource DiffOptionsTip}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <materialIcons:MaterialIcon Kind="TuneVariant" Width="16" Height="16" />
+                            <TextBlock Text="{DynamicResource DiffOptionsBtn}" VerticalAlignment="Center"
+                                       FontSize="12" />
+                        </StackPanel>
+                        <Button.Flyout>
+                            <Flyout Placement="BottomEdgeAlignedRight">
+                                <StackPanel Spacing="9" Width="290" DataContext="{Binding Options}">
+                                    <TextBlock Text="{DynamicResource DiffOptionsHeader}" FontSize="12"
+                                               FontWeight="SemiBold"
+                                               Foreground="{DynamicResource TextMuted}" />
+
+                                    <CheckBox Content="{DynamicResource DiffIgnoreKeyOrder}" FontSize="12.5"
+                                              IsChecked="{Binding IgnoreKeyOrder}" />
+                                    <CheckBox Content="{DynamicResource DiffIgnoreArrayOrder}" FontSize="12.5"
+                                              IsChecked="{Binding IgnoreArrayOrder}" />
+                                    <CheckBox Content="{DynamicResource DiffCaseInsensitive}" FontSize="12.5"
+                                              IsChecked="{Binding CaseInsensitiveStrings}" />
+                                    <CheckBox Content="{DynamicResource DiffIgnoreNullEmpty}" FontSize="12.5"
+                                              IsChecked="{Binding IgnoreNullAndEmpty}" />
+
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="{DynamicResource DiffIgnoredPaths}" FontSize="12"
+                                                   Foreground="{DynamicResource TextSecondary}" />
+                                        <TextBox Text="{Binding IgnoredPathsText}"
+                                                 Watermark="{DynamicResource DiffIgnoredPathsHint}"
+                                                 AcceptsReturn="True" MinHeight="64" MaxHeight="120"
+                                                 FontSize="12" CornerRadius="6"
+                                                 FontFamily="{StaticResource DiffFontFamily}" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+
                     <Border Width="1" Background="{DynamicResource BorderLight}" Margin="4,2" />
                     <ToggleButton Classes="diff-mode" IsChecked="{Binding IsSideBySide}"
                                   ToolTip.Tip="{DynamicResource DiffSideBySide}" Padding="8,5" CornerRadius="6">
@@ -275,6 +312,9 @@
                                    HorizontalAlignment="Center" Foreground="{DynamicResource TextSecondary}" />
                     </StackPanel>
                 </Border>
+
+                <views:BusyOverlay IsActive="{Binding IsBusy}"
+                                   Message="{DynamicResource BusyBuildingDiff}" />
             </Panel>
 
             <!-- Minimap: change markers down the full height of the document; drawn in code-behind
