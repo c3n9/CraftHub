@@ -39,6 +39,10 @@ public partial class WorkspaceViewModel : ViewModelBase
     /// <summary>True when the tab has edits not yet written to <see cref="FilePath"/>.</summary>
     [ObservableProperty] private bool _isModified;
 
+    /// <summary>Drives the busy overlay while a large document is being parsed, serialized or
+    /// written — the work itself is off-thread, so without this the UI just looks frozen-but-idle.</summary>
+    [ObservableProperty] private bool _isBusy;
+
     /// <summary>Last known on-disk modification time, used to detect external changes.</summary>
     private DateTime? _fileWriteTimeUtc;
 
@@ -831,6 +835,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     public async Task<bool> ImportFromPathAsync(string path)
     {
         _isLoading = true;
+        IsBusy = true;
         try
         {
             if (Properties.Count > 0 || Rows.Count > 0)
@@ -932,6 +937,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
         finally
         {
+            IsBusy = false;
             _isLoading = false;
         }
     }
@@ -1054,7 +1060,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
     /// <summary>Canonical JSON for the data currently in memory (table or JSON mode), used as the
     /// "new" side of a diff.</summary>
-    private async Task<string> GetCurrentCanonicalJsonAsync()
+    internal async Task<string> GetCurrentCanonicalJsonAsync()
     {
         if (IsJsonEditorMode)
             return await Task.Run(() => JsonDiffHelper.CanonicalizeForDiff(RawJsonText));
@@ -1075,7 +1081,17 @@ public partial class WorkspaceViewModel : ViewModelBase
     [RelayCommand(CanExecute = nameof(CanShowChanges))]
     private async Task ShowChangesAsync()
     {
-        var current = await GetCurrentCanonicalJsonAsync();
+        string current;
+        IsBusy = true;
+        try
+        {
+            current = await GetCurrentCanonicalJsonAsync();
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+
         var baseline = _baselineJsonText ?? string.Empty;
 
         await _dialogService.ShowJsonChangesWindowAsync(
@@ -1234,11 +1250,20 @@ public partial class WorkspaceViewModel : ViewModelBase
     [RelayCommand]
     private async Task SwitchToJsonEditorAsync()
     {
-        RawJsonText = Rows.Count > 0 && Properties.Count > 0
-            ? await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties))
-            : Properties.Count > 0
-                ? "[]"
-                : "{}";
+        IsBusy = true;
+        try
+        {
+            RawJsonText = Rows.Count > 0 && Properties.Count > 0
+                ? await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties))
+                : Properties.Count > 0
+                    ? "[]"
+                    : "{}";
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+
         JsonEditorError = string.Empty;
         IsJsonEditorErrorVisible = false;
         IsJsonEditorMode = true;
@@ -1255,6 +1280,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     private async Task ReformatJsonAsync(bool indented)
     {
         if (string.IsNullOrWhiteSpace(RawJsonText)) return;
+        IsBusy = true;
         try
         {
             var formatted = await Task.Run(() =>
@@ -1298,6 +1324,10 @@ public partial class WorkspaceViewModel : ViewModelBase
             JsonEditorErrorLine = ex.LineNumber ?? -1;
             JsonEditorError = $"{Localizer.Get("InvalidJsonError")}: {ex.Message}";
         }
+        finally
+        {
+            IsBusy = false;
+        }
     }
 
     [RelayCommand]
@@ -1309,6 +1339,7 @@ public partial class WorkspaceViewModel : ViewModelBase
             return;
         }
 
+        IsBusy = true;
         try
         {
             var rawJson = RawJsonText;
@@ -1354,6 +1385,10 @@ public partial class WorkspaceViewModel : ViewModelBase
             IsJsonEditorErrorVisible = true;
             JsonEditorErrorLine = ex.LineNumber ?? -1;
             JsonEditorError = $"{Localizer.Get("InvalidJsonError")}: {ex.Message}";
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
