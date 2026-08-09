@@ -1,4 +1,4 @@
-<p align="center">
+<img width="1582" height="971" alt="Снимок экрана — 2026-08-09 в 14 42 22" src="https://github.com/user-attachments/assets/5b60d42a-4f4b-492a-9ece-18bf4dd23f25" /><p align="center">
     <img width="1012" height="540" alt="Frame 47983" src="https://github.com/user-attachments/assets/7b1186b4-3be1-45a6-906f-d2fef00751d9" alt="CraftHub banner" />
 </p>
 
@@ -35,24 +35,14 @@
 ## Screenshots
 
 
-<img width="1312" height="890" alt="Table" src="https://github.com/user-attachments/assets/28c52e60-4e72-47ea-874b-6ef255f3d09f" />
+<img width="1582" height="971" alt="Screen 1" src="https://github.com/user-attachments/assets/fdd7f1d2-118d-4004-b1f7-f0bf20330f46" />
 
-<img width="1312" height="890" alt="Editor" src="https://github.com/user-attachments/assets/4133d530-de59-4c8d-80ff-1949da40d45e" />
+<img width="762" height="640" alt="Screen 2" src="https://github.com/user-attachments/assets/2e865d49-4b87-418d-ad21-0192a5510e05" />
 
-<div align="center">
-  <img width="762" height="640" alt="Mapper" src="https://github.com/user-attachments/assets/30af21dd-115f-454d-bb9f-fda6d4612574" />
-</div>
+<img width="1582" height="971" alt="Screen 3" src="https://github.com/user-attachments/assets/7b23585f-ce22-4907-a908-9eb25ccab966" />
 
-<div align="center">
-    <img width="652" height="532" alt="image" src="https://github.com/user-attachments/assets/0e93ef31-2725-4223-bed0-f468990f0079" />
-</div>
+<img width="1582" height="971" alt="Screen 4" src="https://github.com/user-attachments/assets/d21a0119-c00b-4dcc-b795-9be17ec8549b" />
 
-<img width="1312" height="890" alt="image" src="https://github.com/user-attachments/assets/87b82928-0b4c-4790-bfb2-7771ba6c90e1" />
+<img width="1582" height="971" alt="Screen 5" src="https://github.com/user-attachments/assets/e2079ccc-0db6-49a9-9e59-0b3200062cf7" />
 
-<img width="1312" height="890" alt="image" src="https://github.com/user-attachments/assets/3b200b58-7490-441a-9fd0-91055656b53f" />
 
-<img width="1312" height="890" alt="image" src="https://github.com/user-attachments/assets/0f353297-0569-49c6-ab42-7e7915311bbf" />
-
-<div align="center">
-    <img width="622" height="712" alt="image" src="https://github.com/user-attachments/assets/62533d8b-34ae-4caa-a1b8-55771d184de8" />
-</div>
