@@ -102,7 +102,11 @@ public sealed partial class DiffViewModel : ObservableObject
     [ObservableProperty] private bool _isBusy;
 
     [ObservableProperty] private bool _isSideBySide = true;
-    [ObservableProperty] private bool _ignoreKeyOrder;
+
+    /// <summary>Shared, persisted comparison settings; changing any of them re-normalizes both
+    /// sides and recomputes the diff. Can be shared between several diffs (the comparer passes one
+    /// instance to every pair) so their option flyouts never drift apart.</summary>
+    public CompareOptionsViewModel Options { get; }
 
     [ObservableProperty] private IReadOnlyList<MinimapMarker> _minimapMarkers = Array.Empty<MinimapMarker>();
 
@@ -128,22 +132,32 @@ public sealed partial class DiffViewModel : ObservableObject
     public string NormalizedOld { get; private set; } = string.Empty;
     public string NormalizedNew { get; private set; } = string.Empty;
 
-    public DiffViewModel()
+    /// <summary>
+    /// Raised once both normalized sides are up to date. The structural view feeds off this rather
+    /// than the raw input, so the two tabs always agree on what the options excluded.
+    /// </summary>
+    public event Action? NormalizedTextsChanged;
+
+    /// <param name="options">Pass an existing instance to share one set of options across several
+    /// diffs; omit it for a standalone diff with its own.</param>
+    public DiffViewModel(CompareOptionsViewModel? options = null)
     {
+        Options = options ?? new CompareOptionsViewModel();
+
         // The two modes have independent row lists, so switching resets the navigation cursor.
         PropertyChanged += (_, e) =>
         {
             if (e.PropertyName == nameof(IsSideBySide))
                 RefreshNavigation();
         };
+
+        // Re-normalizing changes the text itself, so the whole diff has to be recomputed.
+        Options.Changed += () => _ = RecomputeAsync();
     }
 
     partial void OnIsSideBySideChanged(bool value) => OnPropertyChanged(nameof(IsUnified));
 
     partial void OnTotalChangeCountChanged(int value) => OnPropertyChanged(nameof(HasChanges));
-
-    // Re-normalizing changes the text itself, so the whole diff has to be recomputed.
-    partial void OnIgnoreKeyOrderChanged(bool value) => _ = RecomputeAsync();
 
     public async Task SetTextsAsync(string oldText, string newText)
     {
@@ -157,7 +171,7 @@ public sealed partial class DiffViewModel : ObservableObject
         IsBusy = true;
         try
         {
-            var ignoreKeyOrder = IgnoreKeyOrder;
+            var options = Options.ToSnapshot();
             var oldRaw = _oldText;
             var newRaw = _newText;
 
@@ -170,8 +184,8 @@ public sealed partial class DiffViewModel : ObservableObject
                 oldDoc?.Dispose();
                 newDoc?.Dispose();
 
-                var normOld = JsonDiffHelper.CanonicalizeForDiff(oldRaw, ignoreKeyOrder);
-                var normNew = JsonDiffHelper.CanonicalizeForDiff(newRaw, ignoreKeyOrder);
+                var normOld = JsonDiffHelper.CanonicalizeForDiff(oldRaw, options);
+                var normNew = JsonDiffHelper.CanonicalizeForDiff(newRaw, options);
 
                 var sbs = DiffEngine.ComputeSideBySide(normOld, normNew);
                 var unified = DiffEngine.ComputeUnified(normOld, normNew);
@@ -208,6 +222,7 @@ public sealed partial class DiffViewModel : ObservableObject
             IsIdentical = result.Added == 0 && result.Removed == 0 && result.Changed == 0;
 
             RefreshNavigation();
+            NormalizedTextsChanged?.Invoke();
         }
         finally
         {
