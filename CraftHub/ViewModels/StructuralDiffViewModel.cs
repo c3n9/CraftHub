@@ -60,15 +60,33 @@ public sealed partial class StructuralDiffViewModel : ObservableObject
 {
     private JsonDiffNode? _root;
 
+    /// <summary>The pruned comparison tree, or null while the JSON doesn't parse. Exposed so the
+    /// export formats can be built from the same tree the grid is showing.</summary>
+    public JsonDiffNode? Root => _root;
+
     public ObservableCollection<StructuralDiffRowViewModel> Rows { get; } = new();
 
     [ObservableProperty] private bool _isIdentical;
     [ObservableProperty] private bool _isUnavailable;
     [ObservableProperty] private string? _unavailableReason;
+    [ObservableProperty] private bool _isBusy;
 
     /// <summary>Note there's no "ignore key order" option here: a structural comparison matches
     /// properties by name, so key order never affects the result to begin with.</summary>
     public async Task SetTextsAsync(string oldText, string newText)
+    {
+        IsBusy = true;
+        try
+        {
+            await BuildAsync(oldText, newText);
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
+    private async Task BuildAsync(string oldText, string newText)
     {
         var result = await Task.Run(() =>
         {
