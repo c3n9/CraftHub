@@ -56,6 +56,42 @@
         <Setter Property="BoxShadow" Value="none" />
     </Style>
 
+    <!-- Comparer pane title: reads as a heading, not as a form field — centred, with only an
+         underline instead of a full box, which turns accent-coloured on focus. -->
+    <Style Selector="TextBox.panel-label">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="4,2" />
+        <!-- Fluent gives TextBox a ~32px minimum; the underline is pinned to the bottom of that, so
+             leaving it in place shows a large gap under the text. -->
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="TextAlignment" Value="Center" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBox.panel-label /template/ Border">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderColor}" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="BoxShadow" Value="none" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="TextBox.panel-label /template/ DockPanel">
+        <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="TextBox.panel-label:pointerover /template/ Border">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TextMuted}" />
+    </Style>
+    <Style Selector="TextBox.panel-label:focus /template/ Border">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0,0,0,2" />
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}" />
+    </Style>
+
     <Style Selector="TextBox.grid-editor">
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
         <Setter Property="BorderThickness" Value="1" />
