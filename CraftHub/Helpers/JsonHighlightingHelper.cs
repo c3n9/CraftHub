@@ -1,8 +1,10 @@
 using System;
 using System.Xml;
 using Avalonia;
+using Avalonia.Media;
 using Avalonia.Platform;
 using Avalonia.Styling;
+using AvaloniaEdit;
 using AvaloniaEdit.Highlighting;
 using AvaloniaEdit.Highlighting.Xshd;
 
@@ -25,6 +27,18 @@ public static class JsonHighlightingHelper
     public static bool IsDarkTheme => Application.Current?.ActualThemeVariant == ThemeVariant.Dark;
 
     public static IHighlightingDefinition? ForCurrentTheme() => Get(IsDarkTheme);
+
+    /// <summary>
+    /// Gives an editor the shared selection colours. AvaloniaEdit's default selection is a
+    /// near-opaque blue that drowns out the syntax colours underneath; a translucent overlay with
+    /// no forced foreground lets them show through. Applied to every JSON surface so a selection
+    /// looks the same in the editor and in the comparer.
+    /// </summary>
+    public static void ApplySelectionColors(TextEditor editor)
+    {
+        editor.TextArea.SelectionBrush = new SolidColorBrush(Color.FromArgb(0x55, 0x60, 0xA5, 0xFA));
+        editor.TextArea.SelectionForeground = null;
+    }
 
     public static IHighlightingDefinition? Get(bool dark)
     {

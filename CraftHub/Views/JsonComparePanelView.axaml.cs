@@ -22,6 +22,7 @@ public partial class JsonComparePanelView : UserControl
         InitializeComponent();
 
         Editor.SyntaxHighlighting = JsonHighlightingHelper.ForCurrentTheme();
+        JsonHighlightingHelper.ApplySelectionColors(Editor);
         Editor.TextChanged += OnEditorTextChanged;
 
         DataContextChanged += OnDataContextChanged;

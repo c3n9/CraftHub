@@ -95,11 +95,7 @@ public partial class WorkspaceView : UserControl
         if (_jsonEditor != null)
         {
             _jsonEditor.Options.IndentationSize = 2;
-            // Default selection brush is a near-opaque blue that drowns out the syntax colors
-            // underneath, especially the darker light-theme palette — a translucent overlay lets
-            // them show through instead of forcing a fixed (and sometimes illegible) foreground.
-            _jsonEditor.TextArea.SelectionBrush = new SolidColorBrush(Color.FromArgb(0x55, 0x60, 0xA5, 0xFA));
-            _jsonEditor.TextArea.SelectionForeground = null;
+            JsonHighlightingHelper.ApplySelectionColors(_jsonEditor);
             _jsonEditor.TextChanged += OnEditorTextChanged;
             // Handle Ctrl+F / Ctrl+H ourselves (Tunnel, so before AvaloniaEdit's built-in) to make
             // them toggle the search panel — pressing the same combo again closes it.
