@@ -383,16 +383,6 @@
     <x:String x:Key="TourRecentFoldersText">После того как вы откроете папку, здесь появится список последних 5 для быстрого доступа.</x:String>
     <x:String x:Key="TourNotificationsTitle">Уведомления</x:String>
     <x:String x:Key="TourNotificationsText">Откройте центр уведомлений, чтобы посмотреть последние сообщения и события.</x:String>
-    <x:String x:Key="TourThemeTitle">Светлая / тёмная тема</x:String>
-    <x:String x:Key="TourThemeText">Переключение между светлым и тёмным оформлением.</x:String>
-    <x:String x:Key="TourLanguageTitle">Язык</x:String>
-    <x:String x:Key="TourLanguageText">Переключение языка интерфейса между английским и русским.</x:String>
-    <x:String x:Key="TourReleasesTitle">Версии</x:String>
-    <x:String x:Key="TourReleasesText">Все релизы CraftHub с GitHub и что изменилось в каждом из них.</x:String>
-    <x:String x:Key="TourGithubTitle">Исходный код</x:String>
-    <x:String x:Key="TourGithubText">Открыть репозиторий проекта на GitHub.</x:String>
-    <x:String x:Key="TourHelpStepTitle">Нужно повторить?</x:String>
-    <x:String x:Key="TourHelpStepText">Нажмите эту кнопку помощи в любой момент, чтобы снова запустить обзор интерфейса.</x:String>
 
     <x:String x:Key="DiffOptionsBtn">Опции</x:String>
     <x:String x:Key="DiffOptionsTip">Что считать различием</x:String>
@@ -495,7 +485,40 @@
     <x:String x:Key="FormulaCatJson">JSON</x:String>
     <x:String x:Key="FormulaCatDate">Даты</x:String>
 
+
+    <!-- Окно настроек -->
+    <x:String x:Key="SettingsTip">Настройки</x:String>
+    <x:String x:Key="SettingsTitle">Настройки</x:String>
+    <x:String x:Key="SettingsNavAppearance">Внешний вид</x:String>
+    <x:String x:Key="SettingsNavNotifications">Уведомления</x:String>
+    <x:String x:Key="SettingsNavEditor">Редактор</x:String>
+    <x:String x:Key="SettingsNavAbout">О программе</x:String>
+
+    <x:String x:Key="SettingsAppearanceLead">Применяется сразу, ко всем открытым вкладкам.</x:String>
+    <x:String x:Key="SettingsFollowSystemTitle">Следовать системной теме</x:String>
+    <x:String x:Key="SettingsFollowSystemDesc">Переключаться между светлой и тёмной вместе с операционной системой. Выключите, чтобы выбрать самому.</x:String>
+    <x:String x:Key="SettingsDarkThemeTitle">Тёмная тема</x:String>
+    <x:String x:Key="SettingsDarkThemeDesc">Доступно, когда приложение не следует за системой.</x:String>
+    <x:String x:Key="SettingsLanguageTitle">Язык</x:String>
+    <x:String x:Key="SettingsLanguageDesc">Меняет язык интерфейса сразу — перезапуск не нужен.</x:String>
+
+    <x:String x:Key="SettingsNotificationsLead">Уведомления в любом случае сохраняются в панели с колокольчиком; здесь только то, показывать ли их ещё и на экране.</x:String>
+    <x:String x:Key="SettingsPopupsTitle">Показывать всплывающие уведомления</x:String>
+    <x:String x:Key="SettingsPopupsDesc">Короткие сообщения в углу, когда что-то импортировано, сохранено или не удалось. Если выключить, они будут попадать сразу в панель.</x:String>
+
+    <x:String x:Key="SettingsEditorLead">Поведение табличного и JSON-редактора.</x:String>
+    <x:String x:Key="SettingsDiffOnSaveTitle">Показывать изменения перед сохранением</x:String>
+    <x:String x:Key="SettingsDiffOnSaveDesc">Перечисляет, что будет записано, и просит подтверждения. Это тот же переключатель, что и галочка «Больше не показывать» в том окне.</x:String>
+
+
+    <x:String x:Key="SettingsHelpLead">Ссылки. У тура и справочника формул есть свои кнопки в шапке, рядом с этой.</x:String>
+    <x:String x:Key="SettingsReleases">Релизы и список изменений</x:String>
+
+    <x:String x:Key="TourSettingsTitle">Настройки</x:String>
+    <x:String x:Key="TourSettingsText">Всё, что настраивают один раз: тема, язык, уведомления, поведение редактора и параметры сравнения. В разделе «О программе» — версия и список релизов.</x:String>
+
+    <x:String x:Key="TourHelpStepTitle">Пройти тур заново</x:String>
+    <x:String x:Key="TourHelpStepText">Эта кнопка вернёт обучение в любой момент.</x:String>
     <x:String x:Key="TourFormulaHelpBtnTitle">Справочник формул</x:String>
     <x:String x:Key="TourFormulaHelpBtnText">Ячейки умеют вычисляться из других ячеек. Отсюда открывается справочник: как написать формулу, как сослаться на другую строку или на всю колонку, и все функции с примерами.</x:String>
-
 </ResourceDictionary>

@@ -72,4 +72,12 @@ public interface IDialogService
     /// function list. Non-modal, so it can be left open beside the table while writing a formula.
     /// </summary>
     Task ShowFormulaReferenceAsync();
+
+    /// <summary>
+    /// Opens the settings window. Modal: settings change the whole app (theme, language), so
+    /// letting the user keep editing behind them invites confusion about what applied when.
+    /// The delegates back the About section: the releases and GitHub flows already live on the
+    /// shell, so settings borrows them rather than growing a second copy.
+    /// </summary>
+    Task ShowSettingsAsync(string currentVersion, Func<Task>? showReleases, Action? openGitHub);
 }

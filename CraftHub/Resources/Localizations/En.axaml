@@ -384,16 +384,6 @@
 	<x:String x:Key="TourRecentFoldersText">Once you've opened a folder, this lists your last 5 for quick access.</x:String>
 	<x:String x:Key="TourNotificationsTitle">Notifications</x:String>
 	<x:String x:Key="TourNotificationsText">Open the notification center to review recent messages and events.</x:String>
-	<x:String x:Key="TourThemeTitle">Light / dark theme</x:String>
-	<x:String x:Key="TourThemeText">Switch between light and dark appearance.</x:String>
-	<x:String x:Key="TourLanguageTitle">Language</x:String>
-	<x:String x:Key="TourLanguageText">Switch the interface language between English and Russian.</x:String>
-	<x:String x:Key="TourReleasesTitle">Releases</x:String>
-	<x:String x:Key="TourReleasesText">See every CraftHub release fetched from GitHub, with what changed in each one.</x:String>
-	<x:String x:Key="TourGithubTitle">Source code</x:String>
-	<x:String x:Key="TourGithubText">Open the project repository on GitHub.</x:String>
-	<x:String x:Key="TourHelpStepTitle">Need this again?</x:String>
-	<x:String x:Key="TourHelpStepText">Click this help button anytime to replay the interface tour.</x:String>
 
 	<x:String x:Key="DiffOptionsBtn">Options</x:String>
 	<x:String x:Key="DiffOptionsTip">What counts as a difference</x:String>
@@ -496,7 +486,40 @@
 	<x:String x:Key="FormulaCatJson">JSON</x:String>
 	<x:String x:Key="FormulaCatDate">Date</x:String>
 
+
+	<!-- Settings window -->
+	<x:String x:Key="SettingsTip">Settings</x:String>
+	<x:String x:Key="SettingsTitle">Settings</x:String>
+	<x:String x:Key="SettingsNavAppearance">Appearance</x:String>
+	<x:String x:Key="SettingsNavNotifications">Notifications</x:String>
+	<x:String x:Key="SettingsNavEditor">Editor</x:String>
+	<x:String x:Key="SettingsNavAbout">About</x:String>
+
+	<x:String x:Key="SettingsAppearanceLead">Applies immediately, to every open tab.</x:String>
+	<x:String x:Key="SettingsFollowSystemTitle">Follow the system theme</x:String>
+	<x:String x:Key="SettingsFollowSystemDesc">Switch between light and dark along with the operating system. Turn this off to pick one yourself.</x:String>
+	<x:String x:Key="SettingsDarkThemeTitle">Dark theme</x:String>
+	<x:String x:Key="SettingsDarkThemeDesc">Available once the app is no longer following the system.</x:String>
+	<x:String x:Key="SettingsLanguageTitle">Language</x:String>
+	<x:String x:Key="SettingsLanguageDesc">Changes the interface language right away — no restart.</x:String>
+
+	<x:String x:Key="SettingsNotificationsLead">Notifications are always kept in the bell panel; this only controls whether they also appear on screen.</x:String>
+	<x:String x:Key="SettingsPopupsTitle">Show pop-up notifications</x:String>
+	<x:String x:Key="SettingsPopupsDesc">Brief messages in the corner when something is imported, saved or fails. With this off, they go straight to the bell panel.</x:String>
+
+	<x:String x:Key="SettingsEditorLead">Behaviour of the table and JSON editors.</x:String>
+	<x:String x:Key="SettingsDiffOnSaveTitle">Show changes before saving</x:String>
+	<x:String x:Key="SettingsDiffOnSaveDesc">Lists what is about to be written and asks for confirmation. This is the same switch as the "Don't show this again" box in that dialog.</x:String>
+
+
+	<x:String x:Key="SettingsHelpLead">Links. The tour and the formula reference have their own buttons in the header, next to this one.</x:String>
+	<x:String x:Key="SettingsReleases">Releases and changelog</x:String>
+
+	<x:String x:Key="TourSettingsTitle">Settings</x:String>
+	<x:String x:Key="TourSettingsText">Everything you set once and forget: theme, language, notifications, editor behaviour and comparison options. The About section has the version and the release list.</x:String>
+
+	<x:String x:Key="TourHelpStepTitle">Replay this tour</x:String>
+	<x:String x:Key="TourHelpStepText">This button brings the tour back whenever you want it.</x:String>
 	<x:String x:Key="TourFormulaHelpBtnTitle">Formula reference</x:String>
 	<x:String x:Key="TourFormulaHelpBtnText">Cells can compute themselves from other cells. This opens the reference: how to write a formula, how to address another row or a whole column, and every function with an example.</x:String>
-
 </ResourceDictionary>

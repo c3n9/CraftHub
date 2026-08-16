@@ -20,11 +20,13 @@ public class DialogService : IDialogService
 {
     private readonly NotificationService _notificationService;
     private readonly IFileDialogService _fileDialogService;
+    private readonly ThemeService _themeService;
 
-    public DialogService(NotificationService notificationService, IFileDialogService fileDialogService)
+    public DialogService(NotificationService notificationService, IFileDialogService fileDialogService, ThemeService themeService)
     {
         _notificationService = notificationService;
         _fileDialogService = fileDialogService;
+        _themeService = themeService;
     }
     private static Window? GetMainWindow()
     {
@@ -116,6 +118,20 @@ public class DialogService : IDialogService
 
         new FormulaReferenceWindow().Show(owner);
         return Task.CompletedTask;
+    }
+
+    public async Task ShowSettingsAsync(string currentVersion, Func<Task>? showReleases, Action? openGitHub)
+    {
+        var owner = GetActiveWindow();
+        if (owner == null) return;
+
+        var vm = new SettingsWindowViewModel(_themeService, _notificationService, currentVersion)
+        {
+            ShowReleasesRequested = showReleases,
+            OpenGitHubRequested = openGitHub
+        };
+
+        await new SettingsWindow { DataContext = vm }.ShowDialog(owner);
     }
 
     public async Task ShowJsonChangesWindowAsync(

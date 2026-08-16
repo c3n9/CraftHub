@@ -10,11 +10,14 @@ public sealed class NotificationService
     private const int MaxActivePopups = 5;
     private readonly ObservableCollection<Notification> _history = new();
     private readonly ObservableCollection<Notification> _active = new();
-    private bool _showPopups = true;
+    private bool _showPopups;
     private bool _popupsSuppressed;
 
     public NotificationService()
     {
+        // Now a real preference with a home in settings, so it has to survive a restart — it used
+        // to reset to "on" every launch, which made turning it off feel like it hadn't worked.
+        _showPopups = Properties.Settings.Default.ShowNotificationPopups;
         Notifications = new ReadOnlyObservableCollection<Notification>(_history);
         ActiveNotifications = new ReadOnlyObservableCollection<Notification>(_active);
     }
