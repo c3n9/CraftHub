@@ -9,6 +9,7 @@ using CraftHub.ViewModels;
 using CraftHub.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -96,6 +97,24 @@ public class DialogService : IDialogService
         };
 
         new JsonCompareWindow { DataContext = vm }.Show(owner);
+        return Task.CompletedTask;
+    }
+
+    public Task ShowFormulaReferenceAsync()
+    {
+        var owner = GetActiveWindow();
+        if (owner == null) return Task.CompletedTask;
+
+        // Reuse rather than stack up copies: this is a thing you leave open next to the grid and
+        // click back to, so a second click should surface the one you already have.
+        var existing = (owner as Window)?.OwnedWindows.OfType<FormulaReferenceWindow>().FirstOrDefault();
+        if (existing != null)
+        {
+            existing.Activate();
+            return Task.CompletedTask;
+        }
+
+        new FormulaReferenceWindow().Show(owner);
         return Task.CompletedTask;
     }
 

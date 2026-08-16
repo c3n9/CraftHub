@@ -27,23 +27,13 @@ public sealed class FillDownAction : IUndoableAction
     {
         foreach (var changeSet in _changeSets)
             _session.ApplyChangeSet(changeSet, redo: false);
-        ForceDataGridUpdate();
+        DataGridRefresh.Rows(_dataGrid);
     }
 
     public void Redo()
     {
         foreach (var changeSet in _changeSets)
             _session.ApplyChangeSet(changeSet, redo: true);
-        ForceDataGridUpdate();
-    }
-
-    private void ForceDataGridUpdate()
-    {
-        if (_dataGrid?.ItemsSource is System.Collections.IList)
-        {
-            var itemsSource = _dataGrid.ItemsSource;
-            _dataGrid.ItemsSource = null;
-            _dataGrid.ItemsSource = itemsSource;
-        }
+        DataGridRefresh.Rows(_dataGrid);
     }
 }

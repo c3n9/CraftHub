@@ -39,6 +39,10 @@
 							Content="{materialIcons:MaterialIconExt Kind=HelpCircleOutline}" Classes="toolbar-btn"
 							Click="OnStartTourClick"
 							ToolTip.Tip="{DynamicResource TourHelpTip}" FontSize="16" />
+					<Button cl:Coachmark.Id="formulaHelpBtn"
+							Content="{materialIcons:MaterialIconExt Kind=FunctionVariant}" Classes="toolbar-btn"
+							Command="{Binding ShowFormulaReferenceCommand}"
+							ToolTip.Tip="{DynamicResource FormulaRefTip}" FontSize="16" />
 					<Button cl:Coachmark.Id="comparerBtn"
 							Content="{materialIcons:MaterialIconExt Kind=FileCompare}" Classes="toolbar-btn"
 							Command="{Binding ShowJsonComparerCommand}"

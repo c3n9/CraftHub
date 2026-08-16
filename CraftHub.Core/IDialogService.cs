@@ -66,4 +66,10 @@ public interface IDialogService
     /// this service knowing about workspaces.
     /// </summary>
     Task ShowJsonComparerAsync(Func<Task<string?>>? getCurrentDocument, Func<Task<string?>>? getBaselineDocument);
+
+    /// <summary>
+    /// Opens the formula reference — writing formulas, addressing cells and columns, and the full
+    /// function list. Non-modal, so it can be left open beside the table while writing a formula.
+    /// </summary>
+    Task ShowFormulaReferenceAsync();
 }

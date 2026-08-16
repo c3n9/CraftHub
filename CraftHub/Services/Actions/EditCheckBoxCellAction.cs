@@ -37,22 +37,12 @@ public sealed class EditCheckBoxCellAction : IUndoableAction
     public void Undo()
     {
         _row.SetCell(_propName, _oldValue?.ToString().ToLower() ?? "", _oldKind);
-        ForceDataGridUpdate();
+        DataGridRefresh.Rows(_dataGrid);
     }
 
     public void Redo()
     {
         _row[_propName] = _newValue?.ToString().ToLower();
-        ForceDataGridUpdate();
-    }
-
-    private void ForceDataGridUpdate()
-    {
-        if (_dataGrid?.ItemsSource is System.Collections.IList list)
-        {
-            var itemsSource = _dataGrid.ItemsSource;
-            _dataGrid.ItemsSource = null;
-            _dataGrid.ItemsSource = itemsSource;
-        }
+        DataGridRefresh.Rows(_dataGrid);
     }
 }

@@ -41,22 +41,12 @@ public sealed class EditCellAction : IUndoableAction
     public void Undo()
     {
         _row.SetCell(_propName, _oldValue, _oldKind);
-        ForceDataGridUpdate();
+        DataGridRefresh.Rows(_dataGrid);
     }
 
     public void Redo()
     {
         _row[_propName] = _newValue;
-        ForceDataGridUpdate();
-    }
-
-    private void ForceDataGridUpdate()
-    {
-        if (_dataGrid?.ItemsSource is System.Collections.IList list)
-        {
-            var itemsSource = _dataGrid.ItemsSource;
-            _dataGrid.ItemsSource = null;
-            _dataGrid.ItemsSource = itemsSource;
-        }
+        DataGridRefresh.Rows(_dataGrid);
     }
 }

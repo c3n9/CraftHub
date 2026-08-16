@@ -451,4 +451,52 @@
 	<x:String x:Key="UndoDescRemoveColumnFormula">Remove column formula ({0})</x:String>
 	<x:String x:Key="UndoDescFillDown">Fill down ({0} cells)</x:String>
 	<x:String x:Key="UndoDescDetachFormulas">Detach formulas</x:String>
+	<!-- Formula reference window -->
+	<x:String x:Key="FormulaRefTip">Formula reference — syntax, addressing and every function</x:String>
+	<x:String x:Key="FormulaRefTitle">Formula reference</x:String>
+	<x:String x:Key="FormulaRefSearchWatermark">Search functions…</x:String>
+	<x:String x:Key="FormulaRefNoMatches">No function matches that.</x:String>
+	<x:String x:Key="FormulaRefFunctionsHeading">All functions</x:String>
+	<x:String x:Key="FormulaRefFunctionsIntro">Function names are case-insensitive. Arguments are separated by commas, decimals always use a dot, and an argument shown in [brackets] is optional, while one ending in … can be repeated.</x:String>
+
+	<x:String x:Key="FormulaRefBasicsHeading">Writing a formula</x:String>
+	<x:String x:Key="FormulaRefBasicsBody">A cell becomes a formula when its text starts with '='. Type it straight into the cell, or into the formula bar above the table — they do the same thing. Enter applies it, Escape cancels. Once applied, the cell shows the computed result and gets a small marker in its corner; clicking the cell shows the formula again, in the cell editor and in the formula bar. The usual operators work: + - * / ^ for arithmetic, &amp; to join text, = &lt;&gt; &lt; &gt; &lt;= &gt;= to compare, and parentheses to group.</x:String>
+
+	<x:String x:Key="FormulaRefThisRowHeading">Reading this row: @[field]</x:String>
+	<x:String x:Key="FormulaRefThisRowBody">@[field] means "this row's value for that field". It is the reference you will use most, because a table here has named columns rather than anonymous letters. It keeps meaning "this row" wherever the formula ends up — copied down, or applied to a whole column.</x:String>
+
+	<x:String x:Key="FormulaRefWholeColumnHeading">Reading a whole column: [field]</x:String>
+	<x:String x:Key="FormulaRefWholeColumnBody">Without the @, [field] means the entire column — every row of it, including rows added later. Use it inside a function that takes many values. Note the difference in the last example: @[total] is this row's cell, [total] is all of them, so the formula gives each row's share of the total.</x:String>
+
+	<x:String x:Key="FormulaRefOtherRowsHeading">Reading another row: A1 addresses</x:String>
+	<x:String x:Key="FormulaRefOtherRowsBody">Cells can also be addressed spreadsheet-style: a column letter by position (A is the first column, B the second, …) plus a row number starting at 1. So B2 is the second column of row 2, and D1:D10 is a range of ten cells. This is how a formula in one row reads a value out of a different row — a running total against the row above, or a rate held in the first row.</x:String>
+
+	<x:String x:Key="FormulaRefRelativeHeading">Relative and fixed ($) rows</x:String>
+	<x:String x:Key="FormulaRefRelativeBody">A plain row number is relative: it remembers the distance from the formula to the cell it points at. Written in row 2, =D1 means "the row above me", so copying it down to row 5 reads D4. Putting $ before the row number fixes it: $D$1 keeps pointing at row 1 from every row, which is what you want for a rate or a total that lives in one place. Column letters are always fixed — this table's columns are named, differently-typed fields, so there is no "fill right".</x:String>
+
+	<x:String x:Key="FormulaRefColumnFormulaHeading">One formula for a whole column</x:String>
+	<x:String x:Key="FormulaRefColumnFormulaBody">Ctrl+Enter in the formula bar — or the button beside it, or the right-click menu — applies the formula you have typed to every row of the current column at once, and to rows added later. That is different from dragging the small square at a cell's corner, which copies the formula only into the rows you drag over. To stop a column computing itself, right-click it and choose to stop; the values it produced stay as they are.</x:String>
+
+	<x:String x:Key="FormulaRefTypesHeading">Types are JSON's, not a spreadsheet's</x:String>
+	<x:String x:Key="FormulaRefTypesBody">Nothing is silently converted. The text "123" is not the number 123 — use VALUE() to convert it. TRUE is not 1 — use IF() to convert it. A missing key, a JSON null and an empty string are three different things: ISBLANK, ISNULL and ="" tell them apart, and SUM/AVERAGE/COUNT skip the first two rather than treating them as zero. A result that does not fit the column's declared type (a decimal into an Int column) is reported as an error rather than rounded.</x:String>
+
+	<x:String x:Key="FormulaRefDatesHeading">Dates</x:String>
+	<x:String x:Key="FormulaRefDatesBody">Dates are ISO 8601 text — "2024-03-15" or "2024-03-15T14:30:00", optionally with Z or +03:00 — not serial numbers. Results keep the exact shape of their input: same precision, same offset. There is no date arithmetic through + and -; DATEADD, EDATE, DAYS and DATEDIF are the way to do it.</x:String>
+
+	<x:String x:Key="FormulaRefErrorsHeading">When something goes wrong</x:String>
+	<x:String x:Key="FormulaRefErrorsBody">A failing formula leaves its cell empty and turns the corner marker red — hover it to read what happened. Codes are #DIV/0! for division by zero, #VALUE! for a wrong or unreadable argument, #TYPE! for a result that does not fit the column, #REF! for a reference that no longer exists, and #CYCLE! when formulas depend on each other in a loop. Handle expected failures yourself with IFERROR.</x:String>
+
+	<x:String x:Key="FormulaRefStorageHeading">Where formulas are saved</x:String>
+	<x:String x:Key="FormulaRefStorageBody">The JSON document only ever holds computed values, so it stays an ordinary JSON file for anyone who does not use this app. The formulas themselves live beside it in a file with the same name plus .formulas.json, written at the same moment the document is saved. Copy or move both together. "Detach formulas" in the right-click menu keeps every computed value and removes that file.</x:String>
+
+	<x:String x:Key="FormulaCatMath">Math</x:String>
+	<x:String x:Key="FormulaCatStatistics">Statistics</x:String>
+	<x:String x:Key="FormulaCatLogic">Logic</x:String>
+	<x:String x:Key="FormulaCatText">Text</x:String>
+	<x:String x:Key="FormulaCatJson">JSON</x:String>
+	<x:String x:Key="FormulaCatDate">Date</x:String>
+
+	<x:String x:Key="TourFormulaHelpBtnTitle">Formula reference</x:String>
+	<x:String x:Key="TourFormulaHelpBtnText">Cells can compute themselves from other cells. This opens the reference: how to write a formula, how to address another row or a whole column, and every function with an example.</x:String>
+
 </ResourceDictionary>

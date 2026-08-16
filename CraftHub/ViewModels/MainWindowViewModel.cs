@@ -225,6 +225,9 @@ public partial class MainWindowViewModel : ViewModelBase
             getBaselineDocument: () => Task.FromResult(SelectedWorkspace?.BaselineJsonSnapshot));
 
     [RelayCommand]
+    private Task ShowFormulaReference() => _dialogService.ShowFormulaReferenceAsync();
+
+    [RelayCommand]
     private async void GoToGitHubRepo()
     {
         var ls = Services.LanguageService.Instance;

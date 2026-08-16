@@ -26,22 +26,12 @@ public sealed class DetachFormulasAction : IUndoableAction
     public void Undo()
     {
         _session.RestoreFromDetach(_snapshot);
-        ForceDataGridUpdate();
+        DataGridRefresh.Rows(_dataGrid);
     }
 
     public void Redo()
     {
         _session.DetachAll();
-        ForceDataGridUpdate();
-    }
-
-    private void ForceDataGridUpdate()
-    {
-        if (_dataGrid?.ItemsSource is System.Collections.IList)
-        {
-            var itemsSource = _dataGrid.ItemsSource;
-            _dataGrid.ItemsSource = null;
-            _dataGrid.ItemsSource = itemsSource;
-        }
+        DataGridRefresh.Rows(_dataGrid);
     }
 }

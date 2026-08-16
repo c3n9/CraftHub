@@ -39,10 +39,19 @@ namespace CraftHub.Views;
 
 public partial class WorkspaceView : UserControl
 {
-    // Snapshot captured when the DataGrid enters edit mode (FuncDataTemplate factory runs).
-    // Used by CellEditEnded to push an undo action only when the value actually changed.
-    // OldKind lets undo restore a Null/Missing cell exactly, which its text alone can't express.
-    private (DynamicDataRow Row, string PropName, string OldValue, CellKind OldKind)? _pendingEdit;
+    // The text editor currently open in a cell, if any. CellEditEnded reads its text; nothing
+    // writes to the row until then.
+    //
+    // This used to be a value snapshot plus a live `TextChanged -> row[prop] = text` binding, and
+    // that combination was wrong in a way worth recording. A formula cell is edited as its FORMULA
+    // while the row holds the formula's RESULT, so the live binding immediately wrote the formula
+    // TEXT into the row; restoring the result then depended on the commit path noticing. It
+    // couldn't reliably: a single snapshot slot is overwritten by the next cell's editing template
+    // as soon as the user clicks straight from one cell to another, which happens before
+    // CellEditEnded fires for the one they left — so the cell they left kept the formula text on
+    // screen where its value belonged. Not writing to the row until commit removes the whole class
+    // of failure: there is nothing to restore, and Escape is free.
+    private (DynamicDataRow Row, string PropName, TextBox Box)? _activeCellEditor;
 
     private TextEditor? _jsonEditor;
     private Button? _jsonErrorButton;
@@ -424,38 +433,68 @@ public partial class WorkspaceView : UserControl
             return columnGrid;
         }
 
-        // Fill handle: press-and-drag down from here to copy this cell's formula into every row
-        // the drag passes over — the actual Excel-style "protyanut' za ugolok" gesture. Shown on
-        // every formula cell rather than only "the selected one" (unlike Excel): cell templates
-        // here are built once per grid refresh, not per selection change, so there's no cheap way
-        // to know which cell is currently selected at template-build time.
-        var handle = new Border
-        {
-            Width = 7,
-            Height = 7,
-            Background = Brushes.SteelBlue,
-            HorizontalAlignment = HorizontalAlignment.Right,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            Margin = new Avalonia.Thickness(0, 0, 1, 1),
-            Cursor = new Cursor(StandardCursorType.Cross),
-            [!ToolTip.TipProperty] = new Binding { Source = Localizer.Get("FillHandleTip") }
-        };
-        handle.AddHandler(PointerPressedEvent, (sender, e) => OnFillHandlePressed(sender, e, rowIndex, columnKey));
-        handle.AddHandler(PointerReleasedEvent, OnFillHandleReleased);
-
         var grid = new Grid();
         grid.Children.Add(valueText);
         grid.Children.Add(marker);
-        grid.Children.Add(handle);
+        grid.Children.Add(BuildFillHandle(row, columnKey));
         return grid;
     }
 
-    // Drag state for the fill handle above — set on press, consumed and cleared on release.
-    // Deliberately no live preview highlight in this first cut: the fill only happens on release.
-    private int _fillDragSourceRow = -1;
-    private string? _fillDragColumnKey;
+    /// <summary>The Excel fill handle: the little square at the active cell's bottom-right corner
+    /// that you drag down to copy this cell's formula into the rows you drag over.
+    ///
+    /// Visibility is a live binding on "is this the current cell", the same signal the active-cell
+    /// border already uses — so exactly one handle exists at a time and it follows the selection
+    /// without the grid being rebuilt. (It used to be drawn on every formula cell at once, purely
+    /// because template-build time doesn't know the selection; that was the wrong trade.)</summary>
+    private Control BuildFillHandle(DynamicDataRow row, string columnKey)
+    {
+        var handle = new Border
+        {
+            Width = 9,
+            Height = 9,
+            CornerRadius = new Avalonia.CornerRadius(1),
+            Background = Brushes.SteelBlue,
+            BorderBrush = Brushes.White,
+            BorderThickness = new Avalonia.Thickness(1),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            // Half outside the cell's corner, as in a spreadsheet — that's what makes it a grab
+            // target rather than something you hit by accident while clicking the cell.
+            Margin = new Avalonia.Thickness(0, 0, -3, -3),
+            Cursor = new Cursor(StandardCursorType.Cross),
+            IsVisible = false,
+            [!ToolTip.TipProperty] = new Binding { Source = Localizer.Get("FillHandleTip") }
+        };
 
-    private void OnFillHandlePressed(object? sender, PointerPressedEventArgs e, int sourceRow, string columnKey)
+        if (_currentVm is { } vm)
+        {
+            var mb = new MultiBinding { Converter = new IsCurrentCellConverter(vm.Rows, row, columnKey) };
+            mb.Bindings.Add(new Binding("DataContext.CurrentCellRowIndex")
+            {
+                RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) }
+            });
+            mb.Bindings.Add(new Binding("DataContext.CurrentCellColumnKey")
+            {
+                RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) }
+            });
+            handle.Bind(Visual.IsVisibleProperty, mb);
+        }
+
+        handle.AddHandler(PointerPressedEvent, (sender, e) => OnFillHandlePressed(sender, e, row, columnKey));
+        handle.AddHandler(PointerMovedEvent, OnFillHandleMoved);
+        handle.AddHandler(PointerReleasedEvent, OnFillHandleReleased);
+        return handle;
+    }
+
+    // Live state for a fill drag. The source is held as the row OBJECT, not its index: the drag
+    // outlives any number of layout passes, and an index would go stale if anything reordered
+    // underneath it.
+    private DynamicDataRow? _fillDragSourceRow;
+    private string? _fillDragColumnKey;
+    private Border? _fillPreview;
+
+    private void OnFillHandlePressed(object? sender, PointerPressedEventArgs e, DynamicDataRow sourceRow, string columnKey)
     {
         e.Handled = true; // don't let the DataGrid start its own selection-drag or cell edit
         if (sender is not IInputElement el) return;
@@ -464,27 +503,94 @@ public partial class WorkspaceView : UserControl
         _fillDragColumnKey = columnKey;
     }
 
+    // Draws the range the drop would fill, so the gesture shows its effect before committing to it.
+    private void OnFillHandleMoved(object? sender, PointerEventArgs e)
+    {
+        if (_fillDragSourceRow is null || _currentVm is not { } vm) return;
+
+        var sourceIndex = vm.Rows.IndexOf(_fillDragSourceRow);
+        var targetIndex = FindRowIndexUnderPointer(e.GetPosition(DataGrid), vm);
+        if (sourceIndex < 0 || targetIndex < 0 || targetIndex == sourceIndex)
+        {
+            ClearFillPreview();
+            return;
+        }
+
+        var sourceCell = FindRowVisual(vm.Rows[sourceIndex]);
+        var targetCell = FindRowVisual(vm.Rows[targetIndex]);
+        if (sourceCell is null || targetCell is null)
+        {
+            ClearFillPreview();
+            return;
+        }
+
+        var sourceTop = sourceCell.TranslatePoint(default, DataGrid);
+        var targetTop = targetCell.TranslatePoint(default, DataGrid);
+        if (sourceTop is null || targetTop is null)
+        {
+            ClearFillPreview();
+            return;
+        }
+
+        // Cover both drag directions: from whichever row is higher to the bottom of the lower one.
+        var top = Math.Min(sourceTop.Value.Y, targetTop.Value.Y);
+        var bottom = Math.Max(sourceTop.Value.Y + sourceCell.Bounds.Height,
+                              targetTop.Value.Y + targetCell.Bounds.Height);
+
+        _fillPreview ??= CreateFillPreview();
+        Canvas.SetLeft(_fillPreview, 0);
+        Canvas.SetTop(_fillPreview, top);
+        _fillPreview.Width = Math.Max(0, DataGrid.Bounds.Width);
+        _fillPreview.Height = Math.Max(0, bottom - top);
+        _fillPreview.IsVisible = true;
+    }
+
+    private Border CreateFillPreview()
+    {
+        var preview = new Border
+        {
+            BorderBrush = Brushes.SteelBlue,
+            BorderThickness = new Avalonia.Thickness(1.5),
+            Background = new SolidColorBrush(Colors.SteelBlue, 0.12),
+            IsHitTestVisible = false
+        };
+        FillPreviewLayer.Children.Add(preview);
+        return preview;
+    }
+
+    private void ClearFillPreview()
+    {
+        if (_fillPreview != null) _fillPreview.IsVisible = false;
+    }
+
     private void OnFillHandleReleased(object? sender, PointerReleasedEventArgs e)
     {
-        if (_fillDragSourceRow < 0) return;
+        if (_fillDragSourceRow is null) return;
         e.Handled = true;
         e.Pointer.Capture(null);
 
-        var sourceRow = _fillDragSourceRow;
+        var sourceRowItem = _fillDragSourceRow;
         var columnKey = _fillDragColumnKey!;
-        _fillDragSourceRow = -1;
+        _fillDragSourceRow = null;
         _fillDragColumnKey = null;
+        ClearFillPreview();
 
         if (_currentVm is not { } vm) return;
 
+        var sourceRow = vm.Rows.IndexOf(sourceRowItem);
         var targetRow = FindRowIndexUnderPointer(e.GetPosition(DataGrid), vm);
-        if (targetRow < 0 || targetRow == sourceRow) return;
+        if (sourceRow < 0 || targetRow < 0 || targetRow == sourceRow) return;
 
         var from = Math.Min(sourceRow, targetRow);
         var to = Math.Max(sourceRow, targetRow);
         var targets = Enumerable.Range(from, to - from + 1).Where(r => r != sourceRow).ToList();
         vm.FillDown(sourceRow, columnKey, targets, DataGrid);
     }
+
+    private DataGridRow? FindRowVisual(DynamicDataRow item) =>
+        DataGrid.GetVisualDescendants()
+            .OfType<DataGridRow>()
+            .FirstOrDefault(r => ReferenceEquals(r.DataContext, item));
 
     private int FindRowIndexUnderPointer(Point position, WorkspaceViewModel vm)
     {
@@ -559,20 +665,36 @@ public partial class WorkspaceView : UserControl
     {
         SetCellEditing(false);
 
-        if (_pendingEdit == null) return;
+        var editor = _activeCellEditor;
+        _activeCellEditor = null;
 
-        var (row, propName, oldValue, oldKind) = _pendingEdit.Value;
-        _pendingEdit = null;
+        // Escape needs no undoing: the row was never touched while editing.
+        if (e.EditAction == DataGridEditAction.Cancel) return;
+        if (editor is not { } ed) return;
 
-        var newValue = row[propName];
-        if (newValue == oldValue) return;
+        // The editor field is a single slot, and the next cell's template can claim it before this
+        // fires. Committing it against the wrong cell would be worse than dropping the edit, so
+        // check it really is the cell that just closed.
+        if (e.Column?.Tag as string != ed.PropName) return;
+        if (!ReferenceEquals(e.Row?.DataContext, ed.Row)) return;
 
         if (DataContext is not WorkspaceViewModel vm) return;
 
-        var rowIndex = vm.Rows.IndexOf(row);
+        var rowIndex = vm.Rows.IndexOf(ed.Row);
         if (rowIndex < 0) return;
 
-        vm.CommitCellEdit(rowIndex, propName, oldValue, oldKind, newValue, DataGrid);
+        // Read straight off the row: nothing has written to it, so this is genuinely "before".
+        // Any resulting change in formula state comes back as FormulaVisualsChanged.
+        vm.CommitCellEdit(rowIndex, ed.PropName, ed.Row[ed.PropName], ed.Row.GetKind(ed.PropName),
+            ed.Box.Text ?? string.Empty, DataGrid);
+    }
+
+    private void OnFormulaVisualsChanged(object? sender, EventArgs e) => RefreshGridRows();
+
+    private void RefreshGridRows()
+    {
+        DataGridRefresh.Rows(DataGrid);
+        RefreshCurrentCell();
     }
 
     //  Formula bar — tracks the DataGrid's own "current cell" concept (column-level, unlike
@@ -963,6 +1085,7 @@ public partial class WorkspaceView : UserControl
             _currentVm.PropertyChanged -= OnVmPropertyChanged;
             _currentVm.FocusSearchRequested -= OnFocusSearchRequested;
             _currentVm.ToggleReplaceRequested -= OnToggleReplaceRequested;
+            _currentVm.FormulaVisualsChanged -= OnFormulaVisualsChanged;
         }
 
         if (DataContext is WorkspaceViewModel vm)
@@ -973,6 +1096,7 @@ public partial class WorkspaceView : UserControl
             vm.PropertyChanged += OnVmPropertyChanged;
             vm.FocusSearchRequested += OnFocusSearchRequested;
             vm.ToggleReplaceRequested += OnToggleReplaceRequested;
+            vm.FormulaVisualsChanged += OnFormulaVisualsChanged;
             RebuildColumns(vm);
             PushTextToEditor(vm.RawJsonText); // seed the editor for this tab
             ScheduleOverflowUpdate();
@@ -1450,12 +1574,14 @@ public partial class WorkspaceView : UserControl
                             displayText = formulaText;
                     }
 
-                    // Snapshot the old value the moment the editing template is instantiated.
-                    // CellEditEnded will compare against this to decide whether to push an action.
-                    _pendingEdit = (row, prop.Name, displayText, row.GetKind(prop.Name));
-
                     if (isBoolType)
                     {
+                        // A checkbox commits through its own two-way binding, and its undo entry is
+                        // pushed by the display template's IsCheckedChanged — so there is no text to
+                        // read back at CellEditEnded. Clearing the slot keeps a text editor left
+                        // over from a previously edited cell from being mistaken for this one.
+                        _activeCellEditor = null;
+
                         var cb = new CheckBox
                         {
                             VerticalAlignment = VerticalAlignment.Center,
@@ -1477,7 +1603,9 @@ public partial class WorkspaceView : UserControl
                             AcceptsReturn = true,
                             Text = displayText
                         };
-                        tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
+                        // No live write into the row — CellEditEnded reads this box on commit.
+                        // See _activeCellEditor for why that matters.
+                        _activeCellEditor = (row, prop.Name, tb);
                         return tb;
                     }
                 });

@@ -435,6 +435,7 @@
                          the discoverable way to see and type a formula, rather than requiring the
                          user to already know that typing '=' straight into a grid cell works. -->
                     <Border Grid.Row="0"
+                            cl:Coachmark.Id="wsFormulaBar"
                             Background="{DynamicResource ElevatedBackground}"
                             BorderBrush="{DynamicResource BorderColor}"
                             BorderThickness="0,0,0,1"
@@ -477,6 +478,7 @@
                                  rather than Click so the formula bar's LostFocus commit doesn't
                                  fire first and apply the formula to the single cell instead. -->
                             <Button x:Name="ApplyToColumnButton"
+                                    cl:Coachmark.Id="wsApplyToColumn"
                                     Grid.Column="3"
                                     Padding="6,2"
                                     Margin="8,0,0,0"
@@ -518,6 +520,11 @@
                             CornerRadius="0,0,9,9"
                             Background="{DynamicResource ElevatedBackground}"
                             ClipToBounds="True">
+                    <!-- The DataGrid shares this Panel with a hit-test-invisible canvas, which is
+                         where the fill-drag preview rectangle is drawn. It has to sit above the
+                         grid rather than inside a cell: the range being filled spans many rows, and
+                         a preview living in one cell's template would be clipped to that cell. -->
+                    <Panel>
                     <DataGrid x:Name="DataGrid"
                               cl:Coachmark.Id="wsGrid"
                               MinWidth="520"
@@ -622,6 +629,8 @@
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                     </DataGrid>
+                    <Canvas x:Name="FillPreviewLayer" IsHitTestVisible="False" />
+                    </Panel>
                     </Border>
                 </Grid>
             </Border>

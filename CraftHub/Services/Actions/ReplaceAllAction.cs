@@ -26,23 +26,13 @@ public sealed class ReplaceAllAction : IUndoableAction
     {
         foreach (var c in _changes)
             c.Row[c.PropName] = c.OldValue;
-        ForceDataGridUpdate();
+        DataGridRefresh.Rows(_dataGrid);
     }
 
     public void Redo()
     {
         foreach (var c in _changes)
             c.Row[c.PropName] = c.NewValue;
-        ForceDataGridUpdate();
-    }
-
-    private void ForceDataGridUpdate()
-    {
-        if (_dataGrid?.ItemsSource is System.Collections.IList)
-        {
-            var itemsSource = _dataGrid.ItemsSource;
-            _dataGrid.ItemsSource = null;
-            _dataGrid.ItemsSource = itemsSource;
-        }
+        DataGridRefresh.Rows(_dataGrid);
     }
 }

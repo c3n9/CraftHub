@@ -276,6 +276,16 @@ public partial class WorkspaceViewModel : ViewModelBase
 
     public bool HasFormulas => _formulaSession.HasAnyFormulas;
 
+    /// <summary>Raised after any operation that changes which cells are formulas. The fx marker and
+    /// the fill handle are decided when a cell template is built, not by a binding, so the view has
+    /// to rebuild its rows to show them — and every formula operation except a single-cell edit
+    /// (fill down, apply to column, detach, and the formula bar) reaches the session without the
+    /// grid ever hearing about it. One event rather than a DataGrid reference threaded through each
+    /// of them.</summary>
+    public event EventHandler? FormulaVisualsChanged;
+
+    private void FireFormulaVisualsChanged() => FormulaVisualsChanged?.Invoke(this, EventArgs.Empty);
+
     /// <summary>Which cell the formula bar shows/edits — set by the View from the DataGrid's own
     /// CurrentCellChanged event, since "current cell" isn't something the DataGrid selection model
     /// (SelectedRow/SelectedRowsCount) already tracks at column granularity.</summary>
@@ -312,10 +322,11 @@ public partial class WorkspaceViewModel : ViewModelBase
     /// where it was typed: text starting with '=' becomes a formula; anything else becomes a
     /// plain value, dropping any formula the cell previously had.
     ///
-    /// <paramref name="oldValue"/>/<paramref name="oldKind"/> must be the cell's state captured
-    /// BEFORE this edit started — by the time this runs, the grid's live-binding editor has
-    /// already overwritten the row with <paramref name="newText"/>, so re-reading the row here
-    /// would not recover the true "before" state.</summary>
+    /// <paramref name="oldValue"/>/<paramref name="oldKind"/> are the cell's state before the edit.
+    /// Both callers can read that straight off the row — neither the grid's cell editor nor the
+    /// formula bar writes into it before committing — but it stays an explicit parameter because
+    /// this method itself mutates the row partway through (removing a formula), and the undo entry
+    /// it pushes has to describe the state from before all of that.</summary>
     public void CommitCellEdit(int rowIndex, string columnKey, string oldValue, CellKind oldKind, string newText, DataGrid? dataGrid)
     {
         if (rowIndex < 0 || rowIndex >= Rows.Count) return;
@@ -364,6 +375,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         UndoRedo.Push(new SetCellFormulaAction(_formulaSession, changeSet, dataGrid));
         MarkDirty();
+        FireFormulaVisualsChanged();
     }
 
     /// <summary>Removes a cell's own formula, falling back to the column's template if it has one.
@@ -375,6 +387,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         UndoRedo.Push(new SetCellFormulaAction(_formulaSession, changeSet, dataGrid));
         MarkDirty();
+        FireFormulaVisualsChanged();
     }
 
     /// <summary>Copies <paramref name="sourceRowIndex"/>'s formula down into every row in
@@ -390,6 +403,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         UndoRedo.Push(new FillDownAction(_formulaSession, changeSets, dataGrid));
         MarkDirty();
+        FireFormulaVisualsChanged();
         NotifySuccess(Localizer.Get("FormulaFillDownMsg", changeSets.Count));
     }
 
@@ -431,6 +445,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         UndoRedo.Push(new SetColumnFormulaAction(_formulaSession, changeSet, dataGrid));
         MarkDirty();
+        FireFormulaVisualsChanged();
         NotifySuccess(Localizer.Get("FormulaColumnAppliedMsg",
             JsonPropertyDefinition.GetDisplayPath(columnKey), Rows.Count));
     }
@@ -448,6 +463,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         UndoRedo.Push(new SetColumnFormulaAction(_formulaSession, changeSet, dataGrid));
         MarkDirty();
+        FireFormulaVisualsChanged();
         NotifySuccess(Localizer.Get("FormulaColumnRemovedMsg", JsonPropertyDefinition.GetDisplayPath(columnKey)));
     }
 
@@ -467,6 +483,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         var snapshot = _formulaSession.DetachAll();
         UndoRedo.Push(new DetachFormulasAction(_formulaSession, snapshot));
         MarkDirty();
+        FireFormulaVisualsChanged();
         NotifySuccess(Localizer.Get("FormulaDetachedMsg"));
     }
 

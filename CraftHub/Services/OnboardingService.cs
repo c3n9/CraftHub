@@ -38,7 +38,10 @@ public sealed class OnboardingService : IOnboardingService
     // v3 adds undo history, the search filter toggle, and Find & Replace.
     // v4 adds the "show changes" button and the JSON comparer, which the tour opens and closes
     // for the user so the window isn't just described in the abstract.
-    private const string AppTourId = "app-overview-v4";
+    // v5 adds the formula-reference button. Formulas are deliberately NOT walked through as tour
+    // steps: they need a worked example to be worth anything, the tour would have had to conjure
+    // one up and leave it behind, and a reference you can reread beats a walkthrough you see once.
+    private const string AppTourId = "app-overview-v5";
 
     /// <summary>Separate id: this run is a hand-off from the main tour, not a step inside it.</summary>
     private const string ComparerTourId = "comparer-overview-v1";
@@ -141,6 +144,7 @@ public sealed class OnboardingService : IOnboardingService
             if (vm?.SelectedWorkspace is { IsJsonEditorMode: true } ws)
                 ws.SwitchToTableEditorCommand.Execute(null);
         }
+
 
         return
             TourBuilder.Create(AppTourId)
@@ -312,6 +316,11 @@ public sealed class OnboardingService : IOnboardingService
                     .Interactive(false)
                     .Title(Localizer.Get("TourLanguageTitle"))
                     .Text(Localizer.Get("TourLanguageText")))
+                .Coachmark("formulaHelpBtn", s => s
+                    .Placement(Side.Bottom)
+                    .Interactive(false)
+                    .Title(Localizer.Get("TourFormulaHelpBtnTitle"))
+                    .Text(Localizer.Get("TourFormulaHelpBtnText")))
                 .Coachmark("comparerBtn", s => s
                     .Placement(Side.Bottom)
                     .Interactive(false)
