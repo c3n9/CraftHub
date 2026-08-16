@@ -28,7 +28,7 @@ public partial class MainWindow : Window
     private bool _tourAutoStarted;
 
     // File types that can be opened by dropping them onto the window.
-    private static readonly string[] OpenableExtensions = { ".json", ".txt", ".cs" };
+    private static readonly string[] OpenableExtensions = { ".json", ".txt", ".cs", ".crhb" };
 
     public MainWindow()
     {

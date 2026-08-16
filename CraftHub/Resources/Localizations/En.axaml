@@ -408,8 +408,6 @@
 	<x:String x:Key="NoClassesFoundMsg">No classes found in the file.</x:String>
 
 	<!-- Formulas -->
-	<x:String x:Key="FormulaBarTip">Type a formula starting with '=', e.g. =@[price]*@[qty]. Enter applies it to this cell, Ctrl+Enter to the whole column, Escape cancels.</x:String>
-	<x:String x:Key="FormulaBarWatermark">Value, or a formula starting with '='…</x:String>
 	<x:String x:Key="FillHandleTip">Drag down to copy this formula into the rows below</x:String>
 	<x:String x:Key="CtxFillDown">Fill down</x:String>
 	<x:String x:Key="CtxDetachFormulas">Detach formulas…</x:String>
@@ -426,7 +424,6 @@
 	<x:String x:Key="FormulaCorruptStoredText">The stored formula text is malformed.</x:String>
 	<x:String x:Key="FormulaSidecarCorruptMsg">This document's formula file was unreadable and has been renamed to "{0}.bak" so nothing was lost. The document opened without formulas. ({1})</x:String>
 	<x:String x:Key="FormulaSidecarHashMismatchMsg">This document changed outside the app since its formulas were last saved — recalculating from the stored formulas.</x:String>
-	<x:String x:Key="ApplyToColumnTip">Apply this formula to the whole column (Ctrl+Enter). New rows are computed too.</x:String>
 	<x:String x:Key="CtxApplyToColumn">Apply formula to the whole column</x:String>
 	<x:String x:Key="CtxRemoveColumnFormula">Stop computing this column</x:String>
 	<x:String x:Key="FormulaColumnAppliedMsg">"{0}" is now computed for every row ({1}), including rows added later.</x:String>
@@ -522,4 +519,20 @@
 	<x:String x:Key="TourHelpStepText">This button brings the tour back whenever you want it.</x:String>
 	<x:String x:Key="TourFormulaHelpBtnTitle">Formula reference</x:String>
 	<x:String x:Key="TourFormulaHelpBtnText">Cells can compute themselves from other cells. This opens the reference: how to write a formula, how to address another row or a whole column, and every function with an example.</x:String>
+	<!-- Bundle / formula export -->
+	<x:String x:Key="ExportBundleTitle">Export with formulas</x:String>
+	<x:String x:Key="ExportFormulasTitle">Export formulas</x:String>
+	<x:String x:Key="ExportJsonTitle">Export JSON</x:String>
+	<x:String x:Key="BundleFileFilter">CraftHub document (data + formulas)</x:String>
+	<x:String x:Key="FormulaFileFilter">CraftHub formulas</x:String>
+	<x:String x:Key="BundleExportedMsg">Saved "{0}" — data and formulas in one file.</x:String>
+	<x:String x:Key="FormulasExportedMsg">Formulas saved to "{0}".</x:String>
+	<x:String x:Key="FormulaNoneToExportMsg">This document has no formulas to export.</x:String>
+	<x:String x:Key="BundleImportedMsg">Opened the bundle: {0} rows, {1} fields, formulas included.</x:String>
+	<x:String x:Key="BundleUnreadableMsg">This CraftHub file could not be read. ({0})</x:String>
+
+	<x:String x:Key="ExportMenuTip">Export the whole document — JSON, JSON with formulas, or the formulas alone</x:String>
+	<x:String x:Key="ExportPlainJsonItem">JSON only (computed values)</x:String>
+	<x:String x:Key="ExportBundleItem">JSON with formulas (.crhb)</x:String>
+	<x:String x:Key="ExportFormulasItem">Formulas only (.formulas.json)</x:String>
 </ResourceDictionary>

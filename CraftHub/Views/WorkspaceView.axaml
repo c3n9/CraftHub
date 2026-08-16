@@ -51,13 +51,40 @@
                             <TextBlock Text="{DynamicResource ImportJson}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnExportJson" Classes="toolbar-btn" Command="{Binding ExportJsonCommand}"
+                    <!-- No Command: the click opens the menu. Every entry exports the WHOLE
+                         document — which is why they live here and not in the grid's context menu,
+                         where sitting among "duplicate row"/"delete row" read as row-scoped. -->
+                    <Button x:Name="BtnExportJson" Classes="toolbar-btn"
                             cl:Coachmark.Id="exportJson"
-                            ToolTip.Tip="{DynamicResource ExportJsonTip}">
+                            ToolTip.Tip="{DynamicResource ExportMenuTip}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <materialIcons:MaterialIcon Kind="FileExportOutline" Width="16" Height="16" />
                             <TextBlock Text="{DynamicResource ExportJson}" VerticalAlignment="Center" />
+                            <materialIcons:MaterialIcon Kind="MenuDown" Width="14" Height="14" Opacity="0.6" />
                         </StackPanel>
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="{DynamicResource ExportPlainJsonItem}"
+                                          Command="{Binding ExportJsonCommand}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="CodeJson" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{DynamicResource ExportBundleItem}"
+                                          Command="{Binding ExportBundleCommand}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="PackageVariantClosed" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{DynamicResource ExportFormulasItem}"
+                                          Command="{Binding ExportFormulasCommand}"
+                                          IsEnabled="{Binding HasFormulas}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="FunctionVariant" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </MenuFlyout>
+                        </Button.Flyout>
                     </Button>
                     <Button x:Name="BtnImportClass" Classes="toolbar-btn" Command="{Binding ImportClassCommand}"
                             ToolTip.Tip="{DynamicResource ImportClassTip}">
@@ -105,10 +132,17 @@
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem x:Name="MiExportJson" Header="{DynamicResource ExportJson}"
-                                          IsVisible="False" Command="{Binding ExportJsonCommand}">
+                                          IsVisible="False">
                                     <MenuItem.Icon>
                                         <materialIcons:MaterialIcon Kind="FileExportOutline" Width="16" Height="16" />
                                     </MenuItem.Icon>
+                                    <MenuItem Header="{DynamicResource ExportPlainJsonItem}"
+                                              Command="{Binding ExportJsonCommand}" />
+                                    <MenuItem Header="{DynamicResource ExportBundleItem}"
+                                              Command="{Binding ExportBundleCommand}" />
+                                    <MenuItem Header="{DynamicResource ExportFormulasItem}"
+                                              Command="{Binding ExportFormulasCommand}"
+                                              IsEnabled="{Binding HasFormulas}" />
                                 </MenuItem>
                                 <MenuItem x:Name="MiImportClass" Header="{DynamicResource ImportClass}"
                                           IsVisible="False" Command="{Binding ImportClassCommand}">
@@ -430,74 +464,13 @@
                     CornerRadius="10"
                     Background="{DynamicResource BorderColor}"
                     Padding="1">
-                <Grid RowDefinitions="Auto,*">
-                    <!-- Formula bar: shows/edits the current cell's formula (or plain value) —
-                         the discoverable way to see and type a formula, rather than requiring the
-                         user to already know that typing '=' straight into a grid cell works. -->
-                    <Border Grid.Row="0"
-                            cl:Coachmark.Id="wsFormulaBar"
-                            Background="{DynamicResource ElevatedBackground}"
-                            BorderBrush="{DynamicResource BorderColor}"
-                            BorderThickness="0,0,0,1"
-                            CornerRadius="9,9,0,0"
-                            Padding="10,6">
-                        <!-- Always visible — even before any cell is selected — so the bar itself
-                             is what tells the user "formulas exist," rather than depending on
-                             HasCurrentCell ever flipping true first. -->
-                        <Grid ColumnDefinitions="Auto,Auto,*,Auto">
-                            <materialIcons:MaterialIcon Grid.Column="0"
-                                                         Kind="FunctionVariant"
-                                                         Width="15" Height="15"
-                                                         Opacity="0.55"
-                                                         VerticalAlignment="Center"
-                                                         Margin="0,0,6,0"
-                                                         ToolTip.Tip="{DynamicResource FormulaBarTip}" />
-                            <TextBlock Grid.Column="1"
-                                       Text="{Binding CurrentCellColumnKey}"
-                                       FontSize="12"
-                                       FontWeight="SemiBold"
-                                       Foreground="{DynamicResource TextMuted}"
-                                       VerticalAlignment="Center"
-                                       Margin="0,0,10,0" />
-                            <TextBox x:Name="FormulaBarTextBox"
-                                     Grid.Column="2"
-                                     Classes="grid-editor"
-                                     BorderThickness="0"
-                                     Background="Transparent"
-                                     FontFamily="Cascadia Code,Cascadia Mono,Consolas,Menlo,Courier New,monospace"
-                                     FontSize="13"
-                                     VerticalContentAlignment="Center"
-                                     Watermark="{DynamicResource FormulaBarWatermark}"
-                                     KeyDown="OnFormulaBarKeyDown"
-                                     TextChanged="OnFormulaBarTextChanged"
-                                     LostFocus="OnFormulaBarLostFocus" />
-                            <!-- "Apply to the whole column" needs a button, not just the Ctrl+Enter
-                                 shortcut it duplicates: a calculated column is the thing most
-                                 people actually want when they type their first formula, and a
-                                 shortcut nobody can see is a feature nobody finds. Pointer-pressed
-                                 rather than Click so the formula bar's LostFocus commit doesn't
-                                 fire first and apply the formula to the single cell instead. -->
-                            <Button x:Name="ApplyToColumnButton"
-                                    cl:Coachmark.Id="wsApplyToColumn"
-                                    Grid.Column="3"
-                                    Padding="6,2"
-                                    Margin="8,0,0,0"
-                                    Background="Transparent"
-                                    BorderThickness="0"
-                                    Cursor="Hand"
-                                    VerticalAlignment="Center"
-                                    ToolTip.Tip="{DynamicResource ApplyToColumnTip}">
-                                <materialIcons:MaterialIcon Kind="TableColumn" Width="16" Height="16" Opacity="0.7" />
-                            </Button>
-                        </Grid>
-                    </Border>
-
-                    <!-- Function autocomplete: appears under the formula bar while typing a
-                         function name after '='. Tab/Enter accepts the top suggestion; Escape or
-                         typing something that matches nothing closes it. Formula-bar only for
-                         now — not wired into the grid's own inline cell editor. -->
+                <Grid>
+                    <!-- Autocomplete for whatever cell is being edited: function names, column
+                         names inside [ ] or @[ ], and the current function's signature. Tab/Enter
+                         accepts the top suggestion; Escape or typing something that matches nothing
+                         closes it. PlacementTarget is assigned in code as each cell editor opens —
+                         there is no single fixed box to anchor it to any more. -->
                     <Popup x:Name="FormulaSuggestionsPopup"
-                           PlacementTarget="{Binding #FormulaBarTextBox}"
                            Placement="BottomEdgeAlignedLeft"
                            IsLightDismissEnabled="False"
                            Focusable="False"
@@ -516,8 +489,7 @@
                         </Border>
                     </Popup>
 
-                    <Border Grid.Row="1"
-                            CornerRadius="0,0,9,9"
+                    <Border CornerRadius="9"
                             Background="{DynamicResource ElevatedBackground}"
                             ClipToBounds="True">
                     <!-- The DataGrid shares this Panel with a hit-test-invisible canvas, which is

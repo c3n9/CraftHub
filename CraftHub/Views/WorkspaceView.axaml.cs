@@ -39,19 +39,6 @@ namespace CraftHub.Views;
 
 public partial class WorkspaceView : UserControl
 {
-    // The text editor currently open in a cell, if any. CellEditEnded reads its text; nothing
-    // writes to the row until then.
-    //
-    // This used to be a value snapshot plus a live `TextChanged -> row[prop] = text` binding, and
-    // that combination was wrong in a way worth recording. A formula cell is edited as its FORMULA
-    // while the row holds the formula's RESULT, so the live binding immediately wrote the formula
-    // TEXT into the row; restoring the result then depended on the commit path noticing. It
-    // couldn't reliably: a single snapshot slot is overwritten by the next cell's editing template
-    // as soon as the user clicks straight from one cell to another, which happens before
-    // CellEditEnded fires for the one they left — so the cell they left kept the formula text on
-    // screen where its value belonged. Not writing to the row until commit removes the whole class
-    // of failure: there is nothing to restore, and Escape is free.
-    private (DynamicDataRow Row, string PropName, TextBox Box)? _activeCellEditor;
 
     private TextEditor? _jsonEditor;
     private Button? _jsonErrorButton;
@@ -73,6 +60,7 @@ public partial class WorkspaceView : UserControl
         DataGrid.LoadingRow       += OnDataGridLoadingRow;
         DataGrid.SelectionChanged  += OnDataGridSelectionChanged;
         DataGrid.BeginningEdit     += (_, _) => SetCellEditing(true);
+        DataGrid.CellEditEnding    += OnDataGridCellEditEnding;
         DataGrid.CellEditEnded     += OnDataGridCellEditEnded;
         DataGrid.CurrentCellChanged += OnDataGridCurrentCellChanged;
         // Tunnel (before the Ctrl+D KeyBinding's own Bubble-stage handling) so a formula cell's
@@ -101,21 +89,6 @@ public partial class WorkspaceView : UserControl
                     await vm.RefreshClipboardStateAsync();
             };
 
-        // Pointer-pressed, not Click: the formula bar commits on LostFocus, and a Click fires only
-        // after focus has already moved — which would apply the typed formula to the single current
-        // cell first, and then apply it again to the column. Handling the press keeps focus put.
-        ApplyToColumnButton.AddHandler(PointerPressedEvent, (_, e) =>
-        {
-            e.Handled = true;
-            ApplyFormulaBarTextToColumn();
-        }, RoutingStrategies.Tunnel);
-
-        // Moving the caret changes what the hint should say just as much as typing does — clicking
-        // into an existing formula's parentheses is exactly when someone wants its signature.
-        FormulaBarTextBox.PropertyChanged += (_, e) =>
-        {
-            if (e.Property == TextBox.CaretIndexProperty) UpdateFormulaSuggestions();
-        };
     }
 
     // Which of the two column-formula entries makes sense depends on the column under the pointer,
@@ -355,7 +328,7 @@ public partial class WorkspaceView : UserControl
     //  the text already is, the context menu is where the neighbouring Fill down lives, and the
     //  shortcut is what someone coming from Excel tries first.
 
-    private void OnApplyToColumnClick(object? sender, RoutedEventArgs e) => ApplyFormulaBarTextToColumn();
+    private void OnApplyToColumnClick(object? sender, RoutedEventArgs e) => ApplyCurrentCellFormulaToColumn();
 
     private void OnRemoveColumnFormulaClick(object? sender, RoutedEventArgs e)
     {
@@ -363,20 +336,28 @@ public partial class WorkspaceView : UserControl
         if (DataGrid.CurrentColumn?.Tag is not string columnKey) return;
 
         vm.RemoveColumnFormula(columnKey, DataGrid);
-        RefreshFormulaBar();
     }
 
-    /// <summary>Applies whatever the formula bar currently holds to the whole current column. Reads
-    /// the bar rather than the cell so a formula that's been typed but not yet committed is applied
-    /// as typed — otherwise the button would need the user to press Enter first, which would have
-    /// already committed it to the single cell.</summary>
-    private void ApplyFormulaBarTextToColumn()
+    /// <summary>Applies the current cell's formula to its whole column. Prefers the text still in
+    /// the open cell editor over the committed formula, so Ctrl+Enter works on what has just been
+    /// typed — otherwise it would need Enter first, which would already have committed it to the
+    /// single cell.</summary>
+    private void ApplyCurrentCellFormulaToColumn(TextBox? editorBox = null)
     {
         if (_currentVm is not { HasCurrentCell: true } vm) return;
 
+        var rowIndex = vm.CurrentCellRowIndex;
+        var columnKey = vm.CurrentCellColumnKey!;
+        // Prefer what is still in the open editor over the committed formula.
+        var text = editorBox?.Text ?? vm.GetDisplayFormula(rowIndex, columnKey) ?? string.Empty;
+
+        if (rowIndex < 0) return;
+
         FormulaSuggestionsPopup.IsOpen = false;
-        vm.CommitColumnFormula(vm.CurrentCellRowIndex, vm.CurrentCellColumnKey!, FormulaBarTextBox.Text ?? "", DataGrid);
-        RefreshFormulaBar();
+        // Close the editor first: committing a column formula rewrites every row, and doing that
+        // underneath an open editor is the same re-entrancy that used to crash the cell commit.
+        DataGrid.CommitEdit();
+        vm.CommitColumnFormula(rowIndex, columnKey, text, DataGrid);
     }
 
     private List<int> SelectedRowIndicesInOrder(WorkspaceViewModel vm) =>
@@ -492,6 +473,7 @@ public partial class WorkspaceView : UserControl
     // underneath it.
     private DynamicDataRow? _fillDragSourceRow;
     private string? _fillDragColumnKey;
+    private DataGridCell? _fillDragCell;
     private Border? _fillPreview;
 
     private void OnFillHandlePressed(object? sender, PointerPressedEventArgs e, DynamicDataRow sourceRow, string columnKey)
@@ -501,6 +483,9 @@ public partial class WorkspaceView : UserControl
         e.Pointer.Capture(el);
         _fillDragSourceRow = sourceRow;
         _fillDragColumnKey = columnKey;
+        // The cell the handle sits in gives the preview its horizontal extent — a fill only ever
+        // affects this one column, so highlighting the full row width would overstate it.
+        _fillDragCell = (sender as Visual)?.FindAncestorOfType<DataGridCell>();
     }
 
     // Draws the range the drop would fill, so the gesture shows its effect before committing to it.
@@ -537,10 +522,20 @@ public partial class WorkspaceView : UserControl
         var bottom = Math.Max(sourceTop.Value.Y + sourceCell.Bounds.Height,
                               targetTop.Value.Y + targetCell.Bounds.Height);
 
+        // Horizontal extent = the dragged column only. Falls back to the full width if the cell
+        // visual has been recycled out from under the drag, which beats drawing nothing.
+        var left = 0.0;
+        var width = DataGrid.Bounds.Width;
+        if (_fillDragCell is { } cell && cell.TranslatePoint(default, DataGrid) is { } cellOrigin)
+        {
+            left = cellOrigin.X;
+            width = cell.Bounds.Width;
+        }
+
         _fillPreview ??= CreateFillPreview();
-        Canvas.SetLeft(_fillPreview, 0);
+        Canvas.SetLeft(_fillPreview, left);
         Canvas.SetTop(_fillPreview, top);
-        _fillPreview.Width = Math.Max(0, DataGrid.Bounds.Width);
+        _fillPreview.Width = Math.Max(0, width);
         _fillPreview.Height = Math.Max(0, bottom - top);
         _fillPreview.IsVisible = true;
     }
@@ -573,6 +568,7 @@ public partial class WorkspaceView : UserControl
         var columnKey = _fillDragColumnKey!;
         _fillDragSourceRow = null;
         _fillDragColumnKey = null;
+        _fillDragCell = null;
         ClearFillPreview();
 
         if (_currentVm is not { } vm) return;
@@ -661,35 +657,51 @@ public partial class WorkspaceView : UserControl
             vm.IsCellEditing = value;
     }
 
+    // What the editor held, captured while it still exists. CellEditEnding is the last moment the
+    // editor control is reachable, and it hands it over directly as EditingElement — so the text
+    // comes from the edit that is actually ending, rather than from a field that the next cell's
+    // template may already have overwritten. Clicking straight from one cell to another does
+    // exactly that, and the old single-slot version silently threw such edits away.
+    private (DynamicDataRow Row, string PropName, string Text)? _pendingCommit;
+
+    private void OnDataGridCellEditEnding(object? sender, DataGridCellEditEndingEventArgs e)
+    {
+        _pendingCommit = null;
+        if (e.EditAction != DataGridEditAction.Commit) return;
+        if (e.Column?.Tag is not string propName) return;
+        if (e.Row?.DataContext is not DynamicDataRow row) return;
+        if (e.EditingElement is not TextBox box) return;
+
+        _pendingCommit = (row, propName, box.Text ?? string.Empty);
+    }
+
     private void OnDataGridCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
     {
         SetCellEditing(false);
+        FormulaSuggestionsPopup.IsOpen = false;
 
-        var editor = _activeCellEditor;
-        _activeCellEditor = null;
+        var pending = _pendingCommit;
+        _pendingCommit = null;
 
-        // Escape needs no undoing: the row was never touched while editing.
-        if (e.EditAction == DataGridEditAction.Cancel) return;
-        if (editor is not { } ed) return;
-
-        // The editor field is a single slot, and the next cell's template can claim it before this
-        // fires. Committing it against the wrong cell would be worse than dropping the edit, so
-        // check it really is the cell that just closed.
-        if (e.Column?.Tag as string != ed.PropName) return;
-        if (!ReferenceEquals(e.Row?.DataContext, ed.Row)) return;
-
+        // Escape needs no undoing: nothing was written to the row while editing.
+        if (e.EditAction == DataGridEditAction.Cancel || pending is not { } commit) return;
         if (DataContext is not WorkspaceViewModel vm) return;
 
-        var rowIndex = vm.Rows.IndexOf(ed.Row);
+        var rowIndex = vm.Rows.IndexOf(commit.Row);
         if (rowIndex < 0) return;
 
         // Read straight off the row: nothing has written to it, so this is genuinely "before".
         // Any resulting change in formula state comes back as FormulaVisualsChanged.
-        vm.CommitCellEdit(rowIndex, ed.PropName, ed.Row[ed.PropName], ed.Row.GetKind(ed.PropName),
-            ed.Box.Text ?? string.Empty, DataGrid);
+        vm.CommitCellEdit(rowIndex, commit.PropName, commit.Row[commit.PropName],
+            commit.Row.GetKind(commit.PropName), commit.Text, DataGrid);
     }
 
-    private void OnFormulaVisualsChanged(object? sender, EventArgs e) => RefreshGridRows();
+    /// <summary>Posted rather than run inline. This arrives while the DataGrid is still finishing
+    /// the edit that triggered it, and rebuilding the rows means tearing down ItemsSource — doing
+    /// that underneath the grid's own edit bookkeeping crashed it, which is what typing a formula
+    /// straight into a cell used to do. Background priority lets the edit settle first.</summary>
+    private void OnFormulaVisualsChanged(object? sender, EventArgs e) =>
+        Dispatcher.UIThread.Post(RefreshGridRows, DispatcherPriority.Background);
 
     private void RefreshGridRows()
     {
@@ -697,13 +709,12 @@ public partial class WorkspaceView : UserControl
         RefreshCurrentCell();
     }
 
-    //  Formula bar — tracks the DataGrid's own "current cell" concept (column-level, unlike
-    //  SelectedItem/SelectedRowsCount) so the bar always shows/edits whatever cell has focus.
+    //  Current cell — the DataGrid's own column-level notion of "current", which
+    //  SelectedItem/SelectedRowsCount don't track. Drives the active-cell border and the fill handle.
 
     // Fired from both DataGrid.CurrentCellChanged and DataGrid.SelectionChanged — deliberately
     // redundant, since which one actually reflects "the cell the user just clicked" first isn't
-    // documented/guaranteed, and missing the update entirely would leave the formula bar showing
-    // the wrong cell's content with no visible sign anything was wrong.
+    // documented/guaranteed, and missing the update would leave the active-cell marker behind.
     private void OnDataGridCurrentCellChanged(object? sender, EventArgs e) => RefreshCurrentCell();
 
     private void RefreshCurrentCell()
@@ -718,75 +729,8 @@ public partial class WorkspaceView : UserControl
         vm.CurrentCellRowIndex = hasCell ? rowIndex : -1;
         vm.CurrentCellColumnKey = hasCell ? columnKey : null;
 
-        RefreshFormulaBar();
     }
 
-    private void RefreshFormulaBar()
-    {
-        FormulaBarTextBox.Text = _currentVm is { HasCurrentCell: true } vm ? vm.CurrentCellText : "";
-        FormulaSuggestionsPopup.IsOpen = false;
-    }
-
-    // Enter and losing focus both commit (matches Excel's formula bar); Escape reverts the
-    // displayed text without touching the cell. CommitCellEdit's own "no real change" guard makes
-    // committing on every focus loss safe — clicking away without editing anything is a no-op.
-    private void CommitFormulaBarEdit()
-    {
-        if (_currentVm is not { HasCurrentCell: true } vm) return;
-
-        var rowIndex = vm.CurrentCellRowIndex;
-        var columnKey = vm.CurrentCellColumnKey!;
-        var row = vm.Rows[rowIndex];
-        // Untouched by the formula bar itself (unlike the grid's own cell editor, this TextBox
-        // isn't live-bound into the row), so the row still holds the true pre-edit state here.
-        var oldValue = row[columnKey];
-        var oldKind = row.GetKind(columnKey);
-
-        vm.CommitCellEdit(rowIndex, columnKey, oldValue, oldKind, FormulaBarTextBox.Text ?? "", DataGrid);
-    }
-
-    private void OnFormulaBarKeyDown(object? sender, KeyEventArgs e)
-    {
-        // Ctrl+Enter is "apply to the whole column", never "accept this suggestion".
-        if (FormulaSuggestionsPopup.IsOpen && _formulaSuggestions.Count > 0
-            && e.Key is Key.Tab or Key.Enter && !e.KeyModifiers.HasFlag(KeyModifiers.Control))
-        {
-            e.Handled = true;
-            AcceptFormulaSuggestion(_formulaSuggestions[0]);
-            return;
-        }
-
-        if (FormulaSuggestionsPopup.IsOpen && e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            FormulaSuggestionsPopup.IsOpen = false;
-            return;
-        }
-
-        // Ctrl+Enter applies to the whole column — Excel's own gesture for "commit this to more
-        // than the one cell", so it's the first thing a spreadsheet user tries.
-        if (e.Key == Key.Enter && e.KeyModifiers.HasFlag(KeyModifiers.Control))
-        {
-            e.Handled = true;
-            ApplyFormulaBarTextToColumn();
-            DataGrid.Focus();
-        }
-        else if (e.Key == Key.Enter)
-        {
-            e.Handled = true;
-            CommitFormulaBarEdit();
-            RefreshFormulaBar();
-            DataGrid.Focus();
-        }
-        else if (e.Key == Key.Escape)
-        {
-            e.Handled = true;
-            RefreshFormulaBar();
-            DataGrid.Focus();
-        }
-    }
-
-    private void OnFormulaBarLostFocus(object? sender, RoutedEventArgs e) => CommitFormulaBarEdit();
 
     //  Formula autocomplete — formula bar only (not the grid's own inline cell editor).
     //
@@ -814,20 +758,68 @@ public partial class WorkspaceView : UserControl
     private CompletionKind _completionKind = CompletionKind.None;
     private int _completionStart;
 
-    private void OnFormulaBarTextChanged(object? sender, TextChangedEventArgs e) => UpdateFormulaSuggestions();
+    /// <summary>The editor the visible suggestions belong to. Set from the box that raised the
+    /// event, never from a shared "current editor" field: the grid reuses editor instances, so such
+    /// a field goes stale exactly when a second cell is edited — which is why the popup stopped
+    /// appearing at all after the first cell.</summary>
+    private TextBox? _suggestionBox;
 
-    private void UpdateFormulaSuggestions()
+    /// <summary>Gives a freshly created cell editor the formula behaviour that used to live on the
+    /// formula bar: completion of function and column names, the signature hint, and Ctrl+Enter to
+    /// apply what's typed to the whole column. The popup is anchored here too — with the bar gone
+    /// there is no fixed box to point it at, so it follows whichever cell is open.</summary>
+    private void AttachFormulaEditing(TextBox box)
     {
-        // Selecting a different cell rewrites the bar's text and moves its caret; without this the
-        // popup would pop open over a bar nobody is typing in.
-        if (!FormulaBarTextBox.IsFocused)
+        // The grid reuses editor instances between cells, so this can be handed the same TextBox
+        // more than once — wiring it twice would fire every handler twice.
+        if (box.Tag is "formula-editing") return;
+        box.Tag = "formula-editing";
+
+        box.TextChanged += (_, _) => UpdateFormulaSuggestions(box);
+        // Moving the caret changes what the hint should say just as much as typing does — clicking
+        // into an existing formula's parentheses is exactly when someone wants its signature.
+        box.PropertyChanged += (_, e) =>
         {
-            FormulaSuggestionsPopup.IsOpen = false;
+            if (e.Property == TextBox.CaretIndexProperty) UpdateFormulaSuggestions(box);
+        };
+        box.AddHandler(KeyDownEvent, OnCellEditorKeyDown, RoutingStrategies.Tunnel);
+        box.DetachedFromVisualTree += (_, _) => FormulaSuggestionsPopup.IsOpen = false;
+    }
+
+    // Tunnel, so these are claimed before the DataGrid turns Enter/Escape into its own
+    // commit/cancel — otherwise accepting a suggestion with Enter would close the editor instead.
+    private void OnCellEditorKeyDown(object? sender, KeyEventArgs e)
+    {
+        // Ctrl+Enter is "apply to the whole column", never "accept this suggestion".
+        if (e.Key == Key.Enter && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            e.Handled = true;
+            ApplyCurrentCellFormulaToColumn(sender as TextBox);
             return;
         }
 
-        var text = FormulaBarTextBox.Text ?? "";
-        var caret = Math.Clamp(FormulaBarTextBox.CaretIndex, 0, text.Length);
+        if (!FormulaSuggestionsPopup.IsOpen) return;
+
+        if (e.Key is Key.Tab or Key.Enter && _formulaSuggestions.Count > 0)
+        {
+            e.Handled = true;
+            AcceptFormulaSuggestion(_formulaSuggestions[0]);
+        }
+        else if (e.Key == Key.Escape)
+        {
+            // First Escape dismisses the popup; a second one reaches the grid and cancels the edit.
+            e.Handled = true;
+            FormulaSuggestionsPopup.IsOpen = false;
+        }
+    }
+
+    private void UpdateFormulaSuggestions(TextBox box)
+    {
+        _suggestionBox = box;
+        FormulaSuggestionsPopup.PlacementTarget = box;
+
+        var text = box.Text ?? "";
+        var caret = Math.Clamp(box.CaretIndex, 0, text.Length);
 
         (_completionKind, _completionStart) = FindCompletionTarget(text, caret);
         var prefix = _completionKind == CompletionKind.None ? "" : text[_completionStart..caret];
@@ -1047,8 +1039,10 @@ public partial class WorkspaceView : UserControl
 
     private void AcceptFormulaSuggestion(FormulaSuggestion suggestion)
     {
-        var text = FormulaBarTextBox.Text ?? "";
-        var caret = Math.Clamp(FormulaBarTextBox.CaretIndex, 0, text.Length);
+        if (_suggestionBox is not { } box) return;
+
+        var text = box.Text ?? "";
+        var caret = Math.Clamp(box.CaretIndex, 0, text.Length);
         var start = Math.Clamp(_completionStart, 0, caret);
         var end = CompletionEnd(text, caret);
 
@@ -1065,11 +1059,11 @@ public partial class WorkspaceView : UserControl
         };
         var caretShift = _completionKind == CompletionKind.Column && bracketAlreadyThere ? 1 : 0;
 
-        FormulaBarTextBox.Text = text[..start] + replacement + text[end..];
-        FormulaBarTextBox.CaretIndex = start + replacement.Length + caretShift;
+        box.Text = text[..start] + replacement + text[end..];
+        box.CaretIndex = start + replacement.Length + caretShift;
 
         FormulaSuggestionsPopup.IsOpen = false;
-        FormulaBarTextBox.Focus();
+        box.Focus();
     }
 
     //  DataContext / column wiring
@@ -1577,11 +1571,8 @@ public partial class WorkspaceView : UserControl
                     if (isBoolType)
                     {
                         // A checkbox commits through its own two-way binding, and its undo entry is
-                        // pushed by the display template's IsCheckedChanged — so there is no text to
-                        // read back at CellEditEnded. Clearing the slot keeps a text editor left
-                        // over from a previously edited cell from being mistaken for this one.
-                        _activeCellEditor = null;
-
+                        // pushed by the display template's IsCheckedChanged — CellEditEnding only
+                        // captures text editors, so this one is left alone on purpose.
                         var cb = new CheckBox
                         {
                             VerticalAlignment = VerticalAlignment.Center,
@@ -1603,9 +1594,10 @@ public partial class WorkspaceView : UserControl
                             AcceptsReturn = true,
                             Text = displayText
                         };
-                        // No live write into the row — CellEditEnded reads this box on commit.
-                        // See _activeCellEditor for why that matters.
-                        _activeCellEditor = (row, prop.Name, tb);
+                        // No live write into the row: the row holds a formula's RESULT while the
+                        // editor shows its TEXT, so writing through would put the formula into the
+                        // data. CellEditEnding reads this box at commit time instead.
+                        AttachFormulaEditing(tb);
                         return tb;
                     }
                 });

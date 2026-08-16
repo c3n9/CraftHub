@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using Avalonia.Controls;
 
@@ -29,7 +30,19 @@ public static class DataGridRefresh
         grid.ItemsSource = itemsSource;
 
         if (selected != null) grid.SelectedItem = selected;
-        if (currentColumn != null && grid.Columns.Contains(currentColumn))
+
+        // CurrentColumn can only be assigned while the grid has a current ROW, and re-selecting
+        // above does not always establish one by the time we get here — with nothing selected it
+        // never does. Restoring the cursor is a convenience; throwing out of a refresh because it
+        // could not be restored is not acceptable, so this is best-effort.
+        if (currentColumn == null || !grid.Columns.Contains(currentColumn)) return;
+        try
+        {
             grid.CurrentColumn = currentColumn;
+        }
+        catch (InvalidOperationException)
+        {
+            // No current row to hang it on — the cursor just starts fresh.
+        }
     }
 }

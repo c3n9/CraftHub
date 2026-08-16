@@ -407,8 +407,6 @@
     <x:String x:Key="NoClassesFoundMsg">В файле не найдено ни одного класса.</x:String>
 
     <!-- Формулы -->
-    <x:String x:Key="FormulaBarTip">Введите формулу, начиная с «=», например =@[price]*@[qty]. Enter — применить к ячейке, Ctrl+Enter — ко всей колонке, Escape — отменить.</x:String>
-    <x:String x:Key="FormulaBarWatermark">Значение или формула, начиная с «=»…</x:String>
     <x:String x:Key="FillHandleTip">Потяните вниз, чтобы скопировать формулу в нижние строки</x:String>
     <x:String x:Key="CtxFillDown">Протянуть вниз</x:String>
     <x:String x:Key="CtxDetachFormulas">Отсоединить формулы…</x:String>
@@ -425,7 +423,6 @@
     <x:String x:Key="FormulaCorruptStoredText">Сохранённый текст формулы повреждён.</x:String>
     <x:String x:Key="FormulaSidecarCorruptMsg">Файл формул этого документа не удалось прочитать, он переименован в «{0}.bak» — ничего не потеряно. Документ открыт без формул. ({1})</x:String>
     <x:String x:Key="FormulaSidecarHashMismatchMsg">Документ был изменён вне приложения с момента последнего сохранения формул — пересчитываю по сохранённым формулам.</x:String>
-    <x:String x:Key="ApplyToColumnTip">Применить формулу ко всей колонке (Ctrl+Enter). Новые строки тоже будут вычисляться.</x:String>
     <x:String x:Key="CtxApplyToColumn">Применить формулу ко всей колонке</x:String>
     <x:String x:Key="CtxRemoveColumnFormula">Перестать вычислять эту колонку</x:String>
     <x:String x:Key="FormulaColumnAppliedMsg">Колонка «{0}» теперь вычисляется для каждой строки ({1}), включая добавленные позже.</x:String>
@@ -521,4 +518,20 @@
     <x:String x:Key="TourHelpStepText">Эта кнопка вернёт обучение в любой момент.</x:String>
     <x:String x:Key="TourFormulaHelpBtnTitle">Справочник формул</x:String>
     <x:String x:Key="TourFormulaHelpBtnText">Ячейки умеют вычисляться из других ячеек. Отсюда открывается справочник: как написать формулу, как сослаться на другую строку или на всю колонку, и все функции с примерами.</x:String>
+    <!-- Экспорт документа и формул -->
+    <x:String x:Key="ExportBundleTitle">Экспорт вместе с формулами</x:String>
+    <x:String x:Key="ExportFormulasTitle">Экспорт формул</x:String>
+    <x:String x:Key="ExportJsonTitle">Экспорт JSON</x:String>
+    <x:String x:Key="BundleFileFilter">Документ CraftHub (данные и формулы)</x:String>
+    <x:String x:Key="FormulaFileFilter">Формулы CraftHub</x:String>
+    <x:String x:Key="BundleExportedMsg">Сохранено в «{0}» — данные и формулы в одном файле.</x:String>
+    <x:String x:Key="FormulasExportedMsg">Формулы сохранены в «{0}».</x:String>
+    <x:String x:Key="FormulaNoneToExportMsg">В этом документе нет формул для экспорта.</x:String>
+    <x:String x:Key="BundleImportedMsg">Открыт документ: строк {0}, полей {1}, формулы на месте.</x:String>
+    <x:String x:Key="BundleUnreadableMsg">Не удалось прочитать этот файл CraftHub. ({0})</x:String>
+
+    <x:String x:Key="ExportMenuTip">Экспорт всего документа — JSON, JSON с формулами или только формулы</x:String>
+    <x:String x:Key="ExportPlainJsonItem">Только JSON (вычисленные значения)</x:String>
+    <x:String x:Key="ExportBundleItem">JSON вместе с формулами (.crhb)</x:String>
+    <x:String x:Key="ExportFormulasItem">Только формулы (.formulas.json)</x:String>
 </ResourceDictionary>

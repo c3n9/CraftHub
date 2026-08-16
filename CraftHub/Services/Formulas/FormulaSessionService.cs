@@ -1,4 +1,5 @@
 using System;
+using Avalonia.Threading;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -123,6 +124,19 @@ public sealed class FormulaSessionService
                 return new FormulaLoadResult(outcome, null, null);
         }
         throw new InvalidOperationException("Unreachable.");
+    }
+
+    /// <summary>Adopts a sidecar that came from somewhere other than a <c>.formulas.json</c> file —
+    /// currently a <c>.crhb</c> bundle, which carries its formulas inside itself. Recalculates
+    /// rather than trusting the bundled values: the data and the formulas were written together, so
+    /// they should agree, and if they don't the formulas are the definition and the values are the
+    /// stale copy.</summary>
+    public void AdoptSidecar(FormulaSidecar sidecar)
+    {
+        _formulasDroppedWithColumn.Clear();
+        Sidecar = sidecar;
+        RebuildGraph();
+        if (HasAnyFormulas) FullRecalculate();
     }
 
     /// <summary>Reconstructs the whole dependency graph from the sidecar — the graph holds no
@@ -566,6 +580,20 @@ public sealed class FormulaSessionService
 
     private List<CellSnapshot> RecalculateFrom(IEnumerable<string> changedPaths, WorkspaceTableShape shape)
     {
+        var wasRecalculating = _recalculating;
+        _recalculating = true;
+        try
+        {
+            return RecalculateFromCore(changedPaths, shape);
+        }
+        finally
+        {
+            _recalculating = wasRecalculating;
+        }
+    }
+
+    private List<CellSnapshot> RecalculateFromCore(IEnumerable<string> changedPaths, WorkspaceTableShape shape)
+    {
         var affected = AffectedPaths(changedPaths);
 
         var cyclic = new Dictionary<string, IReadOnlyList<string>>();
@@ -767,6 +795,80 @@ public sealed class FormulaSessionService
             columnEvents.CollectionChanged += OnPropertiesCollectionChanged;
 
         foreach (var property in _properties) WatchForRename(property);
+        foreach (var row in _rows) WatchForValueChanges(row);
+    }
+
+    // -----------------------------------------------------------------------
+    //  Value changes — a formula has to notice when what it READS changes
+    // -----------------------------------------------------------------------
+    //
+    //  Editing a plain cell that a formula reads has to recompute that formula. Without this,
+    //  writing "=@[a]*2" and then filling in the a column leaves the result blank forever, because
+    //  nothing ever asked the engine to run again.
+    //
+    //  Driven off each row's own PropertyChanged rather than from the edit commands, for the same
+    //  reason the structural sync is: the paths that write a value are many (cell edit and its
+    //  undo, paste, replace-all, the JSON editor, recalculation itself) and hooking them one by one
+    //  would miss some and double-apply on others.
+    //
+    //  DynamicDataRow reports "something on this row changed" without naming the column, so there
+    //  is nothing to recalculate *from* — hence a full pass. Two things keep that affordable: it is
+    //  skipped entirely when the document has no formulas, and it is coalesced onto the dispatcher,
+    //  so a paste that writes a thousand cells still recalculates once.
+
+    private bool _recalculating;
+    private bool _recalcQueued;
+
+    private void WatchForValueChanges(DynamicDataRow row) => row.PropertyChanged += OnRowValueChanged;
+
+    private void StopWatchingForValueChanges(DynamicDataRow row) => row.PropertyChanged -= OnRowValueChanged;
+
+    private void OnRowValueChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        // Recalculation writes cells itself; without this it would retrigger itself forever.
+        if (_recalculating || _recalcQueued || !HasAnyFormulas) return;
+
+        _recalcQueued = true;
+        Dispatcher.UIThread.Post(() =>
+        {
+            _recalcQueued = false;
+            RecalculateAll();
+        }, DispatcherPriority.Background);
+    }
+
+    /// <summary>Raised after a recalculation that actually changed something. The workspace turns
+    /// this into a grid refresh: values re-render through their bindings on their own, but a cell
+    /// that has just stopped erroring keeps its red marker and stale tooltip until the row is
+    /// rebuilt, because those are decided when the cell template runs.</summary>
+    public event EventHandler? Recalculated;
+
+    /// <summary>Recomputes every formula and reports whether any cell actually came out different,
+    /// so the caller can skip refreshing the grid when nothing moved.</summary>
+    public bool RecalculateAll()
+    {
+        if (!HasAnyFormulas) return false;
+
+        var before = SnapshotFormulaCells();
+        FullRecalculate();
+        var changed = !SnapshotFormulaCells().SequenceEqual(before);
+        if (changed) Recalculated?.Invoke(this, EventArgs.Empty);
+        return changed;
+    }
+
+    private List<string> SnapshotFormulaCells()
+    {
+        var shape = new WorkspaceTableShape(_rows, _properties);
+        var snapshot = new List<string>();
+        for (var row = 0; row < _rows.Count; row++)
+            foreach (var property in _properties)
+            {
+                var path = shape.PathForCell(row, property.Name)?.ToCanonicalString();
+                if (path is null) continue;
+                if (!Sidecar.CellFormulas.ContainsKey(path) && !Sidecar.ColumnFormulas.ContainsKey(property.Name)) continue;
+                var state = Sidecar.State.TryGetValue(path, out var st) ? st.ErrorCode : "";
+                snapshot.Add($"{path}\u001F{_rows[row][property.Name]}\u001F{state}");
+            }
+        return snapshot;
     }
 
     private void WatchForRename(JsonPropertyDefinition property)
@@ -786,6 +888,7 @@ public sealed class FormulaSessionService
         switch (e.Action)
         {
             case NotifyCollectionChangedAction.Add when e.NewItems is { Count: > 0 } && e.NewStartingIndex >= 0:
+                foreach (var added in e.NewItems.OfType<DynamicDataRow>()) WatchForValueChanges(added);
                 // Once per inserted row at the SAME index: each call shifts everything at or below
                 // that index down by one, which composes to the n-row shift the batch needs.
                 for (var i = 0; i < e.NewItems.Count; i++)
@@ -797,6 +900,7 @@ public sealed class FormulaSessionService
                 break;
 
             case NotifyCollectionChangedAction.Remove when e.OldItems is { Count: > 0 } && e.OldStartingIndex >= 0:
+                foreach (var removed in e.OldItems.OfType<DynamicDataRow>()) StopWatchingForValueChanges(removed);
                 for (var i = 0; i < e.OldItems.Count; i++)
                     SidecarStructuralSync.OnRowRemoved(Sidecar, e.OldStartingIndex);
                 RebuildGraph();
@@ -813,6 +917,7 @@ public sealed class FormulaSessionService
             default:
                 // Reset (a bulk AddRange from import/replace), Move, Replace — no index arithmetic
                 // that would be safe to guess at, so just resync the graph with what's there now.
+                foreach (var row in _rows) { StopWatchingForValueChanges(row); WatchForValueChanges(row); }
                 RebuildGraph();
                 break;
         }

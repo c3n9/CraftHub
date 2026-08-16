@@ -559,6 +559,9 @@ public partial class WorkspaceViewModel : ViewModelBase
         _dialogService = dialogService;
         _notificationService = notificationService;
         _formulaSession = new FormulaSessionService(Rows, Properties);
+        // A recalculation triggered by editing a cell a formula reads changes results, and can
+        // clear or raise an error — both of which the grid only shows after its rows are rebuilt.
+        _formulaSession.Recalculated += (_, _) => FireFormulaVisualsChanged();
 
         Rows.CollectionChanged += OnRowsCollectionChanged;
         Properties.CollectionChanged += OnPropertiesCollectionChanged;
@@ -1052,7 +1055,12 @@ public partial class WorkspaceViewModel : ViewModelBase
     [RelayCommand]
     private async Task ImportJsonAsync()
     {
-        var filters = new List<FileFilter> { new("JSON and TXT files", new[] { "*.json", "*.txt" }) };
+        // Bundles are offered here rather than behind a separate command: from the user's side
+        // "open a document" is one action, and ImportFromPathAsync routes by extension.
+        var filters = new List<FileFilter>
+        {
+            new("JSON, TXT and CraftHub files", new[] { "*.json", "*.txt", "*" + CraftHubBundleIO.Extension })
+        };
         var paths = await _fileDialogService.OpenMultipleFilesAsync(Localizer.Get("ImportJson"), filters);
         if (paths.Count == 0) return;
 
@@ -1082,6 +1090,10 @@ public partial class WorkspaceViewModel : ViewModelBase
     /// </summary>
     public async Task<bool> ImportFromPathAsync(string path)
     {
+        // A bundle carries its own schema and formulas, so it takes a different route entirely.
+        if (path.EndsWith(CraftHubBundleIO.Extension, StringComparison.OrdinalIgnoreCase))
+            return await ImportBundleFromPathAsync(path);
+
         _isLoading = true;
         IsBusy = true;
         try
@@ -1206,7 +1218,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         }
 
         var filters = new List<FileFilter> { new("JSON and TXT files", new[] { "*.json", "*.txt" }) };
-        var path = await _fileDialogService.SaveFileAsync("Export JSON", filters, Header);
+        var path = await _fileDialogService.SaveFileAsync(Localizer.Get("ExportJsonTitle"), filters, Header);
         if (path == null) return;
 
         var json = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
@@ -1214,6 +1226,133 @@ public partial class WorkspaceViewModel : ViewModelBase
         NotifySuccess(Localizer.Get("ExportedMsg", Path.GetFileName(path)));
     }
     
+    // -----------------------------------------------------------------------
+    //  Formula-aware export
+    // -----------------------------------------------------------------------
+
+    /// <summary>Writes a <c>.crhb</c> bundle: the data and the formulas in one file. Ordinary Save
+    /// is untouched and still produces plain JSON plus a sidecar — see <see cref="CraftHubBundleIO"/>
+    /// for why both exist.</summary>
+    [RelayCommand]
+    private async Task ExportBundleAsync()
+    {
+        if (Properties.Count == 0)
+        {
+            await _dialogService.ShowMessageAsync(Localizer.Get("ExportTitle"), Localizer.Get("AddPropsBeforeExport"));
+            return;
+        }
+
+        var filters = new List<FileFilter> { new(Localizer.Get("BundleFileFilter"), new[] { "*" + CraftHubBundleIO.Extension }) };
+        var path = await _fileDialogService.SaveFileAsync(Localizer.Get("ExportBundleTitle"), filters, Header);
+        if (path == null) return;
+
+        if (!path.EndsWith(CraftHubBundleIO.Extension, StringComparison.OrdinalIgnoreCase))
+            path += CraftHubBundleIO.Extension;
+
+        var dataJson = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
+        var sidecar = _formulaSession.HasAnyFormulas ? _formulaSession.Sidecar : null;
+        var bundle = CraftHubBundleIO.Serialize(Properties, dataJson, sidecar, AppVersion());
+
+        await File.WriteAllTextAsync(path, bundle, Encoding.UTF8);
+        NotifySuccess(Localizer.Get("BundleExportedMsg", Path.GetFileName(path)));
+    }
+
+    /// <summary>Writes just the formulas, as the same <c>.formulas.json</c> a save would put beside
+    /// the document — for handing the calculations to someone who already has the data.</summary>
+    [RelayCommand]
+    private async Task ExportFormulasAsync()
+    {
+        if (!_formulaSession.HasAnyFormulas)
+        {
+            NotifyWarning(Localizer.Get("FormulaNoneToExportMsg"));
+            return;
+        }
+
+        var filters = new List<FileFilter> { new(Localizer.Get("FormulaFileFilter"), new[] { "*.formulas.json" }) };
+        var suggested = Header + ".formulas";
+        var path = await _fileDialogService.SaveFileAsync(Localizer.Get("ExportFormulasTitle"), filters, suggested);
+        if (path == null) return;
+
+        var canonical = await GetCurrentCanonicalJsonAsync() ?? string.Empty;
+        var sidecarJson = _formulaSession.PrepareForSave(Path.GetFileName(FilePath ?? Header), canonical);
+        if (sidecarJson == null)
+        {
+            NotifyWarning(Localizer.Get("FormulaNoneToExportMsg"));
+            return;
+        }
+
+        await File.WriteAllTextAsync(path, sidecarJson, Encoding.UTF8);
+        NotifySuccess(Localizer.Get("FormulasExportedMsg", Path.GetFileName(path)));
+    }
+
+    private static string AppVersion()
+    {
+        try
+        {
+            return File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "version.txt")).Trim();
+        }
+        catch (IOException)
+        {
+            return "";
+        }
+    }
+
+    /// <summary>Loads a <c>.crhb</c> bundle: schema, data and formulas in one go. Unlike a plain
+    /// JSON import this needs no field-mapping dialog — the bundle already records every column's
+    /// type.</summary>
+    public async Task<bool> ImportBundleFromPathAsync(string path)
+    {
+        _isLoading = true;
+        IsBusy = true;
+        try
+        {
+            if (Properties.Count > 0 || Rows.Count > 0)
+            {
+                var confirmed = await _dialogService.ShowConfirmAsync(
+                    Localizer.Get("ImportOverwriteTitle"), Localizer.Get("ImportOverwriteMsg"));
+                if (!confirmed) return false;
+            }
+
+            CraftHubBundle bundle;
+            try
+            {
+                var text = await File.ReadAllTextAsync(path);
+                bundle = await Task.Run(() => CraftHubBundleIO.Parse(text));
+            }
+            catch (CraftHubBundleFormatException ex)
+            {
+                await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"),
+                    Localizer.Get("BundleUnreadableMsg", ex.Message));
+                return false;
+            }
+
+            var rows = await Task.Run(() => _jsonService.ParseJsonData(bundle.DataJson, bundle.Properties));
+
+            Properties.Clear();
+            Rows.Clear();
+            Properties.AddRange(bundle.Properties);
+            Rows.AddRange(rows);
+
+            if (bundle.Sidecar is { } sidecar) _formulaSession.AdoptSidecar(sidecar);
+
+            Header = Path.GetFileNameWithoutExtension(path);
+            // Deliberately not bound to the .crhb path: Save writes JSON plus a sidecar, and
+            // silently overwriting the bundle with a different format would be a nasty surprise.
+            FilePath = null;
+            UndoRedo.Clear();
+            IsModified = false;
+            FireColumnsChanged();
+            FireFormulaVisualsChanged();
+            NotifySuccess(Localizer.Get("BundleImportedMsg", Rows.Count, Properties.Count));
+            return true;
+        }
+        finally
+        {
+            IsBusy = false;
+            _isLoading = false;
+        }
+    }
+
     //  Save / Save As  (write back to the bound file)
 
     /// <summary>Ctrl+S: write to the bound file, or fall back to Save As for an unbound tab.</summary>
