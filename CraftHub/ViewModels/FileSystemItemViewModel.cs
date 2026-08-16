@@ -136,7 +136,7 @@ public partial class FileSystemItemViewModel : ObservableObject
         {
             foreach (var dir in Directory.EnumerateDirectories(FullPath))
                 if (!IsHidden(dir)) return true;
-            foreach (var file in Directory.EnumerateFiles(FullPath, "*.json"))
+            foreach (var file in EnumerateDocumentFiles(FullPath))
                 if (!IsHidden(file)) return true;
         }
         catch (UnauthorizedAccessException) { }
@@ -151,10 +151,16 @@ public partial class FileSystemItemViewModel : ObservableObject
             .Where(d => !IsHidden(d))
             .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase);
 
+    /// <summary>Everything the explorer will open: plain JSON plus CraftHub bundles, which are a
+    /// document too and would otherwise be invisible in the very tree you'd look for them in.</summary>
     internal static IEnumerable<string> EnumerateJsonFiles(string path)
-        => Directory.EnumerateFiles(path, "*.json")
+        => EnumerateDocumentFiles(path)
             .Where(f => !IsHidden(f))
             .OrderBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase);
+
+    private static IEnumerable<string> EnumerateDocumentFiles(string path)
+        => Directory.EnumerateFiles(path, "*.json")
+            .Concat(Directory.EnumerateFiles(path, "*.crhb"));
 
     /// <summary>Fast, name-based hidden check (no per-file attribute syscalls).</summary>
     internal static bool IsHidden(string path)

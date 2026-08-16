@@ -535,4 +535,9 @@
 	<x:String x:Key="ExportPlainJsonItem">JSON only (computed values)</x:String>
 	<x:String x:Key="ExportBundleItem">JSON with formulas (.crhb)</x:String>
 	<x:String x:Key="ExportFormulasItem">Formulas only (.formulas.json)</x:String>
+	<x:String x:Key="FormulasImportTitle">Import formulas</x:String>
+	<x:String x:Key="FormulasImportReplaceMsg">This document already has formulas. Importing replaces all of them; the values stay until the imported formulas recompute them.</x:String>
+	<x:String x:Key="FormulasImportNeedsDataMsg">Open a document first — formulas are imported onto data that is already here.</x:String>
+	<x:String x:Key="FormulasImportUnreadableMsg">This formula file could not be read. ({0})</x:String>
+	<x:String x:Key="FormulasImportedMsg">Formulas from "{0}" applied and recalculated.</x:String>
 </ResourceDictionary>

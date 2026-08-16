@@ -595,6 +595,7 @@
                                 </MenuItem>
                                 <Separator />
                                 <MenuItem Header="{DynamicResource CtxDelete}"
+                                          InputGesture="Delete"
                                           Command="{Binding RemoveRowsCommand}"
                                           CommandParameter="{Binding #DataGrid.SelectedItems}"
                                           Foreground="{DynamicResource DangerColor}" />

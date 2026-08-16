@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -6,6 +8,10 @@ using CraftHub.Models.Enums;
 using CraftHub.Services;
 
 namespace CraftHub.ViewModels;
+
+/// <summary>A language the interface can be shown in: the code the service stores, and the name
+/// shown in the list — always in that language itself, so it is readable to whoever needs it.</summary>
+public sealed record LanguageChoice(string Code, string DisplayName);
 
 /// <summary>Which pane the sidebar is showing. A plain enum rather than a list of child view
 /// models — every pane here is a handful of toggles, and giving each one its own type would be
@@ -51,7 +57,8 @@ public sealed partial class SettingsWindowViewModel : ObservableObject
 
         _isDarkTheme = themeService.CurrentTheme == ThemeType.Dark;
         _followSystemTheme = themeService.CurrentTheme == ThemeType.Default;
-        _isRussian = LanguageService.Instance.CurrentLang == "RU";
+        _selectedLanguage = Languages.FirstOrDefault(l => l.Code == LanguageService.Instance.CurrentLang)
+                            ?? Languages[0];
         _showNotificationPopups = notificationService.ShowPopups;
         _showDiffOnSave = Properties.Settings.Default.ShowDiffOnSave;
     }
@@ -62,7 +69,17 @@ public sealed partial class SettingsWindowViewModel : ObservableObject
 
     [ObservableProperty] private bool _isDarkTheme;
     [ObservableProperty] private bool _followSystemTheme;
-    [ObservableProperty] private bool _isRussian;
+
+    /// <summary>One entry per available language. A list rather than a switch because a switch can
+    /// only ever mean "one of two" — adding a third language would mean replacing the control and
+    /// everything bound to it.</summary>
+    public IReadOnlyList<LanguageChoice> Languages { get; } = new[]
+    {
+        new LanguageChoice("EN", "English"),
+        new LanguageChoice("RU", "Русский")
+    };
+
+    [ObservableProperty] private LanguageChoice _selectedLanguage;
 
     partial void OnIsDarkThemeChanged(bool value)
     {
@@ -81,10 +98,11 @@ public sealed partial class SettingsWindowViewModel : ObservableObject
         _themeService.SwitchTheme(IsDarkTheme ? ThemeType.Dark : ThemeType.Light);
     }
 
-    partial void OnIsRussianChanged(bool value)
+    partial void OnSelectedLanguageChanged(LanguageChoice value)
     {
-        var language = LanguageService.Instance;
-        if ((language.CurrentLang == "RU") != value) language.Toggle();
+        // LanguageService only knows how to flip between the two it has; with more than two this
+        // is where a SetLanguage(code) would go.
+        if (LanguageService.Instance.CurrentLang != value.Code) LanguageService.Instance.Toggle();
     }
 
     // -----------------------------------------------------------------------

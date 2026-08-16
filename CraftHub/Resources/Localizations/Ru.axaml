@@ -534,4 +534,9 @@
     <x:String x:Key="ExportPlainJsonItem">Только JSON (вычисленные значения)</x:String>
     <x:String x:Key="ExportBundleItem">JSON вместе с формулами (.crhb)</x:String>
     <x:String x:Key="ExportFormulasItem">Только формулы (.formulas.json)</x:String>
+    <x:String x:Key="FormulasImportTitle">Импорт формул</x:String>
+    <x:String x:Key="FormulasImportReplaceMsg">В документе уже есть формулы. Импорт заменит их все; значения останутся, пока импортированные формулы их не пересчитают.</x:String>
+    <x:String x:Key="FormulasImportNeedsDataMsg">Сначала откройте документ — формулы применяются к уже имеющимся данным.</x:String>
+    <x:String x:Key="FormulasImportUnreadableMsg">Не удалось прочитать этот файл формул. ({0})</x:String>
+    <x:String x:Key="FormulasImportedMsg">Формулы из «{0}» применены и пересчитаны.</x:String>
 </ResourceDictionary>

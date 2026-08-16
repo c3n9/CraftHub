@@ -67,6 +67,7 @@ public partial class WorkspaceView : UserControl
         // Ctrl+D can be claimed for fill-down here, while every other Ctrl+D still falls through
         // unchanged to the pre-existing "duplicate rows after" shortcut.
         DataGrid.AddHandler(KeyDownEvent, OnDataGridKeyDownForFillDown, RoutingStrategies.Tunnel);
+        DataGrid.AddHandler(KeyDownEvent, OnDataGridShortcuts, RoutingStrategies.Tunnel);
         DataGrid.ColumnReordered   += (_, _) => UpdatePinIconStates();
         DataGrid.GotFocus          += async (_, _) =>
         {
@@ -359,6 +360,37 @@ public partial class WorkspaceView : UserControl
         DataGrid.CommitEdit();
         vm.CommitColumnFormula(rowIndex, columnKey, text, DataGrid);
     }
+
+    // Grid shortcuts that a KeyBinding can't express, because they must stand down while the user
+    // is typing. Delete inside a cell editor or the search box means "delete a character"; only
+    // when no text field has focus does it mean "delete these rows".
+    private void OnDataGridShortcuts(object? sender, KeyEventArgs e)
+    {
+        if (_currentVm is not { } vm) return;
+        if (IsTextInputFocused()) return;
+
+        switch (e.Key)
+        {
+            // Backspace as well as Delete: that is the pairing people arrive with, and a laptop
+            // keyboard without a dedicated Delete key would otherwise have no way to do this.
+            case Key.Delete or Key.Back when e.KeyModifiers == KeyModifiers.None:
+                if (DataGrid.SelectedItems is not { Count: > 0 } selected) return;
+                e.Handled = true;
+                vm.RemoveRowsCommand.Execute(selected);
+                break;
+
+            // Enter opens the cell for editing, the way F2 already does — otherwise the only way
+            // in is a double-click.
+            case Key.Enter when e.KeyModifiers == KeyModifiers.None && DataGrid.CurrentColumn is not null:
+                e.Handled = true;
+                DataGrid.BeginEdit();
+                break;
+        }
+    }
+
+    /// <summary>True when a text field owns the keyboard, so a bare Delete belongs to it.</summary>
+    private bool IsTextInputFocused() =>
+        TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is TextBox;
 
     private List<int> SelectedRowIndicesInOrder(WorkspaceViewModel vm) =>
         DataGrid.SelectedItems is { Count: > 1 } selected
@@ -748,6 +780,12 @@ public partial class WorkspaceView : UserControl
 
     private static readonly FunctionRegistry FormulaHintsRegistry = FunctionRegistry.CreateStandard();
 
+    /// <summary>What to offer the instant '=' is typed: arithmetic and aggregation over a column,
+    /// a conditional, rounding, and a date — the shapes most first formulas take. Keep it short;
+    /// this is a doorway, not a catalogue (the full list is in the formula reference).</summary>
+    private static readonly string[] StarterFunctions =
+        { "SUM", "AVERAGE", "COUNT", "MIN", "MAX", "IF", "ROUND", "CONCAT", "TODAY" };
+
     /// <summary>One offered completion. <see cref="InsertText"/> is what replaces the token being
     /// typed; <see cref="Display"/>/<see cref="Detail"/> are what the row shows.</summary>
     private sealed record FormulaSuggestion(string InsertText, string Display, string Detail);
@@ -826,6 +864,15 @@ public partial class WorkspaceView : UserControl
 
         _formulaSuggestions = _completionKind switch
         {
+            // An empty prefix means "just typed =", and alphabetical order would open on ABS and
+            // AND — accurate and useless. A short hand-picked list of the ones people actually
+            // reach for first is worth the small maintenance cost.
+            CompletionKind.Function when prefix.Length == 0 => StarterFunctions
+                .Select(name => FormulaHintsRegistry.TryGetMetadata(name, out var meta) ? meta : null)
+                .Where(meta => meta is not null)
+                .Select(meta => ToSuggestion(meta!))
+                .ToList(),
+
             CompletionKind.Function => FormulaHintsRegistry.All()
                 .Where(f => f.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(f => f.Name, StringComparer.Ordinal)
@@ -884,7 +931,12 @@ public partial class WorkspaceView : UserControl
 
         var start = caret;
         while (start > 0 && char.IsAsciiLetter(text[start - 1])) start--;
-        return start == caret ? (CompletionKind.None, 0) : (CompletionKind.Function, start);
+        if (start != caret) return (CompletionKind.Function, start);
+
+        // Nothing typed yet after the '=' — offer a starting point rather than an empty box. This
+        // is the moment someone has just learned that '=' begins a formula and has no idea what may
+        // follow, so the list is what makes the feature usable at all.
+        return caret > 0 && text[caret - 1] == '=' ? (CompletionKind.Function, caret) : (CompletionKind.None, 0);
     }
 
     /// <summary>The call the caret sits inside, and which argument it's on — found by scanning back

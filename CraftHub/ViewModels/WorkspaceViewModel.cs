@@ -313,8 +313,20 @@ public partial class WorkspaceViewModel : ViewModelBase
     public string GetEditableText(int rowIndex, string columnKey)
     {
         if (rowIndex < 0 || rowIndex >= Rows.Count) return "";
-        return GetDisplayFormula(rowIndex, columnKey) ?? Rows[rowIndex][columnKey];
+        if (GetDisplayFormula(rowIndex, columnKey) is { } formula) return formula;
+
+        // A plain value that happens to start with '=' — JSON is full of ordinary strings, and
+        // nothing stops one being "=SUM" or "=v1.2". Shown for editing with a leading apostrophe,
+        // the same escape Excel uses, so committing it unchanged puts the value back rather than
+        // trying to parse it as a formula. See LiteralPrefix.
+        var value = Rows[rowIndex][columnKey];
+        return value.StartsWith(LiteralPrefix) || value.StartsWith('=') ? LiteralPrefix + value : value;
     }
+
+    /// <summary>Typed in front of a value to say "this is text, not a formula". Needed because '='
+    /// is both this app's formula marker and a perfectly ordinary first character for JSON data;
+    /// without an escape, such a value could be displayed but never edited.</summary>
+    public const string LiteralPrefix = "'";
 
     /// <summary>Single entry point for "the user finished typing this text into this cell" —
     /// used by both the grid's own cell editor (<see cref="Views.WorkspaceView"/>'s
@@ -331,6 +343,21 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         if (rowIndex < 0 || rowIndex >= Rows.Count) return;
         var row = Rows[rowIndex];
+
+        // An explicit escape wins over everything: strip it and store the rest verbatim.
+        if (newText.StartsWith(LiteralPrefix))
+        {
+            var literal = newText[LiteralPrefix.Length..];
+            if (IsFormulaCell(rowIndex, columnKey)) RemoveCellFormula(rowIndex, columnKey, dataGrid);
+            if (row[columnKey] == literal) return;
+
+            var beforeLiteral = row[columnKey];
+            var beforeKind = row.GetKind(columnKey);
+            row[columnKey] = literal;
+            UndoRedo.Push(new EditCellAction(row, columnKey, beforeLiteral, beforeKind, literal, dataGrid));
+            MarkDirty();
+            return;
+        }
 
         if (newText.StartsWith('='))
         {
@@ -1059,7 +1086,8 @@ public partial class WorkspaceViewModel : ViewModelBase
         // "open a document" is one action, and ImportFromPathAsync routes by extension.
         var filters = new List<FileFilter>
         {
-            new("JSON, TXT and CraftHub files", new[] { "*.json", "*.txt", "*" + CraftHubBundleIO.Extension })
+            new("JSON, TXT and CraftHub files",
+                new[] { "*.json", "*.txt", "*" + CraftHubBundleIO.Extension, "*" + FormulasFileSuffix })
         };
         var paths = await _fileDialogService.OpenMultipleFilesAsync(Localizer.Get("ImportJson"), filters);
         if (paths.Count == 0) return;
@@ -1093,6 +1121,11 @@ public partial class WorkspaceViewModel : ViewModelBase
         // A bundle carries its own schema and formulas, so it takes a different route entirely.
         if (path.EndsWith(CraftHubBundleIO.Extension, StringComparison.OrdinalIgnoreCase))
             return await ImportBundleFromPathAsync(path);
+
+        // Checked before the plain-JSON path because a sidecar is also a .json: it holds formulas,
+        // not rows, and importing it as data would produce nonsense.
+        if (path.EndsWith(FormulasFileSuffix, StringComparison.OrdinalIgnoreCase))
+            return await ImportFormulasFromPathAsync(path);
 
         _isLoading = true;
         IsBusy = true;
@@ -1295,6 +1328,48 @@ public partial class WorkspaceViewModel : ViewModelBase
         {
             return "";
         }
+    }
+
+    public const string FormulasFileSuffix = ".formulas.json";
+
+    /// <summary>Applies a <c>.formulas.json</c> to the document that is already open, leaving its
+    /// data alone — for when someone sends you the calculations for data you already have. Every
+    /// formula is recomputed against the current rows rather than trusting whatever values the
+    /// sidecar was written beside.</summary>
+    public async Task<bool> ImportFormulasFromPathAsync(string path)
+    {
+        if (Properties.Count == 0)
+        {
+            await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"),
+                Localizer.Get("FormulasImportNeedsDataMsg"));
+            return false;
+        }
+
+        if (_formulaSession.HasAnyFormulas)
+        {
+            var confirmed = await _dialogService.ShowConfirmAsync(
+                Localizer.Get("FormulasImportTitle"), Localizer.Get("FormulasImportReplaceMsg"));
+            if (!confirmed) return false;
+        }
+
+        try
+        {
+            var text = await File.ReadAllTextAsync(path);
+            var sidecar = await Task.Run(() => SidecarJsonSerializer.Deserialize(text));
+            _formulaSession.AdoptSidecar(sidecar);
+        }
+        catch (Exception ex) when (ex is FormulaSidecarFormatException or JsonException)
+        {
+            await _dialogService.ShowMessageAsync(Localizer.Get("ImportTitle"),
+                Localizer.Get("FormulasImportUnreadableMsg", ex.Message));
+            return false;
+        }
+
+        MarkDirty();
+        FireColumnsChanged();
+        FireFormulaVisualsChanged();
+        NotifySuccess(Localizer.Get("FormulasImportedMsg", Path.GetFileName(path)));
+        return true;
     }
 
     /// <summary>Loads a <c>.crhb</c> bundle: schema, data and formulas in one go. Unlike a plain

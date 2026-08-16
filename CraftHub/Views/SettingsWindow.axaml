@@ -195,9 +195,16 @@
                                 <TextBlock Classes="setting-title" Text="{DynamicResource SettingsLanguageTitle}" />
                                 <TextBlock Classes="setting-desc" Text="{DynamicResource SettingsLanguageDesc}" />
                             </StackPanel>
-                            <ToggleSwitch Grid.Column="1" Classes="setting-control"
-                                          OnContent="Русский" OffContent="English"
-                                          IsChecked="{Binding IsRussian}" />
+                            <ComboBox Grid.Column="1"
+                                      VerticalAlignment="Center" Margin="20,0,0,0" MinWidth="150"
+                                      ItemsSource="{Binding Languages}"
+                                      SelectedItem="{Binding SelectedLanguage}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:LanguageChoice">
+                                        <TextBlock Text="{Binding DisplayName}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
                         </Grid>
                     </Border>
                 </StackPanel>
