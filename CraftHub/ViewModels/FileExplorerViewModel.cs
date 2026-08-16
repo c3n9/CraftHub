@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CraftHub.Core;
+using CraftHub.Formulas.Sidecar;
 using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.Services;
@@ -352,9 +353,16 @@ public partial class FileExplorerViewModel : ViewModelBase
         try
         {
             if (item.IsDirectory)
+            {
                 Directory.Delete(item.FullPath, recursive: true);
+            }
             else
+            {
                 File.Delete(item.FullPath);
+                // An orphaned sidecar for a deleted document is never useful — no separate
+                // confirmation for this half, deleting the main file already needed one.
+                SidecarFileIO.Delete(item.FullPath);
+            }
         }
         catch (Exception ex)
         {
@@ -467,6 +475,11 @@ public partial class FileExplorerViewModel : ViewModelBase
                 if (isDir) CopyDirectory(source, destination);
                 else File.Copy(source, destination);
             }
+
+            // A JSON document's formula sidecar (if any) travels with it — explorer copy/move
+            // doesn't know about "open tabs," so this is the one place that has to handle it for
+            // documents that aren't currently open in the app.
+            if (!isDir) SidecarFileIO.TagAlong(source, destination, move);
         }
         catch (Exception ex)
         {

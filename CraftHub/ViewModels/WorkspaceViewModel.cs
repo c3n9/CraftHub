@@ -1,13 +1,16 @@
+using Avalonia.Controls;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CraftHub.Core;
 using CraftHub.Domain.Enums;
 using CraftHub.Domain.Models;
+using CraftHub.Formulas.Sidecar;
 using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.Services;
 using CraftHub.Services.Actions;
+using CraftHub.Services.Formulas;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections;
@@ -264,6 +267,233 @@ public partial class WorkspaceViewModel : ViewModelBase
     public string DataSizeKb => _dataSizeKb;
 
     // -----------------------------------------------------------------------
+    //  Formulas
+    // -----------------------------------------------------------------------
+
+    // Constructed in the constructor (not = new(), like UndoRedo) because it needs the SAME live
+    // Rows/Properties collections this workspace owns — see FormulaSessionService's own doc comment.
+    private readonly FormulaSessionService _formulaSession;
+
+    public bool HasFormulas => _formulaSession.HasAnyFormulas;
+
+    /// <summary>Which cell the formula bar shows/edits — set by the View from the DataGrid's own
+    /// CurrentCellChanged event, since "current cell" isn't something the DataGrid selection model
+    /// (SelectedRow/SelectedRowsCount) already tracks at column granularity.</summary>
+    [ObservableProperty] private int _currentCellRowIndex = -1;
+    [ObservableProperty] private string? _currentCellColumnKey;
+
+    public bool HasCurrentCell => CurrentCellRowIndex >= 0 && CurrentCellColumnKey is not null;
+
+    /// <summary>What the formula bar should show for the current cell right now.</summary>
+    public string CurrentCellText => HasCurrentCell ? GetEditableText(CurrentCellRowIndex, CurrentCellColumnKey!) : "";
+
+    public bool IsFormulaCell(int rowIndex, string columnKey) => _formulaSession.IsFormulaCell(rowIndex, columnKey);
+
+    /// <summary>The A1-form formula text for a cell (what F2 / double-click should show), or null
+    /// if it isn't a formula.</summary>
+    public string? GetDisplayFormula(int rowIndex, string columnKey) => _formulaSession.GetDisplayFormula(rowIndex, columnKey);
+
+    /// <summary>The sidecar's recorded error for a cell, if it currently has one — for the marker
+    /// tooltip.</summary>
+    public CellState? GetFormulaErrorState(int rowIndex, string columnKey) => _formulaSession.GetErrorState(rowIndex, columnKey);
+
+    /// <summary>What to actually display for a cell right now — its formula text if it's a
+    /// formula, otherwise its stored value. What both the grid's cell editor and the formula bar
+    /// show, and what a no-op edit must round-trip back to unchanged.</summary>
+    public string GetEditableText(int rowIndex, string columnKey)
+    {
+        if (rowIndex < 0 || rowIndex >= Rows.Count) return "";
+        return GetDisplayFormula(rowIndex, columnKey) ?? Rows[rowIndex][columnKey];
+    }
+
+    /// <summary>Single entry point for "the user finished typing this text into this cell" —
+    /// used by both the grid's own cell editor (<see cref="Views.WorkspaceView"/>'s
+    /// OnDataGridCellEditEnded) and the formula bar, so an edit behaves identically no matter
+    /// where it was typed: text starting with '=' becomes a formula; anything else becomes a
+    /// plain value, dropping any formula the cell previously had.
+    ///
+    /// <paramref name="oldValue"/>/<paramref name="oldKind"/> must be the cell's state captured
+    /// BEFORE this edit started — by the time this runs, the grid's live-binding editor has
+    /// already overwritten the row with <paramref name="newText"/>, so re-reading the row here
+    /// would not recover the true "before" state.</summary>
+    public void CommitCellEdit(int rowIndex, string columnKey, string oldValue, CellKind oldKind, string newText, DataGrid? dataGrid)
+    {
+        if (rowIndex < 0 || rowIndex >= Rows.Count) return;
+        var row = Rows[rowIndex];
+
+        if (newText.StartsWith('='))
+        {
+            // Committing the exact text the cell already shows is not an edit. Worth guarding
+            // explicitly: a cell computed by its COLUMN's template shows that template here, so
+            // without this, tabbing through such a cell would silently turn it into a per-cell
+            // override of a formula identical to the one it already had.
+            if (newText == GetEditableText(rowIndex, columnKey)) return;
+
+            CommitCellFormula(rowIndex, columnKey, newText, dataGrid);
+            return;
+        }
+
+        var wasFormula = IsFormulaCell(rowIndex, columnKey);
+        if (wasFormula)
+        {
+            // The formula text was never the row's real stored content — drop the formula first
+            // (its own undo step; reverts the row to its last computed value as a side effect),
+            // then use THAT as the "old" side of the plain edit being applied on top.
+            RemoveCellFormula(rowIndex, columnKey, dataGrid);
+            oldValue = row[columnKey];
+            oldKind = row.GetKind(columnKey);
+        }
+
+        if (oldValue == newText && !wasFormula) return; // no real change
+
+        row[columnKey] = newText;
+        UndoRedo.Push(new EditCellAction(row, columnKey, oldValue, oldKind, newText, dataGrid));
+        MarkDirty();
+    }
+
+    /// <summary>Parses and stores a formula typed into a cell (text starting with '='), pushes an
+    /// undo step, and marks the tab dirty. Called from the DataGrid's cell-edit commit.</summary>
+    public void CommitCellFormula(int rowIndex, string columnKey, string a1FormulaText, DataGrid? dataGrid)
+    {
+        var changeSet = _formulaSession.TrySetCellFormula(rowIndex, columnKey, a1FormulaText, out var error);
+        if (changeSet is null)
+        {
+            NotifyError(error ?? Localizer.Get("FormulaInvalidMsg"));
+            return;
+        }
+
+        UndoRedo.Push(new SetCellFormulaAction(_formulaSession, changeSet, dataGrid));
+        MarkDirty();
+    }
+
+    /// <summary>Removes a cell's own formula, falling back to the column's template if it has one.
+    /// Pushes its own undo step. No-op (and pushes nothing) if the cell wasn't a formula.</summary>
+    public void RemoveCellFormula(int rowIndex, string columnKey, DataGrid? dataGrid)
+    {
+        var changeSet = _formulaSession.TryRemoveCellFormula(rowIndex, columnKey);
+        if (changeSet is null) return;
+
+        UndoRedo.Push(new SetCellFormulaAction(_formulaSession, changeSet, dataGrid));
+        MarkDirty();
+    }
+
+    /// <summary>Copies <paramref name="sourceRowIndex"/>'s formula down into every row in
+    /// <paramref name="targetRowIndices"/> — the fill-down command.</summary>
+    public void FillDown(int sourceRowIndex, string columnKey, IReadOnlyList<int> targetRowIndices, DataGrid? dataGrid)
+    {
+        var changeSets = _formulaSession.FillDown(sourceRowIndex, columnKey, targetRowIndices);
+        if (changeSets.Count == 0)
+        {
+            NotifyWarning(Localizer.Get("FormulaFillDownNothingMsg"));
+            return;
+        }
+
+        UndoRedo.Push(new FillDownAction(_formulaSession, changeSets, dataGrid));
+        MarkDirty();
+        NotifySuccess(Localizer.Get("FormulaFillDownMsg", changeSets.Count));
+    }
+
+    /// <summary>True when this column computes every row from one shared template, rather than from
+    /// per-cell formulas — what the header marker and the context menu's "remove" entry key off.</summary>
+    public bool ColumnHasFormula(string columnKey) => _formulaSession.HasColumnFormula(columnKey);
+
+    /// <summary>True when the cell computes from its own formula rather than inheriting the
+    /// column's — see <see cref="FormulaSessionService.CellHasOwnFormula"/>.</summary>
+    public bool CellHasOwnFormula(int rowIndex, string columnKey) => _formulaSession.CellHasOwnFormula(rowIndex, columnKey);
+
+    public bool CurrentColumnHasFormula => HasCurrentCell && _formulaSession.HasColumnFormula(CurrentCellColumnKey!);
+
+    /// <summary>The column template's A1 text as it reads from a given row — what the formula bar
+    /// shows when the current cell gets its value from the column rather than from its own formula.</summary>
+    public string? GetDisplayColumnFormula(string columnKey, int viewingRowIndex) =>
+        _formulaSession.GetDisplayColumnFormula(columnKey, viewingRowIndex);
+
+    /// <summary>Applies one formula to every row of a column at once — the "calculated column" a
+    /// fill-down only approximates, since this one also computes rows added later. Clears the
+    /// column's per-cell formulas as a documented side effect (see
+    /// <see cref="FormulaSessionService.TrySetColumnFormula"/>), which is why the toast says how
+    /// many rows it touched: applying a column formula is a bigger action than editing one cell,
+    /// and it should look like one.</summary>
+    public void CommitColumnFormula(int authoringRowIndex, string columnKey, string a1FormulaText, DataGrid? dataGrid)
+    {
+        if (!a1FormulaText.StartsWith('='))
+        {
+            NotifyWarning(Localizer.Get("FormulaColumnNeedsFormulaMsg"));
+            return;
+        }
+
+        var changeSet = _formulaSession.TrySetColumnFormula(authoringRowIndex, columnKey, a1FormulaText, out var error);
+        if (changeSet is null)
+        {
+            NotifyError(error ?? Localizer.Get("FormulaInvalidMsg"));
+            return;
+        }
+
+        UndoRedo.Push(new SetColumnFormulaAction(_formulaSession, changeSet, dataGrid));
+        MarkDirty();
+        NotifySuccess(Localizer.Get("FormulaColumnAppliedMsg",
+            JsonPropertyDefinition.GetDisplayPath(columnKey), Rows.Count));
+    }
+
+    /// <summary>Stops a column recomputing itself. Every cell keeps its last computed value, so
+    /// this is the column-scoped twin of "detach formulas", not a way to clear the column.</summary>
+    public void RemoveColumnFormula(string columnKey, DataGrid? dataGrid)
+    {
+        var changeSet = _formulaSession.TryRemoveColumnFormula(columnKey);
+        if (changeSet is null)
+        {
+            NotifyWarning(Localizer.Get("FormulaColumnNoneMsg"));
+            return;
+        }
+
+        UndoRedo.Push(new SetColumnFormulaAction(_formulaSession, changeSet, dataGrid));
+        MarkDirty();
+        NotifySuccess(Localizer.Get("FormulaColumnRemovedMsg", JsonPropertyDefinition.GetDisplayPath(columnKey)));
+    }
+
+    [RelayCommand]
+    private async Task DetachFormulasAsync()
+    {
+        if (!_formulaSession.HasAnyFormulas)
+        {
+            NotifyWarning(Localizer.Get("FormulaNoneToDetachMsg"));
+            return;
+        }
+
+        var confirmed = await _dialogService.ShowConfirmAsync(
+            Localizer.Get("DetachFormulasTitle"), Localizer.Get("DetachFormulasConfirmMsg"));
+        if (!confirmed) return;
+
+        var snapshot = _formulaSession.DetachAll();
+        UndoRedo.Push(new DetachFormulasAction(_formulaSession, snapshot));
+        MarkDirty();
+        NotifySuccess(Localizer.Get("FormulaDetachedMsg"));
+    }
+
+    private async Task LoadFormulaSidecarAsync(string path, string canonicalMainJson)
+    {
+        var result = await _formulaSession.LoadAsync(path, canonicalMainJson);
+        switch (result.Outcome)
+        {
+            case SidecarLoadOutcome.Corrupt:
+                NotifyWarning(Localizer.Get("FormulaSidecarCorruptMsg",
+                    result.CorruptBackupPath is { } p ? Path.GetFileName(p) : "", result.CorruptReason ?? ""));
+                break;
+
+            case SidecarLoadOutcome.HashMismatch:
+                NotifyWarning(Localizer.Get("FormulaSidecarHashMismatchMsg"));
+                if (_formulaSession.Sidecar.Options.RecalcOnOpen != RecalcOnOpenPolicy.Never)
+                    _formulaSession.FullRecalculate();
+                break;
+
+            case SidecarLoadOutcome.Clean:
+                if (_formulaSession.Sidecar.Options.RecalcOnOpen == RecalcOnOpenPolicy.Always)
+                    _formulaSession.FullRecalculate();
+                break;
+        }
+    }
+
+    // -----------------------------------------------------------------------
     //  Undo / Redo
     // -----------------------------------------------------------------------
 
@@ -311,6 +541,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         _classParserService = classParserService;
         _dialogService = dialogService;
         _notificationService = notificationService;
+        _formulaSession = new FormulaSessionService(Rows, Properties);
 
         Rows.CollectionChanged += OnRowsCollectionChanged;
         Properties.CollectionChanged += OnPropertiesCollectionChanged;
@@ -455,7 +686,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         // Capture state before removal for undo
         var propIndex = Properties.IndexOf(prop);
-        var savedValues = Rows.ToDictionary(r => r, r => r[prop.Name]);
+        var savedValues = Rows.ToDictionary(r => r, r => (r[prop.Name], r.GetKind(prop.Name)));
 
         Properties.Remove(prop);
         foreach (var row in Rows)
@@ -595,7 +826,7 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         var newRow = new DynamicDataRow();
         foreach (var prop in Properties)
-            newRow.InitializeProperty(prop.Name, row[prop.Name]);
+            newRow.InitializeProperty(prop.Name, row[prop.Name], row.GetKind(prop.Name));
         return newRow;
     }
 
@@ -677,7 +908,7 @@ public partial class WorkspaceViewModel : ViewModelBase
 
         var newRow = new DynamicDataRow();
         foreach (var kvp in row.GetAllValues())
-            newRow.InitializeProperty(kvp.Key, kvp.Value);
+            newRow.InitializeProperty(kvp.Key, kvp.Value, row.GetKind(kvp.Key));
         newRow[propertyName] = newValue;
 
         var idx = Rows.IndexOf(row);
@@ -924,6 +1155,12 @@ public partial class WorkspaceViewModel : ViewModelBase
             IsModified = false;
             _baselineJsonText = await Task.Run(() => _jsonService.SerializeToJson(Rows, Properties));
 
+            // Hashed against the canonicalized SOURCE text (not the re-serialized rows) — the same
+            // canonicalization WriteToFileAsync hashes on save, so a round-tripped, unedited
+            // document reliably reads back as "unchanged" instead of drifting on formatting alone.
+            var canonicalSource = await Task.Run(() => JsonDiffHelper.CanonicalizeForDiff(json));
+            await LoadFormulaSidecarAsync(path, canonicalSource);
+
             return true;
         }
         catch (JsonException ex)
@@ -1016,12 +1253,29 @@ public partial class WorkspaceViewModel : ViewModelBase
     {
         try
         {
-            await File.WriteAllTextAsync(path, content, Encoding.UTF8);
+            var canonical = await Task.Run(() => JsonDiffHelper.CanonicalizeForDiff(content));
+
+            if (_formulaSession.HasAnyFormulas)
+            {
+                var sidecarJson = _formulaSession.PrepareForSave(Path.GetFileName(path), canonical)!;
+                var sidecarPath = SidecarFileIO.PathFor(path);
+                var result = await SaveTransaction.ExecuteAsync(path, content, sidecarPath, sidecarJson);
+                if (!result.Success)
+                {
+                    NotifyError(result.FailureMessage ?? Localizer.Get("SaveFailedMsg", ""));
+                    if (!result.MainFileWritten) return;
+                }
+            }
+            else
+            {
+                await File.WriteAllTextAsync(path, content, Encoding.UTF8);
+            }
+
             FilePath = path;
             Header = Path.GetFileNameWithoutExtension(path);
             _fileWriteTimeUtc = SafeGetWriteTime(path);
             IsModified = false;
-            _baselineJsonText = await Task.Run(() => JsonDiffHelper.CanonicalizeForDiff(content));
+            _baselineJsonText = canonical;
             NotifySuccess(Localizer.Get("SavedMsg", Path.GetFileName(path)));
             FileSaved?.Invoke(path);
         }
@@ -1497,6 +1751,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         try
         {
             File.Move(FilePath!, newPath);
+            SidecarFileIO.TagAlong(FilePath!, newPath, move: true);
         }
         catch (Exception ex)
         {

@@ -3,8 +3,8 @@
 This engine copies Excel's formula *syntax* and *ergonomics*. It deliberately does not copy
 Excel's type coercion, because that coercion was designed around a grid of untyped cells, not a
 document that already has a real type system (JSON's). Where the two disagree, JSON wins. This
-document is the single source of truth for that behavior; `TypeRules` implements exactly what's
-written here, and every rule below is covered by a test in `CraftHub.Formulas.Tests`.
+document is the single source of truth for that behavior, and `TypeRules` implements exactly what's
+written here — so a disagreement between the two is a bug in the code, not in this file.
 
 ## The value kinds
 
@@ -97,12 +97,41 @@ recalculation pass. See `FormulaSidecar`'s own doc comments for the exact shape.
 
 ## Dates
 
-JSON has no date type — dates are ISO 8601 strings, not Excel's serial-day-number floats. Stage-2
-date functions (`NOW`, `TODAY`, `DATE`, `YEAR`, ...) both accept and return ISO 8601 text.
-Parsing accepts `yyyy-MM-dd` and `yyyy-MM-ddTHH:mm:ss[.fff]`, with or without a UTC/offset suffix,
-via `DateTime.TryParseExact`/`DateTimeOffset` with `DateTimeStyles.RoundtripKind` — a string with no
-offset stays offset-less through every operation (`Unspecified` kind), and a string with an offset
-keeps it; nothing is silently normalized to UTC or to local time. `TODAY()`/`NOW()` read the host
-machine's local clock and are marked `volatile` in the function registry (recomputed only on a full
-recalculation, not on every incremental one — otherwise the sheet would never settle as "not
-dirty").
+JSON has no date type — dates are ISO 8601 strings, not Excel's serial-day-number floats. The date
+functions (`TODAY`, `NOW`, `DATE`, `DATETIME`, `YEAR`/`MONTH`/`DAY`, `HOUR`/`MINUTE`/`SECOND`,
+`WEEKDAY`, `EDATE`, `EOMONTH`, `DAYS`, `DATEDIF`, `DATEADD`, `ISDATE`) both accept and return that
+text. `IsoDateTime` is the single parser/formatter; everything below is what it enforces.
+
+**Accepted spellings**, and nothing else: `yyyy-MM-dd`, and `yyyy-MM-ddTHH:mm:ss` with an optional
+`.f`/`.ff`/`.fff` and an optional `Z` or `±HH:mm`. Parsed with `TryParseExact` against that explicit
+list rather than `DateTime.Parse`, which would accept locale-dependent forms (`15/03/2024`,
+`March 15`) whose meaning changes with the host machine. Anything else is `#VALUE!` naming the
+offending string, never a guess.
+
+**Shape is preserved.** A result comes back spelled the way its input was — same date-vs-date-time,
+same fractional precision, same offset (and `+00:00` stays `+00:00` rather than becoming `Z`).
+`EDATE("2024-03-15T14:30:00+03:00", 1)` is `"2024-04-15T14:30:00+03:00"`. A document's date format
+is data; a formula that quietly rewrote every timestamp into UTC would be corrupting it while
+appearing to do arithmetic.
+
+**Offsets are kept beside the wall clock, not applied to it.** `HOUR("2024-03-15T14:30:00+03:00")`
+is `14`. Date-shifting moves the wall clock and carries the offset along — "the same time next
+month". Comparing a value that records an offset against one that doesn't (`DAYS`, `DATEDIF`) is
+`#VALUE!`: there is no instant to put the offset-less one at, so any answer would be a guess.
+
+**No date arithmetic through `+`/`-`,** because a date is text and text doesn't do arithmetic here.
+`DATEADD`/`EDATE`/`DAYS`/`DATEDIF` are the explicit doors, the same trade `VALUE("123")` makes.
+
+**No roll-over.** Excel turns `DATE(2024,13,1)` into January 2025, hiding whatever off-by-one
+produced the 13; here an impossible date is an error. The one Excel behavior kept is `EDATE`'s
+end-of-month clamping (Jan 31 + 1 month = Feb 29), because "a month later" has no better answer.
+
+**`HOUR`/`MINUTE`/`SECOND` of a date-only value are `#VALUE!`,** not `0`. Excel answers 0 because
+every Excel date secretly *is* a date-time; `"2024-03-15"` genuinely has no hour.
+
+`TODAY()`/`NOW()` read `EvalContext.Clock` (the host machine's local clock by default, overridable
+so tests can pin a moment) and are marked `Volatile` in their registry metadata. The clock is read
+once per evaluation and cached, so two `NOW()` calls in one formula can't disagree. Volatile means
+recomputed only on a full recalculation, not on every incremental one — an incremental pass walks
+the dependency graph, and these have no dependencies to be reached through. That's deliberate:
+otherwise the sheet would never settle as "not dirty" and every save would differ from the last.

@@ -416,4 +416,39 @@
 	<x:String x:Key="ReportGenerated">Generated</x:String>
 	<x:String x:Key="InvalidJsonMsg">The file is not valid JSON.</x:String>
 	<x:String x:Key="NoClassesFoundMsg">No classes found in the file.</x:String>
+
+	<!-- Formulas -->
+	<x:String x:Key="FormulaBarTip">Type a formula starting with '=', e.g. =@[price]*@[qty]. Enter applies it to this cell, Ctrl+Enter to the whole column, Escape cancels.</x:String>
+	<x:String x:Key="FormulaBarWatermark">Value, or a formula starting with '='…</x:String>
+	<x:String x:Key="FillHandleTip">Drag down to copy this formula into the rows below</x:String>
+	<x:String x:Key="CtxFillDown">Fill down</x:String>
+	<x:String x:Key="CtxDetachFormulas">Detach formulas…</x:String>
+	<x:String x:Key="DetachFormulasTitle">Detach formulas</x:String>
+	<x:String x:Key="DetachFormulasConfirmMsg">Every computed cell keeps its current value, but stops being a formula, and the formula file next to this document is deleted. This can be undone until the tab is closed.</x:String>
+	<x:String x:Key="FormulaInvalidMsg">Invalid formula</x:String>
+	<x:String x:Key="FormulaUnknownColumn">Unknown column.</x:String>
+	<x:String x:Key="FormulaNestedColumnUnsupported">Formulas can't target an expanded nested field yet.</x:String>
+	<x:String x:Key="FormulaFillDownMsg">Filled formula into {0} row(s).</x:String>
+	<x:String x:Key="FormulaFillDownNothingMsg">The source cell isn't a formula, or no other rows were selected.</x:String>
+	<x:String x:Key="FormulaNoneToDetachMsg">This document has no formulas to detach.</x:String>
+	<x:String x:Key="FormulaDetachedMsg">Formulas detached — values were kept, the formula file was removed.</x:String>
+	<x:String x:Key="FormulaCycleMessage">Circular reference: {0}</x:String>
+	<x:String x:Key="FormulaCorruptStoredText">The stored formula text is malformed.</x:String>
+	<x:String x:Key="FormulaSidecarCorruptMsg">This document's formula file was unreadable and has been renamed to "{0}.bak" so nothing was lost. The document opened without formulas. ({1})</x:String>
+	<x:String x:Key="FormulaSidecarHashMismatchMsg">This document changed outside the app since its formulas were last saved — recalculating from the stored formulas.</x:String>
+	<x:String x:Key="ApplyToColumnTip">Apply this formula to the whole column (Ctrl+Enter). New rows are computed too.</x:String>
+	<x:String x:Key="CtxApplyToColumn">Apply formula to the whole column</x:String>
+	<x:String x:Key="CtxRemoveColumnFormula">Stop computing this column</x:String>
+	<x:String x:Key="FormulaColumnAppliedMsg">"{0}" is now computed for every row ({1}), including rows added later.</x:String>
+	<x:String x:Key="FormulaColumnRemovedMsg">"{0}" is no longer computed — every cell kept its current value.</x:String>
+	<x:String x:Key="FormulaColumnNeedsFormulaMsg">Type a formula starting with '=' first, then apply it to the column.</x:String>
+	<x:String x:Key="FormulaColumnNoneMsg">This column isn't computed by a formula.</x:String>
+	<x:String x:Key="FormulaFromColumnTip">Computed by the column's formula. Editing it here changes this row only.</x:String>
+	<x:String x:Key="FormulaColumnSuggestionDetail">Column in this document</x:String>
+	<x:String x:Key="FormulaVolatileNote">Recomputed only on a full recalculation.</x:String>
+	<x:String x:Key="UndoDescSetFormula">Set formula ({0})</x:String>
+	<x:String x:Key="UndoDescSetColumnFormula">Column formula ({0})</x:String>
+	<x:String x:Key="UndoDescRemoveColumnFormula">Remove column formula ({0})</x:String>
+	<x:String x:Key="UndoDescFillDown">Fill down ({0} cells)</x:String>
+	<x:String x:Key="UndoDescDetachFormulas">Detach formulas</x:String>
 </ResourceDictionary>

@@ -430,9 +430,94 @@
                     CornerRadius="10"
                     Background="{DynamicResource BorderColor}"
                     Padding="1">
-                <Border CornerRadius="9"
-                        Background="{DynamicResource ElevatedBackground}"
-                        ClipToBounds="True">
+                <Grid RowDefinitions="Auto,*">
+                    <!-- Formula bar: shows/edits the current cell's formula (or plain value) —
+                         the discoverable way to see and type a formula, rather than requiring the
+                         user to already know that typing '=' straight into a grid cell works. -->
+                    <Border Grid.Row="0"
+                            Background="{DynamicResource ElevatedBackground}"
+                            BorderBrush="{DynamicResource BorderColor}"
+                            BorderThickness="0,0,0,1"
+                            CornerRadius="9,9,0,0"
+                            Padding="10,6">
+                        <!-- Always visible — even before any cell is selected — so the bar itself
+                             is what tells the user "formulas exist," rather than depending on
+                             HasCurrentCell ever flipping true first. -->
+                        <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+                            <materialIcons:MaterialIcon Grid.Column="0"
+                                                         Kind="FunctionVariant"
+                                                         Width="15" Height="15"
+                                                         Opacity="0.55"
+                                                         VerticalAlignment="Center"
+                                                         Margin="0,0,6,0"
+                                                         ToolTip.Tip="{DynamicResource FormulaBarTip}" />
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding CurrentCellColumnKey}"
+                                       FontSize="12"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource TextMuted}"
+                                       VerticalAlignment="Center"
+                                       Margin="0,0,10,0" />
+                            <TextBox x:Name="FormulaBarTextBox"
+                                     Grid.Column="2"
+                                     Classes="grid-editor"
+                                     BorderThickness="0"
+                                     Background="Transparent"
+                                     FontFamily="Cascadia Code,Cascadia Mono,Consolas,Menlo,Courier New,monospace"
+                                     FontSize="13"
+                                     VerticalContentAlignment="Center"
+                                     Watermark="{DynamicResource FormulaBarWatermark}"
+                                     KeyDown="OnFormulaBarKeyDown"
+                                     TextChanged="OnFormulaBarTextChanged"
+                                     LostFocus="OnFormulaBarLostFocus" />
+                            <!-- "Apply to the whole column" needs a button, not just the Ctrl+Enter
+                                 shortcut it duplicates: a calculated column is the thing most
+                                 people actually want when they type their first formula, and a
+                                 shortcut nobody can see is a feature nobody finds. Pointer-pressed
+                                 rather than Click so the formula bar's LostFocus commit doesn't
+                                 fire first and apply the formula to the single cell instead. -->
+                            <Button x:Name="ApplyToColumnButton"
+                                    Grid.Column="3"
+                                    Padding="6,2"
+                                    Margin="8,0,0,0"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Cursor="Hand"
+                                    VerticalAlignment="Center"
+                                    ToolTip.Tip="{DynamicResource ApplyToColumnTip}">
+                                <materialIcons:MaterialIcon Kind="TableColumn" Width="16" Height="16" Opacity="0.7" />
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Function autocomplete: appears under the formula bar while typing a
+                         function name after '='. Tab/Enter accepts the top suggestion; Escape or
+                         typing something that matches nothing closes it. Formula-bar only for
+                         now — not wired into the grid's own inline cell editor. -->
+                    <Popup x:Name="FormulaSuggestionsPopup"
+                           PlacementTarget="{Binding #FormulaBarTextBox}"
+                           Placement="BottomEdgeAlignedLeft"
+                           IsLightDismissEnabled="False"
+                           Focusable="False"
+                           IsOpen="False">
+                        <Border Background="{DynamicResource ElevatedBackground}"
+                                BorderBrush="{DynamicResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                MaxHeight="240"
+                                MinWidth="280"
+                                Padding="4"
+                                BoxShadow="0 4 12 0 #40000000">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="FormulaSuggestionsList" Orientation="Vertical" Spacing="1" />
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+
+                    <Border Grid.Row="1"
+                            CornerRadius="0,0,9,9"
+                            Background="{DynamicResource ElevatedBackground}"
+                            ClipToBounds="True">
                     <DataGrid x:Name="DataGrid"
                               cl:Coachmark.Id="wsGrid"
                               MinWidth="520"
@@ -498,6 +583,38 @@
                                           Command="{Binding DuplicateAfterRowsCommand}"
                                           CommandParameter="{Binding #DataGrid.SelectedItems}" />
                                 <Separator />
+                                <MenuItem Header="{DynamicResource CtxFillDown}"
+                                          Click="OnFillDownClick">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="ArrowDownBold" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <!-- Click handlers rather than bound commands for the same reason
+                                     as Fill down above: both act on DataGrid.CurrentColumn, which a
+                                     CommandParameter can't express. -->
+                                <MenuItem x:Name="ApplyToColumnMenuItem"
+                                          Header="{DynamicResource CtxApplyToColumn}"
+                                          InputGesture="Ctrl+Enter"
+                                          Click="OnApplyToColumnClick">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="TableColumn" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem x:Name="RemoveColumnFormulaMenuItem"
+                                          Header="{DynamicResource CtxRemoveColumnFormula}"
+                                          Click="OnRemoveColumnFormulaClick">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="TableColumnRemove" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{DynamicResource CtxDetachFormulas}"
+                                          Command="{Binding DetachFormulasCommand}"
+                                          IsVisible="{Binding HasFormulas}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="LinkVariantOff" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
                                 <MenuItem Header="{DynamicResource CtxDelete}"
                                           Command="{Binding RemoveRowsCommand}"
                                           CommandParameter="{Binding #DataGrid.SelectedItems}"
@@ -505,8 +622,8 @@
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                     </DataGrid>
-
-                </Border>
+                    </Border>
+                </Grid>
             </Border>
         </Grid>
 

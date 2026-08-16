@@ -45,7 +45,7 @@ public sealed class FunctionRegistry : IFunctionRegistry
             yield return fn.Metadata;
     }
 
-    /// <summary>Every stage-1 function (math, statistics, logic, text, JSON), ready to use.</summary>
+    /// <summary>Every built-in function (math, statistics, logic, text, JSON, date), ready to use.</summary>
     public static FunctionRegistry CreateStandard()
     {
         var registry = new FunctionRegistry();
@@ -54,6 +54,7 @@ public sealed class FunctionRegistry : IFunctionRegistry
         LogicFunctions.Register(registry);
         TextFunctions.Register(registry);
         JsonFunctions.Register(registry);
+        DateFunctions.Register(registry);
         return registry;
     }
 }

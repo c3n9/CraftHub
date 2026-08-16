@@ -415,4 +415,39 @@
     <x:String x:Key="ReportGenerated">Сформирован</x:String>
     <x:String x:Key="InvalidJsonMsg">Файл не является корректным JSON.</x:String>
     <x:String x:Key="NoClassesFoundMsg">В файле не найдено ни одного класса.</x:String>
+
+    <!-- Формулы -->
+    <x:String x:Key="FormulaBarTip">Введите формулу, начиная с «=», например =@[price]*@[qty]. Enter — применить к ячейке, Ctrl+Enter — ко всей колонке, Escape — отменить.</x:String>
+    <x:String x:Key="FormulaBarWatermark">Значение или формула, начиная с «=»…</x:String>
+    <x:String x:Key="FillHandleTip">Потяните вниз, чтобы скопировать формулу в нижние строки</x:String>
+    <x:String x:Key="CtxFillDown">Протянуть вниз</x:String>
+    <x:String x:Key="CtxDetachFormulas">Отсоединить формулы…</x:String>
+    <x:String x:Key="DetachFormulasTitle">Отсоединить формулы</x:String>
+    <x:String x:Key="DetachFormulasConfirmMsg">Каждая вычисляемая ячейка сохранит текущее значение, но перестанет быть формулой, а файл формул рядом с документом будет удалён. Это можно отменить, пока вкладка не закрыта.</x:String>
+    <x:String x:Key="FormulaInvalidMsg">Некорректная формула</x:String>
+    <x:String x:Key="FormulaUnknownColumn">Неизвестная колонка.</x:String>
+    <x:String x:Key="FormulaNestedColumnUnsupported">Формулы пока нельзя ставить на развёрнутое вложенное поле.</x:String>
+    <x:String x:Key="FormulaFillDownMsg">Формула протянута в {0} строк(и).</x:String>
+    <x:String x:Key="FormulaFillDownNothingMsg">Исходная ячейка не является формулой, либо не выбраны другие строки.</x:String>
+    <x:String x:Key="FormulaNoneToDetachMsg">В этом документе нет формул для отсоединения.</x:String>
+    <x:String x:Key="FormulaDetachedMsg">Формулы отсоединены — значения сохранены, файл формул удалён.</x:String>
+    <x:String x:Key="FormulaCycleMessage">Циклическая ссылка: {0}</x:String>
+    <x:String x:Key="FormulaCorruptStoredText">Сохранённый текст формулы повреждён.</x:String>
+    <x:String x:Key="FormulaSidecarCorruptMsg">Файл формул этого документа не удалось прочитать, он переименован в «{0}.bak» — ничего не потеряно. Документ открыт без формул. ({1})</x:String>
+    <x:String x:Key="FormulaSidecarHashMismatchMsg">Документ был изменён вне приложения с момента последнего сохранения формул — пересчитываю по сохранённым формулам.</x:String>
+    <x:String x:Key="ApplyToColumnTip">Применить формулу ко всей колонке (Ctrl+Enter). Новые строки тоже будут вычисляться.</x:String>
+    <x:String x:Key="CtxApplyToColumn">Применить формулу ко всей колонке</x:String>
+    <x:String x:Key="CtxRemoveColumnFormula">Перестать вычислять эту колонку</x:String>
+    <x:String x:Key="FormulaColumnAppliedMsg">Колонка «{0}» теперь вычисляется для каждой строки ({1}), включая добавленные позже.</x:String>
+    <x:String x:Key="FormulaColumnRemovedMsg">Колонка «{0}» больше не вычисляется — все ячейки сохранили текущие значения.</x:String>
+    <x:String x:Key="FormulaColumnNeedsFormulaMsg">Сначала введите формулу, начиная с «=», а затем примените её к колонке.</x:String>
+    <x:String x:Key="FormulaColumnNoneMsg">Эта колонка не вычисляется формулой.</x:String>
+    <x:String x:Key="FormulaFromColumnTip">Вычисляется формулой колонки. Изменение здесь затронет только эту строку.</x:String>
+    <x:String x:Key="FormulaColumnSuggestionDetail">Колонка этого документа</x:String>
+    <x:String x:Key="FormulaVolatileNote">Пересчитывается только при полном пересчёте.</x:String>
+    <x:String x:Key="UndoDescSetFormula">Установка формулы ({0})</x:String>
+    <x:String x:Key="UndoDescSetColumnFormula">Формула колонки ({0})</x:String>
+    <x:String x:Key="UndoDescRemoveColumnFormula">Удаление формулы колонки ({0})</x:String>
+    <x:String x:Key="UndoDescFillDown">Протягивание вниз ({0} ячеек)</x:String>
+    <x:String x:Key="UndoDescDetachFormulas">Отсоединение формул</x:String>
 </ResourceDictionary>
