@@ -23,20 +23,18 @@ buildVersion=$(echo "$buildVersion" | tr -d '\n\r')
 scriptDir=$(cd "$(dirname "$0")" && pwd)
 stagingAbs=$(cd "$stagingDir" && pwd)
 
-# rpmbuild refuses a buildroot it thinks it might own, and it will happily delete one; point it at
-# a copy so a failed run cannot take the .deb's staging tree with it.
+# rpmbuild owns its buildroot: it wipes it before %install on rpm 4.x. So it is pointed at a
+# scratch directory of ours and the spec's %install fills it from the staging tree — copying into
+# the buildroot from here instead would just be deleted again, which is exactly how this silently
+# produced no package. It also means a failed run cannot take the .deb's staging tree with it.
 rpmRoot="$scriptDir/rpm_build"
 rm -rf "$rpmRoot"
 mkdir -p "$rpmRoot/BUILDROOT" "$rpmRoot/RPMS"
-cp -a "$stagingAbs/." "$rpmRoot/BUILDROOT/"
-
-# DEBIAN/ is the .deb's metadata directory. It has no business inside an rpm, and %files does not
-# reference it — but leaving it in the buildroot makes rpmbuild warn about unpackaged files.
-rm -rf "$rpmRoot/BUILDROOT/DEBIAN"
 
 rpmbuild -bb "$scriptDir/linux-data/crafthub.spec" \
     --define "appversion $buildVersion" \
     --define "apparch $rpmArch" \
+    --define "stagingdir $stagingAbs" \
     --define "_topdir $rpmRoot" \
     --define "_rpmdir $rpmRoot/RPMS" \
     --buildroot "$rpmRoot/BUILDROOT" \

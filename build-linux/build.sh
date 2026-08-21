@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Fail the whole script on the first failing command. Without this the .rpm step could fail and the
+# script still exit 0, which is how a release went out with a .deb and no .rpm: the packaging error
+# scrolled past, "echo .rpm created" ran anyway, and the upload step skipped the file it could not
+# find.
+set -eo pipefail
+
 # Version
 buildVersion=$(<../build-resources/version.txt)
 

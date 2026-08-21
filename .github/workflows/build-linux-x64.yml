@@ -39,5 +39,8 @@ jobs:
           files: |
             ./build-linux/crafthub_amd64.deb
             ./build-linux/crafthub_x86_64.rpm
+          # Loud, not silent. The default is to skip a file that is not there, which published a
+          # release with the .deb and no .rpm and reported the job green.
+          fail_on_unmatched_files: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
