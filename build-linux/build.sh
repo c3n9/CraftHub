@@ -58,7 +58,10 @@ mkdir -p ./staging_folder/usr/share/icons
 mkdir -p ./staging_folder/usr/share/icons/hicolor
 mkdir -p ./staging_folder/usr/share/icons/hicolor/scalable
 mkdir -p ./staging_folder/usr/share/icons/hicolor/scalable/apps
-cp ../build-resources/logo.svg ./staging_folder/usr/share/icons/hicolor/scalable/apps/crafthub.svg
+# craftHub.svg, not logo.svg: the latter has never existed in this repository, so this copy had
+# been failing since the day it was written — silently, until set -e. The .deb shipped without a
+# scalable icon and the .rpm could not be built at all, because the spec's file list names it.
+cp ../build-resources/craftHub.svg ./staging_folder/usr/share/icons/hicolor/scalable/apps/crafthub.svg
 echo "Another icon copied"
 
 # Make .deb file
