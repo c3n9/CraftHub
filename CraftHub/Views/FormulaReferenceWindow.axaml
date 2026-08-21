@@ -34,8 +34,12 @@
             </Grid>
         </Border>
 
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="20,16,20,24">
-            <StackPanel Spacing="18" MaxWidth="820" HorizontalAlignment="Left">
+        <ScrollViewer Grid.Row="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <!-- No MaxWidth and no Left alignment: those pinned every block to 820px against the
+                 left edge, so maximising the window just added empty space on the right. -->
+            <StackPanel Spacing="18" Margin="20,16,20,24">
 
                 <StackPanel x:Name="ProseSections" Spacing="18" />
 
