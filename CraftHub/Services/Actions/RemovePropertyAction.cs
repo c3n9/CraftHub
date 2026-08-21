@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using CraftHub.Core;
+using CraftHub.Domain.Enums;
 using CraftHub.Domain.Models;
 using CraftHub.Helpers;
 
@@ -14,15 +15,16 @@ public sealed class RemovePropertyAction : IUndoableAction
     private readonly ObservableCollection<DynamicDataRow> _rows;
     private readonly JsonPropertyDefinition _prop;
     private readonly int _propIndex;
-    // Maps each row to the value it had before removal
-    private readonly Dictionary<DynamicDataRow, string> _savedValues;
+    // Maps each row to the value (and kind — a removed Null/Missing cell must come back as such,
+    // not as an empty Value) it had before removal.
+    private readonly Dictionary<DynamicDataRow, (string Value, CellKind Kind)> _savedValues;
     private readonly Action _onColumnsChanged;
 
     public RemovePropertyAction(ObservableCollection<JsonPropertyDefinition> props,
         ObservableCollection<DynamicDataRow> rows,
         JsonPropertyDefinition prop,
         int propIndex,
-        Dictionary<DynamicDataRow, string> savedValues,
+        Dictionary<DynamicDataRow, (string Value, CellKind Kind)> savedValues,
         Action onColumnsChanged)
     {
         _props = props;
@@ -40,8 +42,8 @@ public sealed class RemovePropertyAction : IUndoableAction
         _props.Insert(Math.Min(_propIndex, _props.Count), _prop);
         foreach (var row in _rows)
         {
-            var val = _savedValues.TryGetValue(row, out var v) ? v : string.Empty;
-            row.InitializeProperty(_prop.Name, val);
+            var (val, kind) = _savedValues.TryGetValue(row, out var v) ? v : (string.Empty, CellKind.Empty);
+            row.InitializeProperty(_prop.Name, val, kind);
         }
         _onColumnsChanged();
     }

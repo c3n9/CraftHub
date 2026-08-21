@@ -384,16 +384,6 @@
 	<x:String x:Key="TourRecentFoldersText">Once you've opened a folder, this lists your last 5 for quick access.</x:String>
 	<x:String x:Key="TourNotificationsTitle">Notifications</x:String>
 	<x:String x:Key="TourNotificationsText">Open the notification center to review recent messages and events.</x:String>
-	<x:String x:Key="TourThemeTitle">Light / dark theme</x:String>
-	<x:String x:Key="TourThemeText">Switch between light and dark appearance.</x:String>
-	<x:String x:Key="TourLanguageTitle">Language</x:String>
-	<x:String x:Key="TourLanguageText">Switch the interface language between English and Russian.</x:String>
-	<x:String x:Key="TourReleasesTitle">Releases</x:String>
-	<x:String x:Key="TourReleasesText">See every CraftHub release fetched from GitHub, with what changed in each one.</x:String>
-	<x:String x:Key="TourGithubTitle">Source code</x:String>
-	<x:String x:Key="TourGithubText">Open the project repository on GitHub.</x:String>
-	<x:String x:Key="TourHelpStepTitle">Need this again?</x:String>
-	<x:String x:Key="TourHelpStepText">Click this help button anytime to replay the interface tour.</x:String>
 
 	<x:String x:Key="DiffOptionsBtn">Options</x:String>
 	<x:String x:Key="DiffOptionsTip">What counts as a difference</x:String>
@@ -416,4 +406,139 @@
 	<x:String x:Key="ReportGenerated">Generated</x:String>
 	<x:String x:Key="InvalidJsonMsg">The file is not valid JSON.</x:String>
 	<x:String x:Key="NoClassesFoundMsg">No classes found in the file.</x:String>
+
+	<!-- Formulas -->
+	<x:String x:Key="FillHandleTip">Drag down to copy this formula into the rows below</x:String>
+	<x:String x:Key="CtxFillDown">Fill down</x:String>
+	<x:String x:Key="CtxDetachFormulas">Detach formulas…</x:String>
+	<x:String x:Key="DetachFormulasTitle">Detach formulas</x:String>
+	<x:String x:Key="DetachFormulasConfirmMsg">Every computed cell keeps its current value, but stops being a formula, and the formula file next to this document is deleted. This can be undone until the tab is closed.</x:String>
+	<x:String x:Key="FormulaInvalidMsg">Invalid formula</x:String>
+	<x:String x:Key="FormulaUnknownColumn">Unknown column.</x:String>
+	<x:String x:Key="FormulaNestedColumnUnsupported">Formulas can't target an expanded nested field yet.</x:String>
+	<x:String x:Key="FormulaFillDownMsg">Filled formula into {0} row(s).</x:String>
+	<x:String x:Key="FormulaFillDownNothingMsg">The source cell isn't a formula, or no other rows were selected.</x:String>
+	<x:String x:Key="FormulaNoneToDetachMsg">This document has no formulas to detach.</x:String>
+	<x:String x:Key="FormulaDetachedMsg">Formulas detached — values were kept, the formula file was removed.</x:String>
+	<x:String x:Key="FormulaCycleMessage">Circular reference: {0}</x:String>
+	<x:String x:Key="FormulaCorruptStoredText">The stored formula text is malformed.</x:String>
+	<x:String x:Key="FormulaSidecarCorruptMsg">This document's formula file was unreadable and has been renamed to "{0}.bak" so nothing was lost. The document opened without formulas. ({1})</x:String>
+	<x:String x:Key="FormulaSidecarHashMismatchMsg">This document changed outside the app since its formulas were last saved — recalculating from the stored formulas.</x:String>
+	<x:String x:Key="CtxApplyToColumn">Apply formula to the whole column</x:String>
+	<x:String x:Key="CtxRemoveColumnFormula">Stop computing this column</x:String>
+	<x:String x:Key="FormulaColumnAppliedMsg">"{0}" is now computed for every row ({1}), including rows added later.</x:String>
+	<x:String x:Key="FormulaColumnRemovedMsg">"{0}" is no longer computed — every cell kept its current value.</x:String>
+	<x:String x:Key="FormulaColumnNeedsFormulaMsg">Type a formula starting with '=' first, then apply it to the column.</x:String>
+	<x:String x:Key="FormulaColumnNoneMsg">This column isn't computed by a formula.</x:String>
+	<x:String x:Key="FormulaFromColumnTip">Computed by the column's formula. Editing it here changes this row only.</x:String>
+	<x:String x:Key="FormulaColumnSuggestionDetail">Column in this document</x:String>
+	<x:String x:Key="FormulaVolatileNote">Recomputed only on a full recalculation.</x:String>
+	<x:String x:Key="UndoDescSetFormula">Set formula ({0})</x:String>
+	<x:String x:Key="UndoDescSetColumnFormula">Column formula ({0})</x:String>
+	<x:String x:Key="UndoDescRemoveColumnFormula">Remove column formula ({0})</x:String>
+	<x:String x:Key="UndoDescFillDown">Fill down ({0} cells)</x:String>
+	<x:String x:Key="UndoDescDetachFormulas">Detach formulas</x:String>
+	<!-- Formula reference window -->
+	<x:String x:Key="FormulaRefTip">Formula reference — syntax, addressing and every function</x:String>
+	<x:String x:Key="FormulaRefTitle">Formula reference</x:String>
+	<x:String x:Key="FormulaRefSearchWatermark">Search functions…</x:String>
+	<x:String x:Key="FormulaRefNoMatches">No function matches that.</x:String>
+	<x:String x:Key="FormulaRefFunctionsHeading">All functions</x:String>
+	<x:String x:Key="FormulaRefFunctionsIntro">Function names are case-insensitive. Arguments are separated by commas, decimals always use a dot, and an argument shown in [brackets] is optional, while one ending in … can be repeated.</x:String>
+
+	<x:String x:Key="FormulaRefBasicsHeading">Writing a formula</x:String>
+	<x:String x:Key="FormulaRefBasicsBody">A cell becomes a formula when its text starts with '='. Type it straight into the cell, or into the formula bar above the table — they do the same thing. Enter applies it, Escape cancels. Once applied, the cell shows the computed result and gets a small marker in its corner; clicking the cell shows the formula again, in the cell editor and in the formula bar. The usual operators work: + - * / ^ for arithmetic, &amp; to join text, = &lt;&gt; &lt; &gt; &lt;= &gt;= to compare, and parentheses to group.</x:String>
+
+	<x:String x:Key="FormulaRefThisRowHeading">Reading this row: @[field]</x:String>
+	<x:String x:Key="FormulaRefThisRowBody">@[field] means "this row's value for that field". It is the reference you will use most, because a table here has named columns rather than anonymous letters. It keeps meaning "this row" wherever the formula ends up — copied down, or applied to a whole column.</x:String>
+
+	<x:String x:Key="FormulaRefWholeColumnHeading">Reading a whole column: [field]</x:String>
+	<x:String x:Key="FormulaRefWholeColumnBody">Without the @, [field] means the entire column — every row of it, including rows added later. Use it inside a function that takes many values. Note the difference in the last example: @[total] is this row's cell, [total] is all of them, so the formula gives each row's share of the total.</x:String>
+
+	<x:String x:Key="FormulaRefOtherRowsHeading">Reading another row: A1 addresses</x:String>
+	<x:String x:Key="FormulaRefOtherRowsBody">Cells can also be addressed spreadsheet-style: a column letter by position (A is the first column, B the second, …) plus a row number starting at 1. So B2 is the second column of row 2, and D1:D10 is a range of ten cells. This is how a formula in one row reads a value out of a different row — a running total against the row above, or a rate held in the first row.</x:String>
+
+	<x:String x:Key="FormulaRefRelativeHeading">Relative and fixed ($) rows</x:String>
+	<x:String x:Key="FormulaRefRelativeBody">A plain row number is relative: it remembers the distance from the formula to the cell it points at. Written in row 2, =D1 means "the row above me", so copying it down to row 5 reads D4. Putting $ before the row number fixes it: $D$1 keeps pointing at row 1 from every row, which is what you want for a rate or a total that lives in one place. Column letters are always fixed — this table's columns are named, differently-typed fields, so there is no "fill right".</x:String>
+
+	<x:String x:Key="FormulaRefColumnFormulaHeading">One formula for a whole column</x:String>
+	<x:String x:Key="FormulaRefColumnFormulaBody">Ctrl+Enter in the formula bar — or the button beside it, or the right-click menu — applies the formula you have typed to every row of the current column at once, and to rows added later. That is different from dragging the small square at a cell's corner, which copies the formula only into the rows you drag over. To stop a column computing itself, right-click it and choose to stop; the values it produced stay as they are.</x:String>
+
+	<x:String x:Key="FormulaRefTypesHeading">Types are JSON's, not a spreadsheet's</x:String>
+	<x:String x:Key="FormulaRefTypesBody">Nothing is silently converted. The text "123" is not the number 123 — use VALUE() to convert it. TRUE is not 1 — use IF() to convert it. A missing key, a JSON null and an empty string are three different things: ISBLANK, ISNULL and ="" tell them apart, and SUM/AVERAGE/COUNT skip the first two rather than treating them as zero. A result that does not fit the column's declared type (a decimal into an Int column) is reported as an error rather than rounded.</x:String>
+
+	<x:String x:Key="FormulaRefDatesHeading">Dates</x:String>
+	<x:String x:Key="FormulaRefDatesBody">Dates are ISO 8601 text — "2024-03-15" or "2024-03-15T14:30:00", optionally with Z or +03:00 — not serial numbers. Results keep the exact shape of their input: same precision, same offset. There is no date arithmetic through + and -; DATEADD, EDATE, DAYS and DATEDIF are the way to do it.</x:String>
+
+	<x:String x:Key="FormulaRefErrorsHeading">When something goes wrong</x:String>
+	<x:String x:Key="FormulaRefErrorsBody">A failing formula leaves its cell empty and turns the corner marker red — hover it to read what happened. Codes are #DIV/0! for division by zero, #VALUE! for a wrong or unreadable argument, #TYPE! for a result that does not fit the column, #REF! for a reference that no longer exists, and #CYCLE! when formulas depend on each other in a loop. Handle expected failures yourself with IFERROR.</x:String>
+
+	<x:String x:Key="FormulaRefStorageHeading">Where formulas are saved</x:String>
+	<x:String x:Key="FormulaRefStorageBody">The JSON document only ever holds computed values, so it stays an ordinary JSON file for anyone who does not use this app. The formulas themselves live beside it in a file with the same name plus .formulas.json, written at the same moment the document is saved. Copy or move both together. "Detach formulas" in the right-click menu keeps every computed value and removes that file.</x:String>
+
+	<x:String x:Key="FormulaCatMath">Math</x:String>
+	<x:String x:Key="FormulaCatStatistics">Statistics</x:String>
+	<x:String x:Key="FormulaCatLogic">Logic</x:String>
+	<x:String x:Key="FormulaCatText">Text</x:String>
+	<x:String x:Key="FormulaCatJson">JSON</x:String>
+	<x:String x:Key="FormulaCatDate">Date</x:String>
+
+
+	<!-- Settings window -->
+	<x:String x:Key="SettingsTip">Settings</x:String>
+	<x:String x:Key="SettingsTitle">Settings</x:String>
+	<x:String x:Key="SettingsNavAppearance">Appearance</x:String>
+	<x:String x:Key="SettingsNavNotifications">Notifications</x:String>
+	<x:String x:Key="SettingsNavEditor">Editor</x:String>
+	<x:String x:Key="SettingsNavAbout">About</x:String>
+
+	<x:String x:Key="SettingsAppearanceLead">Applies immediately, to every open tab.</x:String>
+	<x:String x:Key="SettingsFollowSystemTitle">Follow the system theme</x:String>
+	<x:String x:Key="SettingsFollowSystemDesc">Switch between light and dark along with the operating system. Turn this off to pick one yourself.</x:String>
+	<x:String x:Key="SettingsDarkThemeTitle">Dark theme</x:String>
+	<x:String x:Key="SettingsDarkThemeDesc">Available once the app is no longer following the system.</x:String>
+	<x:String x:Key="SettingsLanguageTitle">Language</x:String>
+	<x:String x:Key="SettingsLanguageDesc">Changes the interface language right away — no restart.</x:String>
+
+	<x:String x:Key="SettingsNotificationsLead">Notifications are always kept in the bell panel; this only controls whether they also appear on screen.</x:String>
+	<x:String x:Key="SettingsPopupsTitle">Show pop-up notifications</x:String>
+	<x:String x:Key="SettingsPopupsDesc">Brief messages in the corner when something is imported, saved or fails. With this off, they go straight to the bell panel.</x:String>
+
+	<x:String x:Key="SettingsEditorLead">Behaviour of the table and JSON editors.</x:String>
+	<x:String x:Key="SettingsDiffOnSaveTitle">Show changes before saving</x:String>
+	<x:String x:Key="SettingsDiffOnSaveDesc">Lists what is about to be written and asks for confirmation. This is the same switch as the "Don't show this again" box in that dialog.</x:String>
+
+
+	<x:String x:Key="SettingsHelpLead">Links. The tour and the formula reference have their own buttons in the header, next to this one.</x:String>
+	<x:String x:Key="SettingsReleases">Releases and changelog</x:String>
+
+	<x:String x:Key="TourSettingsTitle">Settings</x:String>
+	<x:String x:Key="TourSettingsText">Everything you set once and forget: theme, language, notifications, editor behaviour and comparison options. The About section has the version and the release list.</x:String>
+
+	<x:String x:Key="TourHelpStepTitle">Replay this tour</x:String>
+	<x:String x:Key="TourHelpStepText">This button brings the tour back whenever you want it.</x:String>
+	<x:String x:Key="TourFormulaHelpBtnTitle">Formula reference</x:String>
+	<x:String x:Key="TourFormulaHelpBtnText">Cells can compute themselves from other cells. This opens the reference: how to write a formula, how to address another row or a whole column, and every function with an example.</x:String>
+	<!-- Bundle / formula export -->
+	<x:String x:Key="ExportBundleTitle">Export with formulas</x:String>
+	<x:String x:Key="ExportFormulasTitle">Export formulas</x:String>
+	<x:String x:Key="ExportJsonTitle">Export JSON</x:String>
+	<x:String x:Key="BundleFileFilter">CraftHub document (data + formulas)</x:String>
+	<x:String x:Key="FormulaFileFilter">CraftHub formulas</x:String>
+	<x:String x:Key="BundleExportedMsg">Saved "{0}" — data and formulas in one file.</x:String>
+	<x:String x:Key="FormulasExportedMsg">Formulas saved to "{0}".</x:String>
+	<x:String x:Key="FormulaNoneToExportMsg">This document has no formulas to export.</x:String>
+	<x:String x:Key="BundleImportedMsg">Opened the bundle: {0} rows, {1} fields, formulas included.</x:String>
+	<x:String x:Key="BundleUnreadableMsg">This CraftHub file could not be read. ({0})</x:String>
+
+	<x:String x:Key="ExportMenuTip">Export the whole document — JSON, JSON with formulas, or the formulas alone</x:String>
+	<x:String x:Key="ExportPlainJsonItem">JSON only (computed values)</x:String>
+	<x:String x:Key="ExportBundleItem">JSON with formulas (.crhb)</x:String>
+	<x:String x:Key="ExportFormulasItem">Formulas only (.formulas.json)</x:String>
+	<x:String x:Key="FormulasImportTitle">Import formulas</x:String>
+	<x:String x:Key="FormulasImportReplaceMsg">This document already has formulas. Importing replaces all of them; the values stay until the imported formulas recompute them.</x:String>
+	<x:String x:Key="FormulasImportNeedsDataMsg">Open a document first — formulas are imported onto data that is already here.</x:String>
+	<x:String x:Key="FormulasImportUnreadableMsg">This formula file could not be read. ({0})</x:String>
+	<x:String x:Key="FormulasImportedMsg">Formulas from "{0}" applied and recalculated.</x:String>
+	<x:String x:Key="FormulaCellDetachedMsg">This cell is no longer computed by the "{0}" column formula — it keeps what you typed. Undo restores it.</x:String>
 </ResourceDictionary>

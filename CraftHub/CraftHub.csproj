@@ -74,5 +74,7 @@
 
 	<ItemGroup>
 	  <ProjectReference Include="..\CraftHub.Core\CraftHub.Core.csproj" />
+	  <ProjectReference Include="..\CraftHub.Formulas\CraftHub.Formulas.csproj" />
+	  <ProjectReference Include="..\CraftHub.Formulas.Addressing\CraftHub.Formulas.Addressing.csproj" />
 	</ItemGroup>
 </Project>

@@ -1,0 +1,282 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:CraftHub.ViewModels"
+        xmlns:conv="using:CraftHub.Converters"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="CraftHub.Views.SettingsWindow"
+        x:DataType="vm:SettingsWindowViewModel"
+        Title="{DynamicResource SettingsTitle}"
+        Width="880" Height="620"
+        MinWidth="700" MinHeight="480"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource AppBackground}">
+
+    <Window.Resources>
+        <conv:IsEqualConverter x:Key="IsEqual" />
+    </Window.Resources>
+
+    <Window.Styles>
+        <!-- Sidebar entry: a full-width borderless button that reads as selected via its own
+             background, so the nav needs no ListBox and no selection-template plumbing. -->
+        <Style Selector="Button.nav">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="12,10" />
+            <Setter Property="Margin" Value="0,1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+        </Style>
+        <Style Selector="Button.nav.selected /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource AccentPrimary}" />
+        </Style>
+        <Style Selector="Button.nav.selected TextBlock">
+            <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+        </Style>
+        <Style Selector="Button.nav.selected materialIcons|MaterialIcon">
+            <Setter Property="Foreground" Value="{DynamicResource TextOnAccent}" />
+        </Style>
+
+        <!-- Link rows in About: same card shape as a setting, but clickable end to end. -->
+        <Style Selector="Button.link">
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+            <Setter Property="HorizontalContentAlignment" Value="Left" />
+            <Setter Property="Padding" Value="16,13" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.link:pointerover /template/ ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource BorderLight}" />
+        </Style>
+
+        <!-- One setting = a card with a label, a sentence saying what it actually does, and the
+             control. The sentence is the point: a bare switch called "Show diff on save" makes
+             people guess. -->
+        <Style Selector="Border.setting">
+            <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="16,14" />
+            <Setter Property="HorizontalAlignment" Value="Stretch" />
+        </Style>
+        <Style Selector="TextBlock.setting-title">
+            <Setter Property="FontSize" Value="13.5" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="TextBlock.setting-desc">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Opacity" Value="0.7" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="Margin" Value="0,3,0,0" />
+        </Style>
+        <Style Selector="TextBlock.section-title">
+            <Setter Property="FontSize" Value="19" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimary}" />
+        </Style>
+        <Style Selector="TextBlock.section-lead">
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Opacity" Value="0.7" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="Foreground" Value="{DynamicResource TextSecondary}" />
+            <Setter Property="Margin" Value="0,2,0,6" />
+        </Style>
+        <!-- The control sits in the Auto column; this keeps every one of them the same distance
+             from the text no matter how long the description is. -->
+        <Style Selector="ToggleSwitch.setting-control">
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="20,0,0,0" />
+            <Setter Property="OnContent" Value="" />
+            <Setter Property="OffContent" Value="" />
+        </Style>
+    </Window.Styles>
+
+    <Grid ColumnDefinitions="236,*">
+
+        <!-- Sidebar -->
+        <Border Grid.Column="0" Background="{DynamicResource ElevatedBackground}"
+                BorderBrush="{DynamicResource BorderColor}" BorderThickness="0,0,1,0" Padding="12,16">
+            <StackPanel Spacing="2">
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="4,0,0,14">
+                    <materialIcons:MaterialIcon Kind="CogOutline" Width="20" Height="20"
+                                                Foreground="{DynamicResource AccentPrimary}" />
+                    <TextBlock Text="{DynamicResource SettingsTitle}" FontSize="16" FontWeight="Bold"
+                               VerticalAlignment="Center" Foreground="{DynamicResource TextPrimary}" />
+                </StackPanel>
+
+                <Button Classes="nav" Classes.selected="{Binding SelectedSection, Converter={StaticResource IsEqual}, ConverterParameter=Appearance}"
+                        Command="{Binding SelectSectionCommand}" CommandParameter="Appearance">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <materialIcons:MaterialIcon Kind="PaletteOutline" Width="17" Height="17" />
+                        <TextBlock Text="{DynamicResource SettingsNavAppearance}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Classes="nav" Classes.selected="{Binding SelectedSection, Converter={StaticResource IsEqual}, ConverterParameter=Notifications}"
+                        Command="{Binding SelectSectionCommand}" CommandParameter="Notifications">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <materialIcons:MaterialIcon Kind="BellOutline" Width="17" Height="17" />
+                        <TextBlock Text="{DynamicResource SettingsNavNotifications}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Classes="nav" Classes.selected="{Binding SelectedSection, Converter={StaticResource IsEqual}, ConverterParameter=Editor}"
+                        Command="{Binding SelectSectionCommand}" CommandParameter="Editor">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <materialIcons:MaterialIcon Kind="TableEdit" Width="17" Height="17" />
+                        <TextBlock Text="{DynamicResource SettingsNavEditor}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Classes="nav" Classes.selected="{Binding SelectedSection, Converter={StaticResource IsEqual}, ConverterParameter=About}"
+                        Command="{Binding SelectSectionCommand}" CommandParameter="About">
+                    <StackPanel Orientation="Horizontal" Spacing="10">
+                        <materialIcons:MaterialIcon Kind="InformationOutline" Width="17" Height="17" />
+                        <TextBlock Text="{DynamicResource SettingsNavAbout}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Two load-bearing details here, neither decorative:
+             HorizontalScrollBarVisibility="Disabled" makes the ScrollViewer measure its content
+             against the viewport instead of against infinity. Without it TextWrapping never takes
+             effect and a card's "*" column behaves like Auto, so every card grows to the length of
+             its unwrapped description and the switch ends up off the right edge.
+             The inset is a Margin on the content, NOT Padding on the ScrollViewer: padding lives in
+             the ScrollViewer's template and whether it is deflated before the content is measured
+             depends on that template, which is how the cards still ran past the edge with the
+             wrapping already fixed. Margin is deflated by Layoutable itself, so it cannot drift. -->
+        <ScrollViewer Grid.Column="1"
+                      VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <Panel Margin="28,24">
+
+                <!-- Appearance -->
+                <StackPanel Spacing="10"
+                            IsVisible="{Binding SelectedSection, Converter={StaticResource IsEqual}, ConverterParameter=Appearance}">
+                    <TextBlock Classes="section-title" Text="{DynamicResource SettingsNavAppearance}" />
+                    <TextBlock Classes="section-lead" Text="{DynamicResource SettingsAppearanceLead}" />
+
+                    <Border Classes="setting">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Classes="setting-title" Text="{DynamicResource SettingsFollowSystemTitle}" />
+                                <TextBlock Classes="setting-desc" Text="{DynamicResource SettingsFollowSystemDesc}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" Classes="setting-control"
+                                          IsChecked="{Binding FollowSystemTheme}" />
+                        </Grid>
+                    </Border>
+
+                    <Border Classes="setting" IsEnabled="{Binding !FollowSystemTheme}">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Classes="setting-title" Text="{DynamicResource SettingsDarkThemeTitle}" />
+                                <TextBlock Classes="setting-desc" Text="{DynamicResource SettingsDarkThemeDesc}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" Classes="setting-control"
+                                          IsChecked="{Binding IsDarkTheme}" />
+                        </Grid>
+                    </Border>
+
+                    <Border Classes="setting">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Classes="setting-title" Text="{DynamicResource SettingsLanguageTitle}" />
+                                <TextBlock Classes="setting-desc" Text="{DynamicResource SettingsLanguageDesc}" />
+                            </StackPanel>
+                            <ComboBox Grid.Column="1"
+                                      VerticalAlignment="Center" Margin="20,0,0,0" MinWidth="150"
+                                      ItemsSource="{Binding Languages}"
+                                      SelectedItem="{Binding SelectedLanguage}">
+                                <ComboBox.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:LanguageChoice">
+                                        <TextBlock Text="{Binding DisplayName}" />
+                                    </DataTemplate>
+                                </ComboBox.ItemTemplate>
+                            </ComboBox>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- Notifications -->
+                <StackPanel Spacing="10"
+                            IsVisible="{Binding SelectedSection, Converter={StaticResource IsEqual}, ConverterParameter=Notifications}">
+                    <TextBlock Classes="section-title" Text="{DynamicResource SettingsNavNotifications}" />
+                    <TextBlock Classes="section-lead" Text="{DynamicResource SettingsNotificationsLead}" />
+
+                    <Border Classes="setting">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Classes="setting-title" Text="{DynamicResource SettingsPopupsTitle}" />
+                                <TextBlock Classes="setting-desc" Text="{DynamicResource SettingsPopupsDesc}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" Classes="setting-control"
+                                          IsChecked="{Binding ShowNotificationPopups}" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- Editor -->
+                <StackPanel Spacing="10"
+                            IsVisible="{Binding SelectedSection, Converter={StaticResource IsEqual}, ConverterParameter=Editor}">
+                    <TextBlock Classes="section-title" Text="{DynamicResource SettingsNavEditor}" />
+                    <TextBlock Classes="section-lead" Text="{DynamicResource SettingsEditorLead}" />
+
+                    <Border Classes="setting">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" VerticalAlignment="Center">
+                                <TextBlock Classes="setting-title" Text="{DynamicResource SettingsDiffOnSaveTitle}" />
+                                <TextBlock Classes="setting-desc" Text="{DynamicResource SettingsDiffOnSaveDesc}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" Classes="setting-control"
+                                          IsChecked="{Binding ShowDiffOnSave}" />
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- About -->
+                <StackPanel Spacing="10"
+                            IsVisible="{Binding SelectedSection, Converter={StaticResource IsEqual}, ConverterParameter=About}">
+                    <TextBlock Classes="section-title" Text="{DynamicResource SettingsNavAbout}" />
+
+                    <Border Classes="setting">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <TextBlock Text="CraftHub" FontSize="20" FontWeight="Bold"
+                                       Foreground="{DynamicResource TextPrimary}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding CurrentVersion}" FontSize="13" FontWeight="SemiBold"
+                                       Foreground="{DynamicResource AccentPrimary}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
+                    <TextBlock Classes="section-lead" Text="{DynamicResource SettingsHelpLead}" Margin="0,6,0,0" />
+
+                    <Button Classes="link" Command="{Binding ShowReleasesCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <materialIcons:MaterialIcon Kind="TagMultipleOutline" Width="17" Height="17" />
+                            <TextBlock Text="{DynamicResource SettingsReleases}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Classes="link" Command="{Binding OpenGitHubCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="10">
+                            <materialIcons:MaterialIcon Kind="Github" Width="17" Height="17" />
+                            <TextBlock Text="GitHub" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+            </Panel>
+        </ScrollViewer>
+    </Grid>
+</Window>

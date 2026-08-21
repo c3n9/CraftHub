@@ -195,6 +195,10 @@ public partial class MainWindowViewModel : ViewModelBase
     partial void OnShowNotificationPopupsChanged(bool value)
     {
         _notificationService.ShowPopups = value;
+        // The bell panel's own toggle and the settings switch are the same preference, so
+        // whichever one the user reaches for has to persist.
+        Properties.Settings.Default.ShowNotificationPopups = value;
+        Properties.Settings.Default.Save();
         OnPropertyChanged(nameof(ShowPopupOverlay));
     }
 
@@ -223,6 +227,15 @@ public partial class MainWindowViewModel : ViewModelBase
                 ? null
                 : await SelectedWorkspace.GetCurrentCanonicalJsonAsync(),
             getBaselineDocument: () => Task.FromResult(SelectedWorkspace?.BaselineJsonSnapshot));
+
+    [RelayCommand]
+    private Task ShowFormulaReference() => _dialogService.ShowFormulaReferenceAsync();
+
+    [RelayCommand]
+    private Task ShowSettings() => _dialogService.ShowSettingsAsync(
+        CurrentVersion,
+        showReleases: () => _dialogService.ShowReleasesDialogAsync(CurrentVersion),
+        openGitHub: () => GoToGitHubRepoCommand.Execute(null));
 
     [RelayCommand]
     private async void GoToGitHubRepo()

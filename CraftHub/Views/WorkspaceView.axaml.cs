@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Xml;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Controls.Templates;
@@ -25,6 +26,7 @@ using AvaloniaEdit.Highlighting;
 using AvaloniaEdit.Highlighting.Xshd;
 using AvaloniaEdit.Search;
 using CraftHub.Converters;
+using CraftHub.Formulas.Functions;
 using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.ViewModels;
@@ -37,9 +39,6 @@ namespace CraftHub.Views;
 
 public partial class WorkspaceView : UserControl
 {
-    // Snapshot captured when the DataGrid enters edit mode (FuncDataTemplate factory runs).
-    // Used by CellEditEnded to push an undo action only when the value actually changed.
-    private (DynamicDataRow Row, string PropName, string OldValue)? _pendingEdit;
 
     private TextEditor? _jsonEditor;
     private Button? _jsonErrorButton;
@@ -61,7 +60,14 @@ public partial class WorkspaceView : UserControl
         DataGrid.LoadingRow       += OnDataGridLoadingRow;
         DataGrid.SelectionChanged  += OnDataGridSelectionChanged;
         DataGrid.BeginningEdit     += (_, _) => SetCellEditing(true);
+        DataGrid.CellEditEnding    += OnDataGridCellEditEnding;
         DataGrid.CellEditEnded     += OnDataGridCellEditEnded;
+        DataGrid.CurrentCellChanged += OnDataGridCurrentCellChanged;
+        // Tunnel (before the Ctrl+D KeyBinding's own Bubble-stage handling) so a formula cell's
+        // Ctrl+D can be claimed for fill-down here, while every other Ctrl+D still falls through
+        // unchanged to the pre-existing "duplicate rows after" shortcut.
+        DataGrid.AddHandler(KeyDownEvent, OnDataGridKeyDownForFillDown, RoutingStrategies.Tunnel);
+        DataGrid.AddHandler(KeyDownEvent, OnDataGridShortcuts, RoutingStrategies.Tunnel);
         DataGrid.ColumnReordered   += (_, _) => UpdatePinIconStates();
         DataGrid.GotFocus          += async (_, _) =>
         {
@@ -79,9 +85,22 @@ public partial class WorkspaceView : UserControl
         if (ctx != null)
             ctx.Opening += async (_, _) =>
             {
+                UpdateColumnFormulaMenuItems();
                 if (DataContext is WorkspaceViewModel vm)
                     await vm.RefreshClipboardStateAsync();
             };
+
+    }
+
+    // Which of the two column-formula entries makes sense depends on the column under the pointer,
+    // which is only known once the menu is about to open.
+    private void UpdateColumnFormulaMenuItems()
+    {
+        var columnKey = DataGrid.CurrentColumn?.Tag as string;
+        var hasColumnFormula = _currentVm is { } vm && columnKey is not null && vm.ColumnHasFormula(columnKey);
+
+        ApplyToColumnMenuItem.IsVisible = columnKey is not null;
+        RemoveColumnFormulaMenuItem.IsVisible = hasColumnFormula;
     }
 
     //  JSON editor (AvaloniaEdit)
@@ -275,6 +294,341 @@ public partial class WorkspaceView : UserControl
         vm.UndoRedo.JumpTo(entry.Index);
     }
 
+    // Plain code-behind Click handler (not a bound Command) because it needs DataGrid.CurrentColumn
+    // — which cell/column the user actually right-clicked on — and that isn't something a
+    // ContextMenu's CommandParameter can express alongside SelectedItems.
+    private void OnFillDownClick(object? sender, RoutedEventArgs e)
+    {
+        if (_currentVm is not { } vm) return;
+        if (DataGrid.CurrentColumn?.Tag is not string columnKey) return;
+        var indices = SelectedRowIndicesInOrder(vm);
+        if (indices.Count < 2) return;
+
+        vm.FillDown(indices[0], columnKey, indices.Skip(1).ToList(), DataGrid);
+    }
+
+    // Ctrl+D already means "duplicate rows after" in this app (see the DataGrid.KeyBindings in
+    // XAML) — that shortcut stays untouched for everything except this one case: multiple rows
+    // selected, current column a formula at the TOP of the selection. There, Ctrl+D means what it
+    // means in Excel — fill down — and this claims the key before the existing binding sees it.
+    private void OnDataGridKeyDownForFillDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyModifiers != KeyModifiers.Control || e.Key != Key.D) return;
+        if (_currentVm is not { } vm) return;
+        if (DataGrid.CurrentColumn?.Tag is not string columnKey) return;
+
+        var indices = SelectedRowIndicesInOrder(vm);
+        if (indices.Count < 2 || !vm.IsFormulaCell(indices[0], columnKey)) return;
+
+        e.Handled = true;
+        vm.FillDown(indices[0], columnKey, indices.Skip(1).ToList(), DataGrid);
+    }
+
+    //  Column formulas — one template computing every row of a column, including rows added later.
+    //  Reachable three ways on purpose (button, Ctrl+Enter, context menu): the formula bar is where
+    //  the text already is, the context menu is where the neighbouring Fill down lives, and the
+    //  shortcut is what someone coming from Excel tries first.
+
+    private void OnApplyToColumnClick(object? sender, RoutedEventArgs e) => ApplyCurrentCellFormulaToColumn();
+
+    private void OnRemoveColumnFormulaClick(object? sender, RoutedEventArgs e)
+    {
+        if (_currentVm is not { } vm) return;
+        if (DataGrid.CurrentColumn?.Tag is not string columnKey) return;
+
+        vm.RemoveColumnFormula(columnKey, DataGrid);
+    }
+
+    /// <summary>Applies the current cell's formula to its whole column. Prefers the text still in
+    /// the open cell editor over the committed formula, so Ctrl+Enter works on what has just been
+    /// typed — otherwise it would need Enter first, which would already have committed it to the
+    /// single cell.</summary>
+    private void ApplyCurrentCellFormulaToColumn(TextBox? editorBox = null)
+    {
+        if (_currentVm is not { HasCurrentCell: true } vm) return;
+
+        var rowIndex = vm.CurrentCellRowIndex;
+        var columnKey = vm.CurrentCellColumnKey!;
+        // Prefer what is still in the open editor over the committed formula.
+        var text = editorBox?.Text ?? vm.GetDisplayFormula(rowIndex, columnKey) ?? string.Empty;
+
+        if (rowIndex < 0) return;
+
+        FormulaSuggestionsPopup.IsOpen = false;
+        // Close the editor first: committing a column formula rewrites every row, and doing that
+        // underneath an open editor is the same re-entrancy that used to crash the cell commit.
+        DataGrid.CommitEdit();
+        vm.CommitColumnFormula(rowIndex, columnKey, text, DataGrid);
+    }
+
+    // Grid shortcuts that a KeyBinding can't express, because they must stand down while the user
+    // is typing. Delete inside a cell editor or the search box means "delete a character"; only
+    // when no text field has focus does it mean "delete these rows".
+    private void OnDataGridShortcuts(object? sender, KeyEventArgs e)
+    {
+        if (_currentVm is not { } vm) return;
+        if (IsTextInputFocused()) return;
+
+        switch (e.Key)
+        {
+            // Backspace as well as Delete: that is the pairing people arrive with, and a laptop
+            // keyboard without a dedicated Delete key would otherwise have no way to do this.
+            case Key.Delete or Key.Back when e.KeyModifiers == KeyModifiers.None:
+                if (DataGrid.SelectedItems is not { Count: > 0 } selected) return;
+                e.Handled = true;
+                vm.RemoveRowsCommand.Execute(selected);
+                break;
+
+            // Enter opens the cell for editing, the way F2 already does — otherwise the only way
+            // in is a double-click.
+            case Key.Enter when e.KeyModifiers == KeyModifiers.None && DataGrid.CurrentColumn is not null:
+                e.Handled = true;
+                DataGrid.BeginEdit();
+                break;
+        }
+    }
+
+    /// <summary>True when a text field owns the keyboard, so a bare Delete belongs to it.</summary>
+    private bool IsTextInputFocused() =>
+        TopLevel.GetTopLevel(this)?.FocusManager?.GetFocusedElement() is TextBox;
+
+    private List<int> SelectedRowIndicesInOrder(WorkspaceViewModel vm) =>
+        DataGrid.SelectedItems is { Count: > 1 } selected
+            ? selected.Cast<DynamicDataRow>().Select(r => vm.Rows.IndexOf(r)).Where(i => i >= 0).OrderBy(i => i).ToList()
+            : new List<int>();
+
+    // Corner "fx" marker for a formula cell, with the formula text (or the error explanation, if
+    // this evaluation produced one) as its tooltip. Computed once when the cell template is built
+    // — like the rest of the formula UI, it's refreshed by the same ItemsSource-reset trick
+    // SetCellFormulaAction/FillDownAction/DetachFormulasAction already use after any formula edit,
+    // not by a live binding.
+    private Control BuildFormulaMarkerOverlay(DynamicDataRow row, string columnKey, TextBlock valueText)
+    {
+        if (_currentVm is not { } vm) return valueText;
+
+        var rowIndex = vm.Rows.IndexOf(row);
+        if (rowIndex < 0 || !vm.IsFormulaCell(rowIndex, columnKey)) return valueText;
+
+        var errorState = vm.GetFormulaErrorState(rowIndex, columnKey);
+        var formulaText = vm.GetDisplayFormula(rowIndex, columnKey) ?? "";
+
+        // A cell can be a formula two ways, and the difference is worth showing: its own formula
+        // (editing it affects this cell) or the column's template (editing it here overrides the
+        // column for this one row). Same distinction the marker's own tooltip spells out.
+        var fromColumn = vm.ColumnHasFormula(columnKey) && !vm.CellHasOwnFormula(rowIndex, columnKey);
+
+        var tooltip = fromColumn
+            ? $"{formulaText}\n\n{Localizer.Get("FormulaFromColumnTip")}"
+            : formulaText;
+        if (errorState != null) tooltip = $"{tooltip}\n\n{errorState.ErrorCode}: {errorState.Message}";
+
+        var marker = new Material.Icons.Avalonia.MaterialIcon
+        {
+            Kind = fromColumn ? Material.Icons.MaterialIconKind.TableColumn : Material.Icons.MaterialIconKind.FunctionVariant,
+            Width = 11,
+            Height = 11,
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Top,
+            Margin = new Avalonia.Thickness(0, 3, 3, 0),
+            Foreground = errorState != null ? Brushes.OrangeRed : Brushes.Gray,
+            Opacity = errorState != null ? 1.0 : 0.6,
+            [!ToolTip.TipProperty] = new Binding { Source = tooltip }
+        };
+
+        // No fill handle on a column-computed cell: dragging it would write per-cell copies of a
+        // formula the column already applies to every row, and those copies would then shadow the
+        // template — silently un-doing the "and rows added later" part of a calculated column.
+        if (fromColumn)
+        {
+            var columnGrid = new Grid();
+            columnGrid.Children.Add(valueText);
+            columnGrid.Children.Add(marker);
+            return columnGrid;
+        }
+
+        var grid = new Grid();
+        grid.Children.Add(valueText);
+        grid.Children.Add(marker);
+        grid.Children.Add(BuildFillHandle(row, columnKey));
+        return grid;
+    }
+
+    /// <summary>The Excel fill handle: the little square at the active cell's bottom-right corner
+    /// that you drag down to copy this cell's formula into the rows you drag over.
+    ///
+    /// Visibility is a live binding on "is this the current cell", the same signal the active-cell
+    /// border already uses — so exactly one handle exists at a time and it follows the selection
+    /// without the grid being rebuilt. (It used to be drawn on every formula cell at once, purely
+    /// because template-build time doesn't know the selection; that was the wrong trade.)</summary>
+    private Control BuildFillHandle(DynamicDataRow row, string columnKey)
+    {
+        var handle = new Border
+        {
+            Width = 9,
+            Height = 9,
+            CornerRadius = new Avalonia.CornerRadius(1),
+            Background = Brushes.SteelBlue,
+            BorderBrush = Brushes.White,
+            BorderThickness = new Avalonia.Thickness(1),
+            HorizontalAlignment = HorizontalAlignment.Right,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            // Half outside the cell's corner, as in a spreadsheet — that's what makes it a grab
+            // target rather than something you hit by accident while clicking the cell.
+            Margin = new Avalonia.Thickness(0, 0, -3, -3),
+            Cursor = new Cursor(StandardCursorType.Cross),
+            IsVisible = false,
+            [!ToolTip.TipProperty] = new Binding { Source = Localizer.Get("FillHandleTip") }
+        };
+
+        if (_currentVm is { } vm)
+        {
+            var mb = new MultiBinding { Converter = new IsCurrentCellConverter(vm.Rows, row, columnKey) };
+            mb.Bindings.Add(new Binding("DataContext.CurrentCellRowIndex")
+            {
+                RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) }
+            });
+            mb.Bindings.Add(new Binding("DataContext.CurrentCellColumnKey")
+            {
+                RelativeSource = new RelativeSource { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) }
+            });
+            handle.Bind(Visual.IsVisibleProperty, mb);
+        }
+
+        handle.AddHandler(PointerPressedEvent, (sender, e) => OnFillHandlePressed(sender, e, row, columnKey));
+        handle.AddHandler(PointerMovedEvent, OnFillHandleMoved);
+        handle.AddHandler(PointerReleasedEvent, OnFillHandleReleased);
+        return handle;
+    }
+
+    // Live state for a fill drag. The source is held as the row OBJECT, not its index: the drag
+    // outlives any number of layout passes, and an index would go stale if anything reordered
+    // underneath it.
+    private DynamicDataRow? _fillDragSourceRow;
+    private string? _fillDragColumnKey;
+    private DataGridCell? _fillDragCell;
+    private Border? _fillPreview;
+
+    private void OnFillHandlePressed(object? sender, PointerPressedEventArgs e, DynamicDataRow sourceRow, string columnKey)
+    {
+        e.Handled = true; // don't let the DataGrid start its own selection-drag or cell edit
+        if (sender is not IInputElement el) return;
+        e.Pointer.Capture(el);
+        _fillDragSourceRow = sourceRow;
+        _fillDragColumnKey = columnKey;
+        // The cell the handle sits in gives the preview its horizontal extent — a fill only ever
+        // affects this one column, so highlighting the full row width would overstate it.
+        _fillDragCell = (sender as Visual)?.FindAncestorOfType<DataGridCell>();
+    }
+
+    // Draws the range the drop would fill, so the gesture shows its effect before committing to it.
+    private void OnFillHandleMoved(object? sender, PointerEventArgs e)
+    {
+        if (_fillDragSourceRow is null || _currentVm is not { } vm) return;
+
+        var sourceIndex = vm.Rows.IndexOf(_fillDragSourceRow);
+        var targetIndex = FindRowIndexUnderPointer(e.GetPosition(DataGrid), vm);
+        if (sourceIndex < 0 || targetIndex < 0 || targetIndex == sourceIndex)
+        {
+            ClearFillPreview();
+            return;
+        }
+
+        var sourceCell = FindRowVisual(vm.Rows[sourceIndex]);
+        var targetCell = FindRowVisual(vm.Rows[targetIndex]);
+        if (sourceCell is null || targetCell is null)
+        {
+            ClearFillPreview();
+            return;
+        }
+
+        var sourceTop = sourceCell.TranslatePoint(default, DataGrid);
+        var targetTop = targetCell.TranslatePoint(default, DataGrid);
+        if (sourceTop is null || targetTop is null)
+        {
+            ClearFillPreview();
+            return;
+        }
+
+        // Cover both drag directions: from whichever row is higher to the bottom of the lower one.
+        var top = Math.Min(sourceTop.Value.Y, targetTop.Value.Y);
+        var bottom = Math.Max(sourceTop.Value.Y + sourceCell.Bounds.Height,
+                              targetTop.Value.Y + targetCell.Bounds.Height);
+
+        // Horizontal extent = the dragged column only. Falls back to the full width if the cell
+        // visual has been recycled out from under the drag, which beats drawing nothing.
+        var left = 0.0;
+        var width = DataGrid.Bounds.Width;
+        if (_fillDragCell is { } cell && cell.TranslatePoint(default, DataGrid) is { } cellOrigin)
+        {
+            left = cellOrigin.X;
+            width = cell.Bounds.Width;
+        }
+
+        _fillPreview ??= CreateFillPreview();
+        Canvas.SetLeft(_fillPreview, left);
+        Canvas.SetTop(_fillPreview, top);
+        _fillPreview.Width = Math.Max(0, width);
+        _fillPreview.Height = Math.Max(0, bottom - top);
+        _fillPreview.IsVisible = true;
+    }
+
+    private Border CreateFillPreview()
+    {
+        var preview = new Border
+        {
+            BorderBrush = Brushes.SteelBlue,
+            BorderThickness = new Avalonia.Thickness(1.5),
+            Background = new SolidColorBrush(Colors.SteelBlue, 0.12),
+            IsHitTestVisible = false
+        };
+        FillPreviewLayer.Children.Add(preview);
+        return preview;
+    }
+
+    private void ClearFillPreview()
+    {
+        if (_fillPreview != null) _fillPreview.IsVisible = false;
+    }
+
+    private void OnFillHandleReleased(object? sender, PointerReleasedEventArgs e)
+    {
+        if (_fillDragSourceRow is null) return;
+        e.Handled = true;
+        e.Pointer.Capture(null);
+
+        var sourceRowItem = _fillDragSourceRow;
+        var columnKey = _fillDragColumnKey!;
+        _fillDragSourceRow = null;
+        _fillDragColumnKey = null;
+        _fillDragCell = null;
+        ClearFillPreview();
+
+        if (_currentVm is not { } vm) return;
+
+        var sourceRow = vm.Rows.IndexOf(sourceRowItem);
+        var targetRow = FindRowIndexUnderPointer(e.GetPosition(DataGrid), vm);
+        if (sourceRow < 0 || targetRow < 0 || targetRow == sourceRow) return;
+
+        var from = Math.Min(sourceRow, targetRow);
+        var to = Math.Max(sourceRow, targetRow);
+        var targets = Enumerable.Range(from, to - from + 1).Where(r => r != sourceRow).ToList();
+        vm.FillDown(sourceRow, columnKey, targets, DataGrid);
+    }
+
+    private DataGridRow? FindRowVisual(DynamicDataRow item) =>
+        DataGrid.GetVisualDescendants()
+            .OfType<DataGridRow>()
+            .FirstOrDefault(r => ReferenceEquals(r.DataContext, item));
+
+    private int FindRowIndexUnderPointer(Point position, WorkspaceViewModel vm)
+    {
+        var hit = DataGrid.InputHitTest(position);
+        var visual = hit as Visual;
+        while (visual != null && visual is not DataGridRow)
+            visual = visual.GetVisualParent();
+        return visual is DataGridRow { DataContext: DynamicDataRow row } ? vm.Rows.IndexOf(row) : -1;
+    }
+
     private static bool RowMatchesQuery(DynamicDataRow row, IEnumerable<JsonPropertyDefinition> props, string query) =>
         props.Any(p => (row[p.Name] ?? string.Empty).Contains(query, StringComparison.OrdinalIgnoreCase));
 
@@ -324,6 +678,7 @@ public partial class WorkspaceView : UserControl
     {
         if (DataContext is WorkspaceViewModel vm)
             vm.SelectedRowsCount = DataGrid.SelectedItems?.Count ?? 0;
+        RefreshCurrentCell();
     }
 
     //  Cell edit tracking for undo / clipboard guard
@@ -334,22 +689,434 @@ public partial class WorkspaceView : UserControl
             vm.IsCellEditing = value;
     }
 
-    private async void OnDataGridCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
+    // What the editor held, captured while it still exists. CellEditEnding is the last moment the
+    // editor control is reachable, and it hands it over directly as EditingElement — so the text
+    // comes from the edit that is actually ending, rather than from a field that the next cell's
+    // template may already have overwritten. Clicking straight from one cell to another does
+    // exactly that, and the old single-slot version silently threw such edits away.
+    private (DynamicDataRow Row, string PropName, string Text)? _pendingCommit;
+
+    private void OnDataGridCellEditEnding(object? sender, DataGridCellEditEndingEventArgs e)
     {
-        SetCellEditing(false);
+        _pendingCommit = null;
+        if (e.EditAction != DataGridEditAction.Commit) return;
+        if (e.Column?.Tag is not string propName) return;
+        if (e.Row?.DataContext is not DynamicDataRow row) return;
+        if (e.EditingElement is not TextBox box) return;
 
-        if (_pendingEdit == null) return;
-
-        var (row, propName, oldValue) = _pendingEdit.Value;
-        _pendingEdit = null;
-
-        var newValue = row[propName];
-        if (newValue == oldValue) return;
-
-        if (DataContext is WorkspaceViewModel vm)
-            vm.UndoRedo.Push(new EditCellAction(row, propName, oldValue, newValue, DataGrid));
+        _pendingCommit = (row, propName, box.Text ?? string.Empty);
     }
 
+    private void OnDataGridCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
+    {
+        SetCellEditing(false);
+        FormulaSuggestionsPopup.IsOpen = false;
+
+        var pending = _pendingCommit;
+        _pendingCommit = null;
+
+        // Escape needs no undoing: nothing was written to the row while editing.
+        if (e.EditAction == DataGridEditAction.Cancel || pending is not { } commit) return;
+        if (DataContext is not WorkspaceViewModel vm) return;
+
+        var rowIndex = vm.Rows.IndexOf(commit.Row);
+        if (rowIndex < 0) return;
+
+        // Read straight off the row: nothing has written to it, so this is genuinely "before".
+        // Any resulting change in formula state comes back as FormulaVisualsChanged.
+        vm.CommitCellEdit(rowIndex, commit.PropName, commit.Row[commit.PropName],
+            commit.Row.GetKind(commit.PropName), commit.Text, DataGrid);
+    }
+
+    /// <summary>Posted rather than run inline. This arrives while the DataGrid is still finishing
+    /// the edit that triggered it, and rebuilding the rows means tearing down ItemsSource — doing
+    /// that underneath the grid's own edit bookkeeping crashed it, which is what typing a formula
+    /// straight into a cell used to do. Background priority lets the edit settle first.</summary>
+    private void OnFormulaVisualsChanged(object? sender, EventArgs e) =>
+        Dispatcher.UIThread.Post(RefreshGridRows, DispatcherPriority.Background);
+
+    private void RefreshGridRows()
+    {
+        DataGridRefresh.Rows(DataGrid);
+        RefreshCurrentCell();
+    }
+
+    //  Current cell — the DataGrid's own column-level notion of "current", which
+    //  SelectedItem/SelectedRowsCount don't track. Drives the active-cell border and the fill handle.
+
+    // Fired from both DataGrid.CurrentCellChanged and DataGrid.SelectionChanged — deliberately
+    // redundant, since which one actually reflects "the cell the user just clicked" first isn't
+    // documented/guaranteed, and missing the update would leave the active-cell marker behind.
+    private void OnDataGridCurrentCellChanged(object? sender, EventArgs e) => RefreshCurrentCell();
+
+    private void RefreshCurrentCell()
+    {
+        if (_currentVm is not { } vm) return;
+
+        var columnKey = DataGrid.CurrentColumn?.Tag as string;
+        var row = DataGrid.SelectedItem as DynamicDataRow;
+        var rowIndex = row is not null ? vm.Rows.IndexOf(row) : -1;
+        var hasCell = rowIndex >= 0 && columnKey is not null;
+
+        vm.CurrentCellRowIndex = hasCell ? rowIndex : -1;
+        vm.CurrentCellColumnKey = hasCell ? columnKey : null;
+
+    }
+
+
+    //  Formula autocomplete — formula bar only (not the grid's own inline cell editor).
+    //
+    //  Three things happen in the one popup, chosen by what's immediately before the caret:
+    //  completing a function name, completing a COLUMN name inside [ ] or @[ ], and — when there's
+    //  nothing to complete but the caret sits inside a call's parentheses — showing that function's
+    //  signature with the argument being typed picked out. Column completion matters at least as
+    //  much as the function list here: unlike Excel's A1 grid, this table's columns are named
+    //  fields, so `@[unitPrice]` is the reference people actually write, and getting it wrong by a
+    //  character is the most likely way to write a formula that doesn't work.
+    //
+    //  None of this parses the formula for real, so a function-shaped word or a '[' inside a string
+    //  literal can still trigger it. That trade-off is unchanged from the original function-only
+    //  version and is worth the simplicity given how rarely it happens in practice.
+
+    private static readonly FunctionRegistry FormulaHintsRegistry = FunctionRegistry.CreateStandard();
+
+    /// <summary>What to offer the instant '=' is typed: arithmetic and aggregation over a column,
+    /// a conditional, rounding, and a date — the shapes most first formulas take. Keep it short;
+    /// this is a doorway, not a catalogue (the full list is in the formula reference).</summary>
+    private static readonly string[] StarterFunctions =
+        { "SUM", "AVERAGE", "COUNT", "MIN", "MAX", "IF", "ROUND", "CONCAT", "TODAY" };
+
+    /// <summary>One offered completion. <see cref="InsertText"/> is what replaces the token being
+    /// typed; <see cref="Display"/>/<see cref="Detail"/> are what the row shows.</summary>
+    private sealed record FormulaSuggestion(string InsertText, string Display, string Detail);
+
+    private enum CompletionKind { None, Function, Column }
+
+    private List<FormulaSuggestion> _formulaSuggestions = new();
+    private CompletionKind _completionKind = CompletionKind.None;
+    private int _completionStart;
+
+    /// <summary>The editor the visible suggestions belong to. Set from the box that raised the
+    /// event, never from a shared "current editor" field: the grid reuses editor instances, so such
+    /// a field goes stale exactly when a second cell is edited — which is why the popup stopped
+    /// appearing at all after the first cell.</summary>
+    private TextBox? _suggestionBox;
+
+    /// <summary>Gives a freshly created cell editor the formula behaviour that used to live on the
+    /// formula bar: completion of function and column names, the signature hint, and Ctrl+Enter to
+    /// apply what's typed to the whole column. The popup is anchored here too — with the bar gone
+    /// there is no fixed box to point it at, so it follows whichever cell is open.</summary>
+    private void AttachFormulaEditing(TextBox box)
+    {
+        // The grid reuses editor instances between cells, so this can be handed the same TextBox
+        // more than once — wiring it twice would fire every handler twice.
+        if (box.Tag is "formula-editing") return;
+        box.Tag = "formula-editing";
+
+        box.TextChanged += (_, _) => UpdateFormulaSuggestions(box);
+        // Moving the caret changes what the hint should say just as much as typing does — clicking
+        // into an existing formula's parentheses is exactly when someone wants its signature.
+        box.PropertyChanged += (_, e) =>
+        {
+            if (e.Property == TextBox.CaretIndexProperty) UpdateFormulaSuggestions(box);
+        };
+        box.AddHandler(KeyDownEvent, OnCellEditorKeyDown, RoutingStrategies.Tunnel);
+        box.DetachedFromVisualTree += (_, _) => FormulaSuggestionsPopup.IsOpen = false;
+    }
+
+    // Tunnel, so these are claimed before the DataGrid turns Enter/Escape into its own
+    // commit/cancel — otherwise accepting a suggestion with Enter would close the editor instead.
+    private void OnCellEditorKeyDown(object? sender, KeyEventArgs e)
+    {
+        // Ctrl+Enter is "apply to the whole column", never "accept this suggestion".
+        if (e.Key == Key.Enter && e.KeyModifiers.HasFlag(KeyModifiers.Control))
+        {
+            e.Handled = true;
+            ApplyCurrentCellFormulaToColumn(sender as TextBox);
+            return;
+        }
+
+        if (!FormulaSuggestionsPopup.IsOpen) return;
+
+        if (e.Key is Key.Tab or Key.Enter && _formulaSuggestions.Count > 0)
+        {
+            e.Handled = true;
+            AcceptFormulaSuggestion(_formulaSuggestions[0]);
+        }
+        else if (e.Key == Key.Escape)
+        {
+            // First Escape dismisses the popup; a second one reaches the grid and cancels the edit.
+            e.Handled = true;
+            FormulaSuggestionsPopup.IsOpen = false;
+        }
+    }
+
+    private void UpdateFormulaSuggestions(TextBox box)
+    {
+        _suggestionBox = box;
+        FormulaSuggestionsPopup.PlacementTarget = box;
+
+        var text = box.Text ?? "";
+        var caret = Math.Clamp(box.CaretIndex, 0, text.Length);
+
+        (_completionKind, _completionStart) = FindCompletionTarget(text, caret);
+        var prefix = _completionKind == CompletionKind.None ? "" : text[_completionStart..caret];
+
+        _formulaSuggestions = _completionKind switch
+        {
+            // An empty prefix means "just typed =", and alphabetical order would open on ABS and
+            // AND — accurate and useless. A short hand-picked list of the ones people actually
+            // reach for first is worth the small maintenance cost.
+            CompletionKind.Function when prefix.Length == 0 => StarterFunctions
+                .Select(name => FormulaHintsRegistry.TryGetMetadata(name, out var meta) ? meta : null)
+                .Where(meta => meta is not null)
+                .Select(meta => ToSuggestion(meta!))
+                .ToList(),
+
+            CompletionKind.Function => FormulaHintsRegistry.All()
+                .Where(f => f.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(f => f.Name, StringComparer.Ordinal)
+                .Take(8)
+                .Select(ToSuggestion)
+                .ToList(),
+
+            CompletionKind.Column => ColumnKeys()
+                .Where(k => JsonPropertyDefinition.GetDisplayPath(k).Contains(prefix, StringComparison.OrdinalIgnoreCase))
+                .OrderBy(k => k, StringComparer.Ordinal)
+                .Take(8)
+                .Select(k => new FormulaSuggestion(k, JsonPropertyDefinition.GetDisplayPath(k),
+                    Localizer.Get("FormulaColumnSuggestionDetail")))
+                .ToList(),
+
+            _ => new List<FormulaSuggestion>()
+        };
+
+        FormulaSuggestionsList.Children.Clear();
+
+        if (_formulaSuggestions.Count > 0)
+        {
+            foreach (var suggestion in _formulaSuggestions)
+                FormulaSuggestionsList.Children.Add(BuildSuggestionRow(suggestion));
+        }
+        else if (FindEnclosingCall(text, caret) is ({ } meta, var activeArg))
+        {
+            FormulaSuggestionsList.Children.Add(BuildSignatureHint(meta, activeArg));
+        }
+
+        FormulaSuggestionsPopup.IsOpen = FormulaSuggestionsList.Children.Count > 0;
+    }
+
+    private IEnumerable<string> ColumnKeys() =>
+        _currentVm?.Properties.Select(p => p.Name) ?? Enumerable.Empty<string>();
+
+    private static FormulaSuggestion ToSuggestion(FunctionMetadata meta)
+    {
+        var argsText = string.Join(", ", meta.Arguments.Select(a => a.Repeating ? a.Name + "…" : a.Name));
+        var detail = meta.Volatile
+            ? $"{meta.Description} {Localizer.Get("FormulaVolatileNote")}"
+            : meta.Description;
+        return new FormulaSuggestion(meta.Name, $"{meta.Name}({argsText})", detail);
+    }
+
+    /// <summary>What the caret is in the middle of typing, and where that token starts. A column
+    /// reference wins over a function name whenever there's an unclosed '[' before the caret —
+    /// inside brackets, a run of letters is a field name, never a function.</summary>
+    private static (CompletionKind Kind, int Start) FindCompletionTarget(string text, int caret)
+    {
+        if (!text.StartsWith('=')) return (CompletionKind.None, 0);
+
+        var open = caret > 0 ? text.LastIndexOf('[', caret - 1) : -1;
+        if (open >= 0 && text.IndexOf(']', open, caret - open) < 0)
+            return (CompletionKind.Column, open + 1);
+
+        var start = caret;
+        while (start > 0 && char.IsAsciiLetter(text[start - 1])) start--;
+        if (start != caret) return (CompletionKind.Function, start);
+
+        // Nothing typed yet after the '=' — offer a starting point rather than an empty box. This
+        // is the moment someone has just learned that '=' begins a formula and has no idea what may
+        // follow, so the list is what makes the feature usable at all.
+        return caret > 0 && text[caret - 1] == '=' ? (CompletionKind.Function, caret) : (CompletionKind.None, 0);
+    }
+
+    /// <summary>The call the caret sits inside, and which argument it's on — found by scanning back
+    /// for an unmatched '(' and counting the commas at that same depth along the way.</summary>
+    private static (FunctionMetadata? Meta, int ActiveArg) FindEnclosingCall(string text, int caret)
+    {
+        var depth = 0;
+        var commas = 0;
+
+        for (var i = Math.Min(caret, text.Length) - 1; i >= 0; i--)
+        {
+            switch (text[i])
+            {
+                case ')':
+                    depth++;
+                    break;
+
+                case '(' when depth == 0:
+                    var end = i;
+                    var start = end;
+                    while (start > 0 && char.IsAsciiLetter(text[start - 1])) start--;
+                    if (start == end) return (null, 0); // a grouping paren, not a call
+                    return FormulaHintsRegistry.TryGetMetadata(text[start..end].ToUpperInvariant(), out var meta)
+                        ? (meta, commas)
+                        : (null, 0);
+
+                case '(':
+                    depth--;
+                    break;
+
+                case ',' when depth == 0:
+                    commas++;
+                    break;
+            }
+        }
+
+        return (null, 0);
+    }
+
+    private Control BuildSuggestionRow(FormulaSuggestion suggestion)
+    {
+        var button = new Button
+        {
+            Content = new StackPanel
+            {
+                Spacing = 1,
+                Children =
+                {
+                    new TextBlock
+                    {
+                        Text = suggestion.Display,
+                        FontFamily = new FontFamily("Cascadia Code,Cascadia Mono,Consolas,Menlo,Courier New,monospace"),
+                        FontWeight = FontWeight.SemiBold,
+                        FontSize = 12
+                    },
+                    new TextBlock
+                    {
+                        Text = suggestion.Detail,
+                        FontSize = 11,
+                        Opacity = 0.65,
+                        TextWrapping = TextWrapping.Wrap
+                    }
+                }
+            },
+            HorizontalContentAlignment = HorizontalAlignment.Left,
+            HorizontalAlignment = HorizontalAlignment.Stretch,
+            Background = Brushes.Transparent,
+            BorderThickness = new Avalonia.Thickness(0),
+            Padding = new Avalonia.Thickness(8, 4),
+            Cursor = Cursor.Parse("Hand")
+        };
+        // Mouse-down (not Click) so the formula bar doesn't lose focus before the text swap runs.
+        button.AddHandler(PointerPressedEvent, (_, e) =>
+        {
+            e.Handled = true;
+            AcceptFormulaSuggestion(suggestion);
+        }, RoutingStrategies.Tunnel);
+        return button;
+    }
+
+    // Not a Button: there's nothing to accept here, only something to read while typing arguments.
+    private static Control BuildSignatureHint(FunctionMetadata meta, int activeArg)
+    {
+        var signature = new TextBlock
+        {
+            FontFamily = new FontFamily("Cascadia Code,Cascadia Mono,Consolas,Menlo,Courier New,monospace"),
+            FontSize = 12,
+            TextWrapping = TextWrapping.Wrap
+        };
+        signature.Inlines?.Add(new Run(meta.Name + "(") { FontWeight = FontWeight.SemiBold });
+
+        for (var i = 0; i < meta.Arguments.Count; i++)
+        {
+            if (i > 0) signature.Inlines?.Add(new Run(", "));
+
+            var arg = meta.Arguments[i];
+            var label = arg.Optional ? $"[{arg.Name}]" : arg.Name;
+            if (arg.Repeating) label += "…";
+
+            // A repeating final argument stays highlighted however many values get typed into it.
+            var isActive = i == activeArg || (arg.Repeating && i == meta.Arguments.Count - 1 && activeArg >= i);
+            signature.Inlines?.Add(new Run(label)
+            {
+                FontWeight = isActive ? FontWeight.Bold : FontWeight.Normal,
+                TextDecorations = isActive ? TextDecorations.Underline : null
+            });
+        }
+        signature.Inlines?.Add(new Run(")") { FontWeight = FontWeight.SemiBold });
+
+        var activeSpec = activeArg < meta.Arguments.Count
+            ? meta.Arguments[activeArg]
+            : meta.Arguments.LastOrDefault(a => a.Repeating);
+
+        return new StackPanel
+        {
+            Spacing = 1,
+            Margin = new Avalonia.Thickness(8, 4),
+            Children =
+            {
+                signature,
+                new TextBlock
+                {
+                    Text = activeSpec?.Description ?? meta.Description,
+                    FontSize = 11,
+                    Opacity = 0.65,
+                    TextWrapping = TextWrapping.Wrap
+                }
+            }
+        };
+    }
+
+    /// <summary>Where the token being completed ends, which is not always the caret: someone
+    /// fixing a typo in the middle of `@[pri|ce]` or `SU|M(` means to replace the whole name, not
+    /// to splice the completion in front of the rest of it.</summary>
+    private int CompletionEnd(string text, int caret)
+    {
+        switch (_completionKind)
+        {
+            case CompletionKind.Column:
+                var close = text.IndexOf(']', caret);
+                return close >= 0 ? close : caret;
+
+            case CompletionKind.Function:
+                var end = caret;
+                while (end < text.Length && char.IsAsciiLetter(text[end])) end++;
+                return end;
+
+            default:
+                return caret;
+        }
+    }
+
+    private void AcceptFormulaSuggestion(FormulaSuggestion suggestion)
+    {
+        if (_suggestionBox is not { } box) return;
+
+        var text = box.Text ?? "";
+        var caret = Math.Clamp(box.CaretIndex, 0, text.Length);
+        var start = Math.Clamp(_completionStart, 0, caret);
+        var end = CompletionEnd(text, caret);
+
+        // A function name brings its own '('; a column name closes its bracket unless one is
+        // already sitting there (which it is whenever the user is editing an existing reference) —
+        // in which case the caret still steps over it, so typing continues after the reference
+        // rather than inside it.
+        var bracketAlreadyThere = end < text.Length && text[end] == ']';
+        var replacement = _completionKind switch
+        {
+            CompletionKind.Function => suggestion.InsertText + "(",
+            CompletionKind.Column => bracketAlreadyThere ? suggestion.InsertText : suggestion.InsertText + "]",
+            _ => suggestion.InsertText
+        };
+        var caretShift = _completionKind == CompletionKind.Column && bracketAlreadyThere ? 1 : 0;
+
+        box.Text = text[..start] + replacement + text[end..];
+        box.CaretIndex = start + replacement.Length + caretShift;
+
+        FormulaSuggestionsPopup.IsOpen = false;
+        box.Focus();
+    }
 
     //  DataContext / column wiring
 
@@ -364,6 +1131,7 @@ public partial class WorkspaceView : UserControl
             _currentVm.PropertyChanged -= OnVmPropertyChanged;
             _currentVm.FocusSearchRequested -= OnFocusSearchRequested;
             _currentVm.ToggleReplaceRequested -= OnToggleReplaceRequested;
+            _currentVm.FormulaVisualsChanged -= OnFormulaVisualsChanged;
         }
 
         if (DataContext is WorkspaceViewModel vm)
@@ -374,6 +1142,7 @@ public partial class WorkspaceView : UserControl
             vm.PropertyChanged += OnVmPropertyChanged;
             vm.FocusSearchRequested += OnFocusSearchRequested;
             vm.ToggleReplaceRequested += OnToggleReplaceRequested;
+            vm.FormulaVisualsChanged += OnFormulaVisualsChanged;
             RebuildColumns(vm);
             PushTextToEditor(vm.RawJsonText); // seed the editor for this tab
             ScheduleOverflowUpdate();
@@ -706,6 +1475,28 @@ public partial class WorkspaceView : UserControl
                 mb.Bindings.Add(new DynamicResourceExtension("AccentPrimary"));
                 border.Bind(Border.BackgroundProperty, mb);
 
+                // Excel-style "active cell" indicator: a live accent border on whichever cell
+                // CurrentCellRowIndex/CurrentCellColumnKey currently point at (see
+                // OnDataGridCurrentCellChanged). A genuine live binding, unlike the formula
+                // marker/fill handle below — it tracks clicks in real time, no grid refresh needed.
+                if (_currentVm is { } cellVm)
+                {
+                    border.BorderThickness = new Avalonia.Thickness(1.5);
+                    var currentCellMb = new MultiBinding { Converter = new CurrentCellHighlightConverter(cellVm.Rows, row, prop.Name) };
+                    currentCellMb.Bindings.Add(new Binding("DataContext.CurrentCellRowIndex")
+                    {
+                        RelativeSource = new RelativeSource
+                            { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) }
+                    });
+                    currentCellMb.Bindings.Add(new Binding("DataContext.CurrentCellColumnKey")
+                    {
+                        RelativeSource = new RelativeSource
+                            { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) }
+                    });
+                    currentCellMb.Bindings.Add(new DynamicResourceExtension("AccentPrimary"));
+                    border.Bind(Border.BorderBrushProperty, currentCellMb);
+                }
+
                 if (isComplexType)
                 {
                     var grid = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto") };
@@ -764,12 +1555,14 @@ public partial class WorkspaceView : UserControl
                         DynamicRowCellBinding.ForKey(prop.Name, BindingMode.TwoWay, new DynamicRowBoolConverter()));
 
                     var boolOldValue = row[prop.Name] == "true";
+                    var boolOldKind = row.GetKind(prop.Name);
                     var boolUserInteraction = false;
 
                     cb.AddHandler(InputElement.PointerPressedEvent, (_, _) =>
                     {
                         boolUserInteraction = true;
                         boolOldValue = row[prop.Name] == "true";
+                        boolOldKind = row.GetKind(prop.Name);
                     }, RoutingStrategies.Tunnel);
 
                     cb.IsCheckedChanged += (_, _) =>
@@ -779,7 +1572,7 @@ public partial class WorkspaceView : UserControl
 
                         var newVal = cb.IsChecked == true;
                         if (newVal != boolOldValue && DataContext is WorkspaceViewModel vm2)
-                            vm2.UndoRedo.Push(new EditCheckBoxCellAction(row, prop.Name, boolOldValue, newVal));
+                            vm2.UndoRedo.Push(new EditCheckBoxCellAction(row, prop.Name, boolOldValue, boolOldKind, newVal));
                     };
 
                     border.Child = cb;
@@ -804,7 +1597,8 @@ public partial class WorkspaceView : UserControl
                             RelativeSource = new RelativeSource
                                 { Mode = RelativeSourceMode.FindAncestor, AncestorType = typeof(DataGrid) }
                         });
-                    border.Child = tb;
+
+                    border.Child = BuildFormulaMarkerOverlay(row, prop.Name, tb);
                 }
 
                 return border;
@@ -815,12 +1609,22 @@ public partial class WorkspaceView : UserControl
             {
                 column.CellEditingTemplate = new FuncDataTemplate<DynamicDataRow>((row, _) =>
                 {
-                    // Snapshot the old value the moment the editing template is instantiated.
-                    // CellEditEnded will compare against this to decide whether to push an action.
-                    _pendingEdit = (row, prop.Name, row[prop.Name]);
+                    // A formula cell edits its FORMULA text, not its computed result — matches
+                    // what OnDataGridCellEditEnded expects back (a leading '=' means "still a
+                    // formula"), and what gets typed here on a no-op edit-and-leave.
+                    var displayText = row[prop.Name];
+                    if (_currentVm is { } editVm)
+                    {
+                        var rowIndex = editVm.Rows.IndexOf(row);
+                        if (rowIndex >= 0 && editVm.GetDisplayFormula(rowIndex, prop.Name) is { } formulaText)
+                            displayText = formulaText;
+                    }
 
                     if (isBoolType)
                     {
+                        // A checkbox commits through its own two-way binding, and its undo entry is
+                        // pushed by the display template's IsCheckedChanged — CellEditEnding only
+                        // captures text editors, so this one is left alone on purpose.
                         var cb = new CheckBox
                         {
                             VerticalAlignment = VerticalAlignment.Center,
@@ -840,9 +1644,12 @@ public partial class WorkspaceView : UserControl
                             HorizontalContentAlignment = HorizontalAlignment.Left,
                             TextWrapping = TextWrapping.Wrap,
                             AcceptsReturn = true,
-                            Text = row[prop.Name]
+                            Text = displayText
                         };
-                        tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
+                        // No live write into the row: the row holds a formula's RESULT while the
+                        // editor shows its TEXT, so writing through would put the formula into the
+                        // data. CellEditEnding reads this box at commit time instead.
+                        AttachFormulaEditing(tb);
                         return tb;
                     }
                 });

@@ -51,13 +51,40 @@
                             <TextBlock Text="{DynamicResource ImportJson}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                    <Button x:Name="BtnExportJson" Classes="toolbar-btn" Command="{Binding ExportJsonCommand}"
+                    <!-- No Command: the click opens the menu. Every entry exports the WHOLE
+                         document — which is why they live here and not in the grid's context menu,
+                         where sitting among "duplicate row"/"delete row" read as row-scoped. -->
+                    <Button x:Name="BtnExportJson" Classes="toolbar-btn"
                             cl:Coachmark.Id="exportJson"
-                            ToolTip.Tip="{DynamicResource ExportJsonTip}">
+                            ToolTip.Tip="{DynamicResource ExportMenuTip}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <materialIcons:MaterialIcon Kind="FileExportOutline" Width="16" Height="16" />
                             <TextBlock Text="{DynamicResource ExportJson}" VerticalAlignment="Center" />
+                            <materialIcons:MaterialIcon Kind="MenuDown" Width="14" Height="14" Opacity="0.6" />
                         </StackPanel>
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuItem Header="{DynamicResource ExportPlainJsonItem}"
+                                          Command="{Binding ExportJsonCommand}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="CodeJson" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{DynamicResource ExportBundleItem}"
+                                          Command="{Binding ExportBundleCommand}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="PackageVariantClosed" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{DynamicResource ExportFormulasItem}"
+                                          Command="{Binding ExportFormulasCommand}"
+                                          IsEnabled="{Binding HasFormulas}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="FunctionVariant" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                            </MenuFlyout>
+                        </Button.Flyout>
                     </Button>
                     <Button x:Name="BtnImportClass" Classes="toolbar-btn" Command="{Binding ImportClassCommand}"
                             ToolTip.Tip="{DynamicResource ImportClassTip}">
@@ -105,10 +132,17 @@
                                     </MenuItem.Icon>
                                 </MenuItem>
                                 <MenuItem x:Name="MiExportJson" Header="{DynamicResource ExportJson}"
-                                          IsVisible="False" Command="{Binding ExportJsonCommand}">
+                                          IsVisible="False">
                                     <MenuItem.Icon>
                                         <materialIcons:MaterialIcon Kind="FileExportOutline" Width="16" Height="16" />
                                     </MenuItem.Icon>
+                                    <MenuItem Header="{DynamicResource ExportPlainJsonItem}"
+                                              Command="{Binding ExportJsonCommand}" />
+                                    <MenuItem Header="{DynamicResource ExportBundleItem}"
+                                              Command="{Binding ExportBundleCommand}" />
+                                    <MenuItem Header="{DynamicResource ExportFormulasItem}"
+                                              Command="{Binding ExportFormulasCommand}"
+                                              IsEnabled="{Binding HasFormulas}" />
                                 </MenuItem>
                                 <MenuItem x:Name="MiImportClass" Header="{DynamicResource ImportClass}"
                                           IsVisible="False" Command="{Binding ImportClassCommand}">
@@ -430,9 +464,39 @@
                     CornerRadius="10"
                     Background="{DynamicResource BorderColor}"
                     Padding="1">
-                <Border CornerRadius="9"
-                        Background="{DynamicResource ElevatedBackground}"
-                        ClipToBounds="True">
+                <Grid>
+                    <!-- Autocomplete for whatever cell is being edited: function names, column
+                         names inside [ ] or @[ ], and the current function's signature. Tab/Enter
+                         accepts the top suggestion; Escape or typing something that matches nothing
+                         closes it. PlacementTarget is assigned in code as each cell editor opens —
+                         there is no single fixed box to anchor it to any more. -->
+                    <Popup x:Name="FormulaSuggestionsPopup"
+                           Placement="BottomEdgeAlignedLeft"
+                           IsLightDismissEnabled="False"
+                           Focusable="False"
+                           IsOpen="False">
+                        <Border Background="{DynamicResource ElevatedBackground}"
+                                BorderBrush="{DynamicResource BorderColor}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                MaxHeight="240"
+                                MinWidth="280"
+                                Padding="4"
+                                BoxShadow="0 4 12 0 #40000000">
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel x:Name="FormulaSuggestionsList" Orientation="Vertical" Spacing="1" />
+                            </ScrollViewer>
+                        </Border>
+                    </Popup>
+
+                    <Border CornerRadius="9"
+                            Background="{DynamicResource ElevatedBackground}"
+                            ClipToBounds="True">
+                    <!-- The DataGrid shares this Panel with a hit-test-invisible canvas, which is
+                         where the fill-drag preview rectangle is drawn. It has to sit above the
+                         grid rather than inside a cell: the range being filled spans many rows, and
+                         a preview living in one cell's template would be clipped to that cell. -->
+                    <Panel>
                     <DataGrid x:Name="DataGrid"
                               cl:Coachmark.Id="wsGrid"
                               MinWidth="520"
@@ -498,15 +562,50 @@
                                           Command="{Binding DuplicateAfterRowsCommand}"
                                           CommandParameter="{Binding #DataGrid.SelectedItems}" />
                                 <Separator />
+                                <MenuItem Header="{DynamicResource CtxFillDown}"
+                                          Click="OnFillDownClick">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="ArrowDownBold" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <!-- Click handlers rather than bound commands for the same reason
+                                     as Fill down above: both act on DataGrid.CurrentColumn, which a
+                                     CommandParameter can't express. -->
+                                <MenuItem x:Name="ApplyToColumnMenuItem"
+                                          Header="{DynamicResource CtxApplyToColumn}"
+                                          InputGesture="Ctrl+Enter"
+                                          Click="OnApplyToColumnClick">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="TableColumn" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem x:Name="RemoveColumnFormulaMenuItem"
+                                          Header="{DynamicResource CtxRemoveColumnFormula}"
+                                          Click="OnRemoveColumnFormulaClick">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="TableColumnRemove" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <MenuItem Header="{DynamicResource CtxDetachFormulas}"
+                                          Command="{Binding DetachFormulasCommand}"
+                                          IsVisible="{Binding HasFormulas}">
+                                    <MenuItem.Icon>
+                                        <materialIcons:MaterialIcon Kind="LinkVariantOff" Width="16" Height="16" />
+                                    </MenuItem.Icon>
+                                </MenuItem>
+                                <Separator />
                                 <MenuItem Header="{DynamicResource CtxDelete}"
+                                          InputGesture="Delete"
                                           Command="{Binding RemoveRowsCommand}"
                                           CommandParameter="{Binding #DataGrid.SelectedItems}"
                                           Foreground="{DynamicResource DangerColor}" />
                             </ContextMenu>
                         </DataGrid.ContextMenu>
                     </DataGrid>
-
-                </Border>
+                    <Canvas x:Name="FillPreviewLayer" IsHitTestVisible="False" />
+                    </Panel>
+                    </Border>
+                </Grid>
             </Border>
         </Grid>
 

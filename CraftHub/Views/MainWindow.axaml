@@ -34,38 +34,32 @@
 							Classes="toolbar-btn"
 							Command="{Binding DownloadAndStartUpdateCommand}"
 							ToolTip.Tip="{DynamicResource UpdateTip}" FontSize="16" />
+					<!-- Five, down from eight. The dividing line is "used while working" vs "set
+					     once": the comparer, the formula reference and the tour are all reached for
+					     mid-task, so they keep their own buttons. Theme, language, releases and
+					     GitHub moved into settings — nobody clicks those mid-edit, and as unlabelled
+					     icons they were guesswork. -->
+					<Button cl:Coachmark.Id="comparerBtn"
+							Content="{materialIcons:MaterialIconExt Kind=FileCompare}" Classes="toolbar-btn"
+							Command="{Binding ShowJsonComparerCommand}"
+							ToolTip.Tip="{DynamicResource ComparerTip}" FontSize="16" />
+					<Button cl:Coachmark.Id="formulaHelpBtn"
+							Content="{materialIcons:MaterialIconExt Kind=FunctionVariant}" Classes="toolbar-btn"
+							Command="{Binding ShowFormulaReferenceCommand}"
+							ToolTip.Tip="{DynamicResource FormulaRefTip}" FontSize="16" />
 					<Button x:Name="TourHelpButton"
 							cl:Coachmark.Id="tourHelp"
 							Content="{materialIcons:MaterialIconExt Kind=HelpCircleOutline}" Classes="toolbar-btn"
 							Click="OnStartTourClick"
 							ToolTip.Tip="{DynamicResource TourHelpTip}" FontSize="16" />
-					<Button cl:Coachmark.Id="comparerBtn"
-							Content="{materialIcons:MaterialIconExt Kind=FileCompare}" Classes="toolbar-btn"
-							Command="{Binding ShowJsonComparerCommand}"
-							ToolTip.Tip="{DynamicResource ComparerTip}" FontSize="16" />
-					<Button cl:Coachmark.Id="releasesBtn"
-							Content="{materialIcons:MaterialIconExt Kind=TagMultipleOutline}" Classes="toolbar-btn"
-							Command="{Binding ShowReleasesCommand}"
-							ToolTip.Tip="{DynamicResource ReleasesTip}" FontSize="16" />
-					<Button cl:Coachmark.Id="githubBtn"
-							Content="{materialIcons:MaterialIconExt Kind=Github}" Classes="toolbar-btn"
-							Command="{Binding GoToGitHubRepoCommand}"
-							ToolTip.Tip="{DynamicResource GitHub}" FontSize="16" />
 					<Button cl:Coachmark.Id="notificationsBtn"
 							Content="{materialIcons:MaterialIconExt Kind=BellNotificationOutline}" Classes="toolbar-btn"
 					        Command="{Binding ToggleNotificationManagerCommand}"
 					        ToolTip.Tip="{DynamicResource NotificationsTip}" FontSize="16" />
-					<Button cl:Coachmark.Id="themeBtn"
-							Classes="toolbar-btn"
-							Command="{Binding ToggleThemeCommand}"
-							Content="{materialIcons:MaterialIconExt Kind=ThemeLightDark}"
-							ToolTip.Tip="{DynamicResource ToggleThemeTip}" FontSize="16" />
-					<Button cl:Coachmark.Id="languageBtn"
-							Classes="toolbar-btn"
-							Command="{Binding ToggleLanguageCommand}"
-							ToolTip.Tip="{DynamicResource ToggleLanguageTip}"
-							Content="{Binding CurrentLang}"
-							FontSize="13" FontWeight="SemiBold"/>
+					<Button cl:Coachmark.Id="settingsBtn"
+							Content="{materialIcons:MaterialIconExt Kind=CogOutline}" Classes="toolbar-btn"
+							Command="{Binding ShowSettingsCommand}"
+							ToolTip.Tip="{DynamicResource SettingsTip}" FontSize="16" />
 				</StackPanel>
 			</Grid>
 		</Border>

@@ -22,6 +22,9 @@ jobs:
           echo "version=$version" >> $GITHUB_OUTPUT
           echo "Version read from version.txt: $version"
 
+      - name: Install rpmbuild
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
       - name: Build project and hash computer
         run: | 
           cd build-linux
@@ -35,5 +38,6 @@ jobs:
           name: Release v${{ steps.version.outputs.version }}
           files: |
             ./build-linux/crafthub_arm64.deb
+            ./build-linux/crafthub_aarch64.rpm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

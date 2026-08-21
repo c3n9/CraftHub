@@ -61,3 +61,7 @@ echo "Another icon copied"
 # Make .deb file
 dpkg-deb --root-owner-group --build ./staging_folder_arm64/ ./crafthub_arm64.deb
 echo ".deb created"
+# Make .rpm file from the very same staging tree, so the two packages cannot drift in content.
+chmod a+x ./make-rpm.sh
+./make-rpm.sh ./staging_folder_arm64 aarch64 ./crafthub_aarch64.rpm
+echo ".rpm created"

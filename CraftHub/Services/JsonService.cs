@@ -136,21 +136,32 @@ public class JsonService : IJsonService
             foreach (var prop in properties)
             {
                 string value = "";
+                CellKind kind;
                 var current = ResolvePath(element, prop.Name);
 
-                if (current != null)
+                if (current == null)
+                {
+                    // The key wasn't present on this particular object — distinct from an explicit
+                    // JSON null, which ISBLANK/ISNULL (and SUM/AVERAGE skipping) both depend on.
+                    kind = CellKind.Missing;
+                }
+                else if (current.Value.ValueKind == JsonValueKind.Null)
+                {
+                    kind = CellKind.Null;
+                }
+                else
                 {
                     var el = current.Value;
                     value = el.ValueKind switch
                     {
                         JsonValueKind.Object => el.GetRawText(),
                         JsonValueKind.Array => el.GetRawText(),
-                        JsonValueKind.Null => "",
                         _ => el.ToString() ?? ""
                     };
+                    kind = value.Length == 0 ? CellKind.Empty : CellKind.Value;
                 }
 
-                row.InitializeProperty(prop.Name, value);
+                row.InitializeProperty(prop.Name, value, kind);
             }
 
             rows.Add(row);
@@ -208,8 +219,15 @@ public class JsonService : IJsonService
         var rowNode = new JsonObject();
         foreach (var prop in properties)
         {
+            // Missing means the key wasn't present in the source object — round-trip that as the
+            // key being absent from the output too, rather than inventing a null for it. Skipping
+            // the call entirely (not just the leaf) also means a parent object made up entirely of
+            // Missing fields never gets created, at any nesting depth.
+            var kind = row.GetKind(prop.Name);
+            if (kind == CellKind.Missing) continue;
+
             var val = row[prop.Name];
-            SetNestedNode(rowNode, prop.Name, val, prop.FieldType);
+            SetNestedNode(rowNode, prop.Name, val, prop.FieldType, kind);
         }
 
         return rowNode;
@@ -225,7 +243,7 @@ public class JsonService : IJsonService
         return node.ToJsonString(options);
     }
 
-    private static void SetNestedNode(JsonObject root, string path, string val, JsonFieldType type)
+    private static void SetNestedNode(JsonObject root, string path, string val, JsonFieldType type, CellKind kind)
     {
         var parts = path.Split(JsonFieldMapping.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
         JsonNode current = root;
@@ -261,7 +279,7 @@ public class JsonService : IJsonService
         }
 
         var leaf = parts[^1];
-        var leafNode = ParsePrimitive(val, type);
+        var leafNode = ParsePrimitive(val, type, kind);
 
         if (leaf.StartsWith("<") && leaf.EndsWith(">"))
         {
@@ -277,9 +295,19 @@ public class JsonService : IJsonService
         }
     }
 
-    private static JsonNode? ParsePrimitive(string val, JsonFieldType type)
+    private static JsonNode? ParsePrimitive(string val, JsonFieldType type, CellKind kind)
     {
-        if (string.IsNullOrEmpty(val)) return null;
+        // An explicit JSON null always stays null, regardless of type.
+        if (kind == CellKind.Null) return null;
+
+        if (kind == CellKind.Empty)
+        {
+            // JSON has no "empty number" or "empty bool" — only a String column can faithfully
+            // hold a blank as "" rather than falling back to null.
+            return type == JsonFieldType.String ? JsonValue.Create("") : null;
+        }
+
+        if (string.IsNullOrEmpty(val)) return null; // defensive: Value implies non-empty text
 
         switch (type)
         {

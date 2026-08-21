@@ -223,7 +223,7 @@ public partial class JsonEditorViewModel : ViewModelBase
         }
 
         var propIndex = Properties.IndexOf(prop);
-        var savedValues = Rows.ToDictionary(r => r, r => r[prop.Name]);
+        var savedValues = Rows.ToDictionary(r => r, r => (r[prop.Name], r.GetKind(prop.Name)));
 
         Properties.Remove(prop);
         foreach (var row in Rows) row.RemoveProperty(prop.Name);
@@ -320,7 +320,7 @@ public partial class JsonEditorViewModel : ViewModelBase
     {
         var newRow = new DynamicDataRow();
         foreach (var prop in Properties)
-            newRow.InitializeProperty(prop.Name, row[prop.Name]);
+            newRow.InitializeProperty(prop.Name, row[prop.Name], row.GetKind(prop.Name));
         return newRow;
     }
 
@@ -400,7 +400,7 @@ public partial class JsonEditorViewModel : ViewModelBase
             var newRow = new DynamicDataRow();
             foreach (var kvp in row.GetAllValues())
             {
-                newRow.InitializeProperty(kvp.Key, kvp.Value);
+                newRow.InitializeProperty(kvp.Key, kvp.Value, row.GetKind(kvp.Key));
             }
 
             newRow[propertyName] = newValue;

@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!-- No project or package references at all — this is the pure formula engine: lexer, parser,
+         evaluator, function registry, dependency graph. No Avalonia, no CraftHub.Domain. Everything
+         it needs to know about cells and JSON paths is defined in here or in
+         CraftHub.Formulas.Addressing, which references this project, not the other way round. -->
+  </PropertyGroup>
+
+</Project>
