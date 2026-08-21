@@ -540,4 +540,5 @@
 	<x:String x:Key="FormulasImportNeedsDataMsg">Open a document first — formulas are imported onto data that is already here.</x:String>
 	<x:String x:Key="FormulasImportUnreadableMsg">This formula file could not be read. ({0})</x:String>
 	<x:String x:Key="FormulasImportedMsg">Formulas from "{0}" applied and recalculated.</x:String>
+	<x:String x:Key="FormulaCellDetachedMsg">This cell is no longer computed by the "{0}" column formula — it keeps what you typed. Undo restores it.</x:String>
 </ResourceDictionary>

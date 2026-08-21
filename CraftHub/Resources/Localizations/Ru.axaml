@@ -539,4 +539,5 @@
     <x:String x:Key="FormulasImportNeedsDataMsg">Сначала откройте документ — формулы применяются к уже имеющимся данным.</x:String>
     <x:String x:Key="FormulasImportUnreadableMsg">Не удалось прочитать этот файл формул. ({0})</x:String>
     <x:String x:Key="FormulasImportedMsg">Формулы из «{0}» применены и пересчитаны.</x:String>
+    <x:String x:Key="FormulaCellDetachedMsg">Эта ячейка больше не вычисляется формулой колонки «{0}» — в ней остаётся введённое значение. Отмена вернёт всё назад.</x:String>
 </ResourceDictionary>

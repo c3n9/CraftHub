@@ -46,8 +46,19 @@ public sealed record ColumnFormulaChangeSet(
     string? OldColumnFormula,
     string? NewColumnFormula,
     IReadOnlyDictionary<string, FormulaEntry> ClearedCellOverrides,
+    IReadOnlyList<string> ClearedExclusions,
     IReadOnlyList<CellSnapshot> OldCells,
     IReadOnlyList<CellSnapshot> NewCells);
+
+/// <summary>Before/after of taking one cell out of its column's formula. The value and the opt-out
+/// travel together so undo restores both — putting the cell back under the template and letting it
+/// recompute, rather than leaving a stranded value nothing owns.</summary>
+public sealed record CellExclusionChangeSet(
+    int RowIndex,
+    string ColumnKey,
+    string Path,
+    CellSnapshot Before,
+    CellSnapshot After);
 
 public enum SidecarLoadOutcome { Absent, Clean, HashMismatch, Corrupt }
 
@@ -163,7 +174,9 @@ public sealed class FormulaSessionService
                 var path = shape.PathForCell(row, columnKey);
                 if (path is null) continue;
                 var pathText = path.ToCanonicalString();
-                if (Sidecar.CellFormulas.ContainsKey(pathText)) continue; // cellFormulas overrides for this one cell
+                // Skips a cell with its own formula (that one is registered above) and a cell that
+                // opted out of the template entirely.
+                if (EffectiveFormulaFor(pathText, columnKey) != entry.Formula) continue;
                 RegisterDependencies(pathText, entry.Formula, new CellAddress(row, columnKey), shape);
             }
         }
@@ -384,14 +397,20 @@ public sealed class FormulaSessionService
             if (Sidecar.CellFormulas.TryGetValue(path, out var over))
                 clearedOverrides[path] = over;
 
+        // "Apply to the whole column" means the whole column, including cells that had previously
+        // opted out by having a value typed into them.
+        var clearedExclusions = columnPaths.Where(Sidecar.ExcludedCells.Contains).ToList();
+
         var oldCells = CaptureCells(AffectedPaths(columnPaths));
 
         Sidecar.ColumnFormulas[columnKey] = new FormulaEntry(storageText);
         foreach (var path in clearedOverrides.Keys) Sidecar.CellFormulas.Remove(path);
+        foreach (var path in clearedExclusions) Sidecar.ExcludedCells.Remove(path);
         RebuildGraph();
 
         var newCells = RecalculateFrom(columnPaths, shape);
-        return new ColumnFormulaChangeSet(columnKey, oldColumnFormula, storageText, clearedOverrides, oldCells, newCells);
+        return new ColumnFormulaChangeSet(columnKey, oldColumnFormula, storageText, clearedOverrides,
+            clearedExclusions, oldCells, newCells);
     }
 
     /// <summary>Drops a column's template. Every cell keeps the value it last computed — that value
@@ -414,7 +433,7 @@ public sealed class FormulaSessionService
 
         var newCells = RecalculateFrom(columnPaths, shape);
         return new ColumnFormulaChangeSet(columnKey, oldEntry.Formula, null,
-            new Dictionary<string, FormulaEntry>(), oldCells, newCells);
+            new Dictionary<string, FormulaEntry>(), Array.Empty<string>(), oldCells, newCells);
     }
 
     /// <summary>Replays a <see cref="ColumnFormulaChangeSet"/> in either direction. Unlike the
@@ -434,6 +453,12 @@ public sealed class FormulaSessionService
             else Sidecar.CellFormulas[path] = entry;
         }
 
+        foreach (var path in changeSet.ClearedExclusions)
+        {
+            if (redo) Sidecar.ExcludedCells.Remove(path);
+            else Sidecar.ExcludedCells.Add(path);
+        }
+
         RebuildGraph();
 
         var shape = new WorkspaceTableShape(_rows, _properties);
@@ -450,6 +475,55 @@ public sealed class FormulaSessionService
     }
 
     public bool HasColumnFormula(string columnKey) => Sidecar.ColumnFormulas.ContainsKey(columnKey);
+
+    /// <summary>Takes one cell out of its column's formula and puts <paramref name="newValue"/> in
+    /// it — what typing a plain value into a computed cell means, as in Excel. Both halves have to
+    /// happen together and be undone together: writing the value without recording the opt-out
+    /// leaves the next recalculation free to overwrite it, which is precisely the bug this fixes.
+    /// Returns null if the cell isn't computed by its column after all.</summary>
+    public CellExclusionChangeSet? ExcludeCellFromColumnFormula(int rowIndex, string columnKey, string newValue)
+    {
+        var shape = new WorkspaceTableShape(_rows, _properties);
+        var pathText = shape.PathForCell(rowIndex, columnKey)?.ToCanonicalString();
+        if (pathText is null) return null;
+        if (!Sidecar.ColumnFormulas.ContainsKey(columnKey)) return null;
+        if (Sidecar.CellFormulas.ContainsKey(pathText)) return null;   // its own formula, a different case
+        if (Sidecar.ExcludedCells.Contains(pathText)) return null;     // already opted out
+
+        var row = _rows[rowIndex];
+        var before = new CellSnapshot(rowIndex, columnKey, row[columnKey], row.GetKind(columnKey),
+            Sidecar.State.TryGetValue(pathText, out var st) ? st : null);
+
+        Sidecar.ExcludedCells.Add(pathText);
+        Sidecar.State.Remove(pathText);
+        RebuildGraph();
+
+        row[columnKey] = newValue;
+        var after = new CellSnapshot(rowIndex, columnKey, row[columnKey], row.GetKind(columnKey), null);
+
+        // Anything that read this cell was reading a computed value that just changed.
+        RecalculateFrom(new[] { pathText }, shape);
+
+        return new CellExclusionChangeSet(rowIndex, columnKey, pathText, before, after);
+    }
+
+    public void ApplyExclusionChangeSet(CellExclusionChangeSet changeSet, bool redo)
+    {
+        if (redo) Sidecar.ExcludedCells.Add(changeSet.Path);
+        else Sidecar.ExcludedCells.Remove(changeSet.Path);
+
+        var cell = redo ? changeSet.After : changeSet.Before;
+        if (IsLiveRow(cell.RowIndex))
+        {
+            _rows[cell.RowIndex].SetCell(cell.ColumnKey, cell.Text, cell.Kind);
+            if (cell.ErrorState is { } state) Sidecar.State[changeSet.Path] = state;
+            else Sidecar.State.Remove(changeSet.Path);
+        }
+
+        RebuildGraph();
+        var shape = new WorkspaceTableShape(_rows, _properties);
+        RecalculateFrom(new[] { changeSet.Path }, shape);
+    }
 
     /// <summary>A column's template rendered in A1 form as it reads from
     /// <paramref name="viewingRowIndex"/> — what the "edit this column's formula" UI shows.</summary>
@@ -628,9 +702,7 @@ public sealed class FormulaSessionService
             var type = _properties.FirstOrDefault(p => p.Name == columnKey)?.FieldType;
             if (type is null) continue;
 
-            var formulaText = Sidecar.CellFormulas.TryGetValue(path, out var cellEntry) ? cellEntry.Formula
-                : Sidecar.ColumnFormulas.TryGetValue(columnKey, out var colEntry) ? colEntry.Formula
-                : null;
+            var formulaText = EffectiveFormulaFor(path, columnKey);
             if (formulaText is null) continue;
 
             FormulaValue result;
@@ -723,9 +795,7 @@ public sealed class FormulaSessionService
         var pathText = shape.PathForCell(rowIndex, columnKey)?.ToCanonicalString();
         if (pathText is null) return null;
 
-        string? storageFormula = Sidecar.CellFormulas.TryGetValue(pathText, out var cellEntry) ? cellEntry.Formula
-            : Sidecar.ColumnFormulas.TryGetValue(columnKey, out var colEntry) ? colEntry.Formula
-            : null;
+        var storageFormula = EffectiveFormulaFor(pathText, columnKey);
         if (storageFormula is null) return null;
 
         try
@@ -738,6 +808,18 @@ public sealed class FormulaSessionService
         {
             return storageFormula;
         }
+    }
+
+    /// <summary>The formula that computes this cell, or null if nothing does. The single place
+    /// that answers the question, so the three rules can't drift apart at the half-dozen call
+    /// sites that ask: a cell's own formula wins; failing that the column's template applies;
+    /// unless the cell has opted out of that template (see <see cref="FormulaSidecar.ExcludedCells"/>),
+    /// in which case it holds a plain value and nothing computes it.</summary>
+    private string? EffectiveFormulaFor(string pathText, string columnKey)
+    {
+        if (Sidecar.CellFormulas.TryGetValue(pathText, out var cellEntry)) return cellEntry.Formula;
+        if (Sidecar.ExcludedCells.Contains(pathText)) return null;
+        return Sidecar.ColumnFormulas.TryGetValue(columnKey, out var colEntry) ? colEntry.Formula : null;
     }
 
     /// <summary>True when this cell has a formula of its own, as opposed to being computed by its
@@ -754,8 +836,7 @@ public sealed class FormulaSessionService
     {
         var shape = new WorkspaceTableShape(_rows, _properties);
         var pathText = shape.PathForCell(rowIndex, columnKey)?.ToCanonicalString();
-        return pathText is not null &&
-               (Sidecar.CellFormulas.ContainsKey(pathText) || Sidecar.ColumnFormulas.ContainsKey(columnKey));
+        return pathText is not null && EffectiveFormulaFor(pathText, columnKey) is not null;
     }
 
     public CellState? GetErrorState(int rowIndex, string columnKey)

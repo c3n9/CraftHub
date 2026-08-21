@@ -56,6 +56,15 @@ public sealed class FormulaSidecar
     public Dictionary<string, FormulaEntry> CellFormulas { get; } = new();
     public Dictionary<string, CellState> State { get; } = new();
 
+    /// <summary>Cells that opted out of their column's formula, by path. Typing a plain value into
+    /// a cell a column formula computes means "this one is mine now" — the Excel behaviour — and
+    /// without recording that, the next recalculation would simply overwrite what was typed.
+    ///
+    /// A separate set rather than an entry in <see cref="CellFormulas"/> because there is no
+    /// formula to store: the cell holds a value and nothing computes it any more. Only meaningful
+    /// for a column whose <see cref="ColumnFormulas"/> template exists; harmless otherwise.</summary>
+    public HashSet<string> ExcludedCells { get; } = new();
+
     /// <summary>Top-level JSON fields this version of the app doesn't recognize, preserved
     /// verbatim on re-save — a sidecar written by a newer app version doesn't lose data just
     /// because an older version happened to open and re-save it.</summary>
@@ -73,5 +82,6 @@ public sealed class FormulaSidecar
         ColumnFormulas.Clear();
         CellFormulas.Clear();
         State.Clear();
+        ExcludedCells.Clear();
     }
 }

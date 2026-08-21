@@ -25,6 +25,7 @@ public static class SidecarStructuralSync
     {
         RewritePaths(sidecar.CellFormulas, path => StructureRewriter.OnRowInserted(path, insertIndex));
         RewritePaths(sidecar.State, path => StructureRewriter.OnRowInserted(path, insertIndex));
+        RewritePaths(sidecar.ExcludedCells, path => StructureRewriter.OnRowInserted(path, insertIndex));
     }
 
     /// <summary>Returns the keys (formula/state paths) that pointed at the removed row and were
@@ -34,6 +35,7 @@ public static class SidecarStructuralSync
     {
         var droppedFormulas = RewritePaths(sidecar.CellFormulas, path => StructureRewriter.OnRowRemoved(path, removedIndex));
         var droppedState = RewritePaths(sidecar.State, path => StructureRewriter.OnRowRemoved(path, removedIndex));
+        RewritePaths(sidecar.ExcludedCells, path => StructureRewriter.OnRowRemoved(path, removedIndex));
         return droppedFormulas.Concat(droppedState).ToList();
     }
 
@@ -44,6 +46,7 @@ public static class SidecarStructuralSync
 
         RewritePaths(sidecar.CellFormulas, path => StructureRewriter.OnColumnRenamed(path, oldKey, newKey));
         RewritePaths(sidecar.State, path => StructureRewriter.OnColumnRenamed(path, oldKey, newKey));
+        RewritePaths(sidecar.ExcludedCells, path => StructureRewriter.OnColumnRenamed(path, oldKey, newKey));
     }
 
     /// <summary>Returns the same "what got dropped" list as <see cref="OnRowRemoved"/>, plus the
@@ -56,9 +59,31 @@ public static class SidecarStructuralSync
 
         var droppedFormulas = RemoveReferencing(sidecar.CellFormulas, removedKey);
         var droppedState = RemoveReferencing(sidecar.State, removedKey);
+        RemoveReferencing(sidecar.ExcludedCells, removedKey);
         dropped.AddRange(droppedFormulas);
         dropped.AddRange(droppedState);
         return dropped;
+    }
+
+    /// <summary>Set flavour of <see cref="RewritePaths{TValue}"/> — same rules, no values.</summary>
+    private static void RewritePaths(HashSet<string> set, Func<JsonPath, JsonPath?> rewrite)
+    {
+        var replacements = new List<(string OldKey, string? NewKey)>();
+        foreach (var key in set)
+        {
+            JsonPath parsed;
+            try { parsed = JsonPath.Parse(key); }
+            catch (FormatException) { continue; }
+
+            var newKey = rewrite(parsed)?.ToCanonicalString();
+            if (newKey != key) replacements.Add((key, newKey));
+        }
+
+        foreach (var (oldKey, newKey) in replacements)
+        {
+            set.Remove(oldKey);
+            if (newKey is not null) set.Add(newKey);
+        }
     }
 
     // Re-keys every entry in `dict` via `rewrite`; an entry whose path rewrites to null (the
@@ -89,6 +114,22 @@ public static class SidecarStructuralSync
         }
 
         return dropped;
+    }
+
+    /// <summary>Set flavour of <see cref="RemoveReferencing{TValue}"/>.</summary>
+    private static void RemoveReferencing(HashSet<string> set, string columnKey)
+    {
+        var toRemove = new List<string>();
+        foreach (var key in set)
+        {
+            JsonPath parsed;
+            try { parsed = JsonPath.Parse(key); }
+            catch (FormatException) { continue; }
+
+            if (StructureRewriter.ReferencesColumn(parsed, columnKey)) toRemove.Add(key);
+        }
+
+        foreach (var key in toRemove) set.Remove(key);
     }
 
     private static List<string> RemoveReferencing<TValue>(Dictionary<string, TValue> dict, string columnKey)

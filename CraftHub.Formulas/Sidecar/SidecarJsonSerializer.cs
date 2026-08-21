@@ -74,6 +74,11 @@ public static class SidecarJsonSerializer
             };
         root["state"] = state;
 
+        // An array, not an object: this is a set of paths with nothing to say about each.
+        var excluded = new JsonArray();
+        foreach (var path in sidecar.ExcludedCells) excluded.Add(path);
+        root["excludedCells"] = excluded;
+
         return root.ToJsonString(WriteOptions);
     }
 
@@ -126,6 +131,11 @@ public static class SidecarJsonSerializer
                 (string?)obj["message"] ?? "",
                 ParseDateOr(obj["computedAtUtc"], DateTime.UtcNow));
         }
+
+        if (root["excludedCells"] is JsonArray excludedArray)
+            foreach (var node in excludedArray)
+                if (node?.GetValue<string>() is { Length: > 0 } path)
+                    sidecar.ExcludedCells.Add(path);
 
         sidecar.UnknownFields = ExtractUnknownFields(root);
         return sidecar;
@@ -182,7 +192,8 @@ public static class SidecarJsonSerializer
 
     private static readonly HashSet<string> KnownTopLevelKeys = new(StringComparer.Ordinal)
     {
-        "$schema", "schemaVersion", "generator", "target", "options", "columnFormulas", "cellFormulas", "state"
+        "$schema", "schemaVersion", "generator", "target", "options", "columnFormulas", "cellFormulas", "state",
+        "excludedCells"
     };
 
     private static JsonObject? ExtractUnknownFields(JsonObject root)

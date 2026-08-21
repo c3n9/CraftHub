@@ -371,6 +371,23 @@ public partial class WorkspaceViewModel : ViewModelBase
             return;
         }
 
+        // Typing a plain value into a cell its COLUMN computes takes that one cell out of the
+        // template, as in Excel — otherwise the next recalculation overwrites what was just typed,
+        // which with automatic recalculation now means within a dispatcher tick.
+        if (ColumnHasFormula(columnKey) && !CellHasOwnFormula(rowIndex, columnKey))
+        {
+            var exclusion = _formulaSession.ExcludeCellFromColumnFormula(rowIndex, columnKey, newText);
+            if (exclusion is not null)
+            {
+                UndoRedo.Push(new ExcludeCellFromColumnAction(_formulaSession, exclusion, dataGrid));
+                MarkDirty();
+                FireFormulaVisualsChanged();
+                NotifySuccess(Localizer.Get("FormulaCellDetachedMsg",
+                    JsonPropertyDefinition.GetDisplayPath(columnKey)));
+                return;
+            }
+        }
+
         var wasFormula = IsFormulaCell(rowIndex, columnKey);
         if (wasFormula)
         {
