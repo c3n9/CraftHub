@@ -46,10 +46,6 @@ mkdir -p ./staging_folder_arm64/usr/share/applications
 cp ./linux-data-arm64/CraftHub.desktop ./staging_folder_arm64/usr/share/applications/CraftHub.desktop
 echo "Shortcut copied"
 
-# Stables
-cp ../build-resources/computed_stables.txt ./staging_folder_arm64/usr/share/crafthub/computed_stables.txt
-echo "Stables copied"
-
 # Desktop icon
 # A 1024px x 1024px PNG, like VS Code uses for its icon
 mkdir -p ./staging_folder_arm64/usr/share/pixmaps
@@ -61,7 +57,10 @@ mkdir -p ./staging_folder_arm64/usr/share/icons
 mkdir -p ./staging_folder_arm64/usr/share/icons/hicolor
 mkdir -p ./staging_folder_arm64/usr/share/icons/hicolor/scalable
 mkdir -p ./staging_folder_arm64/usr/share/icons/hicolor/scalable/apps
-cp ../build-resources/logo.svg ./staging_folder_arm64/usr/share/icons/hicolor/scalable/apps/crafthub.svg
+# craftHub.svg, not logo.svg: the latter has never existed in this repository, so this copy had
+# been failing since the day it was written — silently, until set -e. The .deb shipped without a
+# scalable icon and the .rpm could not be built at all, because the spec's file list names it.
+cp ../build-resources/craftHub.svg ./staging_folder_arm64/usr/share/icons/hicolor/scalable/apps/crafthub.svg
 echo "Another icon copied"
 
 # Make .deb file
