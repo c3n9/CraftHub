@@ -121,13 +121,16 @@ public sealed class A1Translator
 
     private static ReferenceResolution ResolveColumnRef(ColumnRefSyntax colRef, ITableShape shape)
     {
-        if (!shape.ColumnKeysInDisplayOrder.Contains(colRef.ColumnKey))
+        // A reference may be typed with the dotted display path of an expanded nested field
+        // (@["a.b"]); resolve it to the real column key before addressing.
+        var key = shape.ResolveColumnKey(colRef.ColumnKey);
+        if (key is null)
             return Fail($"Column '{colRef.ColumnKey}' does not exist.");
 
         var paths = new List<JsonPath>();
         for (var r = 0; r < shape.RowCount; r++)
         {
-            var resolved = PathOrFail(shape, r, colRef.ColumnKey);
+            var resolved = PathOrFail(shape, r, key);
             if (resolved is ReferenceResolution.Failed f) return f;
             paths.Add(((ReferenceResolution.Single)resolved).Path);
         }
@@ -140,7 +143,11 @@ public sealed class A1Translator
         if (current.RowIndex < 0 || current.RowIndex >= shape.RowCount)
             return Fail("The formula's own row no longer exists.");
 
-        return PathOrFail(shape, current.RowIndex, cur.ColumnKey, $"Column '{cur.ColumnKey}' does not exist.");
+        var key = shape.ResolveColumnKey(cur.ColumnKey);
+        if (key is null)
+            return Fail($"Column '{cur.ColumnKey}' does not exist.");
+
+        return PathOrFail(shape, current.RowIndex, key, $"Column '{cur.ColumnKey}' does not exist.");
     }
 
     // ---- JSON path form (also what the sidecar stores formulas in) ----

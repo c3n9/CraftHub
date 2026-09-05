@@ -415,7 +415,6 @@
 	<x:String x:Key="DetachFormulasConfirmMsg">Every computed cell keeps its current value, but stops being a formula, and the formula file next to this document is deleted. This can be undone until the tab is closed.</x:String>
 	<x:String x:Key="FormulaInvalidMsg">Invalid formula</x:String>
 	<x:String x:Key="FormulaUnknownColumn">Unknown column.</x:String>
-	<x:String x:Key="FormulaNestedColumnUnsupported">Formulas can't target an expanded nested field yet.</x:String>
 	<x:String x:Key="FormulaFillDownMsg">Filled formula into {0} row(s).</x:String>
 	<x:String x:Key="FormulaFillDownNothingMsg">The source cell isn't a formula, or no other rows were selected.</x:String>
 	<x:String x:Key="FormulaNoneToDetachMsg">This document has no formulas to detach.</x:String>

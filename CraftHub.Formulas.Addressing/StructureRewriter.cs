@@ -33,30 +33,41 @@ public static class StructureRewriter
         return ReplaceRootIndex(path, newIndex);
     }
 
-    /// <summary>A column's key changed. Rewrites the segment that names it — specifically the
-    /// second segment (<c>$[i].&lt;key&gt;</c>), since that's the only position a column name ever
-    /// occupies in a path this engine produces; a same-named key appearing deeper (inside a nested
-    /// Object/Array cell value) is a different thing and is correctly left alone.</summary>
-    public static JsonPath OnColumnRenamed(JsonPath path, string oldKey, string newKey)
+    /// <summary>A column's key changed. Rewrites the run of segments that names it, starting at the
+    /// second segment (<c>$[i].&lt;key…&gt;</c>) — one segment for a flat column, several for an
+    /// expanded nested field whose key is a path. A same-named key appearing deeper (inside a
+    /// nested Object/Array cell value, i.e. after the column's own segments) is a different thing
+    /// and is correctly left alone.</summary>
+    public static JsonPath OnColumnRenamed(JsonPath path, IReadOnlyList<string> oldKeySegments, IReadOnlyList<string> newKeySegments)
     {
-        if (path.Segments.Count < 2 || path.Segments[1] is not JsonPathSegment.Key key || key.Name != oldKey)
-            return path;
+        if (!MatchesColumn(path, oldKeySegments)) return path;
 
         var segments = path.Segments.ToList();
-        segments[1] = new JsonPathSegment.Key(newKey);
+        segments.RemoveRange(1, oldKeySegments.Count);
+        segments.InsertRange(1, newKeySegments.Select(JsonPathSegment (s) => new JsonPathSegment.Key(s)));
         return new JsonPath(segments);
     }
 
     /// <summary>A column was removed. <c>null</c> means "this entry addressed the removed column
     /// and no longer applies" (mirrors <see cref="OnRowRemoved"/>'s drop signal).</summary>
-    public static JsonPath? OnColumnRemoved(JsonPath path, string removedKey) =>
-        ReferencesColumn(path, removedKey) ? null : path;
+    public static JsonPath? OnColumnRemoved(JsonPath path, IReadOnlyList<string> removedKeySegments) =>
+        ReferencesColumn(path, removedKeySegments) ? null : path;
 
-    /// <summary>True when <paramref name="path"/>'s column segment is exactly <paramref name="key"/>
-    /// — used to find every reference (in cellFormulas/columnFormulas/state, or in another cell's
-    /// formula text) that a column removal invalidates.</summary>
-    public static bool ReferencesColumn(JsonPath path, string key) =>
-        path.Segments.Count >= 2 && path.Segments[1] is JsonPathSegment.Key k && k.Name == key;
+    /// <summary>True when <paramref name="path"/>'s column segments are exactly
+    /// <paramref name="keySegments"/> — used to find every reference (in
+    /// cellFormulas/columnFormulas/state, or in another cell's formula text) that a column removal
+    /// invalidates.</summary>
+    public static bool ReferencesColumn(JsonPath path, IReadOnlyList<string> keySegments) =>
+        MatchesColumn(path, keySegments);
+
+    private static bool MatchesColumn(JsonPath path, IReadOnlyList<string> keySegments)
+    {
+        if (keySegments.Count == 0 || path.Segments.Count < 1 + keySegments.Count) return false;
+        for (var i = 0; i < keySegments.Count; i++)
+            if (path.Segments[1 + i] is not JsonPathSegment.Key k || k.Name != keySegments[i])
+                return false;
+        return true;
+    }
 
     /// <summary>True when <paramref name="path"/>'s row segment is exactly <paramref name="rowIndex"/>
     /// — used to find every reference a row deletion invalidates.</summary>

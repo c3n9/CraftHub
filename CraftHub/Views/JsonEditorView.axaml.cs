@@ -37,10 +37,9 @@ public partial class JsonEditorView : Window
         var (row, propName, oldValue) = _pendingEdit.Value;
         _pendingEdit = null;
 
-        var newValue = row[propName];
-        if (newValue == oldValue) return;
-
-        _currentVm.UndoRedo.Push(new EditCellAction(row, propName, oldValue, newValue, NestedDataGrid));
+        // Routes '=' text to the formula engine (when enabled) and pushes the right undo step;
+        // for a plain value it does what the old direct EditCellAction push did.
+        _currentVm.CommitCellText(row, propName, oldValue, row[propName], NestedDataGrid);
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
@@ -57,6 +56,9 @@ public partial class JsonEditorView : Window
 
             vm.JsonSubmitted += (s, res) => { _isConfirmedClose = true; Close(res); };
             vm.Cancelled += (s, args) => { _isConfirmedClose = true; Close(null); };
+            vm.FormulaVisualsChanged += (_, _) =>
+                Avalonia.Threading.Dispatcher.UIThread.Post(() => DataGridRefresh.Rows(NestedDataGrid),
+                    Avalonia.Threading.DispatcherPriority.Background);
 
             RebuildColumns(vm);
         }
@@ -105,6 +107,38 @@ public partial class JsonEditorView : Window
                 column.Width = savedWidth;
             NestedDataGrid.Columns.Add(column);
         }
+    }
+
+    /// <summary>Adds a small "fx" corner marker (with the formula text / error as its tooltip) over
+    /// a cell's value when that cell is a formula. Returns <paramref name="valueControl"/> unchanged
+    /// when it isn't, or when this dialog has no formula session.</summary>
+    private Avalonia.Controls.Control WrapWithFormulaMarker(Avalonia.Controls.Control valueControl, DynamicDataRow row, string columnKey)
+    {
+        if (_currentVm is not { FormulasEnabled: true } vm) return valueControl;
+        var rowIndex = vm.Rows.IndexOf(row);
+        if (rowIndex < 0 || !vm.IsFormulaCell(rowIndex, columnKey)) return valueControl;
+
+        var error = vm.GetFormulaErrorState(rowIndex, columnKey);
+        var formula = vm.GetDisplayFormula(rowIndex, columnKey) ?? "";
+        var tip = error != null ? $"{formula}\n\n{error.ErrorCode}: {error.Message}" : formula;
+
+        var marker = new Material.Icons.Avalonia.MaterialIcon
+        {
+            Kind = Material.Icons.MaterialIconKind.FunctionVariant,
+            Width = 11,
+            Height = 11,
+            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
+            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Top,
+            Margin = new Avalonia.Thickness(0, 3, 3, 0),
+            Foreground = error != null ? Avalonia.Media.Brushes.OrangeRed : Avalonia.Media.Brushes.Gray,
+            Opacity = error != null ? 1.0 : 0.6
+        };
+
+        var grid = new Avalonia.Controls.Grid();
+        grid.Children.Add(valueControl);
+        grid.Children.Add(marker);
+        Avalonia.Controls.ToolTip.SetTip(grid, tip);
+        return grid;
     }
 
     private Avalonia.Controls.DataGridTemplateColumn BuildColumn(JsonPropertyDefinition prop)
@@ -237,7 +271,7 @@ public partial class JsonEditorView : Window
                             Converter = new CraftHub.Converters.DynamicRowValueConverter(),
                             ConverterParameter = prop.Name
                         });
-                        border.Child = tb;
+                        border.Child = WrapWithFormulaMarker(tb, row, prop.Name);
                     }
                 }
 
@@ -264,6 +298,11 @@ public partial class JsonEditorView : Window
                     }
                     else
                     {
+                        var rowIndex = _currentVm?.Rows.IndexOf(row) ?? -1;
+                        var initial = _currentVm != null && rowIndex >= 0
+                            ? _currentVm.GetEditableCellText(rowIndex, prop.Name)
+                            : row[prop.Name];
+
                         var tb = new Avalonia.Controls.TextBox
                         {
                             Classes = { "grid-editor" },
@@ -272,8 +311,10 @@ public partial class JsonEditorView : Window
                             HorizontalContentAlignment = Avalonia.Layout.HorizontalAlignment.Left,
                             TextWrapping = Avalonia.Media.TextWrapping.Wrap,
                             AcceptsReturn = true,
-                            Text = row[prop.Name]
+                            Text = initial
                         };
+                        // Live-write keeps plain-value editing working; CommitCellText undoes it
+                        // for '=' text (a formula's text is not the row's data).
                         tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
                         return tb;
                     }

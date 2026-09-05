@@ -83,15 +83,23 @@ public sealed class FormulaSessionService
     private readonly Evaluator _evaluator = new();
     private readonly DependencyGraph<string> _graph = new();
 
+    /// <summary>Only set for a top-level session — a nested (per-cell) session runs without one and
+    /// therefore does not itself recurse into deeper Object/Array cells. Used to parse an
+    /// Object/Array cell's JSON into a sub-table so formulas stored against a path *inside* that
+    /// cell (<c>$[3].person.full</c>) can be recomputed from the main recalculation.</summary>
+    private readonly Core.IJsonService? _jsonService;
+
     public FormulaSidecar Sidecar { get; private set; } = NewEmptySidecar();
 
     public bool HasAnyFormulas => Sidecar.HasAnyFormulas;
 
-    public FormulaSessionService(IReadOnlyList<DynamicDataRow> rows, IReadOnlyList<JsonPropertyDefinition> properties)
+    public FormulaSessionService(IReadOnlyList<DynamicDataRow> rows, IReadOnlyList<JsonPropertyDefinition> properties,
+        Core.IJsonService? jsonService = null, bool subscribeToChanges = true)
     {
         _rows = rows;
         _properties = properties;
-        SubscribeToStructuralChanges();
+        _jsonService = jsonService;
+        if (subscribeToChanges) SubscribeToStructuralChanges();
     }
 
     private static FormulaSidecar NewEmptySidecar() => new()
@@ -160,6 +168,9 @@ public sealed class FormulaSessionService
     {
         var shape = new WorkspaceTableShape(_rows, _properties);
         _graph.Clear();
+        // Any structural or formula change can move a base path or alter what a nested scope
+        // computes; drop the memoized round-trips so the next materialization is authoritative.
+        _nestedScopeCache.Clear();
 
         foreach (var (path, entry) in Sidecar.CellFormulas)
         {
@@ -232,12 +243,6 @@ public sealed class FormulaSessionService
     public FormulaChangeSet? TrySetCellFormula(int rowIndex, string columnKey, string a1FormulaText, out string? error)
     {
         error = null;
-
-        if (columnKey.Contains(JsonFieldMapping.PathSeparator))
-        {
-            error = Localizer.Get("FormulaNestedColumnUnsupported");
-            return null;
-        }
 
         var shape = new WorkspaceTableShape(_rows, _properties);
         var targetPath = shape.PathForCell(rowIndex, columnKey);
@@ -358,12 +363,6 @@ public sealed class FormulaSessionService
     public ColumnFormulaChangeSet? TrySetColumnFormula(int authoringRowIndex, string columnKey, string a1FormulaText, out string? error)
     {
         error = null;
-
-        if (columnKey.Contains(JsonFieldMapping.PathSeparator))
-        {
-            error = Localizer.Get("FormulaNestedColumnUnsupported");
-            return null;
-        }
 
         var shape = new WorkspaceTableShape(_rows, _properties);
         var authoringRow = Math.Clamp(authoringRowIndex, 0, Math.Max(0, _rows.Count - 1));
@@ -642,7 +641,19 @@ public sealed class FormulaSessionService
                 .Where(p => p is not null)!))
             .Distinct()
             .ToList();
-        return RecalculateFrom(allTargets, shape);
+
+        var wasRecalculating = _recalculating;
+        _recalculating = true;
+        try
+        {
+            var result = RecalculateFrom(allTargets, shape);
+            MaterializeNestedScopes();
+            return result;
+        }
+        finally
+        {
+            _recalculating = wasRecalculating;
+        }
     }
 
     private HashSet<string> AffectedPaths(IEnumerable<string> changed)
@@ -949,6 +960,13 @@ public sealed class FormulaSessionService
                 var state = Sidecar.State.TryGetValue(path, out var st) ? st.ErrorCode : "";
                 snapshot.Add($"{path}\u001F{_rows[row][property.Name]}\u001F{state}");
             }
+
+        // An Object/Array cell that hosts formulas at paths *inside* it has no top-level formula
+        // of its own, so the loop above never sees it — but MaterializeNestedScopes rewrites its
+        // JSON, and RecalculateAll must notice that to refresh the grid.
+        foreach (var (basePath, cellText) in NestedScopeCells())
+            snapshot.Add($"{basePath}|{cellText}");
+
         return snapshot;
     }
 
@@ -1032,21 +1050,26 @@ public sealed class FormulaSessionService
         if (Sidecar.ColumnFormulas.TryGetValue(columnKey, out var template))
             columnFormulas[columnKey] = template;
 
+        // Matches both the column's own cells and any formula stored against a path INSIDE an
+        // Object/Array cell of it ($[3].person.full) — those go with the column too.
+        bool BelongsToColumn(string key) =>
+            key == columnKey || key.StartsWith(columnKey + JsonFieldMapping.PathSeparator, StringComparison.Ordinal);
+
         var cellFormulas = new Dictionary<string, FormulaEntry>();
         foreach (var (path, entry) in Sidecar.CellFormulas)
-            if (WorkspacePathCodec.TryTargetCell(path, out _, out var key) && key == columnKey)
+            if (WorkspacePathCodec.TryTargetCell(path, out _, out var key) && BelongsToColumn(key))
                 cellFormulas[path] = entry;
 
         var state = new Dictionary<string, CellState>();
         foreach (var (path, entry) in Sidecar.State)
-            if (WorkspacePathCodec.TryTargetCell(path, out _, out var key) && key == columnKey)
+            if (WorkspacePathCodec.TryTargetCell(path, out _, out var key) && BelongsToColumn(key))
                 state[path] = entry;
 
         if (columnFormulas.Count == 0 && cellFormulas.Count == 0 && state.Count == 0) return;
 
         _formulasDroppedWithColumn[columnKey] = new DetachSnapshot(columnFormulas, cellFormulas, state);
 
-        SidecarStructuralSync.OnColumnRemoved(Sidecar, columnKey);
+        SidecarStructuralSync.OnColumnRemoved(Sidecar, columnKey, KeySegments(columnKey));
         RebuildGraph();
         if (HasAnyFormulas) FullRecalculate(); // formulas that READ the removed column now say so
     }
@@ -1075,9 +1098,15 @@ public sealed class FormulaSessionService
         _renamingColumnFrom = null;
         if (oldKey is null || oldKey == property.Name) return;
 
-        SidecarStructuralSync.OnColumnRenamed(Sidecar, oldKey, property.Name);
+        SidecarStructuralSync.OnColumnRenamed(Sidecar, oldKey, property.Name,
+            KeySegments(oldKey), KeySegments(property.Name));
         RebuildGraph();
     }
+
+    /// <summary>Splits a column key into its path segments — one for a flat column, several for an
+    /// expanded nested field whose key joins its segments with <see cref="JsonFieldMapping.PathSeparator"/>.</summary>
+    private static IReadOnlyList<string> KeySegments(string columnKey) =>
+        columnKey.Split(JsonFieldMapping.PathSeparator, StringSplitOptions.RemoveEmptyEntries);
 
     /// <summary>Recomputes the formula cells of <paramref name="count"/> rows starting at
     /// <paramref name="startIndex"/>, plus everything downstream of them.</summary>
@@ -1093,6 +1122,255 @@ public sealed class FormulaSessionService
                     paths.Add(path.ToCanonicalString());
 
         if (paths.Count > 0) RecalculateFrom(paths, shape);
+    }
+
+    // -----------------------------------------------------------------------
+    //  Nested scopes — formulas stored against a path INSIDE an Object/Array cell
+    // -----------------------------------------------------------------------
+    //
+    //  A formula typed in the pencil-button editor for an Object/Array cell is kept in this same
+    //  sidecar, keyed by the full path of the sub-node it computes ($[3].person.full). The
+    //  top-level recalculation pass skips those keys — their "column" is not a real Property — so
+    //  after every full recalculation each host cell is parsed into a throwaway sub-table, a nested
+    //  session recomputes it, and the JSON is written back. A nested formula therefore sees only
+    //  its own sub-table: a reference across the Object/Array boundary is #REF!.
+
+    private sealed record NestedScope(
+        int RowIndex,
+        string ColumnName,
+        bool IsArray,
+        string BasePath,
+        Dictionary<string, FormulaEntry> LocalCellFormulas,
+        Dictionary<string, CellState> LocalState);
+
+    /// <summary>Every distinct Object/Array cell that has at least one formula stored inside it,
+    /// with those formulas (and any cached error state) re-keyed to paths within a standalone
+    /// sub-table.</summary>
+    private List<NestedScope> EnumerateNestedScopes()
+    {
+        var byBase = new Dictionary<string, NestedScope>(StringComparer.Ordinal);
+
+        NestedScope? ScopeFor(string pathText)
+        {
+            if (!TrySplitNestedPath(pathText, out var row, out var col, out var isArray, out var baseText, out _))
+                return null;
+            if (!byBase.TryGetValue(baseText, out var scope))
+                byBase[baseText] = scope = new NestedScope(row, col, isArray, baseText,
+                    new Dictionary<string, FormulaEntry>(StringComparer.Ordinal),
+                    new Dictionary<string, CellState>(StringComparer.Ordinal));
+            return scope;
+        }
+
+        foreach (var (path, entry) in Sidecar.CellFormulas)
+            if (TrySplitNestedPath(path, out _, out _, out _, out _, out var localKey) && ScopeFor(path) is { } s)
+                s.LocalCellFormulas[localKey] = entry;
+
+        foreach (var (path, st) in Sidecar.State)
+            if (TrySplitNestedPath(path, out _, out _, out _, out _, out var localKey) && ScopeFor(path) is { } s)
+                s.LocalState[localKey] = st;
+
+        return byBase.Values.ToList();
+    }
+
+    /// <summary>(base path, current JSON text) for every Object/Array cell that hosts nested
+    /// formulas — feeds <see cref="SnapshotFormulaCells"/> so a rewrite of the cell by
+    /// <see cref="MaterializeNestedScopes"/> is seen as a change worth a grid refresh.</summary>
+    private IEnumerable<(string BasePath, string CellText)> NestedScopeCells() =>
+        EnumerateNestedScopes().Select(s =>
+            (s.BasePath, IsLiveRow(s.RowIndex) ? _rows[s.RowIndex][s.ColumnName] : ""));
+
+    private bool TrySplitNestedPath(string pathText, out int rowIndex, out string columnName,
+        out bool isArray, out string baseText, out string localKey)
+    {
+        rowIndex = 0; columnName = ""; isArray = false; baseText = ""; localKey = "";
+
+        // Cheap reject before invoking the path parser: a plain top-level cell path ("$[3].total")
+        // has exactly one '[' and one '.'. Anything nested has more.
+        var punct = 0;
+        foreach (var c in pathText) if (c is '.' or '[') punct++;
+        if (punct <= 2) return false;
+
+        JsonPath jp;
+        try { jp = JsonPath.Parse(pathText); }
+        catch (FormatException) { return false; }
+
+        if (jp.Segments.Count < 3) return false;
+        if (jp.Segments[0] is not JsonPathSegment.Index rowIdx) return false;
+        if (jp.Segments[1] is not JsonPathSegment.Key colSeg) return false;
+
+        var prop = _properties.FirstOrDefault(p => p.Name == colSeg.Name);
+        if (prop is null || prop.FieldType is not (JsonFieldType.Object or JsonFieldType.Array)) return false;
+
+        rowIndex = rowIdx.Value;
+        columnName = colSeg.Name;
+        isArray = prop.FieldType == JsonFieldType.Array;
+        baseText = new JsonPath(new JsonPathSegment[]
+            { new JsonPathSegment.Index(rowIndex), new JsonPathSegment.Key(columnName) }).ToCanonicalString();
+
+        var rest = jp.Segments.Skip(2).ToList();
+        var local = new List<JsonPathSegment>();
+        if (isArray)
+        {
+            if (rest[0] is not JsonPathSegment.Index elem) return false;
+            local.Add(new JsonPathSegment.Index(elem.Value));
+            local.AddRange(rest.Skip(1));
+        }
+        else
+        {
+            local.Add(new JsonPathSegment.Index(0));
+            local.AddRange(rest);
+        }
+        if (local.Count < 2) return false; // needs $[i].something
+        localKey = new JsonPath(local).ToCanonicalString();
+        return true;
+    }
+
+    private string? ComposeNestedPath(NestedScope scope, string localKey)
+    {
+        JsonPath lp;
+        try { lp = JsonPath.Parse(localKey); }
+        catch (FormatException) { return null; }
+        if (lp.Segments.Count < 2 || lp.Segments[0] is not JsonPathSegment.Index elem) return null;
+
+        var segs = new List<JsonPathSegment>
+        {
+            new JsonPathSegment.Index(scope.RowIndex),
+            new JsonPathSegment.Key(scope.ColumnName)
+        };
+        if (scope.IsArray) segs.Add(new JsonPathSegment.Index(elem.Value));
+        segs.AddRange(lp.Segments.Skip(1));
+        return new JsonPath(segs).ToCanonicalString();
+    }
+
+    /// <summary>base path -> (host JSON in, computed JSON out) from the last materialization, so an
+    /// unchanged host cell is not re-parsed and re-evaluated on every recalculation. Invalidated for
+    /// a base whenever <see cref="WriteNestedScope"/> changes its formulas.</summary>
+    private readonly Dictionary<string, (string In, string Out)> _nestedScopeCache = new(StringComparer.Ordinal);
+
+    /// <summary>Recomputes every nested scope: parse the host cell's JSON into a sub-table, run a
+    /// nested session over the re-based formulas, and write the serialized result back into the
+    /// cell. A no-op unless this is a top-level session (<see cref="_jsonService"/> set).</summary>
+    private void MaterializeNestedScopes()
+    {
+        if (_jsonService is null) return;
+
+        foreach (var scope in EnumerateNestedScopes())
+        {
+            if (!IsLiveRow(scope.RowIndex)) continue;
+            var hostRow = _rows[scope.RowIndex];
+            var cellJson = hostRow[scope.ColumnName];
+            if (string.IsNullOrWhiteSpace(cellJson)) continue;
+
+            // Skip the parse+evaluate+serialize round-trip when this cell's JSON is exactly what we
+            // last produced from — the common case on an unrelated edit elsewhere in the document.
+            if (_nestedScopeCache.TryGetValue(scope.BasePath, out var cached)
+                && (cached.In == cellJson || cached.Out == cellJson))
+                continue;
+
+            List<JsonPropertyDefinition> subProps;
+            List<DynamicDataRow> subRows;
+            try
+            {
+                subProps = _jsonService.DetectFields(cellJson)
+                    .Select(f => new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType })
+                    .ToList();
+                if (subProps.Count == 0) continue;
+                subRows = _jsonService.ParseJsonData(cellJson, subProps);
+            }
+            catch { continue; }
+            if (subRows.Count == 0) continue;
+
+            var childSidecar = new FormulaSidecar
+            {
+                Target = new TargetInfo("", "", TargetHash.HashInputId, DateTime.UtcNow)
+            };
+            foreach (var (k, v) in scope.LocalCellFormulas) childSidecar.CellFormulas[k] = v;
+            foreach (var (k, v) in scope.LocalState) childSidecar.State[k] = v;
+
+            // One-shot: no change subscriptions (nothing mutates subRows after this) and no
+            // IJsonService, so it cannot recurse into a deeper Object/Array cell.
+            var child = new FormulaSessionService(subRows, subProps, jsonService: null, subscribeToChanges: false);
+            try { child.AdoptSidecar(childSidecar); }
+            catch { continue; }
+
+            string newJson;
+            try
+            {
+                newJson = scope.IsArray
+                    ? _jsonService.SerializeToJson(subRows, subProps)
+                    : _jsonService.SerializeSingleRowToJson(subRows[0], subProps);
+            }
+            catch { continue; }
+
+            if (newJson != cellJson)
+                hostRow.SetCell(scope.ColumnName, newJson, CellKind.Value);
+
+            _nestedScopeCache[scope.BasePath] = (cellJson, newJson);
+
+            // Refresh this scope's cached error state in the parent sidecar (drop stale, re-add
+            // current) so a reopened editor shows the right markers straight away.
+            foreach (var key in Sidecar.State.Keys
+                         .Where(k => k.StartsWith(scope.BasePath + ".", StringComparison.Ordinal)
+                                     || k.StartsWith(scope.BasePath + "[", StringComparison.Ordinal))
+                         .ToList())
+                Sidecar.State.Remove(key);
+
+            foreach (var (localKey, st) in child.Sidecar.State)
+                if (ComposeNestedPath(scope, localKey) is { } composed)
+                    Sidecar.State[composed] = st;
+        }
+    }
+
+    /// <summary>The canonical base-path text for an Object/Array cell (<c>$[3].person</c>) — the key
+    /// the pencil-button editor's formula bridge uses.</summary>
+    public string NestedBasePathFor(int rowIndex, string columnName) =>
+        new JsonPath(new JsonPathSegment[]
+        {
+            new JsonPathSegment.Index(rowIndex),
+            new JsonPathSegment.Key(columnName)
+        }).ToCanonicalString();
+
+    /// <summary>The formulas currently stored inside <paramref name="basePath"/> (an Object/Array
+    /// cell), re-keyed to a standalone sub-table — what the pencil-button editor loads when it
+    /// opens. Object cell → keys like <c>$[0].field</c>; array cell → <c>$[i].field</c>.</summary>
+    public (Dictionary<string, FormulaEntry> CellFormulas, Dictionary<string, CellState> State) ReadNestedScope(string basePath)
+    {
+        var scope = EnumerateNestedScopes().FirstOrDefault(s => s.BasePath == basePath);
+        return scope is null
+            ? (new Dictionary<string, FormulaEntry>(), new Dictionary<string, CellState>())
+            : (new Dictionary<string, FormulaEntry>(scope.LocalCellFormulas), new Dictionary<string, CellState>(scope.LocalState));
+    }
+
+    /// <summary>Replaces every formula/state entry stored inside <paramref name="basePath"/> with
+    /// <paramref name="localCellFormulas"/>/<paramref name="localState"/> (keyed within the
+    /// sub-table, as returned by <see cref="ReadNestedScope"/>), then recomputes. Called when the
+    /// pencil-button editor is submitted.</summary>
+    public void WriteNestedScope(string basePath, int rowIndex, string columnName, bool isArray,
+        IReadOnlyDictionary<string, FormulaEntry> localCellFormulas,
+        IReadOnlyDictionary<string, CellState> localState)
+    {
+        var scope = new NestedScope(rowIndex, columnName, isArray, basePath,
+            new Dictionary<string, FormulaEntry>(), new Dictionary<string, CellState>());
+
+        foreach (var key in Sidecar.CellFormulas.Keys
+                     .Where(k => k.StartsWith(basePath + ".", StringComparison.Ordinal)
+                                 || k.StartsWith(basePath + "[", StringComparison.Ordinal)).ToList())
+            Sidecar.CellFormulas.Remove(key);
+        foreach (var key in Sidecar.State.Keys
+                     .Where(k => k.StartsWith(basePath + ".", StringComparison.Ordinal)
+                                 || k.StartsWith(basePath + "[", StringComparison.Ordinal)).ToList())
+            Sidecar.State.Remove(key);
+
+        foreach (var (localKey, entry) in localCellFormulas)
+            if (ComposeNestedPath(scope, localKey) is { } composed)
+                Sidecar.CellFormulas[composed] = entry;
+        foreach (var (localKey, st) in localState)
+            if (ComposeNestedPath(scope, localKey) is { } composed)
+                Sidecar.State[composed] = st;
+
+        RebuildGraph();
+        FullRecalculate();
+        Recalculated?.Invoke(this, EventArgs.Empty);
     }
 
     // -----------------------------------------------------------------------

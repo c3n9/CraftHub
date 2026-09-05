@@ -32,7 +32,12 @@ public interface IDialogService
     ///   When non-null the editor will use (and modify) this collection instead of
     ///   auto-detecting fields, so every cell in the column stays in sync.
     /// </param>
-    Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService, IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null);
+    /// <param name="formulaBridge">
+    ///   When non-null, the editor supports Excel-style formulas whose definitions are read from
+    ///   and written back through this bridge (i.e. stored in the document's <c>.formulas.json</c>
+    ///   against paths inside the edited cell). Only passed for a top-level Object/Array cell.
+    /// </param>
+    Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService, IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null, IJsonEditorFormulaBridge? formulaBridge = null);
 
     Task<ProgressResult> ShowProgressDialogAsync(string title, Func<IProgress<UpdateProgress>, CancellationToken, Task> task);
     Task<string?> GetFromClipboardAsync();

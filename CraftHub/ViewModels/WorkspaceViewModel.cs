@@ -602,7 +602,7 @@ public partial class WorkspaceViewModel : ViewModelBase
         _classParserService = classParserService;
         _dialogService = dialogService;
         _notificationService = notificationService;
-        _formulaSession = new FormulaSessionService(Rows, Properties);
+        _formulaSession = new FormulaSessionService(Rows, Properties, jsonService);
         // A recalculation triggered by editing a cell a formula reads changes results, and can
         // clear or raise an error — both of which the grid only shows after its rows are rebuilt.
         _formulaSession.Recalculated += (_, _) => FireFormulaVisualsChanged();
@@ -964,11 +964,25 @@ public partial class WorkspaceViewModel : ViewModelBase
             }
         }
 
+        var editIdx = Rows.IndexOf(row);
+        // Formulas typed in the dialog are stored in this document's sidecar against paths inside
+        // the cell; the bridge is how the dialog reads/writes them.
+        var bridge = editIdx >= 0
+            ? new Services.Formulas.NestedFormulaBridge(_formulaSession, editIdx, propertyName, type == JsonFieldType.Array)
+            : null;
+
         var newValue = await _dialogService.ShowJsonEditorDialogAsync($"Edit {propertyName}", currentValue, type,
             _jsonService,
-            merged.Count > 0 ? merged : null);
+            merged.Count > 0 ? merged : null,
+            bridge);
 
-        if (newValue == null || newValue == currentValue) return;
+        if (newValue == null || newValue == currentValue)
+        {
+            // Even when the serialized JSON is unchanged, the dialog may have added/removed
+            // formulas — reflect that in the grid markers.
+            if (_formulaSession.HasAnyFormulas) FireFormulaVisualsChanged();
+            return;
+        }
 
         var newRow = new DynamicDataRow();
         foreach (var kvp in row.GetAllValues())
@@ -981,6 +995,14 @@ public partial class WorkspaceViewModel : ViewModelBase
         Rows[idx] = newRow;
         UndoRedo.Push(new EditJsonCellAction(Rows, row, newRow, propertyName));
         NotifySuccess(Localizer.Get("UpdatedCellMsg", propertyName));
+
+        // The replaced row means the recalculation the dialog already ran wrote into the old
+        // instance; re-run so nested formulas land in the row now in the grid, and refresh markers.
+        if (_formulaSession.HasAnyFormulas)
+        {
+            _formulaSession.RecalculateAll();
+            FireFormulaVisualsChanged();
+        }
     }
 
     // -----------------------------------------------------------------------

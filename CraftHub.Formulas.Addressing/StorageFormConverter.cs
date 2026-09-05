@@ -43,6 +43,11 @@ public sealed class StorageFormConverter
         // relative offset from the authoring cell, or a literal index if it was '$'-marked.
         CellRefSyntax cell => CellToPath(cell, shape, authoringCell),
 
+        // A nested-field reference may have been typed with its dotted display path; store the
+        // real column key so the sidecar is stable regardless of how it was spelled.
+        ColumnRefSyntax col => col with { ColumnKey = shape.ResolveColumnKey(col.ColumnKey) ?? col.ColumnKey },
+        CurrentColumnRefSyntax cur => cur with { ColumnKey = shape.ResolveColumnKey(cur.ColumnKey) ?? cur.ColumnKey },
+
         _ => node
     };
 
@@ -62,6 +67,10 @@ public sealed class StorageFormConverter
         CallExpr c => c with { Arguments = c.Arguments.Select(a => ToDisplayForm(a, shape, viewingCell)).ToList() },
 
         JsonPathSyntax path when TryPathToCell(path, shape, viewingCell, out var cell) => cell!,
+
+        // Show an expanded nested field by its dotted display path, not its raw control-character key.
+        ColumnRefSyntax col => col with { ColumnKey = shape.DisplayColumnKey(col.ColumnKey) },
+        CurrentColumnRefSyntax cur => cur with { ColumnKey = shape.DisplayColumnKey(cur.ColumnKey) },
 
         _ => node
     };

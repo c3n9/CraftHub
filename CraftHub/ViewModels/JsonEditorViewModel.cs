@@ -1,12 +1,15 @@
+using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CraftHub.Core;
 using CraftHub.Domain.Enums;
 using CraftHub.Domain.Models;
+using CraftHub.Formulas.Sidecar;
 using CraftHub.Helpers;
 using CraftHub.Models;
 using CraftHub.Services;
 using CraftHub.Services.Actions;
+using CraftHub.Services.Formulas;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -24,6 +27,18 @@ public partial class JsonEditorViewModel : ViewModelBase
     private readonly IDialogService _dialogService;
     private readonly NotificationService _notificationService;
     private readonly JsonFieldType _expectedType;
+    private readonly IJsonEditorFormulaBridge? _formulaBridge;
+
+    /// <summary>Formula engine over this dialog's own sub-table. Null when the dialog was opened
+    /// without a bridge (e.g. an Object/Array cell nested inside another one — formulas are only
+    /// supported one level deep for now).</summary>
+    public FormulaSessionService? FormulaSession { get; }
+
+    public bool FormulasEnabled => FormulaSession != null;
+
+    /// <summary>Raised after a formula edit so the view can rebuild its rows (the fx marker and the
+    /// computed value are not live bindings).</summary>
+    public event EventHandler? FormulaVisualsChanged;
 
     [ObservableProperty] private string _propertyNameInput = string.Empty;
     [ObservableProperty] private JsonFieldType _selectedType = JsonFieldType.String;
@@ -66,12 +81,13 @@ public partial class JsonEditorViewModel : ViewModelBase
     }
 
     public JsonEditorViewModel(string initialJson, JsonFieldType expectedType, IJsonService jsonService, IDialogService dialogService, NotificationService notificationService,
-        IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null)
+        IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null, IJsonEditorFormulaBridge? formulaBridge = null)
     {
         _jsonService = jsonService;
         _dialogService = dialogService;
         _notificationService = notificationService;
         _expectedType = expectedType;
+        _formulaBridge = formulaBridge;
         IsObjectMode = expectedType == JsonFieldType.Object;
 
         // Seed schema from shared properties first (other rows' merged schema).
@@ -131,6 +147,83 @@ public partial class JsonEditorViewModel : ViewModelBase
 
         UndoRedo.PropertyChanged += (_, _) => RefreshUndoRedoState();
         RefreshUndoRedoState();
+
+        // Formulas: a session over this dialog's own sub-table, seeded from whatever the parent
+        // document already stored for this cell. Primitive-array mode has no named columns to
+        // reference, so formulas don't apply there.
+        if (_formulaBridge != null && !IsPrimitiveArrayMode)
+        {
+            FormulaSession = new FormulaSessionService(Rows, Properties, jsonService);
+            var seeded = new FormulaSidecar
+            {
+                Target = new TargetInfo("", "", "", DateTime.UtcNow)
+            };
+            foreach (var (localPath, formula) in _formulaBridge.LoadFormulas())
+                seeded.CellFormulas[localPath] = new FormulaEntry(formula);
+            if (seeded.CellFormulas.Count > 0)
+                FormulaSession.AdoptSidecar(seeded);
+            FormulaSession.Recalculated += (_, _) => FormulaVisualsChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    //  Formulas (delegates to FormulaSession; no-ops when formulas are disabled)
+    // -----------------------------------------------------------------------
+
+    public bool IsFormulaCell(int rowIndex, string columnKey) =>
+        FormulaSession?.IsFormulaCell(rowIndex, columnKey) ?? false;
+
+    public string? GetDisplayFormula(int rowIndex, string columnKey) =>
+        FormulaSession?.GetDisplayFormula(rowIndex, columnKey);
+
+    public CellState? GetFormulaErrorState(int rowIndex, string columnKey) =>
+        FormulaSession?.GetErrorState(rowIndex, columnKey);
+
+    /// <summary>What the cell editor should preload: the formula text if the cell is a formula,
+    /// otherwise the stored value.</summary>
+    public string GetEditableCellText(int rowIndex, string columnKey)
+    {
+        if (GetDisplayFormula(rowIndex, columnKey) is { } f) return f;
+        return rowIndex >= 0 && rowIndex < Rows.Count ? Rows[rowIndex][columnKey] : "";
+    }
+
+    /// <summary>Commits what was typed into a cell editor: a leading '=' becomes a formula, anything
+    /// else a plain value (dropping any formula the cell had). Mirrors WorkspaceViewModel.CommitCellEdit,
+    /// trimmed to what this dialog needs.</summary>
+    public void CommitCellText(DynamicDataRow row, string propName, string oldValue, string typed, DataGrid? grid)
+    {
+        var idx = Rows.IndexOf(row);
+        if (idx < 0) return;
+
+        if (FormulaSession != null && typed.StartsWith('='))
+        {
+            // Left unchanged (the editor just showed the existing formula text): restore the
+            // computed value the live-write clobbered and stop.
+            if (typed == GetEditableCellText(idx, propName)) { row[propName] = oldValue; return; }
+            // The formula text is not the row's data — undo the editor's live write first.
+            row[propName] = oldValue;
+            var changeSet = FormulaSession.TrySetCellFormula(idx, propName, typed, out var error);
+            if (changeSet is null)
+            {
+                _notificationService.Publish(NotificationType.Warning, error ?? Localizer.Get("FormulaInvalidMsg"));
+                return;
+            }
+            UndoRedo.Push(new SetCellFormulaAction(FormulaSession, changeSet, grid));
+            FormulaVisualsChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
+        if (FormulaSession != null && FormulaSession.IsFormulaCell(idx, propName))
+        {
+            var removed = FormulaSession.TryRemoveCellFormula(idx, propName);
+            if (removed != null) UndoRedo.Push(new SetCellFormulaAction(FormulaSession, removed, grid));
+            oldValue = row[propName];
+            FormulaVisualsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        if (row[propName] != typed) row[propName] = typed;
+        if (oldValue == typed) return;
+        UndoRedo.Push(new EditCellAction(row, propName, oldValue, typed, grid));
     }
 
     private void SeedPrimitiveArray(string json)
@@ -329,6 +422,15 @@ public partial class JsonEditorViewModel : ViewModelBase
     {
         try
         {
+            // Persist formulas defined in this dialog back into the document's sidecar BEFORE
+            // serializing, so the JSON we hand back carries their freshly computed values.
+            if (FormulaSession != null && _formulaBridge != null)
+            {
+                var formulas = FormulaSession.Sidecar.CellFormulas
+                    .ToDictionary(kv => kv.Key, kv => kv.Value.Formula);
+                _formulaBridge.SaveFormulas(formulas);
+            }
+
             var json = _jsonService.SerializeToJson(Rows, Properties);
 
             if (IsObjectMode)

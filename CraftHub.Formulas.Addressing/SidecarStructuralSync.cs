@@ -39,27 +39,36 @@ public static class SidecarStructuralSync
         return droppedFormulas.Concat(droppedState).ToList();
     }
 
-    public static void OnColumnRenamed(FormulaSidecar sidecar, string oldKey, string newKey)
+    /// <summary><paramref name="oldKeySegments"/>/<paramref name="newKeySegments"/> are the column
+    /// key split into path segments — one for a flat column, several for an expanded nested field
+    /// (see CLAUDE.md's "Nested JSON paths"). <paramref name="oldKey"/>/<paramref name="newKey"/>
+    /// are the joined forms, still used verbatim as <see cref="FormulaSidecar.ColumnFormulas"/>
+    /// keys.</summary>
+    public static void OnColumnRenamed(FormulaSidecar sidecar, string oldKey, string newKey,
+        IReadOnlyList<string> oldKeySegments, IReadOnlyList<string> newKeySegments)
     {
         if (sidecar.ColumnFormulas.Remove(oldKey, out var entry))
             sidecar.ColumnFormulas[newKey] = entry;
 
-        RewritePaths(sidecar.CellFormulas, path => StructureRewriter.OnColumnRenamed(path, oldKey, newKey));
-        RewritePaths(sidecar.State, path => StructureRewriter.OnColumnRenamed(path, oldKey, newKey));
-        RewritePaths(sidecar.ExcludedCells, path => StructureRewriter.OnColumnRenamed(path, oldKey, newKey));
+        RewritePaths(sidecar.CellFormulas, path => StructureRewriter.OnColumnRenamed(path, oldKeySegments, newKeySegments));
+        RewritePaths(sidecar.State, path => StructureRewriter.OnColumnRenamed(path, oldKeySegments, newKeySegments));
+        RewritePaths(sidecar.ExcludedCells, path => StructureRewriter.OnColumnRenamed(path, oldKeySegments, newKeySegments));
     }
 
     /// <summary>Returns the same "what got dropped" list as <see cref="OnRowRemoved"/>, plus the
-    /// column formula key itself if that column had one.</summary>
-    public static IReadOnlyList<string> OnColumnRemoved(FormulaSidecar sidecar, string removedKey)
+    /// column formula key itself if that column had one. <paramref name="removedKeySegments"/> is
+    /// the column key split into path segments; <paramref name="removedKey"/> is the joined form
+    /// used as the <see cref="FormulaSidecar.ColumnFormulas"/> key.</summary>
+    public static IReadOnlyList<string> OnColumnRemoved(FormulaSidecar sidecar, string removedKey,
+        IReadOnlyList<string> removedKeySegments)
     {
         var dropped = new List<string>();
         if (sidecar.ColumnFormulas.Remove(removedKey))
             dropped.Add(removedKey);
 
-        var droppedFormulas = RemoveReferencing(sidecar.CellFormulas, removedKey);
-        var droppedState = RemoveReferencing(sidecar.State, removedKey);
-        RemoveReferencing(sidecar.ExcludedCells, removedKey);
+        var droppedFormulas = RemoveReferencing(sidecar.CellFormulas, removedKeySegments);
+        var droppedState = RemoveReferencing(sidecar.State, removedKeySegments);
+        RemoveReferencing(sidecar.ExcludedCells, removedKeySegments);
         dropped.AddRange(droppedFormulas);
         dropped.AddRange(droppedState);
         return dropped;
@@ -117,7 +126,7 @@ public static class SidecarStructuralSync
     }
 
     /// <summary>Set flavour of <see cref="RemoveReferencing{TValue}"/>.</summary>
-    private static void RemoveReferencing(HashSet<string> set, string columnKey)
+    private static void RemoveReferencing(HashSet<string> set, IReadOnlyList<string> columnKeySegments)
     {
         var toRemove = new List<string>();
         foreach (var key in set)
@@ -126,13 +135,13 @@ public static class SidecarStructuralSync
             try { parsed = JsonPath.Parse(key); }
             catch (FormatException) { continue; }
 
-            if (StructureRewriter.ReferencesColumn(parsed, columnKey)) toRemove.Add(key);
+            if (StructureRewriter.ReferencesColumn(parsed, columnKeySegments)) toRemove.Add(key);
         }
 
         foreach (var key in toRemove) set.Remove(key);
     }
 
-    private static List<string> RemoveReferencing<TValue>(Dictionary<string, TValue> dict, string columnKey)
+    private static List<string> RemoveReferencing<TValue>(Dictionary<string, TValue> dict, IReadOnlyList<string> columnKeySegments)
     {
         var toRemove = new List<string>();
         foreach (var key in dict.Keys)
@@ -141,7 +150,7 @@ public static class SidecarStructuralSync
             try { parsed = JsonPath.Parse(key); }
             catch (FormatException) { continue; }
 
-            if (StructureRewriter.ReferencesColumn(parsed, columnKey))
+            if (StructureRewriter.ReferencesColumn(parsed, columnKeySegments))
                 toRemove.Add(key);
         }
 

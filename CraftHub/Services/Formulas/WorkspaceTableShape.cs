@@ -43,4 +43,17 @@ public sealed class WorkspaceTableShape : ITableShape
         }
         return path;
     }
+
+    public string? ResolveColumnKey(string typedKey)
+    {
+        if (_knownColumns.Contains(typedKey)) return typedKey;
+
+        // Expanded nested fields are shown dotted (JsonPropertyDefinition.GetDisplayPath) but keyed
+        // with the control-character separator — so `@["a.b"]` typed in a formula is column `a\x1Eb`.
+        var separated = typedKey.Replace('.', JsonFieldMapping.PathSeparator);
+        return _knownColumns.Contains(separated) ? separated : null;
+    }
+
+    public string DisplayColumnKey(string actualKey) =>
+        actualKey.Replace(JsonFieldMapping.PathSeparator, '.');
 }

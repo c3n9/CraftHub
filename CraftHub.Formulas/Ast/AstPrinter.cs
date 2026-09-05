@@ -39,8 +39,8 @@ public static class AstPrinter
         RangeRefSyntax range => $"{PrintCell(range.From)}:{PrintCell(range.To)}",
         ColumnBandSyntax band => $"{(band.FromFixed ? "$" : "")}{band.FromColumn}:{(band.ToFixed ? "$" : "")}{band.ToColumn}",
         RowBandSyntax rowBand => $"{PrintRow(rowBand.From)}:{PrintRow(rowBand.To)}",
-        ColumnRefSyntax col => $"[{col.ColumnKey}]",
-        CurrentColumnRefSyntax cur => $"@[{cur.ColumnKey}]",
+        ColumnRefSyntax col => $"[{BracketKey(col.ColumnKey)}]",
+        CurrentColumnRefSyntax cur => $"@[{BracketKey(cur.ColumnKey)}]",
 
         JsonPathSyntax path => PrintPath(path),
 
@@ -81,6 +81,17 @@ public static class AstPrinter
             }
         }
         return sb.ToString();
+    }
+
+    // A [name]/@[name] key prints bare only if the parser would read it back as a single Word or
+    // Number token — anything else (a dot from an expanded nested field's display path, a space, a
+    // quote) has to be quoted, matching PrintPath's quoted-key form.
+    private static string BracketKey(string key)
+    {
+        foreach (var c in key)
+            if (!(char.IsAsciiLetterOrDigit(c) || c == '_'))
+                return $"\"{key.Replace("\"", "\"\"")}\"";
+        return key.Length == 0 ? "\"\"" : key;
     }
 
     private static bool IsBareIdentifier(string s)

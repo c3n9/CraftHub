@@ -432,24 +432,21 @@ public partial class WorkspaceView : UserControl
             Margin = new Avalonia.Thickness(0, 3, 3, 0),
             Foreground = errorState != null ? Brushes.OrangeRed : Brushes.Gray,
             Opacity = errorState != null ? 1.0 : 0.6,
-            [!ToolTip.TipProperty] = new Binding { Source = tooltip }
         };
 
         // No fill handle on a column-computed cell: dragging it would write per-cell copies of a
         // formula the column already applies to every row, and those copies would then shadow the
         // template — silently un-doing the "and rows added later" part of a calculated column.
-        if (fromColumn)
-        {
-            var columnGrid = new Grid();
-            columnGrid.Children.Add(valueText);
-            columnGrid.Children.Add(marker);
-            return columnGrid;
-        }
-
         var grid = new Grid();
         grid.Children.Add(valueText);
         grid.Children.Add(marker);
-        grid.Children.Add(BuildFillHandle(row, columnKey));
+        if (!fromColumn) grid.Children.Add(BuildFillHandle(row, columnKey));
+
+        // Tip on the whole cell, not just the 11px marker: an errored formula renders the cell
+        // blank, so a tooltip only on the tiny icon is effectively invisible. A plain string, not
+        // a Binding — `new Binding { Source = text }` never actually showed anything.
+        ToolTip.SetTip(grid, tooltip);
+        ToolTip.SetShowDelay(grid, 400);
         return grid;
     }
 
@@ -796,6 +793,13 @@ public partial class WorkspaceView : UserControl
     private CompletionKind _completionKind = CompletionKind.None;
     private int _completionStart;
 
+    /// <summary>Which suggestion the arrow keys have moved to — the one Enter/Tab accepts and the
+    /// one drawn highlighted. Kept in step with <see cref="_suggestionRows"/>, which holds the row
+    /// controls in the same order as <see cref="_formulaSuggestions"/> so a selection change only
+    /// restyles, never rebuilds.</summary>
+    private int _selectedSuggestionIndex;
+    private readonly List<Button> _suggestionRows = new();
+
     /// <summary>The editor the visible suggestions belong to. Set from the box that raised the
     /// event, never from a shared "current editor" field: the grid reuses editor instances, so such
     /// a field goes stale exactly when a second cell is edited — which is why the popup stopped
@@ -838,10 +842,21 @@ public partial class WorkspaceView : UserControl
 
         if (!FormulaSuggestionsPopup.IsOpen) return;
 
-        if (e.Key is Key.Tab or Key.Enter && _formulaSuggestions.Count > 0)
+        if (e.Key is Key.Down or Key.Up && _formulaSuggestions.Count > 0)
+        {
+            // Wraps at both ends, so holding one arrow key cycles the list rather than stalling.
+            e.Handled = true;
+            var count = _formulaSuggestions.Count;
+            _selectedSuggestionIndex = e.Key == Key.Down
+                ? (_selectedSuggestionIndex + 1) % count
+                : (_selectedSuggestionIndex - 1 + count) % count;
+            HighlightSelectedSuggestion();
+        }
+        else if (e.Key is Key.Tab or Key.Enter && _formulaSuggestions.Count > 0)
         {
             e.Handled = true;
-            AcceptFormulaSuggestion(_formulaSuggestions[0]);
+            var index = Math.Clamp(_selectedSuggestionIndex, 0, _formulaSuggestions.Count - 1);
+            AcceptFormulaSuggestion(_formulaSuggestions[index]);
         }
         else if (e.Key == Key.Escape)
         {
@@ -849,6 +864,24 @@ public partial class WorkspaceView : UserControl
             e.Handled = true;
             FormulaSuggestionsPopup.IsOpen = false;
         }
+    }
+
+    /// <summary>Tints the arrow-selected suggestion row and scrolls it into view; everything else
+    /// goes back to transparent. Cheap enough to call on every keystroke — it only sets a brush on
+    /// a handful of buttons.</summary>
+    private void HighlightSelectedSuggestion()
+    {
+        if (_suggestionRows.Count == 0) return;
+        _selectedSuggestionIndex = Math.Clamp(_selectedSuggestionIndex, 0, _suggestionRows.Count - 1);
+
+        var accent = this.TryFindResource("AccentPrimary", out var res) && res is ISolidColorBrush brush
+            ? new SolidColorBrush(brush.Color, 0x33 / 255.0)
+            : new SolidColorBrush(Colors.Gray, 0x33 / 255.0);
+
+        for (var i = 0; i < _suggestionRows.Count; i++)
+            _suggestionRows[i].Background = i == _selectedSuggestionIndex ? accent : Brushes.Transparent;
+
+        _suggestionRows[_selectedSuggestionIndex].BringIntoView();
     }
 
     private void UpdateFormulaSuggestions(TextBox box)
@@ -861,6 +894,9 @@ public partial class WorkspaceView : UserControl
 
         (_completionKind, _completionStart) = FindCompletionTarget(text, caret);
         var prefix = _completionKind == CompletionKind.None ? "" : text[_completionStart..caret];
+        // A nested-field reference is typed quoted (@["a.b"]); the opening quote isn't part of the
+        // name being matched.
+        if (_completionKind == CompletionKind.Column && prefix.StartsWith('"')) prefix = prefix[1..];
 
         _formulaSuggestions = _completionKind switch
         {
@@ -884,7 +920,7 @@ public partial class WorkspaceView : UserControl
                 .Where(k => JsonPropertyDefinition.GetDisplayPath(k).Contains(prefix, StringComparison.OrdinalIgnoreCase))
                 .OrderBy(k => k, StringComparer.Ordinal)
                 .Take(8)
-                .Select(k => new FormulaSuggestion(k, JsonPropertyDefinition.GetDisplayPath(k),
+                .Select(k => new FormulaSuggestion(ColumnInsertBody(k), JsonPropertyDefinition.GetDisplayPath(k),
                     Localizer.Get("FormulaColumnSuggestionDetail")))
                 .ToList(),
 
@@ -892,11 +928,19 @@ public partial class WorkspaceView : UserControl
         };
 
         FormulaSuggestionsList.Children.Clear();
+        _suggestionRows.Clear();
+        // Typing narrows the list; keep the highlight on the first match rather than a stale index.
+        _selectedSuggestionIndex = 0;
 
         if (_formulaSuggestions.Count > 0)
         {
-            foreach (var suggestion in _formulaSuggestions)
-                FormulaSuggestionsList.Children.Add(BuildSuggestionRow(suggestion));
+            for (var i = 0; i < _formulaSuggestions.Count; i++)
+            {
+                var row = BuildSuggestionRow(_formulaSuggestions[i], i);
+                _suggestionRows.Add(row);
+                FormulaSuggestionsList.Children.Add(row);
+            }
+            HighlightSelectedSuggestion();
         }
         else if (FindEnclosingCall(text, caret) is ({ } meta, var activeArg))
         {
@@ -908,6 +952,14 @@ public partial class WorkspaceView : UserControl
 
     private IEnumerable<string> ColumnKeys() =>
         _currentVm?.Properties.Select(p => p.Name) ?? Enumerable.Empty<string>();
+
+    /// <summary>What goes between the brackets of a completed <c>[…]</c>/<c>@[…]</c> reference: a
+    /// flat column by its bare name, an expanded nested field by its dotted display path in quotes
+    /// (a bare dot wouldn't lex as one token).</summary>
+    private static string ColumnInsertBody(string columnKey) =>
+        columnKey.Contains(JsonFieldMapping.PathSeparator)
+            ? $"\"{JsonPropertyDefinition.GetDisplayPath(columnKey)}\""
+            : columnKey;
 
     private static FormulaSuggestion ToSuggestion(FunctionMetadata meta)
     {
@@ -976,7 +1028,7 @@ public partial class WorkspaceView : UserControl
         return (null, 0);
     }
 
-    private Control BuildSuggestionRow(FormulaSuggestion suggestion)
+    private Button BuildSuggestionRow(FormulaSuggestion suggestion, int index)
     {
         var button = new Button
         {
@@ -1014,6 +1066,13 @@ public partial class WorkspaceView : UserControl
             e.Handled = true;
             AcceptFormulaSuggestion(suggestion);
         }, RoutingStrategies.Tunnel);
+        // Hovering a row makes it the selected one, so mouse and keyboard never disagree about
+        // which suggestion Enter would take.
+        button.PointerEntered += (_, _) =>
+        {
+            _selectedSuggestionIndex = index;
+            HighlightSelectedSuggestion();
+        };
         return button;
     }
 
@@ -1292,7 +1351,7 @@ public partial class WorkspaceView : UserControl
             var col = DataGrid.Columns[i];
             if (col.Tag as string != prop.Name) return false;
             if (col.Header as string !=
-                $"{prop.Name} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})")
+                $"{JsonPropertyDefinition.GetDisplayPath(prop.Name)} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})")
                 return false;
         }
         return true;
@@ -1375,7 +1434,9 @@ public partial class WorkspaceView : UserControl
 
     private DataGridTemplateColumn BuildColumn(JsonPropertyDefinition prop)
     {
-            var header = $"{prop.Name} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})";
+            // Display path, not the raw Name: an expanded nested field's key carries a control
+            // character that must never reach the UI (see CLAUDE.md "Nested JSON paths").
+            var header = $"{JsonPropertyDefinition.GetDisplayPath(prop.Name)} ({JsonPropertyDefinition.GetTypeDisplayName(prop.FieldType)})";
 
             var column = new DataGridTemplateColumn
             {

@@ -414,7 +414,6 @@
     <x:String x:Key="DetachFormulasConfirmMsg">Каждая вычисляемая ячейка сохранит текущее значение, но перестанет быть формулой, а файл формул рядом с документом будет удалён. Это можно отменить, пока вкладка не закрыта.</x:String>
     <x:String x:Key="FormulaInvalidMsg">Некорректная формула</x:String>
     <x:String x:Key="FormulaUnknownColumn">Неизвестная колонка.</x:String>
-    <x:String x:Key="FormulaNestedColumnUnsupported">Формулы пока нельзя ставить на развёрнутое вложенное поле.</x:String>
     <x:String x:Key="FormulaFillDownMsg">Формула протянута в {0} строк(и).</x:String>
     <x:String x:Key="FormulaFillDownNothingMsg">Исходная ячейка не является формулой, либо не выбраны другие строки.</x:String>
     <x:String x:Key="FormulaNoneToDetachMsg">В этом документе нет формул для отсоединения.</x:String>

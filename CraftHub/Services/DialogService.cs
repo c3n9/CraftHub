@@ -217,13 +217,13 @@ public class DialogService : IDialogService
         }
     }
 
-    public async Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService, IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null)
+    public async Task<string?> ShowJsonEditorDialogAsync(string title, string initialJson, JsonFieldType type, IJsonService jsonService, IReadOnlyList<JsonPropertyDefinition>? sharedProperties = null, IJsonEditorFormulaBridge? formulaBridge = null)
     {
         var window = GetMainWindow();
         if (window == null) return null;
 
         var dialog = new JsonEditorView { Title = title };
-        var vm = new JsonEditorViewModel(initialJson, type, jsonService, this, _notificationService, sharedProperties);
+        var vm = new JsonEditorViewModel(initialJson, type, jsonService, this, _notificationService, sharedProperties, formulaBridge);
         dialog.DataContext = vm;
 
         return await dialog.ShowDialog<string?>(GetActiveWindow() ?? window);
