@@ -509,16 +509,19 @@
                               CanUserSortColumns="True"
                               SelectionMode="Extended"
                               IsReadOnly="False"
-                              HorizontalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Visible"
                               VerticalScrollBarVisibility="Auto"
                               FontSize="14"
                               Background="Transparent"
                               BorderThickness="0"
                               RowBackground="{DynamicResource ElevatedBackground}">
                         <DataGrid.Styles>
-                            <!--Отступ снизу у презентера строк, чтобы горизонтальная полоса прокрутки не перекрывала контент-->
-                            <Style Selector="DataGrid /template/ DataGridRowsPresenter">
-                                <Setter Property="Margin" Value="0,0,0,16" />
+                            <!-- Fluent turns AllowAutoHide on for every ScrollBar: the bar fades
+                                 out on a timer and comes back while you scroll or hover. On the
+                                 grid that reads as "the horizontal bar only exists at the bottom
+                                 of the list" and "it flickers" — so pin both bars on. -->
+                            <Style Selector="DataGrid /template/ ScrollBar">
+                                <Setter Property="AllowAutoHide" Value="False" />
                             </Style>
                         </DataGrid.Styles>
                         <DataGrid.KeyBindings>

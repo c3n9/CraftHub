@@ -94,10 +94,6 @@
         <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}" />
     </Style>
 
-    <!-- The in-cell editor. A cell is often narrower than its value (long JSON, a long formula,
-         a URL with no spaces to wrap at), so both scrollbars are explicitly Auto: without them the
-         text simply slid out of view with nothing on screen saying it could be scrolled. MaxHeight
-         keeps a multi-line value from pushing the row taller than the grid. -->
     <Style Selector="TextBox.grid-editor">
         <Setter Property="Background" Value="{DynamicResource SurfaceBackground}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -105,14 +101,6 @@
         <Setter Property="Padding" Value="10,8" />
         <Setter Property="Margin" Value="6,4" />
         <Setter Property="MinHeight" Value="40" />
-        <Setter Property="MaxHeight" Value="220" />
-        <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Auto" />
-        <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
-    </Style>
-
-    <!-- Make the editor's scrollbars usable rather than the 2px overlay default. -->
-    <Style Selector="TextBox.grid-editor /template/ ScrollViewer">
-        <Setter Property="AllowAutoHide" Value="False" />
     </Style>
 
 </Styles>

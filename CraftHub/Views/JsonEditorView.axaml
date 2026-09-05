@@ -199,16 +199,16 @@
 							  CanUserSortColumns="True"
 							  SelectionMode="Extended"
 							  IsReadOnly="False"
-							  HorizontalScrollBarVisibility="Auto"
+							  HorizontalScrollBarVisibility="Visible"
 							  VerticalScrollBarVisibility="Auto"
 							  FontSize="14"
 							  Background="Transparent"
 							  BorderThickness="0"
 							  RowBackground="{DynamicResource ElevatedBackground}">
 						<DataGrid.Styles>
-							<!--Отступ снизу у презентера строк, чтобы горизонтальная полоса прокрутки не перекрывала контент-->
-							<Style Selector="DataGrid /template/ DataGridRowsPresenter">
-								<Setter Property="Margin" Value="0,0,0,16"/>
+							<!-- See the main grid: Fluent auto-hides scrollbars by default. -->
+							<Style Selector="DataGrid /template/ ScrollBar">
+								<Setter Property="AllowAutoHide" Value="False" />
 							</Style>
 						</DataGrid.Styles>
 						<DataGrid.ContextMenu>
