@@ -27,6 +27,10 @@ Name:           crafthub
 Version:        %{appversion}
 Release:        1
 Summary:        JSON editor with a table view, formulas and class generation
+# Localised metadata. rpm keeps one Summary/description per locale and hands the caller the one
+# matching its LC_MESSAGES, falling back to the untagged English above — so `dnf info crafthub`
+# under a Russian locale reads in Russian. The locale tag matches the one the .desktop file uses.
+Summary(ru):    Редактор JSON с табличным представлением, формулами и генерацией классов
 License:        MIT
 URL:            https://github.com/c3n9/CraftHub
 # Architecture comes from rpmbuild --target, not from BuildArch here: the x86_64 runner also builds
@@ -50,6 +54,11 @@ Requires:       libicu
 %description
 CraftHub edits JSON as a typed table: define columns, edit rows in a data grid or as raw JSON,
 compute cells with spreadsheet-style formulas, compare documents, and import or export C# classes.
+
+%description -l ru
+CraftHub редактирует JSON как типизированную таблицу: задайте колонки, правьте строки в таблице
+или как сырой JSON, вычисляйте ячейки формулами в стиле электронных таблиц, сравнивайте документы,
+импортируйте и экспортируйте классы C#.
 
 %install
 # The payload is copied here rather than into the buildroot beforehand, and that is not a style
