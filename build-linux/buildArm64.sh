@@ -24,7 +24,13 @@ mkdir -p staging_folder_arm64
 mkdir -p ./staging_folder_arm64/DEBIAN
 cp ./linux-data-arm64/control ./staging_folder_arm64/DEBIAN
 sed -i "s/currentVersionIsPlacedHere/${buildVersion}/g" ./staging_folder_arm64/DEBIAN/control
-echo "Control copied"
+# Maintainer scripts: they rebuild the MIME and desktop caches after install/remove, without which
+# the .crhb type stays unregistered however correct crafthub.xml is. Not duplicated per
+# architecture — there is nothing arch-specific in them. dpkg refuses a maintainer script that is
+# not executable, and dpkg-deb takes the mode straight from the staging tree, hence the chmod.
+cp ./linux-data/postinst ./linux-data/postrm ./staging_folder_arm64/DEBIAN/
+chmod 755 ./staging_folder_arm64/DEBIAN/postinst ./staging_folder_arm64/DEBIAN/postrm
+echo "Maintainer scripts copied"
 
 # Starter script
 mkdir -p ./staging_folder_arm64/usr
@@ -45,6 +51,13 @@ echo "CraftHub copied"
 mkdir -p ./staging_folder_arm64/usr/share/applications
 cp ./linux-data-arm64/CraftHub.desktop ./staging_folder_arm64/usr/share/applications/CraftHub.desktop
 echo "Shortcut copied"
+
+# MIME type for .crhb bundles. Arch-independent, so both build scripts copy the same file from
+# linux-data/ rather than keeping a second copy under linux-data-arm64/ that could drift.
+mkdir -p ./staging_folder_arm64/usr/share/mime
+mkdir -p ./staging_folder_arm64/usr/share/mime/packages
+cp ./linux-data/crafthub-mime.xml ./staging_folder_arm64/usr/share/mime/packages/crafthub.xml
+echo "MIME type copied"
 
 # Desktop icon
 # A 1024px x 1024px PNG, like VS Code uses for its icon

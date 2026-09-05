@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Registers the .crhb bundle with the system's shared MIME database.
+
+  Without this the desktop only knows the types shipped by shared-mime-info, so a .crhb file is
+  reported as application/octet-stream, no "Open With" entry appears for it however many types the
+  .desktop file lists, and the file manager draws it as a blank sheet.
+
+  Installed to /usr/share/mime/packages/crafthub.xml; the database itself is a compiled cache that
+  has to be rebuilt afterwards with update-mime-database — see the packages' post-install scripts.
+
+  Architecture-independent, so unlike control/CraftHub.desktop this file is NOT duplicated under
+  linux-data-arm64: both build scripts copy this one, which is also what stops the two from drifting.
+-->
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="application/x-crafthub-bundle">
+    <comment>CraftHub bundle</comment>
+    <comment xml:lang="ru">Пакет CraftHub</comment>
+
+    <!-- A bundle is an ordinary JSON document (see CraftHubBundleIO.Serialize), so declaring the
+         relationship lets any JSON-aware tool open one too, and lets a .crhb inherit whatever the
+         desktop already knows how to do with JSON. -->
+    <sub-class-of type="application/json"/>
+
+    <glob pattern="*.crhb"/>
+
+    <!-- Content-based fallback for a bundle that lost its extension. "crhb" is the format marker
+         Parse() requires, and WriteIndented puts it within the first few bytes; the range is
+         generous so the check survives a BOM or a change of indentation. -->
+    <magic priority="60">
+      <match type="string" value="&quot;crhb&quot;" offset="0:64"/>
+    </magic>
+
+    <icon name="crafthub"/>
+    <generic-icon name="text-x-generic"/>
+  </mime-type>
+</mime-info>

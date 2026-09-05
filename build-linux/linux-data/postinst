@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Installing /usr/share/mime/packages/crafthub.xml is only half of registering a MIME type: the
+# database the desktop actually reads is a compiled cache, and until it is rebuilt a .crhb file is
+# still reported as application/octet-stream. Same story for the desktop entry — the MimeType line
+# only takes effect once the applications cache knows about it.
+#
+# Both tools are guarded: they come from shared-mime-info and desktop-file-utils, and neither is
+# guaranteed to be present on a server install. A missing cache updater must not fail the package,
+# hence the command -v check and the "|| true".
+set -e
+
+if [ "$1" = "configure" ]; then
+    if command -v update-mime-database >/dev/null 2>&1; then
+        update-mime-database /usr/share/mime || true
+    fi
+    if command -v update-desktop-database >/dev/null 2>&1; then
+        update-desktop-database -q /usr/share/applications || true
+    fi
+    if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+        gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || true
+    fi
+fi
+
+exit 0

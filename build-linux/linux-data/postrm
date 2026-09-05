@@ -1,0 +1,17 @@
+#!/bin/sh
+#
+# The mirror of postinst: our crafthub.xml is gone from /usr/share/mime/packages, but the compiled
+# cache still lists application/x-crafthub-bundle until it is rebuilt — leaving the system claiming
+# to know a type nothing can open. See postinst for why every call is guarded.
+set -e
+
+if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
+    if command -v update-mime-database >/dev/null 2>&1; then
+        update-mime-database /usr/share/mime || true
+    fi
+    if command -v update-desktop-database >/dev/null 2>&1; then
+        update-desktop-database -q /usr/share/applications || true
+    fi
+fi
+
+exit 0

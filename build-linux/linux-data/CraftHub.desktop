@@ -10,6 +10,6 @@ Exec=/usr/share/crafthub/CraftHub %F
 StartupWMClass=crafthub
 Terminal=false
 Categories=Development;
-MimeType=application/json;
+MimeType=application/json;application/x-crafthub-bundle;
 Keywords=json;hub;crafthub;editor;schema;
 Keywords[ru]=json;редактор;схема;таблица;классы;

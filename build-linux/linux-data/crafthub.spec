@@ -84,7 +84,43 @@ rm -rf %{buildroot}/DEBIAN
 /usr/bin/crafthub
 /usr/share/crafthub
 /usr/share/applications/CraftHub.desktop
+/usr/share/mime/packages/crafthub.xml
 /usr/share/pixmaps/crafthub.png
 /usr/share/icons/hicolor/scalable/apps/crafthub.svg
+
+# Cache-refreshing scriptlets. Dropping crafthub.xml into /usr/share/mime/packages does not
+# register the .crhb type on its own: the database the desktop reads is a compiled cache, and until
+# it is rebuilt a bundle is still reported as application/octet-stream. The desktop entry's
+# MimeType line needs the applications cache refreshed for the same reason. Every updater is
+# guarded: neither shared-mime-info nor desktop-file-utils is guaranteed on a minimal install, and
+# a missing one must not fail the transaction. The .deb does the same from DEBIAN/postinst.
+#
+# These lines sit BEFORE the section directive on purpose. A comment written between a scriptlet's
+# last command and the next %-section is part of that scriptlet's body and gets shipped inside the
+# package's metadata; here it lands in %files instead, where rpm ignores it. For the same reason
+# the scriptlets below carry no comments of their own — see the warning in %install about what rpm
+# does to a percent reference inside a comment.
+%post
+if command -v update-mime-database >/dev/null 2>&1; then
+    update-mime-database /usr/share/mime || :
+fi
+if command -v update-desktop-database >/dev/null 2>&1; then
+    update-desktop-database -q /usr/share/applications || :
+fi
+if command -v gtk-update-icon-cache >/dev/null 2>&1; then
+    gtk-update-icon-cache -q -t -f /usr/share/icons/hicolor || :
+fi
+:
+
+%postun
+if [ $1 -eq 0 ]; then
+    if command -v update-mime-database >/dev/null 2>&1; then
+        update-mime-database /usr/share/mime || :
+    fi
+    if command -v update-desktop-database >/dev/null 2>&1; then
+        update-desktop-database -q /usr/share/applications || :
+    fi
+fi
+:
 
 %changelog
