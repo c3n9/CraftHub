@@ -13,6 +13,7 @@ using CraftHub.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Specialized;
+using System.Linq;
 
 namespace CraftHub.Views;
 
@@ -21,6 +22,16 @@ public partial class JsonEditorView : Window
     private JsonEditorViewModel? _currentVm;
 
     private (DynamicDataRow Row, string PropName, string OldValue)? _pendingEdit;
+
+    /// <summary>The same completion popup the main grid uses (function names, column names inside
+    /// <c>[ ]</c>/<c>@[ ]</c>, signature hints, arrow-key selection) — see
+    /// <see cref="FormulaAutocomplete"/>. No Ctrl+Enter here: this dialog doesn't offer
+    /// "apply to the whole column".</summary>
+    private FormulaAutocomplete? _autocomplete;
+
+    private FormulaAutocomplete Autocomplete => _autocomplete ??=
+        new FormulaAutocomplete(FormulaSuggestionsPopup, FormulaSuggestionsList, this,
+            () => _currentVm?.Properties.Select(p => p.Name) ?? System.Linq.Enumerable.Empty<string>());
 
     public JsonEditorView()
     {
@@ -32,6 +43,7 @@ public partial class JsonEditorView : Window
 
     private void OnCellEditEnded(object? sender, DataGridCellEditEndedEventArgs e)
     {
+        _autocomplete?.Close();
         if (_pendingEdit == null || _currentVm == null) return;
 
         var (row, propName, oldValue) = _pendingEdit.Value;
@@ -316,6 +328,7 @@ public partial class JsonEditorView : Window
                         // Live-write keeps plain-value editing working; CommitCellText undoes it
                         // for '=' text (a formula's text is not the row's data).
                         tb.TextChanged += (_, _) => row[prop.Name] = tb.Text ?? string.Empty;
+                        if (_currentVm is { FormulasEnabled: true }) Autocomplete.Attach(tb);
                         return tb;
                     }
                 });

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using CraftHub.Domain.Enums;
 using CraftHub.Domain.Models;
@@ -93,12 +95,20 @@ public sealed class FormulaSessionService
 
     public bool HasAnyFormulas => Sidecar.HasAnyFormulas;
 
+    /// <summary>How many Object/Array cells deep this session already is. Bounds
+    /// <see cref="MaterializeNestedScopes"/>'s recursion into cells-inside-cells, which is
+    /// otherwise limited only by how deeply the user nested their JSON.</summary>
+    private readonly int _nestingDepth;
+
+    private const int MaxNestingDepth = 4;
+
     public FormulaSessionService(IReadOnlyList<DynamicDataRow> rows, IReadOnlyList<JsonPropertyDefinition> properties,
-        Core.IJsonService? jsonService = null, bool subscribeToChanges = true)
+        Core.IJsonService? jsonService = null, bool subscribeToChanges = true, int nestingDepth = 0)
     {
         _rows = rows;
         _properties = properties;
         _jsonService = jsonService;
+        _nestingDepth = nestingDepth;
         if (subscribeToChanges) SubscribeToStructuralChanges();
     }
 
@@ -1269,13 +1279,25 @@ public sealed class FormulaSessionService
 
             List<JsonPropertyDefinition> subProps;
             List<DynamicDataRow> subRows;
+            var primitiveArray = false;
             try
             {
                 subProps = _jsonService.DetectFields(cellJson)
                     .Select(f => new JsonPropertyDefinition { Name = f.FieldName, FieldType = f.SelectedType })
                     .ToList();
-                if (subProps.Count == 0) continue;
-                subRows = _jsonService.ParseJsonData(cellJson, subProps);
+
+                if (subProps.Count > 0)
+                {
+                    subRows = _jsonService.ParseJsonData(cellJson, subProps);
+                }
+                else
+                {
+                    // An array of plain values ("tags": [1,2,3]) has no fields to detect. Rebuild
+                    // the same synthetic one-column shape the editor shows, so a formula stored
+                    // against $[i].value still has a table to compute against.
+                    if (!scope.IsArray || !TrySeedPrimitiveArray(cellJson, out subProps, out subRows)) continue;
+                    primitiveArray = true;
+                }
             }
             catch { continue; }
             if (subRows.Count == 0) continue;
@@ -1287,18 +1309,24 @@ public sealed class FormulaSessionService
             foreach (var (k, v) in scope.LocalCellFormulas) childSidecar.CellFormulas[k] = v;
             foreach (var (k, v) in scope.LocalState) childSidecar.State[k] = v;
 
-            // One-shot: no change subscriptions (nothing mutates subRows after this) and no
-            // IJsonService, so it cannot recurse into a deeper Object/Array cell.
-            var child = new FormulaSessionService(subRows, subProps, jsonService: null, subscribeToChanges: false);
+            // One-shot: no change subscriptions (nothing mutates subRows after this). It keeps the
+            // IJsonService until MaxNestingDepth so a formula inside a cell inside a cell still
+            // recomputes; past that it gets null and the recursion stops.
+            var child = new FormulaSessionService(subRows, subProps,
+                jsonService: _nestingDepth + 1 < MaxNestingDepth ? _jsonService : null,
+                subscribeToChanges: false,
+                nestingDepth: _nestingDepth + 1);
             try { child.AdoptSidecar(childSidecar); }
             catch { continue; }
 
             string newJson;
             try
             {
-                newJson = scope.IsArray
-                    ? _jsonService.SerializeToJson(subRows, subProps)
-                    : _jsonService.SerializeSingleRowToJson(subRows[0], subProps);
+                newJson = primitiveArray
+                    ? UnwrapPrimitiveArray(_jsonService.SerializeToJson(subRows, subProps))
+                    : scope.IsArray
+                        ? _jsonService.SerializeToJson(subRows, subProps)
+                        : _jsonService.SerializeSingleRowToJson(subRows[0], subProps);
             }
             catch { continue; }
 
@@ -1319,6 +1347,72 @@ public sealed class FormulaSessionService
                 if (ComposeNestedPath(scope, localKey) is { } composed)
                     Sidecar.State[composed] = st;
         }
+    }
+
+    /// <summary>Synthetic column the JSON editor gives one element of an array of plain values
+    /// (<c>["a","b"]</c>), which has no fields of its own to name. Formulas inside such an array are
+    /// stored against it, so this side has to agree with the editor on the name.</summary>
+    public const string PrimitiveArrayColumn = "value";
+
+    /// <summary>Rebuilds the editor's one-column view of an array of plain values. False when
+    /// <paramref name="cellJson"/> isn't a JSON array (or is an array of objects, which
+    /// <c>DetectFields</c> would already have handled).</summary>
+    private static bool TrySeedPrimitiveArray(string cellJson,
+        out List<JsonPropertyDefinition> props, out List<DynamicDataRow> rows)
+    {
+        props = new List<JsonPropertyDefinition>();
+        rows = new List<DynamicDataRow>();
+
+        JsonNode? node;
+        try { node = JsonNode.Parse(cellJson); }
+        catch (JsonException) { return false; }
+        if (node is not JsonArray array) return false;
+
+        var elementType = JsonFieldType.String;
+        var values = new List<(string Text, CellKind Kind)>();
+        foreach (var element in array)
+        {
+            if (values.Count == 0 && element is JsonValue first) elementType = InferPrimitiveType(first);
+            values.Add(element switch
+            {
+                null => ("", CellKind.Null),
+                JsonObject or JsonArray => (element.ToJsonString(), CellKind.Value),
+                _ => (element.ToString(), CellKind.Value)
+            });
+        }
+
+        props.Add(new JsonPropertyDefinition { Name = PrimitiveArrayColumn, FieldType = elementType });
+        foreach (var (text, kind) in values)
+        {
+            var row = new DynamicDataRow();
+            row.InitializeProperty(PrimitiveArrayColumn, text, kind);
+            rows.Add(row);
+        }
+        return true;
+    }
+
+    private static JsonFieldType InferPrimitiveType(JsonValue value)
+    {
+        if (value.TryGetValue<bool>(out _)) return JsonFieldType.Bool;
+        if (value.TryGetValue<int>(out _)) return JsonFieldType.Int;
+        if (value.TryGetValue<double>(out _)) return JsonFieldType.Double;
+        return JsonFieldType.String;
+    }
+
+    /// <summary>Turns <c>[{"value":1},{"value":2}]</c> back into <c>[1,2]</c> — the inverse of
+    /// <see cref="TrySeedPrimitiveArray"/>, matching what the editor does on save.</summary>
+    private static string UnwrapPrimitiveArray(string wrappedJson)
+    {
+        var unwrapped = new JsonArray();
+        if (JsonNode.Parse(wrappedJson) is JsonArray wrapped)
+            foreach (var item in wrapped)
+                unwrapped.Add(item?[PrimitiveArrayColumn]?.DeepClone());
+
+        return unwrapped.ToJsonString(new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        });
     }
 
     /// <summary>The canonical base-path text for an Object/Array cell (<c>$[3].person</c>) — the key

@@ -46,8 +46,10 @@ public partial class JsonEditorViewModel : ViewModelBase
     [ObservableProperty] private bool _isPrimitiveArrayMode;
     [ObservableProperty] private DynamicDataRow? _selectedRow;
 
-    /// <summary>Synthetic column that holds one element of a non-object array.</summary>
-    private const string PrimitiveArrayColumn = "value";
+    /// <summary>Synthetic column that holds one element of a non-object array. Shared with
+    /// <see cref="FormulaSessionService"/>, which has to rebuild the same shape when it recomputes
+    /// formulas stored inside such an array.</summary>
+    private const string PrimitiveArrayColumn = FormulaSessionService.PrimitiveArrayColumn;
 
     public ObservableCollection<JsonPropertyDefinition> Properties { get; } = new();
     public ObservableCollection<DynamicDataRow> Rows { get; } = new();
@@ -149,9 +151,10 @@ public partial class JsonEditorViewModel : ViewModelBase
         RefreshUndoRedoState();
 
         // Formulas: a session over this dialog's own sub-table, seeded from whatever the parent
-        // document already stored for this cell. Primitive-array mode has no named columns to
-        // reference, so formulas don't apply there.
-        if (_formulaBridge != null && !IsPrimitiveArrayMode)
+        // document already stored for this cell. Primitive-array mode is included — its single
+        // synthetic "value" column is a perfectly good formula target, and FormulaSessionService
+        // knows how to rebuild that shape when it recomputes the cell later.
+        if (_formulaBridge != null)
         {
             FormulaSession = new FormulaSessionService(Rows, Properties, jsonService);
             var seeded = new FormulaSidecar
@@ -495,9 +498,24 @@ public partial class JsonEditorViewModel : ViewModelBase
             catch { }
         }
 
+        // Formulas keep working all the way down: the sub-dialog writes into THIS dialog's session
+        // at paths inside the cell, and those travel up to the document's sidecar when this dialog
+        // is submitted (see Submit / NestedFormulaBridge).
+        var editIdx = Rows.IndexOf(row);
+        var bridge = FormulaSession != null && editIdx >= 0
+            ? new NestedFormulaBridge(FormulaSession, editIdx, propertyName, type == JsonFieldType.Array)
+            : null;
+
         var newValue = await _dialogService.ShowJsonEditorDialogAsync(
-            Localizer.Get("EditCellTitle", propertyName), currentValue, type, _jsonService, merged.Count > 0 ? merged : null);
-        if (newValue != null && newValue != currentValue)
+            Localizer.Get("EditCellTitle", propertyName), currentValue, type, _jsonService,
+            merged.Count > 0 ? merged : null, bridge);
+
+        if (newValue == null || newValue == currentValue)
+        {
+            if (FormulaSession?.HasAnyFormulas == true) FormulaVisualsChanged?.Invoke(this, EventArgs.Empty);
+            return;
+        }
+
         {
             var newRow = new DynamicDataRow();
             foreach (var kvp in row.GetAllValues())
@@ -511,6 +529,12 @@ public partial class JsonEditorViewModel : ViewModelBase
             {
                 Rows[idx] = newRow;
                 UndoRedo.Push(new EditJsonCellAction(Rows, row, newRow, propertyName));
+            }
+
+            if (FormulaSession?.HasAnyFormulas == true)
+            {
+                FormulaSession.RecalculateAll();
+                FormulaVisualsChanged?.Invoke(this, EventArgs.Empty);
             }
 
             _notificationService.Publish(NotificationType.Success, Localizer.Get("CellUpdatedMsg", propertyName));

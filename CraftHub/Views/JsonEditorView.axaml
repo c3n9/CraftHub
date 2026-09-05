@@ -160,6 +160,30 @@
 					CornerRadius="10"
 					Background="{DynamicResource BorderColor}"
 					Padding="1">
+				<Grid>
+					<!-- Same formula autocomplete the main grid has (Helpers/FormulaAutocomplete
+					     drives both); a Popup has to live in its own window's tree, so each view
+					     supplies its own host. Kept outside the ClipToBounds border so the list can
+					     overhang the grid. -->
+					<Popup x:Name="FormulaSuggestionsPopup"
+						   Placement="BottomEdgeAlignedLeft"
+						   IsLightDismissEnabled="False"
+						   Focusable="False"
+						   IsOpen="False">
+						<Border Background="{DynamicResource ElevatedBackground}"
+								BorderBrush="{DynamicResource BorderColor}"
+								BorderThickness="1"
+								CornerRadius="6"
+								MaxHeight="240"
+								MinWidth="280"
+								Padding="4"
+								BoxShadow="0 4 12 0 #40000000">
+							<ScrollViewer VerticalScrollBarVisibility="Auto">
+								<StackPanel x:Name="FormulaSuggestionsList" Orientation="Vertical" Spacing="1" />
+							</ScrollViewer>
+						</Border>
+					</Popup>
+
 				<Border CornerRadius="9"
 						Background="{DynamicResource ElevatedBackground}"
 						ClipToBounds="True">
@@ -208,10 +232,11 @@
 					</DataGrid>
 
 				</Border>
+				</Grid>
 			</Border>
 		</Grid>
 
-		<StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,0,10,0">
+		<StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8" Margin="0,0,10,0">
 			<Button Content="{DynamicResource BtnCancel}"
 					Command="{Binding CancelCommand}"
 					Classes="tab-btn"
