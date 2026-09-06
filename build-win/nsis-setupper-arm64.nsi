@@ -21,6 +21,10 @@ RequestExecutionLevel admin
 !define REG_APP_PATH "Software\Microsoft\Windows\CurrentVersion\App Paths\${MAIN_APP_EXE}"
 !define UNINSTALL_PATH "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
 !define REG_START_MENU "Start Menu Folder"
+; CraftHub's own bundle format. A ProgID is the indirection Windows wants: the extension points at
+; it, and it carries the icon and the open command, so a rename or reinstall touches one key.
+!define BUNDLE_EXT ".crhb"
+!define BUNDLE_PROGID "CraftHub.Bundle"
 
 var SM_Folder
 
@@ -117,6 +121,31 @@ Section -MainProgram
     SetDetailsPrint both
 
     ExecWait 'icacls "$INSTDIR" /grant *S-1-1-0:(OI)(CI)F /T'
+SectionEnd
+
+######################################################################
+
+; .crhb is CraftHub's own format, so unlike the optional .json/.cs context-menu entry below this
+; is registered unconditionally and claims the extension outright — there is no other application
+; that opens a bundle. Registering it is also what gives the file an icon in Explorer instead of a
+; blank sheet, and what makes a double-click work at all.
+Section -FileAssoc
+    ${INSTALL_TYPE}
+
+    WriteRegStr HKLM "Software\Classes\${BUNDLE_PROGID}" "" "CraftHub bundle"
+    WriteRegStr HKLM "Software\Classes\${BUNDLE_PROGID}\DefaultIcon" "" "$INSTDIR\${MAIN_APP_EXE},0"
+    WriteRegStr HKLM "Software\Classes\${BUNDLE_PROGID}\shell\open\command" "" '"$INSTDIR\${MAIN_APP_EXE}" "%1"'
+
+    WriteRegStr HKLM "Software\Classes\${BUNDLE_EXT}" "" "${BUNDLE_PROGID}"
+    WriteRegStr HKLM "Software\Classes\${BUNDLE_EXT}" "Content Type" "application/x-crafthub-bundle"
+    WriteRegStr HKLM "Software\Classes\${BUNDLE_EXT}" "PerceivedType" "text"
+    ; Also listed under OpenWithProgids so the app stays in "Open with" even if the user later
+    ; points .crhb at something else.
+    WriteRegStr HKLM "Software\Classes\${BUNDLE_EXT}\OpenWithProgids" "${BUNDLE_PROGID}" ""
+
+    ; Tell the shell to drop its cached association data, otherwise Explorer keeps showing the old
+    ; icon and the old handler until the next logon.
+    System::Call 'shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
 SectionEnd
 
 ######################################################################
@@ -219,6 +248,11 @@ Section Uninstall
 
     DeleteRegKey HKLM "Software\Classes\SystemFileAssociations\.json\shell\${APP_NAME}"
     DeleteRegKey HKLM "Software\Classes\SystemFileAssociations\.cs\shell\${APP_NAME}"
+
+    ; Both keys are ours alone — the ProgID is named after the app and nothing but CraftHub opens a
+    ; .crhb — so they are removed outright rather than value by value.
+    DeleteRegKey HKLM "Software\Classes\${BUNDLE_PROGID}"
+    DeleteRegKey HKLM "Software\Classes\${BUNDLE_EXT}"
     System::Call 'shell32::SHChangeNotify(i 0x8000000, i 0, i 0, i 0)'
 
     RmDir /r "$INSTDIR"

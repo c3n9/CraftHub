@@ -24,5 +24,72 @@
     <string>[version]</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+
+    <!-- File types CraftHub can open. Without this the Finder has no reason to offer the app for a
+         document, and "Open With" never lists it.
+
+         LSHandlerRank matters: "Owner" claims .crhb, which is CraftHub's own format, so a
+         double-click goes here. JSON is declared "Alternate" on purpose — it belongs to whatever
+         editor the user already prefers, and silently taking over every .json on the machine is
+         not ours to do; the app still appears in "Open With" and can be chosen explicitly. -->
+    <key>CFBundleDocumentTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>CraftHub bundle</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Owner</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>com.manakov.crafthub.bundle</string>
+            </array>
+        </dict>
+        <dict>
+            <key>CFBundleTypeName</key>
+            <string>JSON document</string>
+            <key>CFBundleTypeRole</key>
+            <string>Editor</string>
+            <key>LSHandlerRank</key>
+            <string>Alternate</string>
+            <key>LSItemContentTypes</key>
+            <array>
+                <string>public.json</string>
+            </array>
+        </dict>
+    </array>
+
+    <!-- .crhb is CraftHub's own format, so the bundle EXPORTS the type rather than importing one:
+         this declaration is what teaches macOS the identifier used above. It conforms to public.json
+         because a bundle really is a JSON document (see CraftHubBundleIO), which also lets any
+         JSON-aware tool open one — the same relationship the Linux MIME definition declares with
+         sub-class-of. -->
+    <key>UTExportedTypeDeclarations</key>
+    <array>
+        <dict>
+            <key>UTTypeIdentifier</key>
+            <string>com.manakov.crafthub.bundle</string>
+            <key>UTTypeDescription</key>
+            <string>CraftHub bundle</string>
+            <key>UTTypeConformsTo</key>
+            <array>
+                <string>public.json</string>
+            </array>
+            <key>UTTypeIconFile</key>
+            <string>CraftHubIcon</string>
+            <key>UTTypeTagSpecification</key>
+            <dict>
+                <key>public.filename-extension</key>
+                <array>
+                    <string>crhb</string>
+                </array>
+                <key>public.mime-type</key>
+                <array>
+                    <string>application/x-crafthub-bundle</string>
+                </array>
+            </dict>
+        </dict>
+    </array>
 </dict>
 </plist>
