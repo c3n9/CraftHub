@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CraftHub Web — Visual JSON Parser & Class Builder</title>
+<style>
+  /* ---------- Theme & base ---------- */
+  :root{
+    --bg:#0f1419;
+    --bg-2:#161c24;
+    --bg-3:#1d242e;
+    --panel:#1a2029;
+    --line:#283140;
+    --line-2:#374151;
+    --text:#e6edf3;
+    --muted:#8b949e;
+    --accent:#ff8a3d;       /* orange like the CraftHub owl */
+    --accent-2:#ffb27a;
+    --accent-soft:#ff8a3d22;
+    --green:#3fb950;
+    --red:#f85149;
+    --blue:#58a6ff;
+    --purple:#bc8cff;
+    --yellow:#e3b341;
+    --cyan:#39c5cf;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  [data-theme="light"]{
+    --bg:#f6f7f9;
+    --bg-2:#ffffff;
+    --bg-3:#f1f3f6;
+    --panel:#ffffff;
+    --line:#e2e6eb;
+    --line-2:#d0d7de;
+    --text:#1f2328;
+    --muted:#656d76;
+    --accent:#e26b1f;
+    --accent-2:#c8541a;
+    --accent-soft:#e26b1f1f;
+    --green:#1a7f37;
+    --red:#cf222e;
+    --blue:#0969da;
+    --purple:#8250df;
+    --yellow:#9a6700;
+    --cyan:#1f6feb;
+    --shadow:0 6px 18px rgba(140,149,159,.18);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,system-ui,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    font-size:14px;
+    overflow:hidden;
+  }
+  button{font-family:inherit}
+  ::selection{background:var(--accent-soft);color:var(--accent-2)}
+  /* Scrollbars */
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-track{background:transparent}
+  ::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px}
+  ::-webkit-scrollbar-thumb:hover{background:var(--line-2)}
+
+  /* ---------- App layout ---------- */
+  .app{
+    display:grid;
+    grid-template-rows:56px 1fr 28px;
+    height:100vh;
+  }
+  /* Header */
+  header{
+    display:flex; align-items:center; gap:14px;
+    padding:0 18px;
+    background:var(--bg-2);
+    border-bottom:1px solid var(--line);
+  }
+  .logo{
+    display:flex;align-items:center;gap:10px;
+    font-weight:700;font-size:16px;letter-spacing:.2px;
+  }
+  .logo .owl{
+    width:34px;height:34px;border-radius:8px;
+    background:linear-gradient(135deg,var(--accent),#d6541a);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 14px rgba(255,138,61,.35);
+    color:#fff;
+  }
+  .tab svg{margin-right:2px}
+  .btn svg{margin-right:2px}
+  .add-field-btn svg{margin-right:6px;vertical-align:middle}
+  .empty-state .big svg{opacity:1;color:var(--accent);opacity:.45}
+  .empty-state .big{display:flex;justify-content:center;margin-bottom:14px}
+  .logo small{display:block;font-weight:400;color:var(--muted);font-size:11px;margin-top:1px}
+  .tabs{display:flex; gap:4px; margin-left:auto; align-items:center}
+  .tab{
+    background:transparent;color:var(--muted);
+    border:1px solid transparent;border-radius:8px;
+    padding:8px 14px;cursor:pointer;font-size:13px;font-weight:500;
+    transition:all .15s ease;
+  }
+  .tab:hover{color:var(--text);background:var(--bg-3)}
+  .tab.active{background:var(--accent-soft);color:var(--accent);border-color:transparent}
+  .header-actions{display:flex;gap:8px;margin-left:14px}
+  .icon-btn{
+    background:transparent;border:1px solid var(--line);border-radius:8px;
+    width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+    cursor:pointer;color:var(--muted);transition:all .15s;
+  }
+  .icon-btn:hover{color:var(--text);border-color:var(--line-2);background:var(--bg-3)}
+  .icon-btn svg{width:16px;height:16px}
+
+  /* Main area */
+  main{display:flex;min-height:0;background:var(--bg)}
+  .sidebar{
+    width:260px;flex-shrink:0;
+    background:var(--bg-2);border-right:1px solid var(--line);
+    display:flex;flex-direction:column;min-height:0;
+  }
+  .sidebar h3{
+    margin:0;padding:14px 16px 10px;font-size:11px;letter-spacing:.8px;
+    color:var(--muted);text-transform:uppercase;font-weight:600;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .sidebar h3 button{
+    background:transparent;border:none;color:var(--muted);cursor:pointer;
+    font-size:18px;line-height:1;padding:0 4px;
+  }
+  .sidebar h3 button:hover{color:var(--accent)}
+  .class-list{flex:1;overflow-y:auto;padding:0 8px 12px}
+  .class-item{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 10px;margin:2px 0;border-radius:6px;
+    cursor:pointer;color:var(--text);font-size:13px;
+    border:1px solid transparent;
+  }
+  .class-item:hover{background:var(--bg-3)}
+  .class-item.active{background:var(--accent-soft);border-color:transparent;color:var(--accent)}
+  .class-item .name{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .class-item .count{
+    font-size:11px;color:var(--muted);background:var(--bg-3);
+    padding:1px 6px;border-radius:10px;
+  }
+  .class-item.active .count{background:rgba(255,138,61,.15);color:var(--accent)}
+  .class-item .actions{display:none;gap:4px}
+  .class-item:hover .actions{display:flex}
+  .class-item .actions button{
+    background:transparent;border:none;color:var(--muted);cursor:pointer;
+    font-size:13px;padding:0 2px;
+  }
+  .class-item .actions button:hover{color:var(--red)}
+  .empty-list{
+    text-align:center;color:var(--muted);font-size:12px;
+    padding:20px 12px;line-height:1.5;
+  }
+  .sidebar-footer{
+    padding:10px 12px;border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);
+  }
+
+  /* Content */
+  .content{flex:1;display:flex;flex-direction:column;min-width:0;min-height:0;overflow:hidden}
+  .view{display:none;flex:1;min-height:0;overflow:hidden}
+  .view.active{display:flex;flex-direction:column}
+  .toolbar{
+    display:flex;gap:8px;padding:10px 16px;
+    background:var(--bg-2);border-bottom:1px solid var(--line);
+    align-items:center;flex-wrap:wrap;
+  }
+  .btn{
+    background:var(--accent);color:#fff;border:none;border-radius:6px;
+    padding:7px 14px;cursor:pointer;font-size:13px;font-weight:500;
+    display:inline-flex;align-items:center;gap:6px;transition:all .15s;
+  }
+  .btn:hover{background:var(--accent-2);transform:translateY(-1px)}
+  .btn:active{transform:translateY(0)}
+  .btn.secondary{background:var(--bg-3);color:var(--text);border:1px solid var(--line)}
+  .btn.secondary:hover{background:var(--line);transform:none}
+  .btn.ghost{background:transparent;color:var(--muted);border:1px solid var(--line)}
+  .btn.ghost:hover{color:var(--text);background:var(--bg-3)}
+  .btn.danger{background:var(--red)}
+  .btn.danger:hover{background:#e0353f}
+  .btn[disabled]{opacity:.4;cursor:not-allowed;transform:none!important}
+  .toolbar .spacer{flex:1}
+  .toolbar input[type=text], .toolbar select{
+    background:var(--bg-3);color:var(--text);border:1px solid var(--line);
+    border-radius:6px;padding:6px 10px;font-size:13px;outline:none;
+  }
+  .toolbar input[type=text]:focus,.toolbar select:focus{border-color:var(--accent)}
+
+  /* ----- Class Builder view ----- */
+  .builder{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);flex:1;min-height:0}
+  .builder-pane{background:var(--bg);overflow:auto;padding:18px 22px}
+  .builder-pane h2{margin:0 0 14px;font-size:15px;font-weight:600;letter-spacing:.2px}
+  .builder-pane h2 small{font-weight:400;font-size:12px;color:var(--muted);margin-left:8px}
+
+  .field-row{
+    display:grid;grid-template-columns:1fr 130px 110px auto;gap:8px;
+    margin-bottom:8px;align-items:center;
+  }
+  .field-row input, .field-row select{
+    background:var(--bg-2);color:var(--text);
+    border:1px solid var(--line);border-radius:6px;
+    padding:8px 10px;font-size:13px;outline:none;width:100%;
+    font-family:inherit;
+  }
+  .field-row input:focus, .field-row select:focus{border-color:var(--accent)}
+  .field-row .remove-btn{
+    width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    background:transparent;border:1px solid var(--line);border-radius:6px;
+    color:var(--muted);cursor:pointer;font-size:14px;
+  }
+  .field-row .remove-btn:hover{color:var(--red);border-color:var(--red)}
+  .nested-class-info{
+    font-size:11px;color:var(--muted);margin-left:6px;font-style:italic;
+  }
+  .field-headers{
+    display:grid;grid-template-columns:1fr 130px 110px 30px;gap:8px;
+    margin-bottom:6px;
+    font-size:11px;letter-spacing:.6px;color:var(--muted);
+    text-transform:uppercase;font-weight:600;
+    padding:0 2px;
+  }
+  .class-name-row{
+    display:flex;gap:8px;margin-bottom:18px;align-items:center;
+  }
+  .class-name-row label{font-size:12px;color:var(--muted);min-width:80px}
+  .class-name-row input{
+    flex:1;background:var(--bg-2);border:1px solid var(--line);
+    border-radius:6px;padding:8px 12px;color:var(--text);font-size:14px;
+    outline:none;font-weight:600;
+  }
+  .class-name-row input:focus{border-color:var(--accent)}
+
+  .add-field-btn{
+    margin-top:8px;width:100%;
+    background:transparent;color:var(--muted);
+    border:1px dashed var(--line-2);border-radius:6px;
+    padding:10px;cursor:pointer;font-size:13px;
+    transition:all .15s;
+  }
+  .add-field-btn:hover{
+    color:var(--accent);border-color:var(--accent);background:var(--accent-soft);
+  }
+
+  .preview-code{
+    background:var(--bg-2);border:1px solid var(--line);border-radius:8px;
+    padding:14px 16px;font-family:"SF Mono","Monaco","Cascadia Code","Consolas",monospace;
+    font-size:12.5px;line-height:1.6;white-space:pre;overflow:auto;
+    color:var(--text);max-height:calc(100vh - 250px);
+  }
+  .preview-tabs{
+    display:flex;align-items:center;gap:4px;margin-bottom:10px;
+    border-bottom:1px solid var(--line);padding-bottom:8px;
+  }
+  .preview-tabs .spacer{flex:1}
+  .ptab{
+    background:transparent;color:var(--muted);border:none;
+    padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;
+    font-weight:500;transition:all .15s;
+  }
+  .ptab:hover{color:var(--text);background:var(--bg-3)}
+  .ptab.active{color:var(--accent);background:var(--accent-soft)}
+  .lang-picker{
+    background:var(--bg-2);color:var(--text);border:1px solid var(--line);
+    border-radius:6px;padding:5px 8px;font-size:12px;outline:none;
+    font-family:inherit;
+  }
+  .lang-picker:focus{border-color:var(--accent)}
+  .icon-btn.small{width:28px;height:28px}
+  .icon-btn.small svg{width:13px;height:13px}
+  /* Code highlighting */
+  .preview-code .kw{color:var(--purple);font-weight:500}
+  .preview-code .ty{color:var(--cyan)}
+  .preview-code .id{color:var(--blue)}
+  .preview-code .str{color:var(--green)}
+  .preview-code .num{color:var(--purple)}
+  .preview-code .cm{color:var(--muted);font-style:italic}
+  .preview-code .at{color:var(--yellow)}
+
+  /* ----- Generator view ----- */
+  .gen-layout{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);flex:1;min-height:0}
+  .gen-pane{background:var(--bg);overflow:auto;padding:18px 22px}
+  .form-group{margin-bottom:14px}
+  .form-group > label{
+    display:block;font-size:12px;color:var(--muted);
+    margin-bottom:5px;font-weight:500;
+  }
+  .form-group .type-pill{
+    display:inline-block;font-size:10px;
+    padding:1px 6px;border-radius:8px;
+    background:var(--bg-3);color:var(--muted);margin-left:6px;
+    font-family:"SF Mono",monospace;
+  }
+  .form-group input[type=text],
+  .form-group input[type=number],
+  .form-group textarea,
+  .form-group select{
+    width:100%;background:var(--bg-2);border:1px solid var(--line);
+    border-radius:6px;padding:8px 12px;color:var(--text);font-size:13px;
+    outline:none;font-family:inherit;
+  }
+  .form-group textarea{resize:vertical;min-height:60px;font-family:"SF Mono",monospace;font-size:12px}
+  .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent)}
+  .form-group input[type=checkbox]{
+    width:18px;height:18px;accent-color:var(--accent);vertical-align:middle;
+  }
+  .form-group.nested-obj{
+    border:1px solid var(--line);border-radius:8px;padding:14px;
+    background:var(--bg-2);
+  }
+  .form-group.nested-obj > label{
+    color:var(--accent);font-weight:600;font-size:13px;
+  }
+  .array-field{
+    border:1px solid var(--line);border-radius:8px;padding:12px;background:var(--bg-2);
+  }
+  .array-field .array-item{
+    display:flex;gap:6px;margin-bottom:6px;align-items:flex-start;
+  }
+  .array-field .array-item > *:first-child{flex:1}
+  .array-field .add-item{
+    background:transparent;color:var(--accent);border:1px dashed var(--line-2);
+    border-radius:6px;padding:6px;width:100%;cursor:pointer;font-size:12px;
+    margin-top:4px;
+  }
+  .array-field .add-item:hover{border-color:var(--accent);background:var(--accent-soft)}
+  .empty-state{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    color:var(--muted);text-align:center;padding:40px 20px;height:100%;
+    font-size:13px;line-height:1.6;
+  }
+  .empty-state .big{font-size:48px;margin-bottom:12px;opacity:.4}
+  .empty-state .em{color:var(--accent);font-weight:600}
+
+  /* ----- Visual JSON Parser ----- */
+  .parser{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);flex:1;min-height:0}
+  .parser-pane{background:var(--bg);overflow:auto;padding:0;display:flex;flex-direction:column}
+  .editor-area{flex:1;display:flex;flex-direction:column;min-height:0}
+  .editor-area textarea{
+    flex:1;width:100%;background:var(--bg-2);color:var(--text);
+    border:none;outline:none;padding:14px 16px;
+    font-family:"SF Mono","Monaco","Cascadia Code","Consolas",monospace;
+    font-size:13px;line-height:1.55;resize:none;
+  }
+  .tree-area{padding:14px 18px;font-family:"SF Mono","Monaco","Consolas",monospace;font-size:13px;line-height:1.65}
+  .tree-node{margin-left:18px;position:relative}
+  .tree-node.root{margin-left:0}
+  .tree-key{color:var(--blue);cursor:pointer}
+  .tree-string{color:var(--green)}
+  .tree-number{color:var(--purple)}
+  .tree-boolean{color:var(--yellow);font-weight:500}
+  .tree-null{color:var(--red);font-style:italic}
+  .tree-toggle{
+    display:inline-flex;width:14px;height:14px;color:var(--muted);
+    cursor:pointer;user-select:none;align-items:center;justify-content:center;
+    margin-right:2px;
+  }
+  .tree-toggle.leaf{cursor:default;opacity:.4}
+  .tree-toggle.leaf::after{content:"";width:3px;height:3px;border-radius:50%;background:currentColor}
+  .tree-toggle:hover{color:var(--accent)}
+  .row-actions .ra-lbl{margin-left:2px;font-size:10px;letter-spacing:.4px}
+  .tree-line{display:flex;align-items:center;gap:4px;flex-wrap:nowrap;padding:1px 4px;border-radius:4px}
+  .tree-line:hover{background:var(--bg-3)}
+  .tree-line:hover .row-actions{display:inline-flex}
+  .row-actions{display:none;gap:4px;margin-left:8px}
+  .row-actions button{
+    background:transparent;border:none;color:var(--muted);cursor:pointer;
+    font-size:11px;padding:1px 5px;border-radius:3px;
+  }
+  .row-actions button:hover{background:var(--bg-3);color:var(--accent)}
+  .tree-bracket{color:var(--muted)}
+  .tree-comma{color:var(--muted)}
+  .collapsed-summary{color:var(--muted);font-style:italic;cursor:pointer;font-size:11px;margin-left:4px}
+  .collapsed-summary:hover{color:var(--accent)}
+  .tree-children.collapsed{display:none}
+  .tree-value-input{
+    background:var(--bg-2);border:1px solid var(--accent);
+    color:var(--text);font-family:inherit;font-size:13px;
+    padding:1px 6px;border-radius:3px;outline:none;width:auto;min-width:80px;
+  }
+  .err-banner{
+    background:#f8514922;color:var(--red);padding:8px 14px;
+    border-bottom:1px solid var(--red);font-size:12px;
+  }
+  .ok-banner{
+    background:#3fb95022;color:var(--green);padding:6px 14px;
+    border-bottom:1px solid var(--green);font-size:12px;
+  }
+  .pane-header{
+    display:flex;align-items:center;gap:8px;
+    padding:8px 14px;border-bottom:1px solid var(--line);
+    background:var(--bg-2);font-size:12px;color:var(--muted);font-weight:600;
+    text-transform:uppercase;letter-spacing:.6px;
+  }
+  .pane-header .pill{
+    background:var(--bg-3);color:var(--muted);padding:2px 8px;
+    border-radius:10px;font-size:10px;font-weight:600;letter-spacing:.4px;
+  }
+  .pane-header .pill.ok{background:#3fb95022;color:var(--green)}
+  .pane-header .pill.err{background:#f8514922;color:var(--red)}
+  .pane-header > .spacer{flex:1}
+  .pane-header button{
+    background:transparent;border:1px solid var(--line);
+    color:var(--muted);padding:4px 10px;border-radius:5px;cursor:pointer;
+    font-size:11px;font-weight:500;letter-spacing:.4px;
+  }
+  .pane-header button:hover{color:var(--accent);border-color:var(--accent)}
+
+  /* Status bar */
+  .statusbar{
+    display:flex;align-items:center;gap:14px;
+    padding:0 16px;background:var(--bg-2);border-top:1px solid var(--line);
+    font-size:11px;color:var(--muted);
+  }
+  .statusbar .dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+  .statusbar .dot.err{background:var(--red)}
+  .statusbar .spacer{flex:1}
+
+  /* Modal */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:50;
+    display:none;align-items:center;justify-content:center;
+  }
+  .modal-bg.show{display:flex}
+  .modal{
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:12px;box-shadow:var(--shadow);
+    width:480px;max-width:95vw;padding:20px 24px;
+  }
+  .modal h2{margin:0 0 8px;font-size:16px}
+  .modal p{margin:0 0 14px;color:var(--muted);font-size:13px}
+  .modal input{
+    width:100%;background:var(--bg-2);border:1px solid var(--line);
+    border-radius:6px;padding:9px 12px;color:var(--text);font-size:14px;
+    outline:none;font-family:inherit;
+  }
+  .modal input:focus{border-color:var(--accent)}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+
+  /* Toast */
+  .toast{
+    position:fixed;bottom:40px;left:50%;transform:translateX(-50%) translateY(20px);
+    background:var(--panel);border:1px solid var(--line);
+    padding:10px 18px;border-radius:8px;font-size:13px;
+    box-shadow:var(--shadow);opacity:0;pointer-events:none;
+    transition:all .25s ease;z-index:60;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.err{border-color:var(--red);color:var(--red)}
+  .toast.ok{border-color:var(--green);color:var(--green)}
+
+  /* small helpers */
+  .hint{font-size:11px;color:var(--muted);margin-top:4px}
+  .kbd{
+    background:var(--bg-3);border:1px solid var(--line);border-radius:3px;
+    padding:1px 5px;font-size:10px;font-family:monospace;color:var(--muted);
+  }
+</style>
+</head>
+<body data-theme="dark">
+
+<div class="app">
+  <header>
+    <div class="logo">
+      <div class="owl" aria-hidden="true">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="m21 16-9 5-9-5V8l9-5 9 5v8z"/>
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+          <line x1="12" y1="22.08" x2="12" y2="12"/>
+        </svg>
+      </div>
+      <div>CraftHub Web<small>Visual JSON Parser & Class Builder</small></div>
+    </div>
+    <div class="tabs">
+      <button class="tab active" data-view="builder"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>Class Builder</button>
+      <button class="tab" data-view="generator"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>Generator</button>
+      <button class="tab" data-view="parser"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;margin-right:6px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Visual Parser</button>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" id="theme-toggle" title="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="icon-btn" id="export-all" title="Export all classes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      </button>
+      <button class="icon-btn" id="import-all" title="Import classes">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <aside class="sidebar">
+      <h3>My Classes <button id="new-class-btn" title="New class" aria-label="New class"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button></h3>
+      <div class="class-list" id="class-list"></div>
+      <div class="sidebar-footer">
+        Saved locally · <span id="class-count">0</span> classes
+      </div>
+    </aside>
+
+    <div class="content">
+
+      <!-- ============= BUILDER ============= -->
+      <section class="view active" data-view="builder">
+        <div class="toolbar">
+          <button class="btn" id="btn-new-class" data-icon="plus" data-label="New Class"></button>
+          <button class="btn secondary" id="btn-clone-class" data-icon="duplicate" data-label="Clone"></button>
+          <button class="btn secondary" id="btn-import-class" data-icon="upload" data-label="Import from JSON…"></button>
+          <button class="btn secondary" id="btn-import-py" data-icon="file" data-label="Parse Python class…"></button>
+          <div class="spacer"></div>
+          <button class="btn ghost" id="btn-delete-class" data-icon="trash" data-label="Delete"></button>
+        </div>
+
+        <div class="builder">
+          <div class="builder-pane">
+            <h2>Class Definition <small>Define the structure</small></h2>
+
+            <div class="class-name-row">
+              <label>Name:</label>
+              <input type="text" id="class-name-input" placeholder="MyClass" />
+            </div>
+
+            <div class="field-headers">
+              <div>Field name</div>
+              <div>Type</div>
+              <div>Default</div>
+              <div></div>
+            </div>
+
+            <div id="fields-container"></div>
+
+            <button class="add-field-btn" id="add-field-btn"></button>
+
+            <div style="margin-top:22px">
+              <h2 style="font-size:13px">Tips</h2>
+              <div class="hint" style="line-height:1.7">
+                • Choose <span class="kbd">object</span> + a class name in <em>Default</em> to nest classes.<br>
+                • Choose <span class="kbd">array</span> and pick element type.<br>
+                • Use <span class="kbd">enum</span> with comma‑separated values in <em>Default</em>.<br>
+                • Open the Generator tab to fill instances.
+              </div>
+            </div>
+          </div>
+
+          <div class="builder-pane">
+            <div class="preview-tabs">
+              <button class="ptab active" data-ptab="schema">JSON Schema</button>
+              <button class="ptab" data-ptab="sample">Sample</button>
+              <button class="ptab" data-ptab="code">Code</button>
+              <div class="spacer"></div>
+              <select id="lang-select" class="lang-picker" style="display:none">
+                <option value="typescript">TypeScript</option>
+                <option value="python">Python (dataclass)</option>
+                <option value="pydantic">Python (pydantic)</option>
+                <option value="csharp">C#</option>
+                <option value="java">Java</option>
+                <option value="kotlin">Kotlin</option>
+                <option value="go">Go</option>
+                <option value="rust">Rust (serde)</option>
+                <option value="cpp">C++ (struct)</option>
+                <option value="swift">Swift (Codable)</option>
+                <option value="php">PHP</option>
+                <option value="ruby">Ruby</option>
+                <option value="dart">Dart</option>
+                <option value="zod">Zod schema</option>
+              </select>
+              <button class="icon-btn small" id="btn-copy-preview" title="Copy">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              </button>
+              <button class="icon-btn small" id="btn-download-preview" title="Download">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              </button>
+            </div>
+            <pre class="preview-code" id="preview-output" style="max-height:calc(100vh - 220px)"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= GENERATOR ============= -->
+      <section class="view" data-view="generator">
+        <div class="toolbar">
+          <span style="font-size:12px;color:var(--muted)">Class:</span>
+          <select id="gen-class-select" style="min-width:180px"></select>
+          <button class="btn" id="btn-gen-build" data-icon="zap" data-label="Generate JSON"></button>
+          <div class="spacer"></div>
+          <button class="btn secondary" id="btn-gen-copy" data-icon="copy" data-label="Copy"></button>
+          <button class="btn secondary" id="btn-gen-download" data-icon="download" data-label="Download .json"></button>
+          <button class="btn ghost" id="btn-gen-clear" data-label="Reset"></button>
+        </div>
+        <div class="gen-layout">
+          <div class="gen-pane">
+            <div id="gen-form"></div>
+          </div>
+          <div class="gen-pane">
+            <div class="pane-header">
+              <span>Generated JSON</span>
+              <span class="pill" id="gen-size">0 bytes</span>
+              <div class="spacer"></div>
+              <span class="pill" id="gen-validity">—</span>
+            </div>
+            <pre class="preview-code" id="gen-output" style="border-radius:0;border:none;flex:1;max-height:none;margin:0"></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============= PARSER ============= -->
+      <section class="view" data-view="parser">
+        <div class="toolbar">
+          <button class="btn" id="btn-parse" data-icon="search" data-label="Parse"></button>
+          <button class="btn secondary" id="btn-format" data-icon="layers" data-label="Format"></button>
+          <button class="btn secondary" id="btn-minify" data-icon="minus" data-label="Minify"></button>
+          <button class="btn secondary" id="btn-load-file" data-icon="folder" data-label="Open file…"></button>
+          <button class="btn secondary" id="btn-load-sample" data-label="Sample"></button>
+          <input type="text" id="search-input" placeholder="Search keys/values…" style="min-width:180px"/>
+          <div class="spacer"></div>
+          <button class="btn secondary" id="btn-tree-expand" data-icon="expand" data-label="Expand"></button>
+          <button class="btn secondary" id="btn-tree-collapse" data-icon="collapse" data-label="Collapse"></button>
+          <button class="btn secondary" id="btn-tree-copy" data-icon="copy" data-label="Copy JSON"></button>
+        </div>
+        <div class="parser">
+          <div class="parser-pane">
+            <div class="pane-header">
+              <span>Source JSON / JSONC</span>
+              <span class="pill" title="Comments and trailing commas supported">JSONC</span>
+              <div class="spacer"></div>
+              <span class="pill" id="parser-status">empty</span>
+            </div>
+            <div class="editor-area">
+              <textarea id="json-input" placeholder="Paste JSON or JSONC (with // comments and trailing commas), drop a file, or click 'Sample'…&#10;&#10;Example:&#10;{&#10;  // comments are allowed&#10;  &quot;name&quot;: &quot;CraftHub&quot;,&#10;  &quot;stars&quot;: 48,&#10;  &quot;tags&quot;: [&quot;json&quot;, &quot;editor&quot;], /* trailing commas OK */&#10;}"></textarea>
+            </div>
+          </div>
+          <div class="parser-pane">
+            <div class="pane-header">
+              <span>Visual Tree</span>
+              <span class="pill" id="tree-stats">—</span>
+              <div class="spacer"></div>
+              <span class="pill" id="tree-path" title="Currently selected path">$</span>
+            </div>
+            <div class="tree-area" id="tree-output">
+              <div class="empty-state">
+                <div class="big" aria-hidden="true">
+                  <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20"/><path d="M5 8a4 4 0 0 1 4-4"/><path d="M19 8a4 4 0 0 0-4-4"/><path d="M5 16a4 4 0 0 0 4 4"/><path d="M19 16a4 4 0 0 1-4 4"/>
+                    <circle cx="9" cy="4" r="1.5"/><circle cx="15" cy="4" r="1.5"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/>
+                  </svg>
+                </div>
+                <div>Paste JSON on the left and click <span class="em">Parse</span><br/>to see the visual tree.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="statusbar">
+    <span class="dot" id="status-dot"></span>
+    <span id="status-text">Ready</span>
+    <div class="spacer"></div>
+    <span id="status-version">CraftHub Web v1.0 · single‑file build</span>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modal-bg">
+  <div class="modal">
+    <h2 id="modal-title">Title</h2>
+    <p id="modal-msg">Message</p>
+    <input id="modal-input" placeholder="" />
+    <div class="modal-actions">
+      <button class="btn ghost" id="modal-cancel">Cancel</button>
+      <button class="btn" id="modal-ok">OK</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Hidden file input for imports -->
+<input type="file" id="hidden-file" accept=".json,.py,.txt" style="display:none"/>
+
+<script>
+/* ============================================================
+   CraftHub Web — single-file vanilla-JS application
+   ============================================================ */
+
+/* ============================================================
+   Icon system — platform-independent inline SVGs (Lucide-style)
+   All paths use stroke="currentColor", so they inherit text color.
+   Use svg(name, size?) wherever you'd write an emoji.
+   ============================================================ */
+const ICON_PATHS = {
+  cube:        '<path d="m21 16-9 5-9-5V8l9-5 9 5v8z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/>',
+  box:         '<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>',
+  layers:      '<polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/>',
+  zap:         '<polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>',
+  search:      '<circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>',
+  plus:        '<line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>',
+  minus:       '<line x1="5" y1="12" x2="19" y2="12"/>',
+  x:           '<line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>',
+  copy:        '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  duplicate:   '<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/>',
+  download:    '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>',
+  upload:      '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>',
+  trash:       '<polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>',
+  folder:      '<path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>',
+  file:        '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',
+  fileJson:    '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M10 13a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 13a1 1 0 0 1 1 1v1a1 1 0 0 0 1 1 1 1 0 0 0-1 1v1a1 1 0 0 1-1 1"/>',
+  chevronDown: '<polyline points="6 9 12 15 18 9"/>',
+  chevronRight:'<polyline points="9 18 15 12 9 6"/>',
+  expand:      '<polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  collapse:    '<polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/>',
+  moon:        '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>',
+  inbox:       '<polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/>',
+  tree:        '<path d="M12 2v20"/><path d="M5 8a4 4 0 0 1 4-4"/><path d="M19 8a4 4 0 0 0-4-4"/><path d="M5 16a4 4 0 0 0 4 4"/><path d="M19 16a4 4 0 0 1-4 4"/><circle cx="9" cy="4" r="1.5"/><circle cx="15" cy="4" r="1.5"/><circle cx="9" cy="20" r="1.5"/><circle cx="15" cy="20" r="1.5"/>',
+  alert:       '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>',
+  list:        '<line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/>',
+  link:        '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>'
+};
+function svg(name, size){
+  size = size || 16;
+  const path = ICON_PATHS[name] || ICON_PATHS.box;
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;flex-shrink:0">${path}</svg>`;
+}
+
+/* ----- State ----- */
+const STORAGE_KEY = "crafthub_classes_v1";
+const STORAGE_THEME = "crafthub_theme";
+
+let state = {
+  classes: [],     // [{id, name, fields:[{name,type,defaultVal,itemType,nestedClass,enumVals}]}]
+  activeClassId: null,
+  view: "builder",
+  previewTab: "schema",   // schema | sample | code
+  previewLang: "typescript",
+  parsedJson: null,
+  expandedPaths: new Set(),
+  collapsedPaths: new Set()
+};
+
+/* ============================================================
+   JSONC support — strip // line comments, /* block comments,
+   and trailing commas. Preserves them inside strings.
+   ============================================================ */
+function stripJsonc(src){
+  let out = "";
+  let i = 0;
+  const n = src.length;
+  let inString = false;
+  let stringChar = '"';
+  while(i < n){
+    const c = src[i], next = src[i+1];
+    if(inString){
+      if(c === "\\" && i+1 < n){ out += c + next; i+=2; continue; }
+      if(c === stringChar){ inString = false; }
+      out += c; i++; continue;
+    }
+    // outside strings
+    if(c === '"'){ inString = true; stringChar = '"'; out += c; i++; continue; }
+    if(c === "/" && next === "/"){
+      // line comment until \n
+      while(i < n && src[i] !== "\n") i++;
+      continue;
+    }
+    if(c === "/" && next === "*"){
+      i += 2;
+      while(i < n && !(src[i] === "*" && src[i+1] === "/")) i++;
+      i += 2;
+      continue;
+    }
+    out += c; i++;
+  }
+  // remove trailing commas: ", }" or ", ]"
+  out = out.replace(/,(\s*[}\]])/g, "$1");
+  return out;
+}
+function parseJsonc(src){
+  return JSON.parse(stripJsonc(src));
+}
+
+/* ----- Helpers ----- */
+function uid(){return Math.random().toString(36).slice(2,10)}
+function $(s, root=document){return root.querySelector(s)}
+function $$(s, root=document){return [...root.querySelectorAll(s)]}
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>(
+    {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[c]));
+}
+function clone(o){return JSON.parse(JSON.stringify(o))}
+function fmt(n){return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+
+/* ----- Persistence ----- */
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){state.classes = JSON.parse(raw)}
+  }catch(e){state.classes = []}
+  if(state.classes.length===0){
+    // Seed with examples
+    state.classes = [
+      {
+        id: uid(), name:"User",
+        fields:[
+          {name:"id", type:"integer", defaultVal:"1"},
+          {name:"name", type:"string", defaultVal:"John"},
+          {name:"email", type:"string", defaultVal:""},
+          {name:"isActive", type:"boolean", defaultVal:"true"},
+          {name:"role", type:"enum", defaultVal:"admin,user,guest"}
+        ]
+      },
+      {
+        id: uid(), name:"Product",
+        fields:[
+          {name:"sku", type:"string", defaultVal:""},
+          {name:"price", type:"number", defaultVal:"0"},
+          {name:"inStock", type:"boolean", defaultVal:"true"},
+          {name:"tags", type:"array", itemType:"string", defaultVal:""}
+        ]
+      }
+    ];
+    save();
+  }
+  state.activeClassId = state.classes[0]?.id ?? null;
+  // Theme
+  const t = localStorage.getItem(STORAGE_THEME);
+  if(t==="light") document.body.dataset.theme="light";
+}
+function save(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.classes));
+}
+function getActive(){
+  return state.classes.find(c=>c.id===state.activeClassId);
+}
+function findClassByName(name){
+  return state.classes.find(c=>c.name===name);
+}
+
+/* ----- Rendering: sidebar ----- */
+function renderSidebar(){
+  const list = $("#class-list");
+  $("#class-count").textContent = state.classes.length;
+  if(state.classes.length===0){
+    list.innerHTML = `<div class="empty-list">No classes yet.<br/>Click the <span style="display:inline-flex;vertical-align:middle">${svg("plus",12)}</span> button to create one.</div>`;
+    return;
+  }
+  list.innerHTML = state.classes.map(c=>`
+    <div class="class-item ${c.id===state.activeClassId?'active':''}" data-id="${c.id}">
+      <span class="cls-icon">${svg("box",14)}</span>
+      <span class="name" title="${escapeHtml(c.name)}">${escapeHtml(c.name||'(unnamed)')}</span>
+      <span class="count">${c.fields.length}</span>
+      <div class="actions">
+        <button data-act="dup" title="Duplicate" aria-label="Duplicate">${svg("duplicate",13)}</button>
+        <button data-act="del" title="Delete" aria-label="Delete">${svg("x",13)}</button>
+      </div>
+    </div>
+  `).join("");
+  $$('.class-item', list).forEach(el=>{
+    const id = el.dataset.id;
+    el.onclick = (e)=>{
+      const act = e.target.closest("button")?.dataset.act;
+      if(act==="dup"){duplicateClass(id);e.stopPropagation();return;}
+      if(act==="del"){deleteClass(id);e.stopPropagation();return;}
+      state.activeClassId = id;
+      renderAll();
+    };
+  });
+}
+
+/* ----- Rendering: builder ----- */
+const FIELD_TYPES = ["string","number","integer","boolean","null","array","object","enum"];
+function renderBuilder(){
+  const c = getActive();
+  const cont = $("#fields-container");
+  if(!c){
+    $("#class-name-input").value = "";
+    cont.innerHTML = `<div class="empty-state" style="padding:20px;font-size:12px">No class selected. Click <span class="em" style="display:inline-flex;align-items:center;gap:4px">${svg("plus",12)}New Class</span>.</div>`;
+    $("#schema-preview").textContent = "";
+    $("#sample-preview").textContent = "";
+    return;
+  }
+  $("#class-name-input").value = c.name;
+  const objClassOptions = state.classes.filter(cl=>cl.id!==c.id).map(cl=>cl.name).filter(Boolean);
+  cont.innerHTML = c.fields.map((f,i)=>fieldRowHtml(f,i,objClassOptions)).join("");
+  // Listeners
+  $$('.field-row', cont).forEach(row=>{
+    const i = parseInt(row.dataset.idx,10);
+    $('input.f-name',row).oninput = e=>{c.fields[i].name=e.target.value;save();renderPreview();};
+    $('select.f-type',row).onchange = e=>{
+      c.fields[i].type=e.target.value;
+      // reset extras when switching
+      if(e.target.value!=="array")delete c.fields[i].itemType;
+      else c.fields[i].itemType = c.fields[i].itemType||"string";
+      save();renderBuilder();renderPreview();
+    };
+    const def = $('input.f-def, select.f-def',row);
+    if(def){
+      def.oninput = def.onchange = e=>{c.fields[i].defaultVal=e.target.value;save();renderPreview();};
+    }
+    const itype = $('select.f-itemtype',row);
+    if(itype){
+      itype.onchange = e=>{c.fields[i].itemType=e.target.value;save();renderPreview();};
+    }
+    $('button.remove-btn',row).onclick = ()=>{
+      c.fields.splice(i,1);save();renderBuilder();renderPreview();
+    };
+  });
+  renderPreview();
+}
+function fieldRowHtml(f,i,objClassOptions){
+  // Default editor varies by type
+  let defaultEditor = "";
+  if(f.type==="boolean"){
+    defaultEditor = `<select class="f-def">
+      <option value="true" ${f.defaultVal==="true"?"selected":""}>true</option>
+      <option value="false" ${f.defaultVal==="false"?"selected":""}>false</option>
+    </select>`;
+  }else if(f.type==="object"){
+    defaultEditor = `<select class="f-def" title="Pick a saved class">
+      <option value="">— class —</option>
+      ${objClassOptions.map(n=>`<option ${f.defaultVal===n?"selected":""}>${escapeHtml(n)}</option>`).join("")}
+    </select>`;
+  }else if(f.type==="array"){
+    defaultEditor = `<select class="f-itemtype" title="Element type">
+      ${["string","number","integer","boolean","object"].map(t=>
+        `<option ${f.itemType===t?"selected":""}>${t}</option>`).join("")}
+    </select>`;
+  }else if(f.type==="enum"){
+    defaultEditor = `<input type="text" class="f-def" placeholder="a,b,c" value="${escapeHtml(f.defaultVal||"")}"/>`;
+  }else if(f.type==="null"){
+    defaultEditor = `<input type="text" class="f-def" disabled placeholder="null"/>`;
+  }else{
+    defaultEditor = `<input type="text" class="f-def" placeholder="default" value="${escapeHtml(f.defaultVal||"")}"/>`;
+  }
+  return `
+  <div class="field-row" data-idx="${i}">
+    <input class="f-name" type="text" placeholder="fieldName" value="${escapeHtml(f.name||"")}"/>
+    <select class="f-type">
+      ${FIELD_TYPES.map(t=>`<option ${f.type===t?"selected":""}>${t}</option>`).join("")}
+    </select>
+    ${defaultEditor}
+    <button class="remove-btn" title="Remove" aria-label="Remove">${svg("x",13)}</button>
+  </div>`;
+}
+function renderPreview(){
+  const c = getActive();
+  const out = $("#preview-output");
+  if(!c){ if(out) out.innerHTML = ""; return; }
+  const tab = state.previewTab;
+  $("#lang-select").style.display = tab === "code" ? "" : "none";
+  if(tab === "schema"){
+    out.innerHTML = highlightJSON(JSON.stringify(classToJsonSchema(c), null, 2));
+  } else if(tab === "sample"){
+    out.innerHTML = highlightJSON(JSON.stringify(classToSample(c), null, 2));
+  } else {
+    const lang = state.previewLang;
+    const code = generateCode(lang, c);
+    out.innerHTML = highlightCode(lang, code);
+  }
+}
+
+/* ============================================================
+   Multi-language class code generation
+   ============================================================ */
+function generateCode(lang, c){
+  const seen = new Set();
+  const order = collectClassesInOrder(c, seen);  // topological-ish
+  switch(lang){
+    case "typescript": return order.map(genTypeScript).join("\n\n");
+    case "python":     return "from dataclasses import dataclass, field\nfrom typing import List, Optional, Any\n\n" + order.map(genPython).join("\n\n");
+    case "pydantic":   return "from pydantic import BaseModel\nfrom typing import List, Optional, Any\n\n" + order.map(genPydantic).join("\n\n");
+    case "csharp":     return "using System;\nusing System.Collections.Generic;\nusing System.Text.Json.Serialization;\n\nnamespace YourNamespace;\n\n" + order.map(genCSharp).join("\n\n");
+    case "java":       return "import java.util.List;\nimport com.fasterxml.jackson.annotation.JsonProperty;\n\n" + order.map(genJava).join("\n\n");
+    case "kotlin":     return "import kotlinx.serialization.SerialName\nimport kotlinx.serialization.Serializable\n\n" + order.map(genKotlin).join("\n\n");
+    case "go":         return "package model\n\n" + order.map(genGo).join("\n\n");
+    case "rust":       return "use serde::{Deserialize, Serialize};\n\n" + order.map(genRust).join("\n\n");
+    case "cpp":        return "#include <string>\n#include <vector>\n\n" + order.map(genCpp).join("\n\n");
+    case "swift":      return "import Foundation\n\n" + order.map(genSwift).join("\n\n");
+    case "php":        return "<?php\n\n" + order.map(genPhp).join("\n\n");
+    case "ruby":       return order.map(genRuby).join("\n\n");
+    case "dart":       return order.map(genDart).join("\n\n");
+    case "zod":        return "import { z } from \"zod\";\n\n" + order.map(genZod).join("\n\n");
+  }
+  return "";
+}
+function collectClassesInOrder(c, seen, order){
+  order = order || [];
+  if(!c || seen.has(c.id)) return order;
+  seen.add(c.id);
+  // First visit dependencies (nested classes / array<object>)
+  for(const f of c.fields){
+    if((f.type==="object") && f.defaultVal){
+      const nested = findClassByName(f.defaultVal);
+      if(nested) collectClassesInOrder(nested, seen, order);
+    }
+    if(f.type==="array" && f.itemType==="object" && f.defaultVal){
+      const nested = findClassByName(f.defaultVal);
+      if(nested) collectClassesInOrder(nested, seen, order);
+    }
+  }
+  order.push(c);
+  return order;
+}
+function pascal(s){return (s||"X").replace(/(^|[\s_-])(\w)/g,(_,$1,$2)=>$2.toUpperCase()).replace(/[\s_-]/g,"");}
+function snake(s){return (s||"x").replace(/([a-z])([A-Z])/g,"$1_$2").toLowerCase();}
+/* Reserved-keyword escapes, used to keep generated code compilable */
+const CSHARP_KW = new Set(["abstract","as","base","bool","break","byte","case","catch","char","checked","class","const","continue","decimal","default","delegate","do","double","else","enum","event","explicit","extern","false","finally","fixed","float","for","foreach","goto","if","implicit","in","int","interface","internal","is","lock","long","namespace","new","null","object","operator","out","override","params","private","protected","public","readonly","ref","return","sbyte","sealed","short","sizeof","stackalloc","static","string","struct","switch","this","throw","true","try","typeof","uint","ulong","unchecked","unsafe","ushort","using","virtual","void","volatile","while"]);
+const JAVA_KW = new Set(["abstract","assert","boolean","break","byte","case","catch","char","class","const","continue","default","do","double","else","enum","extends","final","finally","float","for","goto","if","implements","import","instanceof","int","interface","long","native","new","package","private","protected","public","return","short","static","strictfp","super","switch","synchronized","this","throw","throws","transient","try","void","volatile","while","true","false","null"]);
+const KOTLIN_KW = new Set(["as","break","class","continue","do","else","false","for","fun","if","in","interface","is","null","object","package","return","super","this","throw","true","try","typealias","val","var","when","while","by","get","set","field","it"]);
+const SWIFT_KW = new Set(["associatedtype","class","deinit","enum","extension","fileprivate","func","import","init","inout","internal","let","open","operator","private","protocol","public","static","struct","subscript","typealias","var","break","case","continue","default","defer","do","else","fallthrough","for","guard","if","in","repeat","return","switch","where","while","as","catch","false","is","nil","rethrows","super","self","Self","throw","throws","true","try","Type"]);
+const RUST_KW = new Set(["as","break","const","continue","crate","else","enum","extern","false","fn","for","if","impl","in","let","loop","match","mod","move","mut","pub","ref","return","self","Self","static","struct","super","trait","true","type","unsafe","use","where","while","async","await","dyn","abstract","become","box","do","final","macro","override","priv","typeof","unsized","virtual","yield"]);
+function escapeName(name, kwSet, prefix="@"){
+  return kwSet.has(name) ? prefix+name : name;
+}
+function arrItemClass(f){
+  if(f.type==="array" && f.itemType==="object" && f.defaultVal){
+    const t = findClassByName(f.defaultVal);
+    if(t) return pascal(t.name);
+  }
+  return null;
+}
+function objNestedClass(f){
+  if(f.type==="object" && f.defaultVal){
+    const t = findClassByName(f.defaultVal);
+    if(t) return pascal(t.name);
+  }
+  return null;
+}
+
+/* ----- TypeScript (interfaces) ----- */
+function genTypeScript(c){
+  const lines = [`export interface ${pascal(c.name)} {`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "any";
+    switch(f.type){
+      case "string": t = "string"; break;
+      case "number": case "integer": t = "number"; break;
+      case "boolean": t = "boolean"; break;
+      case "null": t = "null"; break;
+      case "enum": {
+        const vals = (f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean);
+        t = vals.length ? vals.map(v=>`"${v}"`).join(" | ") : "string";
+        break;
+      }
+      case "array": {
+        const cls = arrItemClass(f);
+        if(cls){ t = `${cls}[]`; }
+        else if(f.itemType==="number"||f.itemType==="integer") t="number[]";
+        else if(f.itemType==="boolean") t="boolean[]";
+        else if(f.itemType==="object") t="Record<string, any>[]";
+        else t="string[]";
+        break;
+      }
+      case "object": {
+        const cls = objNestedClass(f);
+        t = cls || "Record<string, any>";
+        break;
+      }
+    }
+    lines.push(`  ${f.name}: ${t};`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Python (dataclass) ----- */
+function genPython(c){
+  const lines = [`@dataclass`, `class ${pascal(c.name)}:`];
+  if(c.fields.length===0) lines.push("    pass");
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "Any", def = null;
+    switch(f.type){
+      case "string": t="str"; def=`"${(f.defaultVal||"").replace(/"/g,'\\"')}"`; break;
+      case "number": t="float"; def=parseFloat(f.defaultVal)||0.0; break;
+      case "integer": t="int"; def=parseInt(f.defaultVal,10)||0; break;
+      case "boolean": t="bool"; def=f.defaultVal==="false"?"False":"True"; break;
+      case "null": t="Optional[Any]"; def="None"; break;
+      case "enum": t="str"; {
+        const v=(f.defaultVal||"").split(",")[0]?.trim()||""; def=`"${v}"`;
+      } break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls || ({number:"float",integer:"int",boolean:"bool",object:"dict",string:"str"}[f.itemType||"string"]);
+        t = `List[${inner}]`; def="field(default_factory=list)";
+        lines.push(`    ${f.name}: ${t} = ${def}`); continue;
+      }
+      case "object": {
+        const cls = objNestedClass(f);
+        if(cls){
+          t=cls; def=`field(default_factory=${cls})`;
+          lines.push(`    ${f.name}: ${t} = ${def}`); continue;
+        }
+        t="dict"; def="field(default_factory=dict)";
+        lines.push(`    ${f.name}: ${t} = ${def}`); continue;
+      }
+    }
+    lines.push(`    ${f.name}: ${t} = ${def}`);
+  }
+  return lines.join("\n");
+}
+
+/* ----- Python (pydantic v2) ----- */
+function genPydantic(c){
+  const lines = [`class ${pascal(c.name)}(BaseModel):`];
+  if(c.fields.length===0) lines.push("    pass");
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "Any";
+    switch(f.type){
+      case "string": t="str"; break;
+      case "number": t="float"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="Optional[Any] = None"; break;
+      case "enum": t="str"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls || ({number:"float",integer:"int",boolean:"bool",object:"dict",string:"str"}[f.itemType||"string"]);
+        t = `List[${inner}]`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "dict"; break;
+    }
+    lines.push(`    ${f.name}: ${t}`);
+  }
+  return lines.join("\n");
+}
+
+/* ----- C# ----- */
+function genCSharp(c){
+  const lines = [`public class ${pascal(c.name)}`,`{`];
+  let first = true;
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "object";
+    switch(f.type){
+      case "string": t="string"; break;
+      case "number": t="double"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="object?"; break;
+      case "enum": t="string"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls || ({number:"double",integer:"int",boolean:"bool",object:"object",string:"string"}[f.itemType||"string"]);
+        t = `List<${inner}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "object"; break;
+    }
+    let propName = pascal(f.name);
+    if(CSHARP_KW.has(propName.toLowerCase())) propName = "@"+propName;
+    // System.Type collides with reflection — same for Object, etc. Add suffix.
+    if(["Type","Object","String","Int","Double","Boolean"].includes(propName)) {
+      // keep PascalCase but the JsonPropertyName attribute makes deserialization work
+    }
+    if(!first) lines.push("");
+    first = false;
+    if(propName !== f.name) {
+      lines.push(`    [JsonPropertyName("${f.name.replace(/"/g,'\\"')}")]`);
+    }
+    lines.push(`    public ${t} ${propName} { get; set; }`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Java ----- */
+function genJava(c){
+  const lines = [`public class ${pascal(c.name)} {`];
+  let first = true;
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "Object";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="double"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="boolean"; break;
+      case "null": t="Object"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls || ({number:"Double",integer:"Integer",boolean:"Boolean",object:"Object",string:"String"}[f.itemType||"string"]);
+        t = `List<${inner}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "Object"; break;
+    }
+    let fieldName = f.name;
+    const isKw = JAVA_KW.has(fieldName);
+    if(isKw) fieldName = fieldName + "_";
+    if(!first) lines.push("");
+    first = false;
+    if(fieldName !== f.name){
+      lines.push(`    @JsonProperty("${f.name.replace(/"/g,'\\"')}")`);
+    }
+    lines.push(`    private ${t} ${fieldName};`);
+  }
+  lines.push("");
+  lines.push("    // generate getters/setters or use Lombok @Data");
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Kotlin ----- */
+function genKotlin(c){
+  const lines = [`@Serializable`, `data class ${pascal(c.name)}(`];
+  const inner = [];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "Any?";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="Double"; break;
+      case "integer": t="Int"; break;
+      case "boolean": t="Boolean"; break;
+      case "null": t="Any?"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"Double",integer:"Int",boolean:"Boolean",object:"Any",string:"String"}[f.itemType||"string"]);
+        t = `List<${i}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "Map<String, Any>"; break;
+    }
+    let propName = f.name;
+    const isKw = KOTLIN_KW.has(propName);
+    if(isKw) propName = "`"+propName+"`";  // backtick-escape keywords in Kotlin
+    const annotation = (isKw || propName !== f.name) ? `    @SerialName("${f.name.replace(/"/g,'\\"')}") ` : "    ";
+    inner.push(`${annotation}val ${propName}: ${t}`);
+  }
+  lines.push(inner.join(",\n"));
+  lines.push(")");
+  return lines.join("\n");
+}
+
+/* ----- Go ----- */
+function genGo(c){
+  const lines = [`type ${pascal(c.name)} struct {`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "interface{}";
+    switch(f.type){
+      case "string": t="string"; break;
+      case "number": t="float64"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="interface{}"; break;
+      case "enum": t="string"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"float64",integer:"int",boolean:"bool",object:"map[string]interface{}",string:"string"}[f.itemType||"string"]);
+        t = `[]${i}`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "map[string]interface{}"; break;
+    }
+    lines.push(`    ${pascal(f.name)} ${t} \`json:"${f.name}"\``);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Rust ----- */
+function genRust(c){
+  const lines = [`#[derive(Debug, Serialize, Deserialize)]`,`pub struct ${pascal(c.name)} {`];
+  let first = true;
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "serde_json::Value";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="f64"; break;
+      case "integer": t="i64"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="Option<serde_json::Value>"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"f64",integer:"i64",boolean:"bool",object:"serde_json::Value",string:"String"}[f.itemType||"string"]);
+        t = `Vec<${i}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "serde_json::Value"; break;
+    }
+    let snakeName = snake(f.name);
+    const isKw = RUST_KW.has(snakeName);
+    if(isKw) snakeName = "r#"+snakeName;  // raw identifier
+    if(!first) lines.push("");
+    first = false;
+    if(snakeName.replace(/^r#/,"") !== f.name){
+      lines.push(`    #[serde(rename = "${f.name.replace(/"/g,'\\"')}")]`);
+    }
+    lines.push(`    pub ${snakeName}: ${t},`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- C++ ----- */
+function genCpp(c){
+  const lines = [`struct ${pascal(c.name)} {`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "std::string";
+    switch(f.type){
+      case "string": t="std::string"; break;
+      case "number": t="double"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="void*"; break;
+      case "enum": t="std::string"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"double",integer:"int",boolean:"bool",object:"void*",string:"std::string"}[f.itemType||"string"]);
+        t = `std::vector<${i}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "void*"; break;
+    }
+    lines.push(`    ${t} ${f.name};`);
+  }
+  lines.push("};");
+  return lines.join("\n");
+}
+
+/* ----- Swift ----- */
+function genSwift(c){
+  const lines = [`struct ${pascal(c.name)}: Codable {`];
+  const fields = c.fields.filter(f=>f.name);
+  // detect if we need CodingKeys (any field name is a Swift keyword)
+  const needCK = fields.some(f => SWIFT_KW.has(f.name));
+  for(const f of fields){
+    let t = "Any";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="Double"; break;
+      case "integer": t="Int"; break;
+      case "boolean": t="Bool"; break;
+      case "null": t="String?"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"Double",integer:"Int",boolean:"Bool",object:"[String:Any]",string:"String"}[f.itemType||"string"]);
+        t = `[${i}]`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "[String: Any]"; break;
+    }
+    let propName = f.name;
+    if(SWIFT_KW.has(propName)) propName = "`"+propName+"`";
+    lines.push(`    let ${propName}: ${t}`);
+  }
+  if(needCK){
+    lines.push("");
+    lines.push("    enum CodingKeys: String, CodingKey {");
+    for(const f of fields){
+      const propName = SWIFT_KW.has(f.name) ? "`"+f.name+"`" : f.name;
+      // Only emit explicit raw value when needed (keyword-escaped names need to map back to the JSON key)
+      if(SWIFT_KW.has(f.name)){
+        lines.push(`        case ${propName} = "${f.name.replace(/"/g,'\\"')}"`);
+      } else {
+        lines.push(`        case ${propName}`);
+      }
+    }
+    lines.push("    }");
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- PHP ----- */
+function genPhp(c){
+  const lines = [`class ${pascal(c.name)}`,`{`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "mixed";
+    switch(f.type){
+      case "string": t="string"; break;
+      case "number": t="float"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="?mixed"; break;
+      case "enum": t="string"; break;
+      case "array": t="array"; break;
+      case "object": t = objNestedClass(f) || "object"; break;
+    }
+    lines.push(`    public ${t} $${f.name};`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Ruby ----- */
+function genRuby(c){
+  const lines = [`class ${pascal(c.name)}`];
+  const attrs = c.fields.filter(f=>f.name).map(f=>`:${f.name}`);
+  if(attrs.length) lines.push(`  attr_accessor ${attrs.join(", ")}`);
+  lines.push("");
+  lines.push(`  def initialize(${c.fields.filter(f=>f.name).map(f=>f.name+":nil").join(", ")})`);
+  for(const f of c.fields){
+    if(!f.name) continue;
+    lines.push(`    @${f.name} = ${f.name}`);
+  }
+  lines.push("  end");
+  lines.push("end");
+  return lines.join("\n");
+}
+
+/* ----- Dart ----- */
+function genDart(c){
+  const lines = [`class ${pascal(c.name)} {`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "dynamic";
+    switch(f.type){
+      case "string": t="String"; break;
+      case "number": t="double"; break;
+      case "integer": t="int"; break;
+      case "boolean": t="bool"; break;
+      case "null": t="dynamic"; break;
+      case "enum": t="String"; break;
+      case "array": {
+        const cls = arrItemClass(f);
+        let i = cls || ({number:"double",integer:"int",boolean:"bool",object:"Map<String,dynamic>",string:"String"}[f.itemType||"string"]);
+        t = `List<${i}>`;
+        break;
+      }
+      case "object": t = objNestedClass(f) || "Map<String,dynamic>"; break;
+    }
+    lines.push(`  ${t} ${f.name};`);
+  }
+  // constructor
+  const params = c.fields.filter(f=>f.name).map(f=>`required this.${f.name}`);
+  if(params.length){
+    lines.push("");
+    lines.push(`  ${pascal(c.name)}({${params.join(", ")}});`);
+  }
+  lines.push("}");
+  return lines.join("\n");
+}
+
+/* ----- Zod (TS validation schema) ----- */
+function genZod(c){
+  const lines = [`export const ${pascal(c.name)}Schema = z.object({`];
+  for(const f of c.fields){
+    if(!f.name) continue;
+    let t = "z.any()";
+    switch(f.type){
+      case "string": t="z.string()"; break;
+      case "number": t="z.number()"; break;
+      case "integer": t="z.number().int()"; break;
+      case "boolean": t="z.boolean()"; break;
+      case "null": t="z.null()"; break;
+      case "enum": {
+        const vals = (f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean);
+        t = vals.length ? `z.enum([${vals.map(v=>`"${v}"`).join(", ")}])` : "z.string()";
+        break;
+      }
+      case "array": {
+        const cls = arrItemClass(f);
+        let inner = cls ? `${cls}Schema` : ({number:"z.number()",integer:"z.number().int()",boolean:"z.boolean()",object:"z.record(z.any())",string:"z.string()"}[f.itemType||"string"]);
+        t = `z.array(${inner})`;
+        break;
+      }
+      case "object": {
+        const cls = objNestedClass(f);
+        t = cls ? `${cls}Schema` : "z.record(z.any())";
+        break;
+      }
+    }
+    lines.push(`  ${f.name}: ${t},`);
+  }
+  lines.push("});");
+  lines.push(`export type ${pascal(c.name)} = z.infer<typeof ${pascal(c.name)}Schema>;`);
+  return lines.join("\n");
+}
+
+/* ----- Light syntax highlighting for generated code -----
+   Tokenize-first: extract strings, comments, numbers, attributes
+   into placeholders BEFORE keyword matching, so a language keyword
+   like "class" cannot accidentally rewrite an already-inserted
+   HTML attribute (e.g. class="str") inside a span.
+   Placeholders use private-use chars \uE000 / \uE001 so they
+   cannot collide with anything in real source code.
+*/
+function highlightCode(lang, src){
+  if(!src) return "";
+  // 1. HTML-escape
+  let s = src.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  // 2. Tokenize -> placeholders
+  const tokens = [];
+  const O = "\uE000", C = "\uE001";
+  const stash = (cls, text) => {
+    const i = tokens.length;
+    tokens.push(`<span class="${cls}">${text}</span>`);
+    return O + i + C;
+  };
+
+  // Strings (escape-aware, double/single/back quotes)
+  s = s.replace(/("(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|`(?:\\.|[^`\\])*`)/g, m => stash("str", m));
+  // Block comments
+  s = s.replace(/(\/\*[\s\S]*?\*\/)/g, m => stash("cm", m));
+  // Line comments  // ...   and Python-style # ...
+  s = s.replace(/(\/\/[^\n]*|^[ \t]*#[^\n]*)/gm, m => stash("cm", m));
+  // Numbers — explicitly skip digits already inside a placeholder
+  s = s.replace(/(?<![\w\uE000\uE001])(-?\d+(?:\.\d+)?)(?![\w\uE000\uE001])/g,
+                m => stash("num", m));
+  // Attributes / decorators:
+  //   Python @decorator   Rust #[derive(...)]   C# [JsonPropertyName(...)]
+  s = s.replace(/(^|\n)(\s*)(@\w[\w\.]*|#\[[^\]\n]+\]|\[[A-Z][^\]\n]*\])/g,
+                (_, p1, p2, p3) => p1 + p2 + stash("at", p3));
+
+  // 3. Apply keyword highlighting on the cleaned text
+  const kwMap = {
+    typescript:["interface","export","string","number","boolean","null","any","Record","import","from","z","type","const"],
+    python:    ["class","from","import","dataclass","field","Optional","List","Any","str","int","float","bool","dict","None","True","False"],
+    pydantic:  ["class","from","import","BaseModel","Optional","List","Any","str","int","float","bool","dict"],
+    csharp:    ["public","class","get","set","string","int","double","bool","object","List","using","namespace"],
+    java:      ["public","class","private","String","int","double","boolean","Object","List","import"],
+    kotlin:    ["data","class","val","var","Int","Double","Boolean","String","Any","List","Map"],
+    go:        ["package","type","struct","string","int","float64","bool","interface","map"],
+    rust:      ["pub","struct","String","i64","f64","bool","Vec","Option","use","derive","Serialize","Deserialize"],
+    cpp:       ["struct","int","double","bool","void","std","string","vector"],
+    swift:     ["struct","let","var","String","Int","Double","Bool","Codable","import","Foundation","Any"],
+    php:       ["class","public","string","int","float","bool","array","object","mixed"],
+    ruby:      ["class","def","end","attr_accessor","initialize","nil"],
+    dart:      ["class","String","int","double","bool","dynamic","List","Map","required","this"],
+    zod:       ["export","const","import","from","z","string","number","boolean","null","array","object","record","enum","int"]
+  };
+  const kws = kwMap[lang] || [];
+  if(kws.length){
+    const re = new RegExp(`\\b(${kws.join("|")})\\b`, "g");
+    s = s.replace(re, '<span class="kw">$1</span>');
+  }
+
+  // 4. Restore placeholders in their final positions.
+  // Loop because tokens can nest (e.g. an attribute placeholder may
+  // wrap a string placeholder).
+  let prev;
+  do { prev = s; s = s.replace(/\uE000(\d+)\uE001/g, (_, i) => tokens[+i]); }
+  while(s !== prev);
+  return s;
+}
+function classToJsonSchema(c){
+  const out = {type:"object", title:c.name||"Unnamed", properties:{}, required:[]};
+  for(const f of c.fields){
+    if(!f.name) continue;
+    out.required.push(f.name);
+    out.properties[f.name] = fieldToSchema(f);
+  }
+  return out;
+}
+function fieldToSchema(f){
+  switch(f.type){
+    case "string":  return {type:"string"};
+    case "number":  return {type:"number"};
+    case "integer": return {type:"integer"};
+    case "boolean": return {type:"boolean"};
+    case "null":    return {type:"null"};
+    case "enum":    return {enum:(f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean)};
+    case "array":   return {type:"array", items: itemSchema(f.itemType||"string")};
+    case "object":{
+      const target = findClassByName(f.defaultVal);
+      if(target) return classToJsonSchema(target);
+      return {type:"object"};
+    }
+  }
+  return {};
+}
+function itemSchema(t){
+  if(t==="object") return {type:"object"};
+  return {type:t};
+}
+function classToSample(c, seen=new Set()){
+  if(!c) return null;
+  if(seen.has(c.id)) return "<circular>";
+  seen = new Set([...seen, c.id]);
+  const o = {};
+  for(const f of c.fields){
+    if(!f.name) continue;
+    o[f.name] = fieldSample(f, seen);
+  }
+  return o;
+}
+function fieldSample(f, seen){
+  switch(f.type){
+    case "string": return f.defaultVal||"";
+    case "number": return parseFloat(f.defaultVal||0)||0;
+    case "integer": return parseInt(f.defaultVal||0,10)||0;
+    case "boolean": return f.defaultVal==="false"?false:true;
+    case "null": return null;
+    case "enum":{
+      const vals = (f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean);
+      return vals[0]||"";
+    }
+    case "array": {
+      const t = f.itemType||"string";
+      if(t==="number"||t==="integer") return [0];
+      if(t==="boolean") return [true];
+      if(t==="object") return [{}];
+      return [""];
+    }
+    case "object": {
+      const target = findClassByName(f.defaultVal);
+      return classToSample(target, seen) ?? {};
+    }
+  }
+  return null;
+}
+
+/* ----- JSON syntax highlight (for preview) ----- */
+function highlightJSON(jsonStr){
+  if(!jsonStr) return "";
+  return jsonStr
+    .replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")
+    .replace(/("(?:\\.|[^"\\])*")(\s*:)/g,'<span style="color:var(--blue)">$1</span>$2')
+    .replace(/:\s*("(?:\\.|[^"\\])*")/g,': <span style="color:var(--green)">$1</span>')
+    .replace(/\b(true|false)\b/g,'<span style="color:var(--yellow)">$1</span>')
+    .replace(/\bnull\b/g,'<span style="color:var(--red);font-style:italic">null</span>')
+    .replace(/(?<![\w"])(-?\d+\.?\d*)(?![\w"])/g,'<span style="color:var(--purple)">$1</span>');
+}
+
+/* ----- Generator view ----- */
+function renderGenerator(){
+  const sel = $("#gen-class-select");
+  sel.innerHTML = state.classes.map(c=>
+    `<option value="${c.id}" ${c.id===state.activeClassId?"selected":""}>${escapeHtml(c.name||'(unnamed)')}</option>`
+  ).join("");
+  buildGenForm();
+  rebuildGenOutput();
+}
+function buildGenForm(){
+  const c = state.classes.find(c=>c.id===$("#gen-class-select").value) || getActive();
+  if(!c){
+    $("#gen-form").innerHTML = `<div class="empty-state"><div class="big">${svg("inbox",56)}</div>No class selected.</div>`;
+    return;
+  }
+  $("#gen-form").innerHTML = `<h2 style="margin:0 0 14px;font-size:15px">${escapeHtml(c.name)} <small style="color:var(--muted);font-weight:400;font-size:12px">— fill the fields</small></h2>`
+    + buildFormFields(c, "root").join("");
+  attachGenListeners();
+}
+function buildFormFields(c, pathPrefix){
+  if(!c) return [];
+  return c.fields.filter(f=>f.name).map(f=>{
+    const path = `${pathPrefix}.${f.name}`;
+    return formFieldHtml(f, path);
+  });
+}
+function formFieldHtml(f, path){
+  const labelPill = `<span class="type-pill">${f.type}${f.type==="array"?`&lt;${f.itemType||"string"}&gt;`:""}</span>`;
+  let inner = "";
+  if(f.type==="string"){
+    inner = `<input type="text" data-path="${path}" data-type="string" value="${escapeHtml(f.defaultVal||"")}"/>`;
+  }else if(f.type==="number"||f.type==="integer"){
+    inner = `<input type="number" data-path="${path}" data-type="${f.type}" value="${escapeHtml(f.defaultVal||"0")}" ${f.type==="integer"?'step="1"':'step="any"'}/>`;
+  }else if(f.type==="boolean"){
+    const checked = f.defaultVal!=="false";
+    inner = `<label style="display:inline-flex;align-items:center;gap:8px"><input type="checkbox" data-path="${path}" data-type="boolean" ${checked?"checked":""}/> <span style="color:var(--muted);font-size:12px">true / false</span></label>`;
+  }else if(f.type==="null"){
+    inner = `<input type="text" disabled value="null"/>`;
+  }else if(f.type==="enum"){
+    const opts = (f.defaultVal||"").split(",").map(s=>s.trim()).filter(Boolean);
+    inner = `<select data-path="${path}" data-type="enum">
+      ${opts.map(o=>`<option>${escapeHtml(o)}</option>`).join("")}
+    </select>`;
+  }else if(f.type==="array"){
+    const t = f.itemType||"string";
+    inner = `<div class="array-field" data-path="${path}" data-itemtype="${t}">
+      <div class="items"></div>
+      <button class="add-item" type="button">${svg("plus",12)}<span>Add ${escapeHtml(t)}</span></button>
+    </div>`;
+  }else if(f.type==="object"){
+    const target = findClassByName(f.defaultVal);
+    if(target){
+      inner = buildFormFields(target, path).join("");
+      return `<div class="form-group nested-obj">
+        <label>${escapeHtml(f.name)} ${labelPill} <span style="color:var(--muted);font-weight:400">→ ${escapeHtml(target.name)}</span></label>
+        ${inner}
+      </div>`;
+    }
+    inner = `<textarea data-path="${path}" data-type="object" placeholder='{"key":"value"}'>{}</textarea>`;
+  }
+  return `<div class="form-group">
+    <label>${escapeHtml(f.name)} ${labelPill}</label>
+    ${inner}
+  </div>`;
+}
+function attachGenListeners(){
+  // Inputs
+  $$('#gen-form input, #gen-form select, #gen-form textarea').forEach(el=>{
+    if(el.type==="button") return;
+    el.addEventListener("input", rebuildGenOutput);
+    el.addEventListener("change", rebuildGenOutput);
+  });
+  // Array fields
+  $$('.array-field').forEach(af=>{
+    const itemType = af.dataset.itemtype;
+    const items = $('.items', af);
+    const addBtn = $('.add-item', af);
+    const addItem = (val="")=>{
+      const item = document.createElement("div");
+      item.className="array-item";
+      let editor = "";
+      if(itemType==="number"||itemType==="integer"){
+        editor = `<input type="number" value="${val||0}" ${itemType==="integer"?'step="1"':'step="any"'}/>`;
+      }else if(itemType==="boolean"){
+        editor = `<label style="display:inline-flex;align-items:center;gap:6px"><input type="checkbox" ${val?"checked":""}/> bool</label>`;
+      }else if(itemType==="object"){
+        editor = `<textarea placeholder='{"key":"value"}'>{}</textarea>`;
+      }else{
+        editor = `<input type="text" value="${escapeHtml(val||"")}"/>`;
+      }
+      item.innerHTML = editor + `<button type="button" class="btn ghost" style="padding:4px 8px" title="Remove" aria-label="Remove">${svg("x",13)}</button>`;
+      items.appendChild(item);
+      $('button',item).onclick = ()=>{item.remove();rebuildGenOutput();};
+      $$('input,textarea',item).forEach(i=>{
+        i.addEventListener("input", rebuildGenOutput);
+        i.addEventListener("change", rebuildGenOutput);
+      });
+      rebuildGenOutput();
+    };
+    addBtn.onclick = ()=>addItem();
+    // seed one
+    addItem();
+  });
+}
+function rebuildGenOutput(){
+  const c = state.classes.find(c=>c.id===$("#gen-class-select").value) || getActive();
+  if(!c){return}
+  const obj = collectFormValues(c, "root");
+  const json = JSON.stringify(obj,null,2);
+  $("#gen-output").innerHTML = highlightJSON(json);
+  const bytes = new Blob([json]).size;
+  $("#gen-size").textContent = `${fmt(bytes)} bytes`;
+  $("#gen-validity").textContent = "VALID";
+  $("#gen-validity").className = "pill ok";
+}
+function collectFormValues(c, pathPrefix){
+  const out = {};
+  for(const f of c.fields){
+    if(!f.name) continue;
+    const path = `${pathPrefix}.${f.name}`;
+    out[f.name] = collectField(f, path);
+  }
+  return out;
+}
+function collectField(f, path){
+  if(f.type==="object"){
+    const target = findClassByName(f.defaultVal);
+    if(target){
+      return collectFormValues(target, path);
+    }else{
+      const el = document.querySelector(`#gen-form [data-path="${cssEscape(path)}"]`);
+      try{ return JSON.parse(el?.value||"{}"); }catch{return {};}
+    }
+  }
+  if(f.type==="array"){
+    const af = document.querySelector(`#gen-form .array-field[data-path="${cssEscape(path)}"]`);
+    if(!af) return [];
+    const items = $$('.array-item', af);
+    return items.map(item=>{
+      const inp = $('input,textarea',item);
+      if(!inp) return null;
+      const t = af.dataset.itemtype;
+      if(t==="number") return parseFloat(inp.value)||0;
+      if(t==="integer") return parseInt(inp.value,10)||0;
+      if(t==="boolean") return inp.checked;
+      if(t==="object"){try{return JSON.parse(inp.value||"{}");}catch{return {};}}
+      return inp.value;
+    });
+  }
+  const el = document.querySelector(`#gen-form [data-path="${cssEscape(path)}"]`);
+  if(!el) return null;
+  if(f.type==="boolean") return el.checked;
+  if(f.type==="number") return parseFloat(el.value)||0;
+  if(f.type==="integer") return parseInt(el.value,10)||0;
+  if(f.type==="null") return null;
+  return el.value;
+}
+function cssEscape(s){return s.replace(/"/g,'\\"')}
+
+/* ----- Visual JSON Parser ----- */
+function parseAndRender(){
+  const txt = $("#json-input").value.trim();
+  const out = $("#tree-output");
+  if(!txt){
+    out.innerHTML = `<div class="empty-state"><div class="big">${svg("tree",56)}</div>Empty input.</div>`;
+    setParserStatus("empty", false);
+    return;
+  }
+  try{
+    const cleaned = stripJsonc(txt);
+    const data = JSON.parse(cleaned);
+    state.parsedJson = data;
+    out.innerHTML = "";
+    out.appendChild(buildTreeNode("$", data, "$", true));
+    const hadComments = cleaned !== txt;
+    setParserStatus(hadComments ? "JSONC" : "valid", true);
+    updateTreeStats(data);
+  }catch(e){
+    out.innerHTML = `<div class="err-banner"><span style="display:inline-flex;vertical-align:middle;margin-right:6px">${svg("alert",14)}</span>Parse error: ${escapeHtml(e.message)}</div>`;
+    setParserStatus("invalid", false);
+  }
+}
+function setParserStatus(text, ok){
+  $("#parser-status").textContent = text;
+  $("#parser-status").className = "pill " + (ok?"ok":(text==="empty"?"":"err"));
+}
+function updateTreeStats(d){
+  const stats = countDeep(d);
+  $("#tree-stats").textContent = `${fmt(stats.total)} nodes · depth ${stats.depth}`;
+}
+function countDeep(d, depth=1){
+  let total=1, maxDepth=depth;
+  if(d && typeof d==="object"){
+    const keys = Array.isArray(d) ? d.map((_,i)=>i) : Object.keys(d);
+    for(const k of keys){
+      const r = countDeep(d[k], depth+1);
+      total += r.total;
+      maxDepth = Math.max(maxDepth, r.depth);
+    }
+  }
+  return {total, depth:maxDepth};
+}
+function buildTreeNode(key, value, path, isRoot=false){
+  const node = document.createElement("div");
+  node.className = "tree-node" + (isRoot?" root":"");
+  const line = document.createElement("div");
+  line.className = "tree-line";
+  node.appendChild(line);
+
+  const isObj = value!==null && typeof value==="object" && !Array.isArray(value);
+  const isArr = Array.isArray(value);
+  const collapsible = isObj || isArr;
+
+  if(collapsible){
+    const tog = document.createElement("span");
+    tog.className = "tree-toggle";
+    tog.innerHTML = svg("chevronDown", 11);
+    line.appendChild(tog);
+    tog.onclick = ()=>{
+      const ch = node.querySelector(":scope > .tree-children");
+      const isCollapsed = ch.classList.toggle("collapsed");
+      tog.innerHTML = svg(isCollapsed ? "chevronRight" : "chevronDown", 11);
+      const summary = node.querySelector(":scope > .tree-line > .collapsed-summary");
+      if(summary) summary.style.display = isCollapsed?"inline":"none";
+    };
+  }else{
+    const sp = document.createElement("span");
+    sp.className = "tree-toggle leaf";
+    line.appendChild(sp);
+  }
+
+  // Key
+  if(!isRoot){
+    const keyEl = document.createElement("span");
+    keyEl.className = "tree-key";
+    keyEl.textContent = typeof key==="number" ? `[${key}]` : `"${key}"`;
+    line.appendChild(keyEl);
+    const colon = document.createElement("span");
+    colon.className = "tree-bracket";
+    colon.textContent = ": ";
+    line.appendChild(colon);
+  }
+
+  // Value
+  if(isObj || isArr){
+    const open = document.createElement("span");
+    open.className = "tree-bracket";
+    open.textContent = isArr ? "[" : "{";
+    line.appendChild(open);
+
+    const summary = document.createElement("span");
+    summary.className = "collapsed-summary";
+    const childCount = isArr ? value.length : Object.keys(value).length;
+    summary.textContent = ` ${childCount} ${isArr?"items":"keys"} `;
+    summary.style.display = "none";
+    summary.onclick = ()=>{
+      const ch = node.querySelector(":scope > .tree-children");
+      ch.classList.remove("collapsed");
+      summary.style.display = "none";
+      const tog = node.querySelector(":scope > .tree-line > .tree-toggle");
+      if(tog) tog.textContent = "▼";
+    };
+    line.appendChild(summary);
+
+    const childrenDiv = document.createElement("div");
+    childrenDiv.className = "tree-children";
+    const keys = isArr ? value.map((_,i)=>i) : Object.keys(value);
+    keys.forEach(k=>{
+      const childPath = isArr ? `${path}[${k}]` : `${path}.${k}`;
+      childrenDiv.appendChild(buildTreeNode(k, value[k], childPath));
+    });
+    node.appendChild(childrenDiv);
+
+    const close = document.createElement("div");
+    close.className = "tree-bracket";
+    close.style.marginLeft = "16px";
+    close.textContent = isArr ? "]" : "}";
+    node.appendChild(close);
+
+    // Path display on hover
+    line.onmouseenter = ()=>$("#tree-path").textContent = path;
+  }else{
+    const valEl = document.createElement("span");
+    let cls = "";
+    let text = "";
+    if(typeof value==="string"){cls="tree-string";text=`"${value}"`}
+    else if(typeof value==="number"){cls="tree-number";text=value}
+    else if(typeof value==="boolean"){cls="tree-boolean";text=value}
+    else if(value===null){cls="tree-null";text="null"}
+    valEl.className = cls;
+    valEl.textContent = text;
+    valEl.title = "Click to edit";
+    valEl.style.cursor = "pointer";
+    valEl.onclick = ()=>editLeaf(valEl, path, value);
+    line.appendChild(valEl);
+
+    line.onmouseenter = ()=>$("#tree-path").textContent = path;
+
+    // Row actions (copy path/value)
+    const actions = document.createElement("span");
+    actions.className = "row-actions";
+    actions.innerHTML = `
+      <button title="Copy value" data-act="copy-val" aria-label="Copy value">${svg("copy",11)}<span class="ra-lbl">val</span></button>
+      <button title="Copy path" data-act="copy-path" aria-label="Copy path">${svg("link",11)}<span class="ra-lbl">path</span></button>
+    `;
+    line.appendChild(actions);
+    $('[data-act=copy-val]', actions).onclick = (e)=>{
+      e.stopPropagation();
+      copyText(typeof value==="string"?value:JSON.stringify(value));
+      toast("Value copied", "ok");
+    };
+    $('[data-act=copy-path]', actions).onclick = (e)=>{
+      e.stopPropagation();copyText(path);toast("Path copied","ok");
+    };
+  }
+  return node;
+}
+function editLeaf(el, path, value){
+  const oldText = el.textContent;
+  const isStr = typeof value==="string";
+  const inp = document.createElement("input");
+  inp.className = "tree-value-input";
+  inp.value = isStr ? value : (value===null?"null":String(value));
+  el.replaceWith(inp);
+  inp.focus();
+  inp.select();
+  const finish = (commit)=>{
+    let newVal;
+    if(commit){
+      const v = inp.value;
+      if(v==="null") newVal=null;
+      else if(v==="true") newVal=true;
+      else if(v==="false") newVal=false;
+      else if(/^-?\d+\.?\d*$/.test(v)) newVal=parseFloat(v);
+      else newVal=v;
+      try{
+        setByPath(state.parsedJson, path, newVal);
+        $("#json-input").value = JSON.stringify(state.parsedJson,null,2);
+        parseAndRender();
+        toast("Value updated", "ok");
+      }catch(e){
+        toast("Update failed","err");
+      }
+    }else{
+      // restore
+      parseAndRender();
+    }
+  };
+  inp.onblur = ()=>finish(true);
+  inp.onkeydown = (e)=>{
+    if(e.key==="Enter"){e.preventDefault();finish(true);}
+    if(e.key==="Escape"){e.preventDefault();finish(false);}
+  };
+}
+function setByPath(root, path, value){
+  // path like $.a.b[0].c
+  const tokens = tokenizePath(path);
+  let cur = {wrap:root};
+  let parent = cur, lastKey = "wrap";
+  for(const tok of tokens){
+    parent = cur;
+    lastKey = tok;
+    cur = cur[tok];
+    if(cur===undefined) throw new Error("Bad path");
+  }
+  parent[lastKey] = value;
+}
+function tokenizePath(p){
+  // Strip leading $ and $.
+  p = p.replace(/^\$\.?/, "");
+  if(!p) return [];
+  const out = [];
+  let buf = "";
+  let i=0;
+  while(i<p.length){
+    const c = p[i];
+    if(c==="."){
+      if(buf) out.push(buf); buf=""; i++;
+    }else if(c==="["){
+      if(buf){out.push(buf);buf="";}
+      const j = p.indexOf("]", i);
+      out.push(parseInt(p.slice(i+1,j),10));
+      i = j+1;
+      if(p[i]===".") i++;
+    }else{
+      buf += c; i++;
+    }
+  }
+  if(buf) out.push(buf);
+  return out;
+}
+
+/* ----- Search highlighting ----- */
+function searchTree(q){
+  if(!q){
+    $$('.tree-line', $("#tree-output")).forEach(l=>l.style.background="");
+    return;
+  }
+  const lq = q.toLowerCase();
+  let matches=0;
+  $$('.tree-line', $("#tree-output")).forEach(l=>{
+    if(l.textContent.toLowerCase().includes(lq)){
+      l.style.background = "rgba(255,138,61,.18)";
+      matches++;
+      // expand ancestors
+      let p = l.parentElement;
+      while(p){
+        if(p.classList && p.classList.contains("tree-children")){
+          p.classList.remove("collapsed");
+          const tog = p.parentElement.querySelector(":scope > .tree-line > .tree-toggle");
+          if(tog) tog.textContent = "▼";
+        }
+        p = p.parentElement;
+      }
+    }else l.style.background="";
+  });
+  setStatus(`${matches} matches for "${q}"`);
+}
+
+/* ----- View switching ----- */
+function setView(name){
+  state.view = name;
+  $$('.tab').forEach(t=>t.classList.toggle("active", t.dataset.view===name));
+  $$('.view').forEach(v=>v.classList.toggle("active", v.dataset.view===name));
+  if(name==="generator") renderGenerator();
+  if(name==="builder")  renderBuilder();
+}
+
+/* ----- Class CRUD ----- */
+function newClass(){
+  const c = {id:uid(), name:"NewClass"+(state.classes.length+1), fields:[
+    {name:"id", type:"integer", defaultVal:"1"},
+    {name:"name", type:"string", defaultVal:""}
+  ]};
+  state.classes.push(c);
+  state.activeClassId = c.id;
+  save();renderAll();
+  toast("Class created","ok");
+}
+function duplicateClass(id){
+  const orig = state.classes.find(c=>c.id===id);
+  if(!orig) return;
+  const c = clone(orig);
+  c.id = uid();
+  c.name = orig.name + "_copy";
+  state.classes.push(c);
+  state.activeClassId = c.id;
+  save();renderAll();
+  toast("Class duplicated","ok");
+}
+function deleteClass(id){
+  modal({
+    title:"Delete class?",
+    msg:"This cannot be undone.",
+    showInput:false,
+    okText:"Delete"
+  }).then(ok=>{
+    if(!ok) return;
+    state.classes = state.classes.filter(c=>c.id!==id);
+    if(state.activeClassId===id) state.activeClassId = state.classes[0]?.id ?? null;
+    save();renderAll();
+    toast("Deleted","ok");
+  });
+}
+
+/* ----- Python class import (very basic regex parser) ----- */
+function pythonToClass(src){
+  // parse `class Name:` then dataclass-style fields `field: type = default`
+  // also catches `self.x = value` in __init__
+  const out = [];
+  const classRegex = /class\s+([A-Za-z_]\w*)\s*(?:\([^)]*\))?\s*:/g;
+  let m;
+  let classes = [];
+  while((m = classRegex.exec(src))!==null){
+    classes.push({name:m[1], start:m.index});
+  }
+  classes.forEach((c,i)=>{
+    const end = (i+1<classes.length)?classes[i+1].start:src.length;
+    const body = src.slice(c.start, end);
+    const fields = [];
+    // dataclass-style: `name: type [= default]`
+    const fr = /^\s{2,}([A-Za-z_]\w*)\s*:\s*([A-Za-z_][\w\[\], ]*)\s*(?:=\s*(.+?))?\s*$/gm;
+    let f;
+    while((f = fr.exec(body))!==null){
+      fields.push({name:f[1], type: pyType(f[2]), defaultVal:(f[3]||"").replace(/['"]/g,"")});
+    }
+    // self.x = y
+    const sr = /self\.([A-Za-z_]\w*)\s*=\s*(.+)/g;
+    while((f = sr.exec(body))!==null){
+      if(!fields.find(x=>x.name===f[1])){
+        const def = f[2].trim().replace(/[,#].*$/,"").trim();
+        fields.push({name:f[1], type: inferType(def), defaultVal: def.replace(/['"]/g,"")});
+      }
+    }
+    if(fields.length){
+      out.push({id:uid(), name:c.name, fields});
+    }
+  });
+  return out;
+}
+function pyType(t){
+  t = t.trim().toLowerCase();
+  if(t==="str") return "string";
+  if(t==="int") return "integer";
+  if(t==="float") return "number";
+  if(t==="bool") return "boolean";
+  if(t.startsWith("list")||t.startsWith("tuple")) return "array";
+  if(t.startsWith("dict")) return "object";
+  return "string";
+}
+function inferType(v){
+  if(/^-?\d+$/.test(v)) return "integer";
+  if(/^-?\d*\.\d+$/.test(v)) return "number";
+  if(v==="True"||v==="False") return "boolean";
+  if(v==="None") return "null";
+  if(v.startsWith("[")) return "array";
+  if(v.startsWith("{")) return "object";
+  return "string";
+}
+function importPython(){
+  const f = document.createElement("input");
+  f.type="file";f.accept=".py,.txt";
+  f.onchange = e=>{
+    const file = e.target.files[0]; if(!file) return;
+    const r = new FileReader();
+    r.onload = ev=>{
+      const text = ev.target.result;
+      const found = pythonToClass(text);
+      if(found.length===0){toast("No classes found","err");return;}
+      state.classes.push(...found);
+      state.activeClassId = found[0].id;
+      save();renderAll();
+      toast(`Imported ${found.length} class(es)`,"ok");
+    };
+    r.readAsText(file);
+  };
+  f.click();
+}
+
+/* ----- Import/Export of classes ----- */
+function exportAll(){
+  const blob = new Blob([JSON.stringify(state.classes,null,2)],{type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "crafthub_classes.json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast("Exported classes","ok");
+}
+function importAll(){
+  const f = document.createElement("input");
+  f.type="file";f.accept=".json";
+  f.onchange = e=>{
+    const file = e.target.files[0];if(!file)return;
+    const r = new FileReader();
+    r.onload = ev=>{
+      try{
+        const data = JSON.parse(ev.target.result);
+        if(!Array.isArray(data)) throw new Error("Invalid file");
+        // Make sure each has id
+        const valid = data.filter(c=>c.name && Array.isArray(c.fields)).map(c=>({...c,id:c.id||uid()}));
+        state.classes = state.classes.concat(valid);
+        state.activeClassId = state.classes[0]?.id ?? null;
+        save();renderAll();
+        toast(`Imported ${valid.length} class(es)`,"ok");
+      }catch(e){
+        toast("Import failed: "+e.message,"err");
+      }
+    };
+    r.readAsText(file);
+  };
+  f.click();
+}
+
+/* ----- Modal & toast ----- */
+function modal({title, msg, showInput=true, defaultVal="", okText="OK"}){
+  return new Promise((resolve)=>{
+    $("#modal-title").textContent=title;
+    $("#modal-msg").textContent=msg||"";
+    $("#modal-input").style.display = showInput?"":"none";
+    $("#modal-input").value = defaultVal;
+    $("#modal-ok").textContent = okText;
+    $("#modal-bg").classList.add("show");
+    if(showInput) setTimeout(()=>$("#modal-input").focus(),50);
+    const close = (val)=>{
+      $("#modal-bg").classList.remove("show");
+      $("#modal-ok").onclick = $("#modal-cancel").onclick = null;
+      resolve(val);
+    };
+    $("#modal-ok").onclick = ()=>close(showInput?$("#modal-input").value:true);
+    $("#modal-cancel").onclick = ()=>close(false);
+  });
+}
+let toastTimer;
+function toast(msg, kind=""){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.className = "toast show " + kind;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>t.classList.remove("show"), 2200);
+}
+function setStatus(text, err=false){
+  $("#status-text").textContent = text;
+  $("#status-dot").className = "dot" + (err?" err":"");
+}
+
+/* ----- Copy helper ----- */
+function copyText(t){
+  navigator.clipboard.writeText(t).catch(()=>{
+    const ta = document.createElement("textarea");
+    ta.value=t;document.body.appendChild(ta);ta.select();
+    document.execCommand("copy");ta.remove();
+  });
+}
+
+/* ----- Re-render everything ----- */
+function renderAll(){
+  renderSidebar();
+  renderBuilder();
+  if(state.view==="generator") renderGenerator();
+}
+
+/* ----- Populate buttons that declared their icon via data-icon ----- */
+function paintButtons(){
+  $$('[data-icon],[data-label]').forEach(btn=>{
+    const icon = btn.dataset.icon, label = btn.dataset.label;
+    btn.innerHTML = (icon ? svg(icon,14) : "") + (label ? `<span>${escapeHtml(label)}</span>` : "");
+  });
+  // Add field button
+  const af = $("#add-field-btn");
+  if(af) af.innerHTML = `${svg("plus",13)}<span>Add field</span>`;
+}
+
+/* ----- Wire up events ----- */
+function init(){
+  load();
+  paintButtons();
+  // Tabs
+  $$('.tab').forEach(t=>t.onclick = ()=>setView(t.dataset.view));
+  // Theme
+  $("#theme-toggle").onclick = ()=>{
+    const cur = document.body.dataset.theme==="light"?"light":"dark";
+    const next = cur==="dark"?"light":"dark";
+    document.body.dataset.theme = next;
+    localStorage.setItem(STORAGE_THEME, next);
+  };
+  // Header actions
+  $("#export-all").onclick = exportAll;
+  $("#import-all").onclick = importAll;
+  // Sidebar
+  $("#new-class-btn").onclick = newClass;
+  // Builder buttons
+  $("#btn-new-class").onclick = newClass;
+  $("#btn-clone-class").onclick = ()=>{ if(getActive()) duplicateClass(getActive().id); };
+  $("#btn-delete-class").onclick = ()=>{ if(getActive()) deleteClass(getActive().id); };
+  $("#btn-import-class").onclick = importAll;
+  $("#btn-import-py").onclick = importPython;
+  $("#class-name-input").addEventListener("input", e=>{
+    const c = getActive(); if(!c) return;
+    c.name = e.target.value;
+    save();renderSidebar();renderPreview();
+  });
+  $("#add-field-btn").onclick = ()=>{
+    const c = getActive(); if(!c) return;
+    c.fields.push({name:"", type:"string", defaultVal:""});
+    save();renderBuilder();
+  };
+  // Preview tabs (Schema / Sample / Code)
+  $$('.ptab').forEach(b=>{
+    b.onclick = ()=>{
+      $$('.ptab').forEach(x=>x.classList.toggle('active', x===b));
+      state.previewTab = b.dataset.ptab;
+      renderPreview();
+    };
+  });
+  $("#lang-select").onchange = (e)=>{
+    state.previewLang = e.target.value;
+    renderPreview();
+  };
+  $("#btn-copy-preview").onclick = ()=>{
+    copyText($("#preview-output").innerText);
+    toast("Copied","ok");
+  };
+  $("#btn-download-preview").onclick = ()=>{
+    const c = getActive(); if(!c) return;
+    const txt = $("#preview-output").innerText;
+    const ext = ({
+      schema:"schema.json", sample:"sample.json"
+    })[state.previewTab] || ({
+      typescript:"ts", python:"py", pydantic:"py", csharp:"cs", java:"java",
+      kotlin:"kt", go:"go", rust:"rs", cpp:"cpp", swift:"swift",
+      php:"php", ruby:"rb", dart:"dart", zod:"ts"
+    })[state.previewLang] || "txt";
+    const fname = (state.previewTab==="code" ? `${pascal(c.name)}.${ext}` : `${c.name}.${ext}`);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([txt],{type:"text/plain"}));
+    a.download = fname; a.click(); URL.revokeObjectURL(a.href);
+    toast("Downloaded "+fname,"ok");
+  };
+  // Generator
+  $("#gen-class-select").onchange = ()=>{buildGenForm();rebuildGenOutput();};
+  $("#btn-gen-build").onclick = rebuildGenOutput;
+  $("#btn-gen-copy").onclick = ()=>{copyText($("#gen-output").innerText);toast("JSON copied","ok");};
+  $("#btn-gen-download").onclick = ()=>{
+    const json = $("#gen-output").innerText;
+    const c = state.classes.find(c=>c.id===$("#gen-class-select").value);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([json],{type:"application/json"}));
+    a.download = (c?.name||"data")+".json";
+    a.click();URL.revokeObjectURL(a.href);
+    toast("Downloaded","ok");
+  };
+  $("#btn-gen-clear").onclick = ()=>buildGenForm();
+
+  // Parser
+  $("#btn-parse").onclick = parseAndRender;
+  $("#btn-format").onclick = ()=>{
+    try{
+      const d = parseJsonc($("#json-input").value);
+      $("#json-input").value = JSON.stringify(d,null,2);
+      parseAndRender();
+      toast("Formatted","ok");
+    }catch(e){toast("Invalid JSON","err");}
+  };
+  $("#btn-minify").onclick = ()=>{
+    try{
+      const d = parseJsonc($("#json-input").value);
+      $("#json-input").value = JSON.stringify(d);
+      parseAndRender();
+      toast("Minified","ok");
+    }catch(e){toast("Invalid JSON","err");}
+  };
+  $("#btn-load-file").onclick = ()=>{
+    const f = document.createElement("input");
+    f.type="file";f.accept=".json,.txt";
+    f.onchange = e=>{
+      const file=e.target.files[0];if(!file)return;
+      const r = new FileReader();
+      r.onload = ev=>{$("#json-input").value=ev.target.result;parseAndRender();};
+      r.readAsText(file);
+    };
+    f.click();
+  };
+  $("#btn-load-sample").onclick = ()=>{
+    $("#json-input").value = JSON.stringify({
+      project:"CraftHub Web",
+      version:"1.0.0",
+      author:{name:"You",email:"you@example.com"},
+      stars:48,
+      tags:["json","editor","schema","parser"],
+      features:[
+        {id:1,name:"Class Builder",enabled:true},
+        {id:2,name:"JSON Generator",enabled:true},
+        {id:3,name:"Visual Parser",enabled:true}
+      ],
+      meta:{license:"MIT",created:"2024-01-01",contributors:2}
+    }, null, 2);
+    parseAndRender();
+  };
+  $("#btn-tree-expand").onclick = ()=>{
+    $$('.tree-children', $("#tree-output")).forEach(c=>c.classList.remove("collapsed"));
+    $$('.tree-toggle', $("#tree-output")).forEach(t=>{if(t.textContent==="▶")t.textContent="▼";});
+  };
+  $("#btn-tree-collapse").onclick = ()=>{
+    $$('.tree-node:not(.root) > .tree-children', $("#tree-output")).forEach(c=>c.classList.add("collapsed"));
+    $$('.tree-node:not(.root) > .tree-line > .tree-toggle', $("#tree-output")).forEach(t=>{if(t.textContent==="▼")t.textContent="▶";});
+  };
+  $("#btn-tree-copy").onclick = ()=>{
+    if(state.parsedJson){
+      copyText(JSON.stringify(state.parsedJson,null,2));
+      toast("JSON copied","ok");
+    }
+  };
+  $("#search-input").addEventListener("input", e=>searchTree(e.target.value));
+  $("#json-input").addEventListener("keydown", e=>{
+    if(e.key==="Tab"){e.preventDefault();
+      const s=e.target.selectionStart, en=e.target.selectionEnd;
+      e.target.value = e.target.value.slice(0,s)+"  "+e.target.value.slice(en);
+      e.target.selectionStart=e.target.selectionEnd=s+2;
+    }
+    if((e.ctrlKey||e.metaKey)&&e.key==="Enter"){parseAndRender();}
+  });
+  // Drop zone for parser
+  const ta = $("#json-input");
+  ta.addEventListener("dragover", e=>{e.preventDefault();ta.style.outline="2px dashed var(--accent)"});
+  ta.addEventListener("dragleave", ()=>ta.style.outline="");
+  ta.addEventListener("drop", e=>{
+    e.preventDefault();ta.style.outline="";
+    const f = e.dataTransfer.files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ev=>{ta.value=ev.target.result;parseAndRender();};
+    r.readAsText(f);
+  });
+
+  renderAll();
+  setStatus("Ready");
+}
+init();
+</script>
+</body>
+</html>
