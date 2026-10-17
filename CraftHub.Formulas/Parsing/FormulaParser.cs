@@ -17,8 +17,19 @@ namespace CraftHub.Formulas.Parsing;
 /// </summary>
 public sealed class FormulaParser
 {
+    /// <summary>
+    /// Hard cap on how deeply productions may nest. The parser is recursive descent, so nesting
+    /// depth is stack depth: without this, <c>=((((…1…))))</c> or <c>=----…1</c> from a crafted
+    /// <c>.formulas.json</c> / <c>.crhb</c> file overflows the stack, and a StackOverflowException
+    /// cannot be caught — the process dies. Deliberately larger than the evaluator's own
+    /// <see cref="Eval.EvalLimits.MaxDepth"/> default so this never rejects a formula the evaluator
+    /// would have accepted; it exists only to stop pathological input, not to police real formulas.
+    /// </summary>
+    public const int MaxNestingDepth = 256;
+
     private readonly IReadOnlyList<Token> _tokens;
     private int _pos;
+    private int _depth;
 
     private FormulaParser(IReadOnlyList<Token> tokens)
     {
@@ -99,7 +110,30 @@ public sealed class FormulaParser
 
     // ---- expression, by precedence, loosest to tightest ----
 
-    private FormulaAst ParseExpression() => ParseComparison();
+    private FormulaAst ParseExpression()
+    {
+        // Every nesting construct (parentheses, call arguments) comes back through here, so one
+        // guard at this entry covers all of them; ParseUnary has its own because a unary chain
+        // recurses without passing through an expression.
+        EnterNesting();
+        try
+        {
+            return ParseComparison();
+        }
+        finally
+        {
+            _depth--;
+        }
+    }
+
+    private void EnterNesting()
+    {
+        if (++_depth > MaxNestingDepth)
+        {
+            _depth--;
+            throw Error(Current.Span, $"Formula nesting exceeds the limit of {MaxNestingDepth} levels.");
+        }
+    }
 
     private FormulaAst ParseComparison()
     {
@@ -181,17 +215,20 @@ public sealed class FormulaParser
 
     private FormulaAst ParseUnary()
     {
-        if (Current.Kind == TokenKind.Minus)
+        if (Current.Kind is TokenKind.Minus or TokenKind.Plus)
         {
-            var t = Advance();
-            var operand = ParseUnary();
-            return new UnaryExpr(SpanFrom(t.Span.Start, operand.Span.End), UnaryOp.Negate, operand);
-        }
-        if (Current.Kind == TokenKind.Plus)
-        {
-            var t = Advance();
-            var operand = ParseUnary();
-            return new UnaryExpr(SpanFrom(t.Span.Start, operand.Span.End), UnaryOp.Plus, operand);
+            EnterNesting();
+            try
+            {
+                var t = Advance();
+                var op = t.Kind == TokenKind.Minus ? UnaryOp.Negate : UnaryOp.Plus;
+                var operand = ParseUnary();
+                return new UnaryExpr(SpanFrom(t.Span.Start, operand.Span.End), op, operand);
+            }
+            finally
+            {
+                _depth--;
+            }
         }
         return ParsePercent();
     }

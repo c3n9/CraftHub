@@ -92,7 +92,12 @@ public static class CraftHubBundleIO
         if (obj["crhb"] is not { } versionNode)
             throw new CraftHubBundleFormatException("The file is not a CraftHub bundle.");
 
-        var version = versionNode.GetValue<int>();
+        // GetValue<int> throws for a "crhb" that is a string, an object or a fractional number —
+        // and that exception isn't a CraftHubBundleFormatException, so it would escape every
+        // caller's "the bundle is unreadable" handling and crash the app on a malformed file.
+        if (versionNode is not JsonValue versionValue || !versionValue.TryGetValue<int>(out var version))
+            throw new CraftHubBundleFormatException("The bundle's format version is not a whole number.");
+
         if (version > CurrentVersion)
             throw new CraftHubBundleFormatException(
                 $"This bundle was written by a newer version of CraftHub (format {version}).");
@@ -101,13 +106,13 @@ public static class CraftHubBundleIO
         if (obj["schema"] is JsonArray schema)
             foreach (var entry in schema.OfType<JsonObject>())
             {
-                var name = entry["name"]?.GetValue<string>();
+                var name = ReadString(entry["name"]);
                 if (string.IsNullOrEmpty(name)) continue;
                 properties.Add(new JsonPropertyDefinition
                 {
                     Name = name,
-                    FieldType = ParseType(entry["type"]?.GetValue<string>()),
-                    ArrayElementType = ParseType(entry["arrayElementType"]?.GetValue<string>())
+                    FieldType = ParseType(ReadString(entry["type"])),
+                    ArrayElementType = ParseType(ReadString(entry["arrayElementType"]))
                 });
             }
 
@@ -129,6 +134,22 @@ public static class CraftHubBundleIO
         }
 
         return new CraftHubBundle(properties, dataJson, sidecar);
+    }
+
+    /// <summary>Reads a JSON string, treating any other type as absent — a schema entry whose
+    /// "name" is a number must not take the app down with an InvalidOperationException that no
+    /// caller expects.</summary>
+    private static string? ReadString(JsonNode? node)
+    {
+        if (node is null) return null;
+        try
+        {
+            return (string?)node;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or FormatException)
+        {
+            return null;
+        }
     }
 
     private static JsonFieldType ParseType(string? name) =>

@@ -162,6 +162,11 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private GitHubAsset GetPlatformSpecificAsset(List<GitHubAsset> assets)
     {
+        // "name" is optional in the API response as far as this code can know, and every branch
+        // below calls Contains/EndsWith on it — one asset without a name would throw here rather
+        // than simply not matching.
+        assets = assets?.Where(a => a?.Name is not null && a.BrowserDownloadUrl is not null).ToList();
+
         if(assets != null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -286,8 +291,15 @@ public partial class MainWindowViewModel : ViewModelBase
                 if (string.IsNullOrEmpty(sanitizedName))
                     throw new InvalidOperationException("Invalid asset filename.");
 
-                string downloadPath = Path.GetFullPath(Path.Combine(Path.GetTempPath(), sanitizedName));
-                if (!downloadPath.StartsWith(Path.GetFullPath(Path.GetTempPath())))
+                // A private, freshly created directory rather than the shared temp root. The name
+                // of the file we are about to download is predictable from the release, and the
+                // temp root is world-writable on Linux and macOS: another local account could
+                // pre-create that path (or a symlink at it) and get the verified-then-executed
+                // installer written somewhere of its choosing, or swapped between the two steps.
+                var downloadDirectory = Directory.CreateTempSubdirectory("crafthub-update-").FullName;
+
+                string downloadPath = Path.GetFullPath(Path.Combine(downloadDirectory, sanitizedName));
+                if (!downloadPath.StartsWith(downloadDirectory + Path.DirectorySeparatorChar, StringComparison.Ordinal))
                     throw new InvalidOperationException("Asset filename contains invalid path characters.");
 
                 progress.Report(new UpdateProgress
@@ -303,9 +315,9 @@ public partial class MainWindowViewModel : ViewModelBase
                     client.Timeout = TimeSpan.FromMinutes(5);
                     
                     var uri = new Uri(asset.BrowserDownloadUrl);
-                    if (!uri.Host.EndsWith(".github.com") && uri.Host != "github.com")
+                    if (!IsTrustedDownloadUri(uri))
                         throw new Exception("The link has been replaced, and the github version cannot be installed.");
-                    
+
                     using (var response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, cancellationToken))
                     {
                         response.EnsureSuccessStatusCode();
@@ -356,7 +368,9 @@ public partial class MainWindowViewModel : ViewModelBase
 
                 if (!await VerifyChecksum(downloadPath, asset.Sha256))
                 {
-                    throw new Exception("Checksum verification failed. The file may be corrupted.");
+                    throw new Exception(
+                        "The download could not be verified against the release's SHA256 digest, so it was not installed. " +
+                        "The file may be corrupted or may have been tampered with.");
                 }
 
                 progress.Report(new UpdateProgress
@@ -387,14 +401,36 @@ public partial class MainWindowViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// Whether an asset URL may be downloaded and then executed as an installer. HTTPS is part of
+    /// the check, not a detail: over plain HTTP anyone on the path could serve the installer
+    /// instead, and a host test alone would have let "http://github.com/..." through. The host list
+    /// covers github.com, its subdomains, and the *.githubusercontent.com buckets that release
+    /// assets actually redirect to.
+    /// </summary>
+    private static bool IsTrustedDownloadUri(Uri uri)
+    {
+        if (uri.Scheme != Uri.UriSchemeHttps) return false;
+
+        var host = uri.Host;
+        return host.Equals("github.com", StringComparison.OrdinalIgnoreCase)
+            || host.EndsWith(".github.com", StringComparison.OrdinalIgnoreCase)
+            || host.Equals("githubusercontent.com", StringComparison.OrdinalIgnoreCase)
+            || host.EndsWith(".githubusercontent.com", StringComparison.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
     /// Вычисляет SHA256-хеш скачанного файла и сравнивает с ожидаемым хешем.
+    ///
+    /// Fails closed when the release carries no digest: this file is about to be run as an
+    /// installer, with elevation on Windows and sudo on Linux, so "no hash to check" is not a
+    /// reason to trust it — it is the one case where a substituted asset would go unnoticed.
     /// </summary>
     private async Task<bool> VerifyChecksum(string filePath, string expectedSha256)
     {
-        if (string.IsNullOrEmpty(expectedSha256))
+        if (string.IsNullOrWhiteSpace(expectedSha256) || !IsSha256Hex(expectedSha256))
         {
-            Debug.WriteLine("Warning: No SHA256 provided for verification");
-            return true;
+            Debug.WriteLine("Refusing to install: the release provides no usable SHA256 digest.");
+            return false;
         }
 
         using (var sha256 = System.Security.Cryptography.SHA256.Create())
@@ -402,10 +438,21 @@ public partial class MainWindowViewModel : ViewModelBase
             using (var stream = File.OpenRead(filePath))
             {
                 var hash = await sha256.ComputeHashAsync(stream);
-                var actualHash = BitConverter.ToString(hash).Replace("-", "").ToLower();
-                return actualHash == expectedSha256.ToLower();
+                var expected = Convert.FromHexString(expectedSha256);
+                // Fixed-time comparison: not because a timing attack is plausible here, but because
+                // it costs nothing and keeps the comparison correct for any input length.
+                return System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(hash, expected);
             }
         }
+    }
+
+    private static bool IsSha256Hex(string value)
+    {
+        if (value.Length != 64) return false;
+        foreach (var c in value)
+            if (!Uri.IsHexDigit(c))
+                return false;
+        return true;
     }
 
     private void CloseApplication()
@@ -435,7 +482,12 @@ public partial class MainWindowViewModel : ViewModelBase
         }
         else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
         {
-            Process.Start("open", filePath);
+            // ArgumentList, not Process.Start("open", filePath): the two-string overload parses its
+            // second argument into an argv, so a path with a quote or a space in it would split
+            // into extra arguments to `open`.
+            var psi = new ProcessStartInfo("open") { UseShellExecute = false };
+            psi.ArgumentList.Add(filePath);
+            Process.Start(psi);
         }
     }
 

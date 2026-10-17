@@ -1,3 +1,4 @@
+using System;
 using System.Diagnostics;
 using CommunityToolkit.Mvvm.Input;
 
@@ -32,9 +33,17 @@ public sealed class ReleaseItemViewModel
 
     private void OpenOnGitHub()
     {
+        // HtmlUrl comes straight out of the GitHub API response, and UseShellExecute hands whatever
+        // it is to the OS to open — so a value that isn't an http(s) URL (a local path, a
+        // file:// target, some registered scheme) would be launched as such. Checking the scheme
+        // keeps this button to what it claims to be: opening a web page.
+        if (!Uri.TryCreate(HtmlUrl, UriKind.Absolute, out var uri)
+            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            return;
+
         try
         {
-            Process.Start(new ProcessStartInfo(HtmlUrl) { UseShellExecute = true });
+            Process.Start(new ProcessStartInfo(uri.AbsoluteUri) { UseShellExecute = true });
         }
         catch
         {

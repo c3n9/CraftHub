@@ -10,6 +10,10 @@ namespace CraftHub.Formulas.Functions;
 
 public static class TextFunctions
 {
+    /// <summary>Longest string REPT may build. Generous next to Excel's own 32,767-character cell
+    /// limit, but small enough that the allocation can never be a denial of service.</summary>
+    private const int MaxRepeatedLength = 1_000_000;
+
     public static void Register(FunctionRegistry r)
     {
         r.Add(new SimpleFunction(
@@ -116,6 +120,12 @@ public static class TextFunctions
                 if (!FunctionArgs.TryText(args[0], ctx, out var text, out var e1)) return e1;
                 if (!FunctionArgs.TryInt(args[1], ctx, out var times, out var e2)) return e2;
                 if (times < 0) return FormulaValue.Of(FormulaErrorCode.Value, "REPT's count cannot be negative.");
+                // The result is one allocation, so the evaluator's timeout cannot interrupt it:
+                // REPT("x", 2000000000) would try for a 4 GB string and take the process down with
+                // an OutOfMemoryException before any deadline is ever checked. Refuse up front.
+                if ((long)text.Length * times > MaxRepeatedLength)
+                    return FormulaValue.Of(FormulaErrorCode.Value,
+                        $"REPT's result would exceed the limit of {MaxRepeatedLength} characters.");
                 return FormulaValue.Of(string.Concat(Enumerable.Repeat(text, times)));
             }));
 

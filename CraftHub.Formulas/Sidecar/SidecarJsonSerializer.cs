@@ -100,14 +100,14 @@ public static class SidecarJsonSerializer
 
         var sidecar = new FormulaSidecar
         {
-            SchemaVersion = (int?)root["schemaVersion"] ?? 1,
+            SchemaVersion = ReadInt(root["schemaVersion"], 1),
             Generator = new GeneratorInfo(
-                (string?)root["generator"]?["app"] ?? "",
-                (string?)root["generator"]?["version"] ?? ""),
+                ReadString(root["generator"]?["app"]) ?? "",
+                ReadString(root["generator"]?["version"]) ?? ""),
             Target = new TargetInfo(
                 RequireString(targetNode, "fileName"),
                 RequireString(targetNode, "hash"),
-                (string?)targetNode["hashInput"] ?? TargetHash.HashInputId,
+                ReadString(targetNode["hashInput"]) ?? TargetHash.HashInputId,
                 ParseDateOr(targetNode["savedAtUtc"], DateTime.UtcNow)),
             Options = ParseOptions(root["options"]?.AsObject())
         };
@@ -128,13 +128,13 @@ public static class SidecarJsonSerializer
             var obj = node?.AsObject() ?? throw new FormulaSidecarFormatException($"state[\"{path}\"] is not an object.");
             sidecar.State[path] = new CellState(
                 RequireString(obj, "error"),
-                (string?)obj["message"] ?? "",
+                ReadString(obj["message"]) ?? "",
                 ParseDateOr(obj["computedAtUtc"], DateTime.UtcNow));
         }
 
         if (root["excludedCells"] is JsonArray excludedArray)
             foreach (var node in excludedArray)
-                if (node?.GetValue<string>() is { Length: > 0 } path)
+                if (ReadString(node) is { Length: > 0 } path)
                     sidecar.ExcludedCells.Add(path);
 
         sidecar.UnknownFields = ExtractUnknownFields(root);
@@ -151,7 +151,7 @@ public static class SidecarJsonSerializer
     {
         if (node is null) return SidecarOptions.Default;
 
-        var recalc = (string?)node["recalcOnOpen"] switch
+        var recalc = ReadString(node["recalcOnOpen"]) switch
         {
             "never" => RecalcOnOpenPolicy.Never,
             "always" => RecalcOnOpenPolicy.Always,
@@ -161,20 +161,57 @@ public static class SidecarJsonSerializer
         var limitsNode = node["limits"]?.AsObject();
         var limits = limitsNode is null
             ? SidecarLimits.Default
+            // Clamped on the way in: the file is untrusted, and these numbers are the runaway
+            // guards themselves, so a sidecar must not be able to raise its own ceiling.
             : new SidecarLimits(
-                (int?)limitsNode["maxRangeCells"] ?? SidecarLimits.Default.MaxRangeCells,
-                (int?)limitsNode["maxDepth"] ?? SidecarLimits.Default.MaxDepth,
-                (int?)limitsNode["formulaTimeoutMs"] ?? SidecarLimits.Default.FormulaTimeoutMs);
+                ReadInt(limitsNode["maxRangeCells"], SidecarLimits.Default.MaxRangeCells),
+                ReadInt(limitsNode["maxDepth"], SidecarLimits.Default.MaxDepth),
+                ReadInt(limitsNode["formulaTimeoutMs"], SidecarLimits.Default.FormulaTimeoutMs)).Clamped();
 
         return new SidecarOptions(recalc, limits);
     }
 
+    /// <summary>Reads a JSON string, treating a value of any other type as absent. A plain
+    /// <c>(string?)</c> cast throws <see cref="InvalidOperationException"/> when the file holds a
+    /// number or an object where a string belongs — and that exception is not a
+    /// <see cref="FormulaSidecarFormatException"/>, so it escapes the policy that a corrupt sidecar
+    /// is quarantined while the document still opens, and surfaces as a crash instead.</summary>
+    private static string? ReadString(JsonNode? node)
+    {
+        if (node is null) return null;
+        try
+        {
+            return (string?)node;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or FormatException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>Reads an integer option, falling back to <paramref name="fallback"/> for anything
+    /// that isn't one. A plain cast throws <see cref="InvalidOperationException"/> when the file
+    /// holds a string or an object there, and that escapes the "corrupt sidecar is quarantined, the
+    /// document still opens" policy by not being a <see cref="FormulaSidecarFormatException"/>.</summary>
+    private static int ReadInt(JsonNode? node, int fallback)
+    {
+        if (node is null) return fallback;
+        try
+        {
+            return (int?)node ?? fallback;
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or FormatException or OverflowException)
+        {
+            return fallback;
+        }
+    }
+
     private static string RequireString(JsonObject obj, string key) =>
-        (string?)obj[key] ?? throw new FormulaSidecarFormatException($"Missing or non-string field \"{key}\".");
+        ReadString(obj[key]) ?? throw new FormulaSidecarFormatException($"Missing or non-string field \"{key}\".");
 
     private static DateTime ParseDateOr(JsonNode? node, DateTime fallback)
     {
-        var text = (string?)node;
+        var text = ReadString(node);
         return text is not null && DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var dt)
             ? dt
             : fallback;

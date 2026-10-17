@@ -265,7 +265,11 @@ public partial class FileExplorerViewModel : ViewModelBase
             return;
         }
 
-        if (!full.StartsWith(rootFull, StringComparison.OrdinalIgnoreCase)) return;
+        // Compared with the separator appended, so a sibling folder whose name merely starts with
+        // the root's ("/work" vs "/workspace-backup") is not mistaken for something inside it.
+        var rootPrefix = rootFull.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                         + Path.DirectorySeparatorChar;
+        if (!full.StartsWith(rootPrefix, StringComparison.OrdinalIgnoreCase)) return;
 
         var dir = Path.GetDirectoryName(full);
         if (dir == null) return;
@@ -562,13 +566,26 @@ public partial class FileExplorerViewModel : ViewModelBase
         return candidate;
     }
 
-    private static void CopyDirectory(string source, string destination)
+    /// <summary>Maximum directory nesting a copy will follow. A symlink pointing back at an
+    /// ancestor makes the tree infinite, and this recursion would then run until the stack
+    /// overflows — which kills the process outright, uncatchably.</summary>
+    private const int MaxCopyDepth = 64;
+
+    private static void CopyDirectory(string source, string destination, int depth = 0)
     {
+        if (depth > MaxCopyDepth)
+            throw new IOException($"The folder is nested deeper than {MaxCopyDepth} levels, or contains a link back into itself.");
+
         Directory.CreateDirectory(destination);
         foreach (var file in Directory.EnumerateFiles(source))
             File.Copy(file, Path.Combine(destination, Path.GetFileName(file)));
         foreach (var dir in Directory.EnumerateDirectories(source))
-            CopyDirectory(dir, Path.Combine(destination, Path.GetFileName(dir)));
+        {
+            // Don't descend through a symlink: the target is outside the tree being copied, so
+            // following it both copies files the user never selected and is how a loop happens.
+            if ((new DirectoryInfo(dir).Attributes & FileAttributes.ReparsePoint) != 0) continue;
+            CopyDirectory(dir, Path.Combine(destination, Path.GetFileName(dir)), depth + 1);
+        }
     }
 
     //  Tree building
@@ -648,8 +665,18 @@ public partial class FileExplorerViewModel : ViewModelBase
     {
         try
         {
+            // Paths go through ArgumentList, never into a single Arguments string: a file or folder
+            // name is attacker-controlled data as soon as the user opens a folder they didn't
+            // create (a clone, an unpacked archive, a shared drive). Hand-quoting it meant a name
+            // containing a double quote could close the quote and append further arguments to
+            // open/xdg-open/explorer — e.g. -a to make `open` launch an application of its choice.
+            // ArgumentList quotes each element for the platform, so a name can only ever be a name.
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                // explorer.exe is the one exception: it only understands /select,"path" as a single
+                // pre-quoted string and mis-parses a properly escaped argument list. Safe here
+                // anyway, because Windows itself forbids '"' in a file name, so the quoting below
+                // cannot be broken out of — unlike on the Unix branches, where a quote is legal.
                 if (isDirectory)
                     Process.Start(new ProcessStartInfo { FileName = path, UseShellExecute = true });
                 else
@@ -657,12 +684,17 @@ public partial class FileExplorerViewModel : ViewModelBase
             }
             else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Process.Start(new ProcessStartInfo("open", isDirectory ? $"\"{path}\"" : $"-R \"{path}\"") { UseShellExecute = false });
+                var psi = new ProcessStartInfo("open") { UseShellExecute = false };
+                if (!isDirectory) psi.ArgumentList.Add("-R");
+                psi.ArgumentList.Add(path);
+                Process.Start(psi);
             }
             else // Linux
             {
                 var dir = isDirectory ? path : Path.GetDirectoryName(path) ?? path;
-                Process.Start(new ProcessStartInfo("xdg-open", $"\"{dir}\"") { UseShellExecute = false });
+                var psi = new ProcessStartInfo("xdg-open") { UseShellExecute = false };
+                psi.ArgumentList.Add(dir);
+                Process.Start(psi);
             }
         }
         catch (Exception ex)

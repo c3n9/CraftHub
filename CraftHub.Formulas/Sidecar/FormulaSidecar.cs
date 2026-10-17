@@ -16,6 +16,22 @@ public enum RecalcOnOpenPolicy { Never, IfHashMismatch, Always }
 public sealed record SidecarLimits(int MaxRangeCells, int MaxDepth, int FormulaTimeoutMs)
 {
     public static SidecarLimits Default { get; } = new(1_000_000, 64, 250);
+
+    // A sidecar is untrusted input — it arrives next to a document someone mailed or committed —
+    // and these three numbers are precisely the guards that stop a formula from running away. Taken
+    // at face value, a file could set them to int.MaxValue and make opening it hang the app or
+    // exhaust memory: the limits would be switched off by the very data they are meant to limit.
+    // So the file may only ever tighten them, never loosen them past what the app considers sane.
+    private const int MaxAllowedRangeCells = 10_000_000;
+    private const int MaxAllowedDepth = 256;
+    private const int MaxAllowedTimeoutMs = 10_000;
+
+    /// <summary>The limits as the app will actually enforce them: each value clamped into a usable
+    /// range, so a hostile or corrupt sidecar cannot grant itself unbounded evaluation.</summary>
+    public SidecarLimits Clamped() => new(
+        Math.Clamp(MaxRangeCells, 1, MaxAllowedRangeCells),
+        Math.Clamp(MaxDepth, 1, MaxAllowedDepth),
+        Math.Clamp(FormulaTimeoutMs, 1, MaxAllowedTimeoutMs));
 }
 
 public sealed record SidecarOptions(RecalcOnOpenPolicy RecalcOnOpen, SidecarLimits Limits)
